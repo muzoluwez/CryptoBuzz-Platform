@@ -19,7 +19,7 @@ export function Main() {
         <Outlet />
       </div>
 
-      <Footer />
+      {/* <Footer /> */}
     </div>
   );
 }
