@@ -6,7 +6,7 @@ export function Layout7() {
   return (
     <>
       <Helmet>
-        <title>Metronic - Layout 7</title>
+        <title>CryptoBuzz</title>
       </Helmet>
 
       <LayoutProvider>
