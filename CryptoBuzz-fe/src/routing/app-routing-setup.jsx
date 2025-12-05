@@ -37,6 +37,14 @@ import { Layout36Page } from '@/pages/layout-36/page';
 import { Layout37Page } from '@/pages/layout-37/page';
 import { Layout38Page } from '@/pages/layout-38/page';
 import { Layout39Page } from '@/pages/layout-39/page';
+import { HomePage } from '@/pages/Client/home/page';
+import { IdeaPage } from '@/pages/Client/idea/page';
+import { LivePage } from '@/pages/Client/live/page';
+import { AcademyPage } from '@/pages/Client/academy/page';
+import { AnalysisPage } from '@/pages/Client/analysis/page';
+import { BlogPage } from '@/pages/Client/blog/page';
+import { JournalingPage } from '@/pages/Client/journaling/page';
+import { SocialPage } from '@/pages/Client/social/page';
 import { Navigate, Route, Routes } from 'react-router';
 import { Layout1 } from '@/components/layouts/layout-1';
 import { Layout2 } from '@/components/layouts/layout-2';
@@ -102,6 +110,14 @@ export function AppRoutingSetup() {
       </Route>
       <Route element={<Layout7 />}>
         <Route path="/layout-7" element={<Layout7Page />} />
+        <Route path="/client/home" element={<HomePage />} />
+        <Route path="/client/idea" element={<IdeaPage />} />
+        <Route path="/client/live" element={<LivePage />} />
+        <Route path="/client/academy" element={<AcademyPage />} />
+        <Route path="/client/analysis" element={<AnalysisPage />} />
+        <Route path="/client/blog" element={<BlogPage />} />
+        <Route path="/client/journaling" element={<JournalingPage />} />
+        <Route path="/client/social" element={<SocialPage />} />
       </Route>
       <Route element={<Layout8 />}>
         <Route path="/layout-8" element={<Layout8Page />} />

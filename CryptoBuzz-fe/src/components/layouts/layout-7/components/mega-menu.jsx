@@ -40,17 +40,94 @@ export function MegaMenu() {
         <NavigationMenuItem>
           <NavigationMenuLink asChild>
             <Link
-              to={homeItem.path || '/'}
+              to="/client/home"
               className={cn(linkClass)}
-              data-active={isActive(homeItem.path) || undefined}
+              data-active={isActive('/client/home') || undefined}
             >
-              {homeItem.title}
+              Home
+            </Link>
+          </NavigationMenuLink>
+        </NavigationMenuItem>
+        <NavigationMenuItem>
+          <NavigationMenuLink asChild>
+            <Link
+              to="/client/academy"
+              className={cn(linkClass)}
+              data-active={isActive('/client/academy') || undefined}
+            >
+              Academy
+            </Link>
+          </NavigationMenuLink>
+        </NavigationMenuItem>
+        <NavigationMenuItem>
+          <NavigationMenuLink asChild>
+            <Link
+              to="/client/live"
+              className={cn(linkClass)}
+              data-active={isActive('/client/live') || undefined}
+            >
+              Live
+            </Link>
+          </NavigationMenuLink>
+        </NavigationMenuItem>
+        <NavigationMenuItem>
+          <NavigationMenuLink asChild>
+            <Link
+              to="/client/analysis"
+              className={cn(linkClass)}
+              data-active={isActive('/client/analysis') || undefined}
+            >
+              Analysis
+            </Link>
+          </NavigationMenuLink>
+        </NavigationMenuItem>
+        <NavigationMenuItem>
+          <NavigationMenuLink asChild>
+            <Link
+              to="/client/idea"
+              className={cn(linkClass)}
+              data-active={isActive('/client/idea') || undefined}
+            >
+              Idea
+            </Link>
+          </NavigationMenuLink>
+        </NavigationMenuItem>
+        <NavigationMenuItem>
+          <NavigationMenuLink asChild>
+            <Link
+              to="/client/blog"
+              className={cn(linkClass)}
+              data-active={isActive('/client/blog') || undefined}
+            >
+              Blog
+            </Link>
+          </NavigationMenuLink>
+        </NavigationMenuItem>
+        <NavigationMenuItem>
+          <NavigationMenuLink asChild>
+            <Link
+              to="/client/journaling"
+              className={cn(linkClass)}
+              data-active={isActive('/client/journaling') || undefined}
+            >
+              Journaling
+            </Link>
+          </NavigationMenuLink>
+        </NavigationMenuItem>
+        <NavigationMenuItem>
+          <NavigationMenuLink asChild>
+            <Link
+              to="/client/social"
+              className={cn(linkClass)}
+              data-active={isActive('/client/social') || undefined}
+            >
+              Social
             </Link>
           </NavigationMenuLink>
         </NavigationMenuItem>
 
         {/* Public Profiles Item */}
-        <NavigationMenuItem>
+        {/* <NavigationMenuItem>
           <NavigationMenuTrigger
             className={cn(linkClass)}
             data-active={
@@ -62,10 +139,10 @@ export function MegaMenu() {
           <NavigationMenuContent className="p-0">
             <MegaMenuSubProfiles items={MENU_MEGA} />
           </NavigationMenuContent>
-        </NavigationMenuItem>
+        </NavigationMenuItem> */}
 
         {/* My Account Item */}
-        <NavigationMenuItem>
+        {/* <NavigationMenuItem>
           <NavigationMenuTrigger
             className={cn(linkClass)}
             data-active={hasActiveChild(myAccountItem.children) || undefined}
@@ -75,10 +152,10 @@ export function MegaMenu() {
           <NavigationMenuContent className="p-0">
             <MegaMenuSubAccount items={MENU_MEGA} />
           </NavigationMenuContent>
-        </NavigationMenuItem>
+        </NavigationMenuItem> */}
 
         {/* Network Item */}
-        <NavigationMenuItem>
+        {/* <NavigationMenuItem>
           <NavigationMenuTrigger
             className={cn(linkClass)}
             data-active={
@@ -90,10 +167,10 @@ export function MegaMenu() {
           <NavigationMenuContent className="p-0">
             <MegaMenuSubNetwork items={MENU_MEGA} />
           </NavigationMenuContent>
-        </NavigationMenuItem>
+        </NavigationMenuItem> */}
 
         {/* Store Item */}
-        <NavigationMenuItem>
+        {/* <NavigationMenuItem>
           <NavigationMenuTrigger
             className={cn(linkClass)}
             data-active={hasActiveChild(storeItem.children || []) || undefined}
@@ -103,10 +180,10 @@ export function MegaMenu() {
           <NavigationMenuContent className="p-0">
             <MegaMenuSubStore items={MENU_MEGA} />
           </NavigationMenuContent>
-        </NavigationMenuItem>
+        </NavigationMenuItem> */}
 
         {/* Authentication Item */}
-        <NavigationMenuItem>
+        {/* <NavigationMenuItem>
           <NavigationMenuTrigger
             className={cn(linkClass)}
             data-active={hasActiveChild(authItem.children) || undefined}
@@ -116,7 +193,7 @@ export function MegaMenu() {
           <NavigationMenuContent className="p-0">
             <MegaMenuSubAuth items={MENU_MEGA} />
           </NavigationMenuContent>
-        </NavigationMenuItem>
+        </NavigationMenuItem> */}
       </NavigationMenuList>
     </NavigationMenu>
   );
