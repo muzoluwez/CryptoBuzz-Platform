@@ -1,0 +1,34 @@
+{
+  "name": "cryptobuzz_be",
+  "version": "1.0.0",
+  "description": "this is a CryptoBuzz Backend",
+  "license": "ISC",
+  "author": "",
+  "type": "module",
+  "main": "src/index.js",
+  "scripts": {
+    "dev": "cross-env NODE_ENV=development nodemon -r dotenv/config src/index.js",
+    "dev:staging": "cross-env NODE_ENV=staging nodemon -r dotenv/config src/index.js",
+    "dev:production": "cross-env NODE_ENV=production nodemon -r dotenv/config src/index.js",
+    "start": "cross-env NODE_ENV=production node -r dotenv/config src/index.js",
+    "start:development": "cross-env NODE_ENV=development node -r dotenv/config src/index.js",
+    "start:staging": "cross-env NODE_ENV=staging node -r dotenv/config src/index.js",
+    "lint": "prettier --check \"**/*.{js,json,md}\"",
+    "format": "prettier --write \"**/*.{js,json,md}\""
+  },
+  "dependencies": {
+    "@stream-io/node-sdk": "^0.7.25",
+    "bcryptjs": "^3.0.3",
+    "cors": "^2.8.5",
+    "dotenv": "^17.2.3",
+    "express": "^5.2.1",
+    "jsonwebtoken": "^9.0.3",
+    "mongoose": "^9.0.0",
+    "socket.io": "^4.8.1"
+  },
+  "devDependencies": {
+    "cross-env": "^10.1.0",
+    "nodemon": "^3.1.11",
+    "prettier": "^3.7.4"
+  }
+}
