@@ -26,12 +26,12 @@ export function MegaMenu() {
   const storeItem = MENU_MEGA[5];
   const authItem = MENU_MEGA[4];
   const linkClass = `
-    text-sm text-secondary-foreground font-medium rounded-none px-0 border-b border-transparent
-    hover:text-primary hover:bg-transparent 
-    focus:text-primary focus:bg-transparent 
-    data-[active=true]:text-mono data-[active=true]:bg-transparent data-[active=true]:border-mono
-    data-[state=open]:text-mono data-[state=open]:bg-transparent
-  `;
+  relative text-sm font-medium text-white px-0 py-2 transition-all duration-200
+  hover:text-gray-light
+  before:absolute before:-bottom-1 before:left-0 before:h-[2px] before:w-0 before:bg-white before:transition-all before:duration-300
+  hover:before:w-full
+  data-[active=true]:text-mono data-[active=true]:before:w-full data-[active=true]:before:bg-white
+`;
 
   return (
     <NavigationMenu>
@@ -48,6 +48,7 @@ export function MegaMenu() {
             </Link>
           </NavigationMenuLink>
         </NavigationMenuItem>
+
         <NavigationMenuItem>
           <NavigationMenuLink asChild>
             <Link
@@ -59,6 +60,7 @@ export function MegaMenu() {
             </Link>
           </NavigationMenuLink>
         </NavigationMenuItem>
+
         <NavigationMenuItem>
           <NavigationMenuLink asChild>
             <Link
@@ -70,6 +72,7 @@ export function MegaMenu() {
             </Link>
           </NavigationMenuLink>
         </NavigationMenuItem>
+
         <NavigationMenuItem>
           <NavigationMenuLink asChild>
             <Link
@@ -81,6 +84,7 @@ export function MegaMenu() {
             </Link>
           </NavigationMenuLink>
         </NavigationMenuItem>
+
         <NavigationMenuItem>
           <NavigationMenuLink asChild>
             <Link
@@ -92,6 +96,7 @@ export function MegaMenu() {
             </Link>
           </NavigationMenuLink>
         </NavigationMenuItem>
+
         <NavigationMenuItem>
           <NavigationMenuLink asChild>
             <Link
@@ -103,6 +108,7 @@ export function MegaMenu() {
             </Link>
           </NavigationMenuLink>
         </NavigationMenuItem>
+
         <NavigationMenuItem>
           <NavigationMenuLink asChild>
             <Link
@@ -114,6 +120,7 @@ export function MegaMenu() {
             </Link>
           </NavigationMenuLink>
         </NavigationMenuItem>
+
         <NavigationMenuItem>
           <NavigationMenuLink asChild>
             <Link

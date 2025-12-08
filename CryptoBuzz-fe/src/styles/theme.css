@@ -1,0 +1,92 @@
+@layer base {
+  :root {
+    --color-primary: #ffcd0b;
+    --color-primary-accent: #ffff00;
+
+    --color-secondary: #0b3dff;
+    --color-tertiary: #00ff73;
+
+    --color-black: #000000;
+    --color-gray: #262626;
+    --color-gray-medium: #323639;
+    --color-gray-light: #eff2f4;
+    --color-white: #ffffff;
+  }
+}
+
+@layer utilities {
+  .text-primary {
+    color: var(--color-primary);
+  }
+
+  .bg-primary {
+    background-color: var(--color-primary);
+  }
+
+  .bg-gradient-green {
+    background: linear-gradient(126deg, rgba(0, 255, 115, 1) 1%, rgba(0, 51, 23, 0.8) 67%, rgba(0, 0, 0, 0.8) 100%);
+  }
+
+  .bg-gradient-blue {
+    background: linear-gradient(126deg, rgba(11, 61, 255, 1) 1%, rgba(0, 12, 58, 0.8) 67%, rgba(0, 0, 0, 0.8) 100%);
+  }
+
+  .bg-gradient-yellow {
+    background: linear-gradient(27deg,rgba(255, 205, 11, 1) 0%, rgba(0, 0, 0, 0.8) 87%);
+  }
+  .bg-gradient-black {
+    background: linear-gradient(180deg, rgba(0, 0, 0, 0) 1%, rgba(0, 0, 0, 0.8) 67%, rgba(0, 0, 0, 0.8) 100%);
+  }
+   
+  .radius-live-user{
+   border-radius: 30% 70% 70% 30% / 30% 30% 70% 70%; 
+  }
+
+  .text-primary-accent {
+    color: var(--color-primary-accent);
+  }
+
+  .bg-primary-accent {
+    background-color: var(--color-primary-accent);
+  }
+
+  .text-secondary {
+    color: var(--color-secondary);
+  }
+
+  .bg-secondary {
+    background-color: var(--color-secondary);
+  }
+
+  .text-tertiary {
+    color: var(--color-tertiary);
+  }
+
+  .bg-tertiary {
+    background-color: var(--color-tertiary);
+  }
+
+  .text-gray {
+    color: var(--color-gray);
+  }
+
+  .text-gray-medium {
+    color: var(--color-gray-medium);
+  }
+
+  .text-gray-light {
+    color: var(--color-gray-light);
+  }
+
+  .card {
+    @apply rounded-[var(--card-radius)] overflow-hidden shadow-md;
+  }
+
+  .card-content {
+    @apply p-6;
+  }
+
+  .btn {
+    @apply inline-block px-5 py-3 rounded-md text-sm font-medium shadow-sm tracking-wide;
+  }
+}

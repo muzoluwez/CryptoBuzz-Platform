@@ -29,7 +29,7 @@ const HeaderLogo = () => {
       <div className="flex items-center gap-2.5">
         <Link to="/client/home">
           <img
-            src={toAbsoluteUrl('/media/app/mini-logo-circle-primary.svg')}
+            src={toAbsoluteUrl('/media/app/mini-logo-circle-primary-dark.svg')}
             className="dark:hidden min-h-[34px]"
             alt="logo"
           />
@@ -40,10 +40,6 @@ const HeaderLogo = () => {
             alt="logo"
           />
         </Link>
-
-        <h3 className="text-mono text-lg font-medium hidden lg:block">
-          CryptoBuzz
-        </h3>
       </div>
 
       {!isMobile ? (

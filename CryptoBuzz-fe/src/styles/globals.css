@@ -1,12 +1,16 @@
 /* Tailwind Core */
 @import 'tailwindcss';
-
 @import 'tw-animate-css';
+@import "./theme.css";
+@import "../../public/fonts/css/satoshi.css";
 
 /** Dark Mode Variant **/
 @custom-variant dark (&:is(.dark *));
 
 /** Colors - https://tailwindcss.com/docs/colors **/
+* {
+  font-family: 'Satoshi', sans-serif;
+}
 :root {
   --background: var(--color-white);
   --foreground: var(--color-zinc-950);
