@@ -1,6 +1,6 @@
-const mongoose = require("mongoose");
+import mongoose from "mongoose";
 
-const IdeaSchema = new mongoose.Schema(
+ const IdeaSchema = new mongoose.Schema(
   {
     name: {
       type: String
@@ -32,15 +32,15 @@ const IdeaSchema = new mongoose.Schema(
       type: String,
       required: true
     },
-    // educatorId: {
-    //   type: mongoose.Schema.Types.ObjectId,
-    //   ref: "user",
-    //   required: true
-    // },
-    // category: {
-    //   type: mongoose.Schema.Types.ObjectId,
-    //   ref: "Category"
-    // },
+    educatorId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "user",
+      required: true
+    },
+    category: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Category"
+    },
     status: {
       type: String,
       enum: ["active", "pending", "win", "partialWin", "loss", "breakEven"],
@@ -86,6 +86,6 @@ IdeaSchema.pre("countDocuments", function () {
   this.where({ isDeleted: false });
 });
 
-const ideaModel = mongoose.model("idea", IdeaSchema);
+export const ideaModel = mongoose.model("idea", IdeaSchema);
 
-module.exports = ideaModel;
+export default ideaModel;

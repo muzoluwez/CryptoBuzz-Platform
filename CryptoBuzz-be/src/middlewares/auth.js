@@ -2,7 +2,7 @@
 import jwt from "jsonwebtoken";
 import { ApiError } from "../utils/ApiError.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
-import { User } from "../models/user.model.js";
+import { User } from "../models/user.js";
 
 export const verifyJWT = asyncHandler(async (req, res, next) => {
   try {
@@ -31,3 +31,43 @@ export const verifyJWT = asyncHandler(async (req, res, next) => {
     throw new ApiError(401, error?.message || "Authentication failed");
   }
 });
+
+
+export const CommonAuth = asyncHandler(async (req, res, next) => {
+  try {
+    const token = req.headers.authorization?.split(" ")[1];
+
+    if (!token) {
+      return res.status(401).json({ message: "No token provided" });
+    }
+
+    const decodedToken = jwt.verify(token, process.env.JWT_SECRET); // Your JWT secret key
+
+    if (decodedToken.role === "user") {
+      return res.status(401).json({
+        message: "Access denied because you are not eductor or admin",
+      });
+    }
+
+    let user = await UserModel.findById(decodedToken._id);
+
+    if (!user) {
+      return res.status(400).json({ message: "User not found" });
+    } else if (user.role == "user") {
+      return res.status(403).json({ message: "Access denied" });
+    }
+
+    // Attach the user object to the request for use in the next middleware/handler
+    req.user = user;
+
+    // Proceed to the next middleware or route handler
+    next();
+  } catch (error) {
+    return res.status(500).json({
+      message: "Internal Server Error",
+      error: error.errors || error.message,
+    });
+  }
+});
+
+export default {CommonAuth,verifyJWT}
