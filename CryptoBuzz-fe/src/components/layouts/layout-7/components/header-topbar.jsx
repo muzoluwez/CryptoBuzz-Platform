@@ -17,8 +17,8 @@ const HeaderTopbar = () => {
           </span>
         </div> */}
 
-        <Button size="sm" asChild>
-          <Link to="#">
+        <Button size="lg" asChild className="bg-transparent p-0">
+          <Link to="#" className='text-primary'>
             Premium
             <ArrowUp />
           </Link>

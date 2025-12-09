@@ -302,7 +302,7 @@ const EducatorsPage = () => {
                       </>
                     )}
                   </button>
-                  <button className="py-2 bg-white dark:bg-gray-800 border-1 border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-200 rounded-lg font-medium hover:bg-gray-50 dark:hover:bg-gray-700 transition-all flex items-center justify-center gap-2 cursor-pointer">
+                  <button onClick={() => navigate("/client/viewprofile")} className="py-2 bg-white dark:bg-gray-800 border-1 border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-200 rounded-lg font-medium hover:bg-gray-50 dark:hover:bg-gray-700 transition-all flex items-center justify-center gap-2 cursor-pointer">
                     <Eye className="w-4 h-4" />
                     View Profile
                   </button>

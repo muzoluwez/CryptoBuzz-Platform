@@ -109,7 +109,7 @@ export function HomePage() {
             </div>
           </section>
 
-          <section className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+          <section className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
             <Card className="relative bg-black text-white h-[438px] p-0 overflow-hidden">
               <CardContent className="p-0">
                 <div className="relative h-full">
@@ -170,10 +170,10 @@ export function HomePage() {
           {/* FEED + SIDEBAR */}
           <section className="grid grid-cols-3 lg:grid-cols-3 gap-6">
             {/* Activity feed (large left) */}
-            <div className="lg:col-span-2 space-y-6">
+            <div className="col-span-12 lg:col-span-2 space-y-6">
               <Card>
                 <CardHeader>
-                  <div className="flex items-center justify-between w-full">
+                  <div className="flex items-center justify-between flex-wrap w-full gap-3 p-2">
                     <CardHeading>Live Activity Feed</CardHeading>
                     <div className="flex gap-2 items-center">
                       <button className="py-2 px-4 rounded-lg cursor-pointer bg-[#eef2f5] dark:bg-gray-800 text-sm text-gray-700 dark:text-gray-300">CryptoBuzz Announcements</button>
@@ -207,7 +207,7 @@ export function HomePage() {
             </div>
 
             {/* Right Sidebar */}
-            <div className=" lg:col-span-1">
+            <div className="col-span-12 lg:col-span-1">
               <aside className="space-y-4 mb-5">
                 <Card className="p-4">
                   <CardHeader className='!p-0 min-h-0 !pb-3 mb-3'>

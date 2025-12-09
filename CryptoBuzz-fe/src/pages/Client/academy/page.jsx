@@ -199,9 +199,9 @@ function TradingUI({ activeTab, setActiveTab, toggle, open, introLessons, sectio
   return (
     <>
       {/* Header */}
-      <Toolbar><ToolbarHeading title="Academy" /></Toolbar>
+      
 
-      <div className="container mb-6">
+      <div className="container my-6">
 
         {/* Top Title */}
         <h1 className="text-2xl font-bold">Academy</h1>
@@ -390,9 +390,9 @@ function DigitalMarketingUI({ activeTab, setActiveTab, toggle, open, introLesson
   return (
     <>
       {/* Header */}
-      <Toolbar><ToolbarHeading title="Academy" /></Toolbar>
+      
 
-      <div className="container mb-6">
+      <div className="container my-6">
 
         {/* Top Title */}
         <h1 className="text-2xl font-bold">Academy</h1>

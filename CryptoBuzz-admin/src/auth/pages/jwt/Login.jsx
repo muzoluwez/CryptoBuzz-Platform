@@ -76,8 +76,8 @@ const Login = () => {
       <form className="card-body flex flex-col login_card gap-5 p-7" noValidate>
         <div className="flex justify-center mb-5">
           <img
-            src="/media/app/default-logo-dark.png"
-            className="w-100 h-5"
+            src="/media/app/logo.png"
+            className="w-100 h-16"
             alt=""
           />
           {/* <img src="/media/app/default-logo-dark.png" className="w-100 h-5 dark_mode" alt="" /> */}
@@ -86,7 +86,7 @@ const Login = () => {
           <h3 className="text-lg font-semibold text-gray-100 dark:text-gray-900 leading-none mb-2.5">
             Sign in
           </h3>
-          <p className="text-gray-500">Let's Get Started IQONIC</p>
+          <p className="text-gray-500">Let's Get Started CryptoBuzz</p>
         </div>
         {formik.status && <Alert variant="danger">{formik.status}</Alert>}
         <Link

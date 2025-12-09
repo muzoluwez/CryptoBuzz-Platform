@@ -48,7 +48,7 @@ const HeaderLogo = () => {
         <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
           <SheetTrigger asChild>
             <Button variant="dim" mode="icon">
-              <Menu />
+              <Menu className='text-white'/>
             </Button>
           </SheetTrigger>
           <SheetContent

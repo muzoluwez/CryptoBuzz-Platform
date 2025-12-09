@@ -10,7 +10,7 @@ const Layout = () => {
     <style>
       {`
           .branded-bg {
-            background-image: url('${toAbsoluteUrl('/media/images/2600x1600/edwin-andrade.png')}');
+            background-image: url('${toAbsoluteUrl('/media/images/2600x1600/bg-img.png')}');
             background-size: cover;
             background-repeat: no-repeat;
             background-position: center;

@@ -78,7 +78,7 @@ const AdminLogin = () => {
               </Link>
             </div>
             <div className="flex justify-center mb-8">
-              <img src="/media/app/default-logo-dark.png" className="w-100 h-5" alt="" />
+              <img src="/media/app/default-logo-dark.png" className="w-100 h-16" alt="" />
               {/* <img src="/media/app/default-logo-dark.png" className="w-100 h-5 dark_mode" alt="" /> */}
             </div>
             <h3 className="text-xl font-medium text-gray-100 dark:text-gray-900 leading-none mb-3 text-center">
@@ -196,7 +196,7 @@ const AdminLogin = () => {
 
         <button
           onClick={formik.handleSubmit}
-          className="btn py-7 rounded-2xl bg-[linear-gradient(90deg,#7C3AED_0%,#5C25BA_100%)] btn-primary flex justify-center grow"
+          className="btn py-7 rounded-2xl bg-[linear-gradient(90deg,#FFCD0B_0%,#FFCD0B_100%)] btn-primary flex justify-center grow text-dark"
           disabled={loading || formik.isSubmitting}
         >
           {loading ? "Please wait..." : "Login"}
