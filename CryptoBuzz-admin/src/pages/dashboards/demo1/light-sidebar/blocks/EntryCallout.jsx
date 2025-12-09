@@ -6,8 +6,8 @@ const EntryCallout = ({
   className
 }) => {
   return <Fragment>
-      <style>
-        {`
+    <style>
+      {`
           @media screen and (min-width: 767px) {
             .entry-callout-bg {
               background-image: url('${toAbsoluteUrl('/media/images/2600x1600/2.png')}');
@@ -17,12 +17,12 @@ const EntryCallout = ({
             }
           }
         `}
-      </style>
+    </style>
 
-      <div className={`card h-full ${className}`}>
-        <div className="card-body p-10 bg-[length:80%] rtl:[background-position:-70%_25%] [background-position:175%_25%] bg-no-repeat entry-callout-bg">
-          <div className="flex flex-col justify-center gap-4">
-            <CommonAvatars size="size-10" group={[{
+    <div className={`card h-full ${className}`}>
+      <div className="card-body p-10 bg-[length:80%] rtl:[background-position:-70%_25%] [background-position:175%_25%] bg-no-repeat entry-callout-bg">
+        <div className="flex flex-col justify-center gap-4">
+          <CommonAvatars size="size-10" group={[{
             filename: '300-4.png'
           }, {
             filename: '300-1.png'
@@ -33,29 +33,29 @@ const EntryCallout = ({
             variant: 'text-success-inverse text-xs ring-success-light bg-success'
           }]} />
 
-            <h2 className="text-1.5xl font-semibold text-gray-900">
-              Where Trading Knowledge  <br />
-              Meets{' '}
-              <a href="#" className="link">
-                Intelligent Execution.
-              </a>
-            </h2>
+          <h2 className="text-1.5xl font-semibold text-gray-900">
+            Where Trading Knowledge  <br />
+            Meets{' '}
+            <a href="#" className="link">
+              Intelligent Execution.
+            </a>
+          </h2>
 
-            <p className="text-sm font-normal text-gray-700 leading-5.5">
-              Level up your trading skills with structured <br />
-               lessons and expert insights. Join IQVerse  <br />
-              for smarter, faster learning.
-            </p>
-          </div>
-        </div>
-
-        <div className="card-footer justify-center">
-          <Link to="/account/home/get-started" className="btn btn-link">
-            Get Started
-          </Link>
+          <p className="text-sm font-normal text-gray-700 leading-5.5">
+            Level up your trading skills with structured <br />
+            lessons and expert insights. Join IQVerse  <br />
+            for smarter, faster learning.
+          </p>
         </div>
       </div>
-    </Fragment>;
+
+      <div className="card-footer justify-center">
+        <Link to="#" className="btn btn-link">
+          Get Started
+        </Link>
+      </div>
+    </div>
+  </Fragment>;
 };
 export { EntryCallout };
 

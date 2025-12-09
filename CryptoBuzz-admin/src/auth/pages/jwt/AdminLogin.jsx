@@ -195,6 +195,7 @@ const AdminLogin = () => {
         </div>
 
         <button
+          type="submit"
           onClick={formik.handleSubmit}
           className="btn py-7 rounded-2xl bg-[linear-gradient(90deg,#FFCD0B_0%,#FFCD0B_100%)] btn-primary flex justify-center grow text-dark"
           disabled={loading || formik.isSubmitting}

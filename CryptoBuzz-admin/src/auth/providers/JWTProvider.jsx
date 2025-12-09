@@ -106,9 +106,10 @@ const AuthProvider = ({ children }) => {
   const login = async (email, password, dispatch) => {
     try {
       const data = await lmsAuth.login(email, password);
+      console.log(data, "data");
       const auth = {
-        token: data.token,
-        user: data.user,
+        token: data?.data?.token,
+        user: data?.data?.user,
       };
       saveAuth(auth);
       // const {
