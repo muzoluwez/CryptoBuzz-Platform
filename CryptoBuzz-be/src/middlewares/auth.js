@@ -32,7 +32,6 @@ export const verifyJWT = asyncHandler(async (req, res, next) => {
   }
 });
 
-
 export const CommonAuth = asyncHandler(async (req, res, next) => {
   try {
     const token = req.headers.authorization?.split(" ")[1];
@@ -45,11 +44,11 @@ export const CommonAuth = asyncHandler(async (req, res, next) => {
 
     if (decodedToken.role === "user") {
       return res.status(401).json({
-        message: "Access denied because you are not eductor or admin",
+        message: "Access denied because you are not eductor or admin"
       });
     }
 
-    let user = await UserModel.findById(decodedToken._id);
+    let user = await User.findById(decodedToken._id);
 
     if (!user) {
       return res.status(400).json({ message: "User not found" });
@@ -65,9 +64,45 @@ export const CommonAuth = asyncHandler(async (req, res, next) => {
   } catch (error) {
     return res.status(500).json({
       message: "Internal Server Error",
-      error: error.errors || error.message,
+      error: error.errors || error.message
+    });
+  }
+});
+export const AdminAuth = asyncHandler(async (req, res, next) => {
+  try {
+    const token = req.headers.authorization?.split(" ")[1];
+
+    if (!token) {
+      return res.status(401).json({ message: "No token provided" });
+    }
+
+    const decodedToken = jwt.verify(token, process.env.JWT_SECRET); // Your JWT secret key
+
+    if (decodedToken.role == "student" || decodedToken.role == "educator") {
+      return res.status(401).json({
+        message: "Access denied because you are not eductor or admin"
+      });
+    }
+
+    let user = await User.findById(decodedToken._id);
+
+    if (!user) {
+      return res.status(400).json({ message: "User not found" });
+    } else if (user.role == "student" || user.role == "educator") {
+      return res.status(403).json({ message: "Access denied" });
+    }
+
+    // Attach the user object to the request for use in the next middleware/handler
+    req.user = user;
+
+    // Proceed to the next middleware or route handler
+    next();
+  } catch (error) {
+    return res.status(500).json({
+      message: "Internal Server Error",
+      error: error.errors || error.message
     });
   }
 });
 
-export default {CommonAuth,verifyJWT}
+export default { CommonAuth, verifyJWT,AdminAuth };

@@ -10,8 +10,8 @@ export const GetApiResponse = (statusCode = 200, data = null,pagination, message
   return {
     statusCode,
     data,
-    message,
     pagination,
+    message,
     success: statusCode < 400,
   };
 };
