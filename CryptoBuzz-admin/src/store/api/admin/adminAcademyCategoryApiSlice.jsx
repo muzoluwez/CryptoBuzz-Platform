@@ -1,73 +1,115 @@
 import { createApi } from "@reduxjs/toolkit/query/react";
 import baseQueryWithReauth from "../apiSlice";
+import { useGetLanguageQuery } from "./adminLanguagesApiSlice";
+import { useLazyGetAdminCoursesTypesQuery } from "./adminCoursesTypesApiSlice";
+
 
 /**
- * Admin Academy Category API Slice
+ * Admin Category API Slice
  * 
- * Provides endpoints for managing academy categories, course types,
- * languages, and related educational content from the admin perspective.
+ * Provides endpoints for managing categories from the admin perspective.
+ * Integrated with backend routes: /admin/category
  */
 export const adminAcademyCategoryApiSlice = createApi({
   reducerPath: "adminAcademyCategory",
   baseQuery: baseQueryWithReauth,
+  tagTypes: ["Category"],
   endpoints: (builder) => ({
-    // Get academy categories with pagination
-    getAdminAcademyCategory: builder.query({
-      query: ({ page = 1, limit = 10 } = {}) =>
-        `/admin/category?page=${page}&limit=${limit}`,
+    // Get all categories with pagination and search
+    // Backend: GET /admin/category?page=1&limit=10&search=keyword
+    getCategories: builder.query({
+      query: ({ page = 1, limit = 10, search = "" } = {}) => {
+        let url = `/admin/category?page=${page}&limit=${limit}`;
+        if (search) {
+          url += `&search=${encodeURIComponent(search)}`;
+        }
+        return url;
+      },
+      providesTags: (result) =>
+        result?.data
+          ? [
+            ...result.data.map(({ _id }) => ({ type: "Category", id: _id })),
+            { type: "Category", id: "LIST" },
+          ]
+          : [{ type: "Category", id: "LIST" }],
     }),
 
-    // Get all academy categories (for dropdowns/selects)
-    getEducatorAcademyCategory: builder.query({
-      query: ({ page = 1, limit = 100 } = {}) =>
-        `/admin/category?page=${page}&limit=${limit}`,
+    // Get all categories with status true (for dropdowns/selects)
+    // Backend: GET /admin/category/list
+    fetchCategories: builder.query({
+      query: () => `/admin/category/list`,
+      providesTags: [{ type: "Category", id: "LIST" }],
     }),
 
-    // Get course types list
-    getCoursesTypes: builder.query({
-      query: () => `/admin/course-type/list`,
+    // Get single category by ID
+    // Backend: GET /admin/category/:id
+    getOneCategory: builder.query({
+      query: (id) => `/admin/category/${id}`,
+      providesTags: (result, error, id) => [{ type: "Category", id }],
     }),
 
-    // Get language list (for language selector)
-    getLanguageList: builder.query({
-      query: () => `/admin/language/list`,
-    }),
-
-    // Create new academy category
-    createAdminAcademyCategory: builder.mutation({
+    // Create new category
+    // Backend: POST /admin/category
+    createCategory: builder.mutation({
       query: (data) => ({
         url: "/admin/category",
         method: "POST",
         body: data,
       }),
+      invalidatesTags: [{ type: "Category", id: "LIST" }],
     }),
 
-    // Update existing academy category
-    updateAdminAcademyCategory: builder.mutation({
-      query: ({ data, id }) => ({
+    // Update existing category
+    // Backend: PUT /admin/category/:id
+    updateCategory: builder.mutation({
+      query: ({ id, data }) => ({
         url: `/admin/category/${id}`,
         method: "PUT",
         body: data,
-        formData: true,
       }),
+      invalidatesTags: (result, error, { id }) => [
+        { type: "Category", id },
+        { type: "Category", id: "LIST" },
+      ],
     }),
 
-    // Delete academy category
-    deleteAdminAcademyCategory: builder.mutation({
+    // Delete category (soft delete)
+    // Backend: DELETE /admin/category/:id
+    deleteCategory: builder.mutation({
       query: (id) => ({
         url: `/admin/category/${id}`,
         method: "DELETE",
       }),
+      invalidatesTags: (result, error, id) => [
+        { type: "Category", id },
+        { type: "Category", id: "LIST" },
+      ],
     }),
   }),
 });
 
 export const {
-  useLazyGetAdminAcademyCategoryQuery,
-  useGetEducatorAcademyCategoryQuery,
-  useGetCoursesTypesQuery,
-  useGetLanguageListQuery,
-  useCreateAdminAcademyCategoryMutation,
-  useUpdateAdminAcademyCategoryMutation,
-  useDeleteAdminAcademyCategoryMutation,
+  useGetCategoriesQuery,
+  useLazyGetCategoriesQuery,
+  useFetchCategoriesQuery,
+  useLazyFetchCategoriesQuery,
+  useGetOneCategoryQuery,
+  useLazyGetOneCategoryQuery,
+  useCreateCategoryMutation,
+  useUpdateCategoryMutation,
+  useDeleteCategoryMutation,
 } = adminAcademyCategoryApiSlice;
+
+// Backward compatibility exports for existing components
+// These are aliases to the new hook names
+export const useLazyGetAdminAcademyCategoryQuery = useLazyGetCategoriesQuery;
+export const useGetEducatorAcademyCategoryQuery = useFetchCategoriesQuery;
+export const useCreateAdminAcademyCategoryMutation = useCreateCategoryMutation;
+export const useUpdateAdminAcademyCategoryMutation = useUpdateCategoryMutation;
+export const useDeleteAdminAcademyCategoryMutation = useDeleteCategoryMutation;
+
+// Re-export hooks from other API slices for backward compatibility
+// These were previously exported from this slice
+export const useGetCoursesTypesQuery = useLazyGetAdminCoursesTypesQuery;
+export const useGetLanguageListQuery = useGetLanguageQuery;
+

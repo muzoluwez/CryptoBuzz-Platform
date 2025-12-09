@@ -251,7 +251,7 @@ const educatorPostSlice = createSlice({
         state.status = "succeeded";
         state.loadingMore = false;
         // Map backend response to frontend structure
-        const postsToAdd = action.payload.posts.map((post) => ({
+        const postsToAdd = action.payload.data.map((post) => ({
           id: post._id,
           content: post.content,
           author: {
@@ -317,7 +317,7 @@ const educatorPostSlice = createSlice({
 
         // Map backend response to frontend structure
         // Handle both old and new API response formats
-        const postData = action.payload.post || action.payload;
+        const postData = action.payload.data || action.payload.post || action.payload;
 
         const newPost = {
           id: postData._id || postData.id,
@@ -369,7 +369,7 @@ const educatorPostSlice = createSlice({
         state.status = "succeeded";
         // Map backend response to frontend structure
         // Handle both old and new API response formats
-        const postData = action.payload.post || action.payload;
+        const postData = action.payload.data || action.payload.post || action.payload;
         const updatedPost = {
           id: postData._id || postData.id,
           content: postData.content,

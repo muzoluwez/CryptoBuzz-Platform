@@ -24,8 +24,8 @@ import {
 } from "../../../store/api/admin/adminTradeIdeasApiSlice";
 import RichTextEditor from "../../../components/ui/rich-editor";
 import {
-  useCreateAdminTradeAnalysisMutation,
-  useUpdateAdminTradeAnalysisMutation,
+  useCreateTradeAnalysisMutation,
+  useUpdateTradeAnalysisMutation,
 } from "../../../store/api/admin/adminTradeAnalysisApiSlice";
 import { useGetEducatorAcademyCategoryQuery } from "../../../store/api/admin/adminAcademyCategoryApiSlice";
 
@@ -35,8 +35,8 @@ const CreateTradeAnalysis = forwardRef(
     ref
   ) => {
     const { auth } = useAuthContext();
-    const [createAdminTradeAnalysis] = useCreateAdminTradeAnalysisMutation();
-    const [updateAdminTradeAnalysis] = useUpdateAdminTradeAnalysisMutation();
+    const [createTradeAnalysis] = useCreateTradeAnalysisMutation();
+    const [updateTradeAnalysis] = useUpdateTradeAnalysisMutation();
     const createdBy = auth?.user?._id ?? null;
     const { data } = useGetEducatorAcademyCategoryQuery();
 
@@ -81,12 +81,15 @@ const CreateTradeAnalysis = forwardRef(
 
         try {
           if (selectedRow?._id) {
-            let a = await updateAdminTradeAnalysis(formData).unwrap();
+            let a = await updateTradeAnalysis({
+              id: selectedRow?._id,
+              formData,
+            }).unwrap();
 
             refetch();
             toast.success("IQ Insight updated successfully!");
           } else {
-            await createAdminTradeAnalysis(formData).unwrap();
+            await createTradeAnalysis(formData).unwrap();
             refetch();
             toast.success("IQ Insight created successfully!");
           }
@@ -174,11 +177,10 @@ const CreateTradeAnalysis = forwardRef(
                       type="text"
                       placeholder="Enter Title"
                       autoComplete="off"
-                      className={`form-control input input-md w-full ${
-                        formik.errors.title && formik.touched.title
-                          ? "border border-danger"
-                          : ""
-                      }`}
+                      className={`form-control input input-md w-full ${formik.errors.title && formik.touched.title
+                        ? "border border-danger"
+                        : ""
+                        }`}
                       {...formik.getFieldProps("title")}
                     />
                     {formik.touched.title && formik.errors.title && (
@@ -223,11 +225,10 @@ const CreateTradeAnalysis = forwardRef(
                       type="text"
                       placeholder="Enter url"
                       autoComplete="off"
-                      className={`form-control input input-md w-full ${
-                        formik.errors.url && formik.touched.url
-                          ? "border border-danger"
-                          : ""
-                      }`}
+                      className={`form-control input input-md w-full ${formik.errors.url && formik.touched.url
+                        ? "border border-danger"
+                        : ""
+                        }`}
                       {...formik.getFieldProps("url")}
                     />
                     {formik.touched.url && formik.errors.url && (
@@ -290,11 +291,10 @@ const CreateTradeAnalysis = forwardRef(
                         >
                           <div
                             className={`flex border justify-center rounded-lg image-input-placeholder items-center 
-            ${
-              formik.touched.files && formik.errors.files
-                ? "border-danger"
-                : "border-gray-200"
-            }`}
+            ${formik.touched.files && formik.errors.files
+                                ? "border-danger"
+                                : "border-gray-200"
+                              }`}
                           >
                             <i className="ki-filled ki-picture"></i>
                           </div>

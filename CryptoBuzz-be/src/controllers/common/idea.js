@@ -2,7 +2,7 @@ import IdeaModel from "../../models/idea.js";
 import yup from "yup";
 import path from "path";
 import fs from "fs";
-import {uploadImageToAzure,deleteImageFromAzure,} from "../../utils/azureUploader.js";
+import { uploadImageToAzure, deleteImageFromAzure, } from "../../utils/azureUploader.js";
 // import { notifyUsersOnTradeIdea, notifyFollowersOfEducator } from "../../firebase/messaging";
 import CategoryModel from "../../models/category.js";
 import mongoose from "mongoose";
@@ -176,7 +176,7 @@ export const createIdea = async (req, res) => {
     }
     const imageUrls = await Promise.all(
       req.files.map(async file => {
-        const filePath = path.resolve(__dirname, "../../../public/temp", file.path);
+        const filePath = path.resolve(file.path);
         const fileBuffer = fs.readFileSync(filePath);
 
         const imageUrl = await uploadImageToAzure(fileBuffer, file.originalname);
@@ -270,7 +270,7 @@ export const updateIdea = async (req, res) => {
 
       updatedImageUrls = await Promise.all(
         req.files.map(async file => {
-          const localPath = path.resolve(__dirname, "../../../public/temp", file.path);
+          const localPath = path.resolve(file.path);
           const buffer = fs.readFileSync(localPath);
 
           const azureUrl = await uploadImageToAzure(buffer, file.originalname);

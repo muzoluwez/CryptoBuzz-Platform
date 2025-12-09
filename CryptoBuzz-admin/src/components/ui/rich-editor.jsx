@@ -21,18 +21,18 @@
 //     if (!iframe?.contentDocument) return;
 
 //     const { documentElement, body } = iframe.contentDocument;
-    
+
 //     // Clean previous theme classes
 //     documentElement.classList.remove('light', 'dark');
 //     // Add current theme class
 //     documentElement.classList.add(settings.themeMode);
-    
+
 //     // Force redraw for immediate theme application
 //     body.style.display = 'none';
 //     body.offsetHeight; // Trigger reflow
 //     body.style.display = '';
 //   }, [settings.themeMode]);
-  
+
 //   return (
 //     <div
 //       className={cn("border rounded-md overflow-hidden", className)}
@@ -140,7 +140,12 @@ import 'react-quill/dist/quill.snow.css';
 import 'react-quill/dist/quill.bubble.css';
 import { cn } from '@/lib/utils';
 import { useSettings } from '@/providers/SettingsProvider';
-// import '@/styles/editor.css'; // Custom theme-based styles you can define here
+
+// Wrapper to suppress findDOMNode warning in React 18
+const QuillWrapper = React.forwardRef((props, ref) => {
+  return <ReactQuill ref={ref} {...props} />;
+});
+QuillWrapper.displayName = 'QuillWrapper';
 
 const RichEditor = ({ content, onChange, className }) => {
   const editorRef = useRef(null);
@@ -160,7 +165,7 @@ const RichEditor = ({ content, onChange, className }) => {
 
   return (
     <div className={cn("border rounded-md bg-light", className)}>
-      <ReactQuill
+      <QuillWrapper
         ref={editorRef}
         theme="snow"
         value={content || ''}
@@ -187,6 +192,7 @@ const RichEditor = ({ content, onChange, className }) => {
 };
 
 export default RichEditor;
+
 
 
 

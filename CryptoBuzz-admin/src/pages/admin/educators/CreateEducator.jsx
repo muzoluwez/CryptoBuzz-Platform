@@ -13,6 +13,7 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogDescription,
 } from "@/components/ui/dialog";
 import {
   Popover,
@@ -291,6 +292,11 @@ const CreateEducator = forwardRef(
             <DialogTitle>
               {selectedRow?._id ? "Update Educator" : "Create Educator"}
             </DialogTitle>
+            <DialogDescription>
+              {selectedRow?._id
+                ? "Update the educator's information below."
+                : "Fill in the details to create a new educator."}
+            </DialogDescription>
           </DialogHeader>
           <div className="grid gap-5 px-0 pb-5">
             <div className="grid grid-cols-12 gap-4">
@@ -305,12 +311,12 @@ const CreateEducator = forwardRef(
                         ? typeof formik.values.image === "string"
                           ? [{ dataURL: formik.values.image }] // URL from backend
                           : [
-                              {
-                                dataURL: URL.createObjectURL(
-                                  formik.values.image
-                                ),
-                              },
-                            ] // Local file
+                            {
+                              dataURL: URL.createObjectURL(
+                                formik.values.image
+                              ),
+                            },
+                          ] // Local file
                         : []
                     }
                     accept="image/*"
@@ -373,11 +379,10 @@ const CreateEducator = forwardRef(
                     type="text"
                     placeholder="Enter first name"
                     autoComplete="off"
-                    className={`form-control input input-md w-full ${
-                      formik.errors.first_name && formik.touched.first_name
+                    className={`form-control input input-md w-full ${formik.errors.first_name && formik.touched.first_name
                         ? "border border-danger"
                         : ""
-                    }`}
+                      }`}
                     {...formik.getFieldProps("first_name")}
                   />
                   {formik.touched.first_name && formik.errors.first_name && (
@@ -396,11 +401,10 @@ const CreateEducator = forwardRef(
                     type="text"
                     placeholder="Enter last name"
                     autoComplete="off"
-                    className={`form-control input input-md w-full ${
-                      formik.errors.last_name && formik.touched.last_name
+                    className={`form-control input input-md w-full ${formik.errors.last_name && formik.touched.last_name
                         ? "border border-danger"
                         : ""
-                    }`}
+                      }`}
                     {...formik.getFieldProps("last_name")}
                   />
                   {formik.touched.last_name && formik.errors.last_name && (
@@ -410,7 +414,7 @@ const CreateEducator = forwardRef(
                   )}
                 </div>
               </div>
-             
+
 
 
 
@@ -428,11 +432,10 @@ const CreateEducator = forwardRef(
                     placeholder="Enter Educator Speciality"
                     autoComplete="off"
                     {...formik.getFieldProps("educatorRole")}
-                    className={`form-control input input-md w-full ${
-                      formik.errors.educatorRole && formik.touched.educatorRole
+                    className={`form-control input input-md w-full ${formik.errors.educatorRole && formik.touched.educatorRole
                         ? "border border-danger"
                         : ""
-                    }`}
+                      }`}
                   />
                   {formik.touched.educatorRole &&
                     formik.errors.educatorRole && (
@@ -453,11 +456,10 @@ const CreateEducator = forwardRef(
                     placeholder="Enter email"
                     autoComplete="off"
                     {...formik.getFieldProps("email")}
-                    className={`form-control input input-md w-full ${
-                      formik.errors.email && formik.touched.email
+                    className={`form-control input input-md w-full ${formik.errors.email && formik.touched.email
                         ? "border border-danger"
                         : ""
-                    }`}
+                      }`}
                   />
                   {formik.touched.email && formik.errors.email && (
                     <span role="alert" className="text-danger text-xs mt-1">
@@ -515,11 +517,10 @@ const CreateEducator = forwardRef(
                     onValueChange={(value) =>
                       formik.setFieldValue("status", value)
                     }
-                    className={`form-control input input-md w-full ${
-                      formik.errors.status && formik.touched.status
+                    className={`form-control input input-md w-full ${formik.errors.status && formik.touched.status
                         ? "border border-danger"
                         : ""
-                    }`}
+                      }`}
                   >
                     <SelectTrigger>
                       <SelectValue placeholder="Select" />
@@ -547,12 +548,11 @@ const CreateEducator = forwardRef(
                       formik.setFieldValue("is_create_stream", value)
                     }
                     className={`form-control input input-md w-full 
-                                ${
-                                  formik.errors.is_create_stream &&
-                                  formik.touched.is_create_stream
-                                    ? "border border-danger"
-                                    : ""
-                                }`}
+                                ${formik.errors.is_create_stream &&
+                        formik.touched.is_create_stream
+                        ? "border border-danger"
+                        : ""
+                      }`}
                   >
                     <SelectTrigger>
                       <SelectValue placeholder="Select" />
@@ -609,11 +609,10 @@ const CreateEducator = forwardRef(
                     placeholder="Enter projectId of dyntube"
                     autoComplete="off"
                     {...formik.getFieldProps("projectId")}
-                    className={`form-control input input-md w-full ${
-                      formik.errors.projectId && formik.touched.projectId
+                    className={`form-control input input-md w-full ${formik.errors.projectId && formik.touched.projectId
                         ? "border border-danger"
                         : ""
-                    }`}
+                      }`}
                   />
                   {formik.touched.projectId && formik.errors.projectId && (
                     <span role="alert" className="text-danger text-xs mt-1">
@@ -695,7 +694,7 @@ const CreateEducator = forwardRef(
                 </div>
               </div>
 
-               <div className="col-span-12 md:col-span-12">
+              <div className="col-span-12 md:col-span-12">
                 <div className="flex flex-col gap-1">
                   <label className="form-label text-gray-900 gap-1">
                     Profile Bio<span className="text-danger">*</span>
@@ -704,11 +703,10 @@ const CreateEducator = forwardRef(
                     type="text"
                     placeholder="Enter profile bio"
                     autoComplete="off"
-                    className={`form-control input input-md w-full ${
-                      formik.errors.bio && formik.touched.bio
+                    className={`form-control input input-md w-full ${formik.errors.bio && formik.touched.bio
                         ? "border border-danger"
                         : ""
-                    }`}
+                      }`}
                     {...formik.getFieldProps("bio")}
                   />
                   {formik.touched.bio && formik.errors.bio && (

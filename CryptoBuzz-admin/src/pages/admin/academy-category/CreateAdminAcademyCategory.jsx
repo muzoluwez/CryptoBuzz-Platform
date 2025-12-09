@@ -145,7 +145,7 @@ const CreateEducator = forwardRef(
           image: selectedRow?.image,
           icon: selectedRow?.icon,
           type: selectedRow?.type,
-      
+
           status: String(selectedRow?.status),
         };
         formik.setValues(initData);
@@ -186,11 +186,10 @@ const CreateEducator = forwardRef(
                     type="text"
                     placeholder="Enter category name"
                     autoComplete="off"
-                    className={`form-control input input-md w-full ${
-                      formik.errors.name && formik.touched.name
+                    className={`form-control input input-md w-full ${formik.errors.name && formik.touched.name
                         ? "border border-danger"
                         : ""
-                    }`}
+                      }`}
                     {...formik.getFieldProps("name")}
                   />
                   {formik.touched.name && formik.errors.name && (
@@ -216,11 +215,10 @@ const CreateEducator = forwardRef(
                     onBlur={() => formik.setFieldTouched("type", true)}
                   >
                     <SelectTrigger
-                      className={`form-control input input-md w-full ${
-                        formik.errors.type && formik.touched.type
+                      className={`form-control input input-md w-full ${formik.errors.type && formik.touched.type
                           ? "border border-danger"
                           : ""
-                      }`}
+                        }`}
                     >
                       <SelectValue placeholder="Select" />
                     </SelectTrigger>
@@ -252,12 +250,12 @@ const CreateEducator = forwardRef(
                         ? typeof formik.values.icon === "string"
                           ? [{ dataURL: formik.values.icon }] // URL from backend
                           : [
-                              {
-                                dataURL: URL.createObjectURL(
-                                  formik.values.icon
-                                ),
-                              },
-                            ] // Local file
+                            {
+                              dataURL: URL.createObjectURL(
+                                formik.values.icon
+                              ),
+                            },
+                          ] // Local file
                         : []
                     }
                     accept="image/*"
@@ -283,12 +281,12 @@ const CreateEducator = forwardRef(
                         ? typeof formik.values.image === "string"
                           ? [{ dataURL: formik.values.image }] // URL from backend
                           : [
-                              {
-                                dataURL: URL.createObjectURL(
-                                  formik.values.image
-                                ),
-                              },
-                            ] // Local file
+                            {
+                              dataURL: URL.createObjectURL(
+                                formik.values.image
+                              ),
+                            },
+                          ] // Local file
                         : []
                     }
                     accept="image/*"

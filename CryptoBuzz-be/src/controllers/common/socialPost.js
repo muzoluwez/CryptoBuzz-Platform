@@ -174,7 +174,7 @@ export const updatePost = async (req, res) => {
     // Replace images
     if (req.files?.images) {
       for (const img of post.images) {
-        if (img.url) await deleteImageFromAzure(img.url).catch(() => {});
+        if (img.url) await deleteImageFromAzure(img.url).catch(() => { });
       }
 
       const newImages = [];
@@ -192,7 +192,7 @@ export const updatePost = async (req, res) => {
     // Replace videos
     if (req.files?.videos) {
       for (const vid of post.videos) {
-        if (vid.url) await deleteVideoFromAzure(vid.url).catch(() => {});
+        if (vid.url) await deleteVideoFromAzure(vid.url).catch(() => { });
       }
 
       const newVideos = [];
@@ -232,11 +232,11 @@ export const deletePost = async (req, res) => {
     }
 
     for (const img of post.images) {
-      if (img.url) await deleteImageFromAzure(img.url).catch(() => {});
+      if (img.url) await deleteImageFromAzure(img.url).catch(() => { });
     }
 
     for (const vid of post.videos) {
-      if (vid.url) await deleteVideoFromAzure(vid.url).catch(() => {});
+      if (vid.url) await deleteVideoFromAzure(vid.url).catch(() => { });
     }
 
     await PostModel.findByIdAndDelete(req.params.id);

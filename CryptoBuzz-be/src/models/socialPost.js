@@ -112,7 +112,7 @@ postSchema.virtual("timeAgo").get(function () {
 });
 
 // Extract hashtags and mentions
-postSchema.pre("save", function (next) {
+postSchema.pre("save", async function () {
   if (this.isModified("content")) {
     const hashtagRegex = /#(\w+)/g;
     const hashtags = [];
@@ -132,8 +132,6 @@ postSchema.pre("save", function (next) {
 
     // Mention usernames → userIds mapping 
   }
-
-  next();
 });
 
 // Indexes

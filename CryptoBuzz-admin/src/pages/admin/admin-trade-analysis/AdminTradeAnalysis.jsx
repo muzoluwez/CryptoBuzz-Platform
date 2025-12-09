@@ -32,7 +32,7 @@ import CreateTradeAnalysis from "./CreateTradeAnalysis";
 // import DeleteAdminTradeIdeas from "./DeleteAdminTradeIdeas";
 import { MenuIcon, MenuLink, MenuSub, MenuTitle } from "@/components";
 import DeleteTradeAnalysis from "./DeleteTradeAnalysis";
-import { useLazyGetAdminTradeAnalysisQuery } from "../../../store/api/admin/adminTradeAnalysisApiSlice";
+import { useLazyGetTradeAnalysisQuery } from "../../../store/api/admin/adminTradeAnalysisApiSlice";
 import ViewAdminTradeAnalysis from "./ViewAdminTradeAnalysis";
 import { useGetEducatorAcademyCategoryQuery } from "../../../store/api/admin/adminAcademyCategoryApiSlice";
 import { set } from "date-fns";
@@ -43,8 +43,8 @@ const AdminTradeAnalysis = ({ title = "IQ Insight" }) => {
   const [selectedRow, setSelectedRow] = useState({});
   const [isLightBoxOpen, setIsLightBoxOpen] = useState(false);
   const [category, setCategory] = useState(null);
-  const [getAdminTradeAnalysis, { data, isLoading, refetch }] =
-    useLazyGetAdminTradeAnalysisQuery();
+  const [getTradeAnalysis, { data, isLoading, refetch }] =
+    useLazyGetTradeAnalysisQuery();
   const { data: categoryList } = useGetEducatorAcademyCategoryQuery();
 
   const handleCloseView = () => {
@@ -288,7 +288,7 @@ const AdminTradeAnalysis = ({ title = "IQ Insight" }) => {
 
     try {
       // Fetch API Data
-      const response = await getAdminTradeAnalysis({
+      const response = await getTradeAnalysis({
         page: newPage,
         limit: newLimit,
         category: category?._id || "",
