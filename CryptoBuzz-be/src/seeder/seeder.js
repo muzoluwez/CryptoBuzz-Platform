@@ -1,18 +1,16 @@
-const UserModel = require("../models/user");
-const bcrypt = require("bcrypt");
+import UserModel from "../models/user.js";
+import bcrypt from "bcrypt";
 const admins = [
   {
     name: "Admin One",
     email: "admin@cryptobuzz.in",
     password: "3XC^c^@NpZu",
     role: "admin",
-    status: "true",
-  },
+    status: "true"
+  }
 ];
 
-
-
-const seedAdmins = async () => {
+export const seedAdmins = async () => {
   try {
     for (let admin of admins) {
       const existingAdmin = await UserModel.findOne({ email: admin.email });
@@ -27,7 +25,6 @@ const seedAdmins = async () => {
   }
 };
 
-
-module.exports = {
-  seedAdmins,
+export default {
+  seedAdmins
 };
