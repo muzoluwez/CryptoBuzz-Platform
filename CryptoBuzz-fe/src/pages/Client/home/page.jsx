@@ -27,7 +27,7 @@ export function HomePage() {
         <main className="">
           {/* Page Header */}
           <header className="mb-6">
-            <h1 className="text-2xl font-semibold text-[#1f2937]">Cripto Buzz Home</h1>
+            <h1 className="text-2xl font-semibold text-black dark:text-white">Cripto Buzz Home</h1>
             <p className="text-xs text-gray-500 mt-1">Home</p>
           </header>
 

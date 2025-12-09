@@ -76,11 +76,11 @@ export function MegaMenu() {
         <NavigationMenuItem>
           <NavigationMenuLink asChild>
             <Link
-              to="/client/analysis"
+              to="/client/insight"
               className={cn(linkClass)}
-              data-active={isActive('/client/analysis') || undefined}
+              data-active={isActive('/client/insight') || undefined}
             >
-              Analysis
+              Insight
             </Link>
           </NavigationMenuLink>
         </NavigationMenuItem>
