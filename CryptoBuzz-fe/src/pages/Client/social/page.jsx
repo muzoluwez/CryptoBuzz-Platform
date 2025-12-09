@@ -30,10 +30,7 @@ export function SocialPage() {
 
   return (
     <>
-      <Toolbar>
-        <ToolbarHeading title="Social" />
-      </Toolbar>
-      <div className="container">
+      <div className="container py-6">
         <div className='flex justify-between items-center'>
           <header className="mb-6">
             <h1 className="text-2xl font-semibold text-black dark:text-white">Social</h1>

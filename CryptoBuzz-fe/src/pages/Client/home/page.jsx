@@ -20,15 +20,15 @@ const DummyImage = ({ src, alt = "", className = "" }) => (
 export function HomePage() {
   return (
     <>
-      <Toolbar>
+      {/* <Toolbar>
         <ToolbarHeading title="Home" />
-      </Toolbar>
-      <div className="container">
+      </Toolbar> */}
+      <div className="container my-6">
         <main className="">
           {/* Page Header */}
           <header className="mb-6">
-            <h1 className="text-2xl font-semibold text-black dark:text-white">Cripto Buzz Home</h1>
-            <p className="text-xs text-gray-500 mt-1">Home</p>
+            <h1 className="text-2xl font-bold">Cripto Buzz Home</h1>
+            <p className="text-sm text-gray-500">Home</p>
           </header>
 
           {/* HERO */}
@@ -147,7 +147,7 @@ export function HomePage() {
             </Card>
 
 
-                <Card className="relative bg-black text-white h-[438px] p-0 overflow-hidden">
+            <Card className="relative bg-black text-white h-[438px] p-0 overflow-hidden">
               <CardContent className="p-0">
                 <div className="relative h-full">
                   <img
@@ -176,15 +176,15 @@ export function HomePage() {
                   <div className="flex items-center justify-between w-full">
                     <CardHeading>Live Activity Feed</CardHeading>
                     <div className="flex gap-2 items-center">
-                      <button className="btn bg-[#eef2f5] text-sm text-gray-700">CryptoBuzz Announcements</button>
-                      <button className="btn bg-yellow-400 text-sm text-black">Social</button>
+                      <button className="py-2 px-4 rounded-lg cursor-pointer bg-[#eef2f5] dark:bg-gray-800 text-sm text-gray-700 dark:text-gray-300">CryptoBuzz Announcements</button>
+                      <button className="py-2 px-4 rounded-lg cursor-pointer bg-yellow-400 text-sm text-black">Social</button>
                     </div>
                   </div>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
                     {Array.from({ length: 6 }).map((_, idx) => (
-                      <article key={idx} className="flex gap-4 items-start bg-white">
+                      <article key={idx} className="flex gap-4 items-start">
                         <img
                           src={`https://i.pravatar.cc/48?img=${idx + 10}`}
                           alt="avatar"
@@ -208,29 +208,32 @@ export function HomePage() {
 
             {/* Right Sidebar */}
             <div className=" lg:col-span-1">
-              <aside className="space-y-4">
-                <Card className="p-4 bg-white">
-                  <CardHeader>
-                    <div className="flex items-center justify-between">
-                      <CardTitle>Connect With Us</CardTitle>
-                      <button className="btn bg-[#edf2ff] text-sm">Follow</button>
-                    </div>
+              <aside className="space-y-4 mb-5">
+                <Card className="p-4">
+                  <CardHeader className='!p-0 min-h-0 !pb-3 mb-3'>
+                    <CardTitle>Connect With Us</CardTitle>
                   </CardHeader>
-                  <CardContent>
-                    <p className="text-xs text-gray-500">@cryptobuzz</p>
+                  <CardContent className='!p-0'>
+                    <div className="rounded-md p-3 bg-blue-100 text-black flex items-center gap-3">
+                      <div className="h-10 w-10 rounded-md bg-blue-700 text-white flex items-center justify-center">C</div>
+                      <div>
+                        <p className="text-sm font-medium">Follow Crypto Buzz</p>
+                        <p className="text-xs text-gray-500">@cryptobuzz</p>
+                      </div>
+                    </div>
                   </CardContent>
                 </Card>
 
-                <Card className="p-4 bg-white">
-                  <CardHeader>
+                <Card className="p-4 ">
+                  <CardHeader className='!p-0 min-h-0 !pb-3 mb-3'>
                     <CardTitle>Download our Apps</CardTitle>
                   </CardHeader>
-                  <CardContent>
+                  <CardContent className='!p-0'>
                     <div className="flex flex-col gap-3">
                       <div className="flex items-center gap-3 bg-[#fbf6e6] rounded-md p-3">
                         <div className="h-10 w-10 rounded-md bg-black text-white flex items-center justify-center">C</div>
                         <div>
-                          <p className="text-sm font-medium">Cripto Buzz App</p>
+                          <p className="text-sm font-medium dark:text-gray-900">Cripto Buzz App</p>
                           <p className="text-xs text-gray-500">2K+ Beta Users</p>
                         </div>
                       </div>
@@ -243,14 +246,20 @@ export function HomePage() {
                   </CardContent>
                 </Card>
 
-                <Card className="p-4 bg-white">
-                  <CardHeader>
+                <Card className="p-4">
+                  <CardHeader className='!p-0 min-h-0 !pb-3 mb-3'>
                     <CardTitle>Ideas and Analysis</CardTitle>
                   </CardHeader>
-                  <CardContent>
+                  <CardContent className='!p-0'>
                     <div className="space-y-3">
-                      <div className="rounded-md p-3 bg-yellow-400 text-black">Cripto Ideas</div>
-                      <div className="rounded-md p-3 bg-yellow-400 text-black">Buzz Analysis</div>
+                      <div className="rounded-md p-3 bg-yellow-400 text-black flex items-center gap-3">
+                        <div className="h-10 w-10 rounded-md bg-black text-white flex items-center justify-center">C</div>
+                        <p>Cripto Ideas</p>
+                      </div>
+                      <div className="rounded-md p-3 bg-yellow-400 text-black flex items-center gap-3">
+                        <div className="h-10 w-10 rounded-md bg-black text-white flex items-center justify-center">C</div>
+                        <p>Cripto Ideas</p>
+                      </div>
                     </div>
                   </CardContent>
                 </Card>

@@ -66,10 +66,15 @@ export function MegaMenu() {
             <Link
               to="/client/live"
               className={cn(linkClass)}
-              data-active={isActive('/client/live') || undefined}
+              data-active={
+                isActive('/client/live') || isActive('/client/educators')
+                  ? "true"
+                  : undefined
+              }
             >
               Live
             </Link>
+
           </NavigationMenuLink>
         </NavigationMenuItem>
 
@@ -97,7 +102,7 @@ export function MegaMenu() {
           </NavigationMenuLink>
         </NavigationMenuItem>
 
-        <NavigationMenuItem>
+        {/* <NavigationMenuItem>
           <NavigationMenuLink asChild>
             <Link
               to="/client/blog"
@@ -107,9 +112,9 @@ export function MegaMenu() {
               Blog
             </Link>
           </NavigationMenuLink>
-        </NavigationMenuItem>
+        </NavigationMenuItem> */}
 
-        <NavigationMenuItem>
+        {/* <NavigationMenuItem>
           <NavigationMenuLink asChild>
             <Link
               to="/client/journaling"
@@ -119,7 +124,7 @@ export function MegaMenu() {
               Journaling
             </Link>
           </NavigationMenuLink>
-        </NavigationMenuItem>
+        </NavigationMenuItem> */}
 
         <NavigationMenuItem>
           <NavigationMenuLink asChild>

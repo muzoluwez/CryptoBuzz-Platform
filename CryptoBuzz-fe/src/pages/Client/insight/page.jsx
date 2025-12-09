@@ -58,11 +58,11 @@ export function InsightPage() {
 
   return (
     <>
-      <Toolbar>
+      {/* <Toolbar>
         <ToolbarHeading title="Analysis" />
-      </Toolbar>
+      </Toolbar> */}
 
-      <div className="container py-8">
+      <div className="container py-6">
         <header className="mb-6">
           <h1 className="text-2xl font-semibold text-foreground">Insight Feed</h1>
           <p className="text-sm text-muted-foreground mt-1">Latest market insights and analysis</p>

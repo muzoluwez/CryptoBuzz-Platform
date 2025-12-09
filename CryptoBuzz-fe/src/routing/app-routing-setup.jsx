@@ -9,6 +9,7 @@ import { SocialPage } from '@/pages/Client/social/page';
 import { Navigate, Route, Routes } from 'react-router';
 import { Layout7 } from '@/components/layouts/layout-7';
 import { InsightPage } from '../pages/Client/insight/page';
+import EducatorsPage from '../pages/Client/live/EducatorsPage';
 
 export function AppRoutingSetup() {
   return (
@@ -18,6 +19,7 @@ export function AppRoutingSetup() {
         <Route path="/client/home" element={<HomePage />} />
         <Route path="/client/idea" element={<IdeaPage />} />
         <Route path="/client/live" element={<LivePage />} />
+        <Route path="/client/educators" element={<EducatorsPage />} />
         <Route path="/client/academy" element={<AcademyPage />} />
         <Route path="/client/insight" element={<InsightPage />} />
         <Route path="/client/blog" element={<BlogPage />} />
