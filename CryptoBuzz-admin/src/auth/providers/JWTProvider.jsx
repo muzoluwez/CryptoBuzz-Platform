@@ -107,8 +107,8 @@ const AuthProvider = ({ children }) => {
     try {
       const data = await lmsAuth.login(email, password);
       const auth = {
-        token: data.token,
-        user: data.user,
+        token: data?.data?.token,
+        user: data?.data?.user,
       };
       saveAuth(auth);
       // const {
@@ -354,7 +354,7 @@ const AuthProvider = ({ children }) => {
           }
         }
       } catch (err) {
-        console.error("Unexpected error:", err);
+        // console.error("Unexpected error:", err);
         return {
           success: false,
           error:

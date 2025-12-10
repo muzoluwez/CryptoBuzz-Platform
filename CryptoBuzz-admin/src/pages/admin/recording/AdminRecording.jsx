@@ -297,7 +297,7 @@ const AdminRecording = ({ title = "Recorded Academy" }) => {
         totalCount: response.pagination?.totalRecords || 0,
       };
     } catch (error) {
-      console.error("Error fetching educators:", error);
+      // console.error("Error fetching educators:", error);
       return { data: [], totalCount: 0 };
     }
   };

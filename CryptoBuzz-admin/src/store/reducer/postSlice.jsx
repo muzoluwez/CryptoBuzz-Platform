@@ -14,7 +14,7 @@ export const fetchEducatorPosts = createAsyncThunk(
       const response = await getEducatorPosts({ page, limit });
       return { ...response.data, append };
     } catch (error) {
-      console.error("Fetch posts error:", error); // Debug log
+      // console.error("Fetch posts error:", error); // Debug log
 
       // Check for JWT expired error
       if (
@@ -56,7 +56,7 @@ export const createEducatorPost = createAsyncThunk(
 
       return response.data;
     } catch (error) {
-      console.error("Create post error:", error); // Debug log
+      // console.error("Create post error:", error); // Debug log
 
       // Check for JWT expired error
       if (
@@ -97,7 +97,7 @@ export const updateEducatorPost = createAsyncThunk(
       const response = await updateEducatorPostAPI(id, postData);
       return response.data;
     } catch (error) {
-      console.error("Update post error:", error); // Debug log
+      // console.error("Update post error:", error); // Debug log
 
       // Check for JWT expired error
       if (
@@ -138,7 +138,7 @@ export const deleteEducatorPost = createAsyncThunk(
       await deleteEducatorPostAPI(id);
       return id;
     } catch (error) {
-      console.error("Delete post error:", error); // Debug log
+      // console.error("Delete post error:", error); // Debug log
 
       // Check for JWT expired error
       if (
@@ -251,7 +251,7 @@ const educatorPostSlice = createSlice({
         state.status = "succeeded";
         state.loadingMore = false;
         // Map backend response to frontend structure
-        const postsToAdd = action.payload.posts.map((post) => ({
+        const postsToAdd = action.payload.data.map((post) => ({
           id: post._id,
           content: post.content,
           author: {
@@ -317,7 +317,7 @@ const educatorPostSlice = createSlice({
 
         // Map backend response to frontend structure
         // Handle both old and new API response formats
-        const postData = action.payload.post || action.payload;
+        const postData = action.payload.data || action.payload.post || action.payload;
 
         const newPost = {
           id: postData._id || postData.id,
@@ -369,7 +369,7 @@ const educatorPostSlice = createSlice({
         state.status = "succeeded";
         // Map backend response to frontend structure
         // Handle both old and new API response formats
-        const postData = action.payload.post || action.payload;
+        const postData = action.payload.data || action.payload.post || action.payload;
         const updatedPost = {
           id: postData._id || postData.id,
           content: postData.content,

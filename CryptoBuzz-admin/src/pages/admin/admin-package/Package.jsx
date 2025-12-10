@@ -80,7 +80,7 @@ const Package = () => {
             totalCount: res.total || 0,
           };
         } catch (error) {
-          console.error("❌ Fetch packages error:", error);
+          // console.error("❌ Fetch packages error:", error);
           return { data: [], totalCount: 0 };
         }
       },
@@ -91,7 +91,7 @@ const Package = () => {
       <MenuItem
         onClick={() => {
           setSelectedRow(row);
-          setIsAddOpen(true); 
+          setIsAddOpen(true);
         }}
       >
         <MenuLink>
@@ -272,7 +272,7 @@ const Package = () => {
           refetch={reloadTable}
         />
       )}
-      
+
       {isDeleteOpen && selectedRow && (
         <DeletePackage
           isDeleteOpen={isDeleteOpen}

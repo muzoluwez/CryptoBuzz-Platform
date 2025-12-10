@@ -60,7 +60,7 @@ const AdminLogs = ({ title = "Admin Logs" }) => {
         totalCount: response.pagination?.totalRecords || 0,
       };
     } catch (error) {
-      console.error("Error fetching logs:", error);
+      // console.error("Error fetching logs:", error);
       setLogs([]);
       return { data: [], totalCount: 0 };
     } finally {
@@ -85,7 +85,7 @@ const AdminLogs = ({ title = "Admin Logs" }) => {
 
         setLogs(res.logs || []);
       } catch (err) {
-        console.error("Error fetching logs:", err);
+        // console.error("Error fetching logs:", err);
         setLogs([]);
       }
     };
@@ -148,13 +148,12 @@ const AdminLogs = ({ title = "Admin Logs" }) => {
         enableSorting: true,
         cell: (info) => (
           <span
-            className={`badge capitalize badge-outline ${
-              info.row?.original?.action === "POST"
-                ? "badge-success"
-                : info.row?.original?.action === "PUT"
-                  ? "badge-warning"
-                  : "badge-danger"
-            }`}
+            className={`badge capitalize badge-outline ${info.row?.original?.action === "POST"
+              ? "badge-success"
+              : info.row?.original?.action === "PUT"
+                ? "badge-warning"
+                : "badge-danger"
+              }`}
           >
             {info.row?.original?.action === "PUT"
               ? "UPDATE"
@@ -228,7 +227,7 @@ const AdminLogs = ({ title = "Admin Logs" }) => {
               />
             </div>
             <div className="flex gap-2">
-         
+
               <CustomDateRangePicker
                 handleDateRangeChangeCallback={handleDateRangeChangeCallback}
               />

@@ -94,7 +94,7 @@ export const reorderSections = createAsyncThunk(
       const response = await reorderSectionsApi(sections, token);
       return response;
     } catch (error) {
-      console.log("error createAsyncThunk", error);
+      // console.log("error createAsyncThunk", error);
       return rejectWithValue(error.response?.data || error.message);
     }
   }

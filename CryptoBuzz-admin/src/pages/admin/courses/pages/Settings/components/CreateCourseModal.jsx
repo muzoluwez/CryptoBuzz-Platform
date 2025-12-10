@@ -42,13 +42,13 @@ const CreateCourseModal = forwardRef(
         )
           .unwrap()
           .then((response) => {
-            console.log("Courses fetched successfully:", response);
+            // console.log("Courses fetched successfully:", response);
           })
           .catch((error) => {
-            console.error("Error fetching courses:", error);
+            // console.error("Error fetching courses:", error);
           });
       } else {
-        console.log("No auth token available");
+        // console.log("No auth token available");
       }
     };
 
@@ -118,7 +118,7 @@ const CreateCourseModal = forwardRef(
         // ✅ Refresh list
         await fetchAllCourses();
       } catch (error) {
-        console.error("Submission error:", error);
+        // console.error("Submission error:", error);
         toast.error(
           error ? error : error.essage || "Operation failed. Please try again."
         );

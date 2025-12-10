@@ -29,7 +29,7 @@ const LectureMainContent = ({ currentLecture }) => {
         );
         setLectureContent(response.data);
       } catch (err) {
-        console.error("Error fetching lecture content:", err);
+        // console.error("Error fetching lecture content:", err);
         setError(err.message || "Failed to load lecture content");
       } finally {
         setIsLoading(false);

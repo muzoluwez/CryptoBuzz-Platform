@@ -3,17 +3,16 @@ import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import { useDeleteTradeIdeaMutation } from '../../../store/api/admin/adminTradeIdeasApiSlice';
 import { toast } from 'sonner';
-import { useDeleteEducatorTradeIdeaMutation } from '../../../store/api/admin/adminTradeAnalysisApiSlice';
-import { useDeleteEducatorTradeAnalysisMutation } from '../../../store/api/admin/adminTradeAnalysisApiSlice';
+import { useDeleteTradeAnalysisMutation } from '../../../store/api/admin/adminTradeAnalysisApiSlice';
 
 // Delete eductor trade idea
 
-const DeleteTradeAnalysis = forwardRef(({ isDeleteOpen, handleDeleteClose, selectedRow, refetch}, ref) => {
-    const [DeleteTradeAnalysis, { isLoading, isSuccess, isError, error }] = useDeleteEducatorTradeAnalysisMutation();
+const DeleteTradeAnalysis = forwardRef(({ isDeleteOpen, handleDeleteClose, selectedRow, refetch }, ref) => {
+    const [deleteTradeAnalysis, { isLoading, isSuccess, isError, error }] = useDeleteTradeAnalysisMutation();
 
     const handleDelete = async () => {
         try {
-            await DeleteTradeAnalysis(selectedRow?._id).unwrap();
+            await deleteTradeAnalysis(selectedRow?._id).unwrap();
             refetch();
             toast.success("IQ Insight deleted successfully!");
             handleDeleteClose();

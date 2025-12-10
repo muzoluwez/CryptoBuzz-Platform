@@ -46,14 +46,14 @@ const SettingsSection = () => {
         })
       )
         .unwrap()
-         .then((response) => {
-          console.log("IQ Vault fetched successfully:", response);
+        .then((response) => {
+          // console.log("IQ Vault fetched successfully:", response);
         })
         .catch((error) => {
-          console.error("Error fetching IQ Vault:", error);
+          // console.error("Error fetching IQ Vault:", error);
         });
     } else {
-      console.log("No auth token available");
+      // console.log("No auth token available");
     }
   }, [dispatch, auth?.token]);
 

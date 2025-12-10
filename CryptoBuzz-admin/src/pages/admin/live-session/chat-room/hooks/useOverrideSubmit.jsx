@@ -25,7 +25,7 @@ export const useOverrideSubmit = (showInChannel) => {
       try {
         await sendMessage(messageToSend, { show_in_channel: showInChannel });
       } catch (err) {
-        console.log(err);
+        // console.log(err);
       }
 
       setGiphyState(false);

@@ -171,7 +171,7 @@ const CreateAdminStreamSchedule = forwardRef(
           formik.resetForm();
           handleCloseCreate();
         } catch (err) {
-          console.error("API Error:", err);
+          // console.error("API Error:", err);
           const errorMessage =
             err?.data?.message || "An unexpected error occurred.";
           toast.error(errorMessage);
@@ -236,11 +236,10 @@ const CreateAdminStreamSchedule = forwardRef(
                     type="text"
                     placeholder="Enter title"
                     autoComplete="off"
-                    className={`form-control input input-md w-full ${
-                      formik.errors.title && formik.touched.title
-                        ? "border border-danger"
-                        : ""
-                    }`}
+                    className={`form-control input input-md w-full ${formik.errors.title && formik.touched.title
+                      ? "border border-danger"
+                      : ""
+                      }`}
                     {...formik.getFieldProps("title")}
                   />
                   {formik.touched.title && formik.errors.title && (
@@ -323,11 +322,10 @@ const CreateAdminStreamSchedule = forwardRef(
                       onValueChange={(value) =>
                         formik.setFieldValue("educator", value)
                       }
-                      className={`form-control input input-md w-full ${
-                        formik.errors.educator && formik.touched.educator
-                          ? "border border-danger"
-                          : ""
-                      }`}
+                      className={`form-control input input-md w-full ${formik.errors.educator && formik.touched.educator
+                        ? "border border-danger"
+                        : ""
+                        }`}
                     >
                       <SelectTrigger>
                         <SelectValue placeholder="Select" />
@@ -365,7 +363,7 @@ const CreateAdminStreamSchedule = forwardRef(
                     </SelectTrigger>
                     <SelectContent>
                       {Array.isArray(languagesList?.data) &&
-                      languagesList.data.length > 0 ? (
+                        languagesList.data.length > 0 ? (
                         languagesList.data.map((item) => (
                           <SelectItem key={item._id} value={item.name}>
                             {item.name}
@@ -397,11 +395,10 @@ const CreateAdminStreamSchedule = forwardRef(
                       onValueChange={(value) =>
                         formik.setFieldValue("category", value)
                       }
-                      className={`form-control input input-md w-full ${
-                        formik.errors.category && formik.touched.category
-                          ? "border border-danger"
-                          : ""
-                      }`}
+                      className={`form-control input input-md w-full ${formik.errors.category && formik.touched.category
+                        ? "border border-danger"
+                        : ""
+                        }`}
                     >
                       <SelectTrigger>
                         <SelectValue placeholder="Select" />
@@ -467,11 +464,10 @@ const CreateAdminStreamSchedule = forwardRef(
                           {...dragProps}
                           className={`
         border border-dashed rounded-lg text-center transition-colors 
-        p-5 ${isDragging ? "bg-gray-100" : ""} border-gray-300 ${
-          formik.touched.thumbnail && formik.errors.thumbnail
-            ? "validation-error-border"
-            : ""
-        }`}
+        p-5 ${isDragging ? "bg-gray-100" : ""} border-gray-300 ${formik.touched.thumbnail && formik.errors.thumbnail
+                              ? "validation-error-border"
+                              : ""
+                            }`}
                         >
                           {fileList.length === 0 ? (
                             <>

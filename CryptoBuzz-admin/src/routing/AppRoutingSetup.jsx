@@ -174,12 +174,14 @@ const AppRoutingSetup = () => {
       {/* Authentication wrapper - protects all routes */}
       <Route element={<RequireAuth />}></Route>
 
-      {/* Admin Routes - All admin pages wrapped with Demo1Layout */}
-      {adminRoutes.map((route, index) => (
-        <Route key={index} element={<Demo1Layout />}>
-          <Route path={route.path} element={route.element} />
-        </Route>
-      ))}
+      {/* Admin Routes - All admin pages wrapped with Demo1Layout and protected by RequireAuth */}
+      <Route element={<RequireAuth />}>
+        {adminRoutes.map((route, index) => (
+          <Route key={index} element={<Demo1Layout />}>
+            <Route path={route.path} element={route.element} />
+          </Route>
+        ))}
+      </Route>
 
       {/* Public Routes - Legal and Support Pages */}
       <Route path="/privacy-policy" element={<PrivacyPolicy />} />
