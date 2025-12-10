@@ -14,7 +14,8 @@
     "start:development": "cross-env NODE_ENV=development node -r dotenv/config src/index.js",
     "start:staging": "cross-env NODE_ENV=staging node -r dotenv/config src/index.js",
     "lint": "prettier --check \"**/*.{js,json,md}\"",
-    "format": "prettier --write \"**/*.{js,json,md}\""
+    "format": "prettier --write \"**/*.{js,json,md}\"",
+    "swagger": "node swagger.config.js"
   },
   "dependencies": {
     "@azure/storage-blob": "^12.29.1",
@@ -29,6 +30,8 @@
     "multer": "^2.0.2",
     "slugify": "^1.6.6",
     "socket.io": "^4.8.1",
+    "swagger-autogen": "^2.23.7",
+    "swagger-ui-express": "^5.0.1",
     "uuid": "^13.0.0",
     "yup": "^1.7.1"
   },
