@@ -71,7 +71,7 @@ const CreateTask = ({ isOpen, onClose, editingTask = null, refetch }) => {
         refetch?.();
         onClose();
       } catch (err) {
-        console.error("Task save failed:", err);
+        // console.error("Task save failed:", err);
         toast.error(err?.data?.message || "Failed to save task");
       }
     },
@@ -140,11 +140,10 @@ const CreateTask = ({ isOpen, onClose, editingTask = null, refetch }) => {
             <input
               type="text"
               placeholder="Enter title"
-              className={`form-control input input-md w-full ${
-                formik.errors.title && formik.touched.title
-                  ? "border border-danger"
-                  : ""
-              }`}
+              className={`form-control input input-md w-full ${formik.errors.title && formik.touched.title
+                ? "border border-danger"
+                : ""
+                }`}
               {...formik.getFieldProps("title")}
             />
             {formik.touched.title && formik.errors.title && (
@@ -182,11 +181,10 @@ const CreateTask = ({ isOpen, onClose, editingTask = null, refetch }) => {
               name="priority"
               value={formik.values.priority}
               onChange={formik.handleChange}
-              className={`form-control input input-md w-full ${
-                formik.errors.priority && formik.touched.priority
-                  ? "border border-danger"
-                  : ""
-              }`}
+              className={`form-control input input-md w-full ${formik.errors.priority && formik.touched.priority
+                ? "border border-danger"
+                : ""
+                }`}
             >
               <option value="low">🟢 Low</option>
               <option value="medium">🟡 Medium</option>

@@ -42,7 +42,7 @@ const Task = () => {
       setHasMore(totalFetched < total);
       setPage(pageNum);
     } catch (err) {
-      console.error("Error fetching tasks:", err);
+      // console.error("Error fetching tasks:", err);
     }
   };
 

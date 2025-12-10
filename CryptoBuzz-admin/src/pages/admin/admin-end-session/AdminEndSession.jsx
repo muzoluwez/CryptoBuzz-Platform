@@ -46,7 +46,7 @@ const AdminEndSession = ({ title = "Ended Live Sessions" }) => {
   const { data: educators } = useGetEducatorsQuery({ page: 1, limit: 100 });
   const [selectedEducator, setSelectedEducator] = useState(null);
   const [searchText, setSearchText] = useState("");
-  const [searchTextInput,setSearchTextInput] = useState("");
+  const [searchTextInput, setSearchTextInput] = useState("");
   const ColumnInputFilter = ({ column }) => {
     return (
       <Input
@@ -235,14 +235,14 @@ const AdminEndSession = ({ title = "Ended Live Sessions" }) => {
       }).unwrap();
 
       const endedData = response.data.filter((row) => row.status === "ended");
-     
+
 
       return {
         data: endedData || [],
         totalCount: response.pagination?.totalRecords || 0,
       };
     } catch (error) {
-      console.error("Error fetching IQ Ideas:", error);
+      // console.error("Error fetching IQ Ideas:", error);
       return { data: [], totalCount: 0 };
     }
   };
@@ -253,14 +253,14 @@ const AdminEndSession = ({ title = "Ended Live Sessions" }) => {
   //   [reloadKey]
   // );
 
- const debouncedSearch = useMemo(
-  () =>
-    debounce((value) => {
-      setSearchTextInput(value); 
-      reloadTable(); 
-    }, 500),
-  []
-);
+  const debouncedSearch = useMemo(
+    () =>
+      debounce((value) => {
+        setSearchTextInput(value);
+        reloadTable();
+      }, 500),
+    []
+  );
   const handleSearchChange = (event) => {
 
     const value = event.target.value;

@@ -67,7 +67,7 @@ const Educators = ({ title = "Educators" }) => {
   const [selectedRow, setSelectedRow] = useState({});
   const [searchTerm, setSearchTerm] = useState("");
   const [isLightBoxOpen, setIsLightBoxOpen] = useState(false);
-  const [getEducators, { data : educators, isLoading }] = useLazyGetEducatorsQuery();
+  const [getEducators, { data: educators, isLoading }] = useLazyGetEducatorsQuery();
   const [selectedEducator, setSelectedEducator] = useState(null);
 
   // const [tableKey, setTableKey] = useState(0);
@@ -118,7 +118,7 @@ const Educators = ({ title = "Educators" }) => {
         totalCount: response.pagination?.totalRecords || 0,
       };
     } catch (error) {
-      console.error("Error fetching educators:", error);
+      // console.error("Error fetching educators:", error);
       return { data: [], totalCount: 0 };
     }
   };

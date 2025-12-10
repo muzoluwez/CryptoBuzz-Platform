@@ -24,7 +24,7 @@ const LectureContent = ({ handleBack, selectedCourse, selectedLecture }) => {
       );
       return saved ? JSON.parse(saved) : [];
     } catch (error) {
-      console.error("Error loading progress from localStorage:", error);
+      // console.error("Error loading progress from localStorage:", error);
       return [];
     }
   });
@@ -57,7 +57,7 @@ const LectureContent = ({ handleBack, selectedCourse, selectedLecture }) => {
           JSON.stringify(completedLectures)
         );
       } catch (error) {
-        console.error("Error saving progress to localStorage:", error);
+        // console.error("Error saving progress to localStorage:", error);
       }
     }
   }, [completedLectures, selectedCourse?._id]);

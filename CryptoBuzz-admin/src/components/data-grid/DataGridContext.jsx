@@ -65,7 +65,7 @@ export const DataGridProvider = props => {
       setData(data || []);
       setTotalRows(totalCount || 0);
     } catch (error) {
-      console.error('Failed to fetch data:', error);
+      // console.error('Failed to fetch data:', error);
     } finally {
       setLoading(false);
     }
@@ -129,8 +129,8 @@ export const DataGridProvider = props => {
     setLoading,
     reload: loadData
   }}>
-      <DataGridInner />
-    </DataGridContext.Provider>;
+    <DataGridInner />
+  </DataGridContext.Provider>;
 };
 
 

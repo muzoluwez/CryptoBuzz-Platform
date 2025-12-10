@@ -82,7 +82,7 @@ const CreatePackageModel = forwardRef(
           setSelectedRow({});
           handleClose();
         } catch (err) {
-          console.error("API Error:", err);
+          // console.error("API Error:", err);
           toast.error(err?.data?.message || "Something went wrong.");
         }
       },
@@ -129,8 +129,8 @@ const CreatePackageModel = forwardRef(
                       placeholder="Enter package name"
                       autoComplete="off"
                       className={`form-control input dark:bg-[#2b2b2b] input-md w-full ${formik.errors.name && formik.touched.name
-                          ? "border border-danger"
-                          : ""
+                        ? "border border-danger"
+                        : ""
                         }`}
                       {...formik.getFieldProps("name")}
                     />

@@ -14,7 +14,7 @@ export const fetchEducatorPosts = createAsyncThunk(
       const response = await getEducatorPosts({ page, limit });
       return { ...response.data, append };
     } catch (error) {
-      console.error("Fetch posts error:", error); // Debug log
+      // console.error("Fetch posts error:", error); // Debug log
 
       // Check for JWT expired error
       if (
@@ -56,7 +56,7 @@ export const createEducatorPost = createAsyncThunk(
 
       return response.data;
     } catch (error) {
-      console.error("Create post error:", error); // Debug log
+      // console.error("Create post error:", error); // Debug log
 
       // Check for JWT expired error
       if (
@@ -97,7 +97,7 @@ export const updateEducatorPost = createAsyncThunk(
       const response = await updateEducatorPostAPI(id, postData);
       return response.data;
     } catch (error) {
-      console.error("Update post error:", error); // Debug log
+      // console.error("Update post error:", error); // Debug log
 
       // Check for JWT expired error
       if (
@@ -138,7 +138,7 @@ export const deleteEducatorPost = createAsyncThunk(
       await deleteEducatorPostAPI(id);
       return id;
     } catch (error) {
-      console.error("Delete post error:", error); // Debug log
+      // console.error("Delete post error:", error); // Debug log
 
       // Check for JWT expired error
       if (

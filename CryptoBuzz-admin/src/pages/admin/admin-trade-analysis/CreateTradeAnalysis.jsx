@@ -96,8 +96,7 @@ const CreateTradeAnalysis = forwardRef(
           formik.resetForm();
           handleCloseCreate();
         } catch (err) {
-          console.log(err);
-          console.error("API Error:", err);
+          // console.error("API Error:", err);
           const errorMessage =
             err?.data?.message || "An unexpected error occurred.";
           toast.error(errorMessage);

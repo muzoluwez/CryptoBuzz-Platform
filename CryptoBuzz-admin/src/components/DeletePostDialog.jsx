@@ -15,7 +15,7 @@ const DeletePostDialog = forwardRef(({ isDeleteOpen, handleDeleteClose, selected
             toast.success("Post deleted successfully!");
             handleDeleteClose();
         } catch (error) {
-            console.error('Failed to delete post:', error);
+            // console.error('Failed to delete post:', error);
             toast.error(error?.message || "Failed to delete post");
         }
     };

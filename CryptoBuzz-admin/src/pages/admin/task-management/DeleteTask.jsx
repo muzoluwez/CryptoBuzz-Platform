@@ -15,7 +15,7 @@ const DeleteTask = forwardRef(
         refetch?.();
         handleDeleteClose();
       } catch (err) {
-        console.error("Delete error:", err);
+        // console.error("Delete error:", err);
         toast.error(err?.data?.message || "Failed to delete task");
       }
     };

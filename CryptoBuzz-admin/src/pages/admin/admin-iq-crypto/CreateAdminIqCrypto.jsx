@@ -85,8 +85,7 @@ const CreateAdminIqCrypto = forwardRef(
           setSelectedRow({});
           handleCloseCreate();
         } catch (err) {
-          console.log(err);
-          console.error("API Error:", err);
+          // console.error("API Error:", err);
           const errorMessage =
             err?.data?.message || "An unexpected error occurred.";
           toast.error(errorMessage);
@@ -169,11 +168,10 @@ const CreateAdminIqCrypto = forwardRef(
                       type="text"
                       placeholder="Enter Title"
                       autoComplete="off"
-                      className={`form-control input input-md w-full ${
-                        formik.errors.title && formik.touched.title
-                          ? "border border-danger"
-                          : ""
-                      }`}
+                      className={`form-control input input-md w-full ${formik.errors.title && formik.touched.title
+                        ? "border border-danger"
+                        : ""
+                        }`}
                       {...formik.getFieldProps("title")}
                     />
                     {formik.touched.title && formik.errors.title && (
@@ -218,11 +216,10 @@ const CreateAdminIqCrypto = forwardRef(
                       type="text"
                       placeholder="Enter url"
                       autoComplete="off"
-                      className={`form-control input input-md w-full ${
-                        formik.errors.url && formik.touched.url
-                          ? "border border-danger"
-                          : ""
-                      }`}
+                      className={`form-control input input-md w-full ${formik.errors.url && formik.touched.url
+                        ? "border border-danger"
+                        : ""
+                        }`}
                       {...formik.getFieldProps("url")}
                     />
                     {formik.touched.url && formik.errors.url && (
@@ -248,11 +245,10 @@ const CreateAdminIqCrypto = forwardRef(
                         >
                           <div
                             className={`flex border justify-center rounded-lg image-input-placeholder items-center 
-            ${
-              formik.touched.files && formik.errors.files
-                ? "border-danger"
-                : "border-gray-200"
-            }`}
+            ${formik.touched.files && formik.errors.files
+                                ? "border-danger"
+                                : "border-gray-200"
+                              }`}
                           >
                             <i className="ki-filled ki-picture"></i>
                           </div>

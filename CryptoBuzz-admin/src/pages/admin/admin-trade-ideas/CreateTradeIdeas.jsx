@@ -35,8 +35,7 @@ const CreateTradeIdeas = forwardRef(
     const [createIdea] = useCreateIdeaMutation();
     const [updateIdea] = useUpdateIdeaMutation();
     const educatorId = auth?.user?._id;
-    const { data: categories } = useGetCommonCategoryQuery();
-    console.log(categories);
+    const { data: categories } = useGetCommonCategoryQuery()
 
     const initialValues = {
       name: "",
@@ -135,7 +134,7 @@ const CreateTradeIdeas = forwardRef(
           formik.resetForm();
           handleCloseCreate();
         } catch (err) {
-          console.error("API Error:", err);
+          // console.error("API Error:", err);
           const errorMessage =
             err?.data?.message || "An unexpected error occurred.";
           toast.error(errorMessage);

@@ -374,7 +374,7 @@ const AdminTradeIdeas = ({ title = "IQ Ideas" }) => {
         totalCount: response.pagination?.totalRecords || 0,
       };
     } catch (error) {
-      console.error("Error fetching IQ ideas:", error);
+      // console.error("Error fetching IQ ideas:", error);
       return { data: [], totalCount: 0 };
     }
   };

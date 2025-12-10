@@ -71,7 +71,7 @@ const SectionList = ({
       // No necesitamos actualizar el estado local aquí porque el useEffect
       // se encargará de actualizarlo cuando cambien las secciones en Redux
     } catch (error) {
-      console.error("Failed to reorder sections:", error);
+      le.error("Failed to reorder sections:", error);
       // Si falla, volvemos al estado anterior
       setSections(reduxSections);
     } finally {
@@ -98,7 +98,7 @@ const SectionList = ({
       setNewSectionTitle("");
       setIsAddingSection(false);
     } catch (error) {
-      console.error("Failed to create section:", error);
+      // console.error("Failed to create section:", error);
     } finally {
       setIsSubmitting(false);
     }
@@ -122,11 +122,10 @@ const SectionList = ({
             {sections.length > 1 && (
               <button
                 onClick={() => setReorderMode(!reorderMode)}
-                className={`p-2 rounded-full transition-colors ${
-                  reorderMode
-                    ? "bg-indigo-100 text-indigo-700 hover:bg-indigo-200"
-                    : "text-gray-500 hover:text-gray-700 hover:bg-gray-100"
-                }`}
+                className={`p-2 rounded-full transition-colors ${reorderMode
+                  ? "bg-indigo-100 text-indigo-700 hover:bg-indigo-200"
+                  : "text-gray-500 hover:text-gray-700 hover:bg-gray-100"
+                  }`}
                 title={reorderMode ? "Exit reorder mode" : "Reorder sections"}
               >
                 <MoveVertical className="w-4 h-4" />
@@ -252,21 +251,21 @@ const SectionList = ({
                     moveSection={moveSection}
                     sections={sections}
                     onReorder={handleReorder} // ✅ Pass this prop
-                    // onReorder={async (newOrder) => {
-                    //   try {
-                    //     const reorderedPayload = newOrder.map(
-                    //       ({ id, order }) => ({
-                    //         _id: id,
-                    //         order,
-                    //       })
-                    //     );
-                    //     await dispatch(
-                    //       reorderSections(reorderedPayload, auth.token)
-                    //     ).unwrap();
-                    //   } catch (error) {
-                    //     console.error("Failed to reorder:", error);
-                    //   }
-                    // }}
+                  // onReorder={async (newOrder) => {
+                  //   try {
+                  //     const reorderedPayload = newOrder.map(
+                  //       ({ id, order }) => ({
+                  //         _id: id,
+                  //         order,
+                  //       })
+                  //     );
+                  //     await dispatch(
+                  //       reorderSections(reorderedPayload, auth.token)
+                  //     ).unwrap();
+                  //   } catch (error) {
+                  //     console.error("Failed to reorder:", error);
+                  //   }
+                  // }}
                   >
                     <SectionItem section={section} reorderMode={true} />
                   </DraggableSection>

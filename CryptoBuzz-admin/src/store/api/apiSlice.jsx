@@ -3,7 +3,7 @@ import { fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 const baseQuery = fetchBaseQuery({
     baseUrl: import.meta.env.VITE_APP_API_URL,
     prepareHeaders: (headers, { getState }) => {
-        const token = getState().auth.token;        
+        const token = getState().auth.token;
         if (token) {
             headers.set('authorization', `Bearer ${token}`);
         }
@@ -20,7 +20,7 @@ const baseQueryWithReauth = async (args, api, extraOptions) => {
         const { status, data } = result.error;
 
         if (status === 401 || data?.error === "jwt expired" || data?.error === "invalid signature") {
-            console.warn("JWT expired! Logging out...");
+            // console.warn("JWT expired! Logging out...");
 
             // Clear local storage
             localStorage.clear();

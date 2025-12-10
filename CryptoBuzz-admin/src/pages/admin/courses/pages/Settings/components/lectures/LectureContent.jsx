@@ -364,7 +364,7 @@ const LectureContent = ({
       clearInterval(interval);
       setIsLoading(false);
       setUploadProgress(0);
-      console.error("Failed to update lecture:", error);
+      // console.error("Failed to update lecture:", error);
       const backendMessage =
         error?.response?.data?.message ||
         error?.response?.data?.error ||
@@ -465,8 +465,8 @@ const LectureContent = ({
 
               {/* Thumbnail Preview */}
               {formData.thumbnail ||
-              formData.thumbnail?.preview ||
-              formData.thumbnail?.url ? (
+                formData.thumbnail?.preview ||
+                formData.thumbnail?.url ? (
                 <div className="mt-3">
                   <img
                     src={
@@ -738,9 +738,8 @@ const LectureContent = ({
           </div>
           <div className="flex items-center px-3 py-1.5 rounded-full bg-gray-100">
             <span
-              className={`flex items-center gap-1.5 text-sm font-medium ${
-                lectureContent?.preview ? "text-green-700" : "text-gray-500"
-              }`}
+              className={`flex items-center gap-1.5 text-sm font-medium ${lectureContent?.preview ? "text-green-700" : "text-gray-500"
+                }`}
             >
               {lectureContent?.preview ? (
                 <>
@@ -787,9 +786,8 @@ const LectureContent = ({
           </div>
           <div className="flex items-center px-3 py-1.5 rounded-full bg-gray-100">
             <span
-              className={`flex items-center gap-1.5 text-sm font-medium ${
-                lectureContent?.preview ? "text-green-700" : "text-gray-500"
-              }`}
+              className={`flex items-center gap-1.5 text-sm font-medium ${lectureContent?.preview ? "text-green-700" : "text-gray-500"
+                }`}
             >
               {lectureContent?.preview ? (
                 <>
@@ -813,11 +811,10 @@ const LectureContent = ({
           </h3>
           <div className="flex items-center gap-2">
             <span
-              className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-medium ${
-                lecture?.type === "VIDEO"
-                  ? "bg-primary-light text-primary"
-                  : "bg-primary-light text-primary"
-              }`}
+              className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-medium ${lecture?.type === "VIDEO"
+                ? "bg-primary-light text-primary"
+                : "bg-primary-light text-primary"
+                }`}
             >
               {lecture?.type === "VIDEO" ? (
                 <>
@@ -1063,21 +1060,19 @@ const LectureContent = ({
               <div className="flex border-b border-gray-200">
                 <button
                   onClick={() => setActiveTab("content")}
-                  className={`flex-1 px-4 py-3 text-sm font-medium text-center transition-colors ${
-                    activeTab === "content"
-                      ? "text-primary border-b-2 border-primary bg-light"
-                      : "text-gray-500 hover:text-gray-700 hover:bg-light"
-                  }`}
+                  className={`flex-1 px-4 py-3 text-sm font-medium text-center transition-colors ${activeTab === "content"
+                    ? "text-primary border-b-2 border-primary bg-light"
+                    : "text-gray-500 hover:text-gray-700 hover:bg-light"
+                    }`}
                 >
                   Content
                 </button>
                 <button
                   onClick={() => setActiveTab("settings")}
-                  className={`flex-1 px-4 py-3 text-sm font-medium text-center transition-colors ${
-                    activeTab === "settings"
-                      ? "text-primary border-b-2 border-primary bg-light"
-                      : "text-gray-500 hover:text-gray-700 hover:bg-light"
-                  }`}
+                  className={`flex-1 px-4 py-3 text-sm font-medium text-center transition-colors ${activeTab === "settings"
+                    ? "text-primary border-b-2 border-primary bg-light"
+                    : "text-gray-500 hover:text-gray-700 hover:bg-light"
+                    }`}
                 >
                   Settings
                 </button>

@@ -86,7 +86,7 @@ export const useCourses = () => {
         dispatch(setFeaturedCourses(mockFeaturedCourses));
       }
     } catch (err) {
-      console.warn("Error fetching courses, falling back to mock data:", err);
+      // console.warn("Error fetching courses, falling back to mock data:", err);
       // En caso de error, usa los datos mock
       dispatch(setCourses(mockCourses));
       dispatch(setFeaturedCourses(mockFeaturedCourses));

@@ -130,7 +130,7 @@ const CreateEducator = forwardRef(
           formik.resetForm();
           handleCloseCreate();
         } catch (err) {
-          console.error("API Error:", err);
+          // console.error("API Error:", err);
           const errorMessage =
             err?.data?.message || "An unexpected error occurred.";
           toast.error(errorMessage);
@@ -187,8 +187,8 @@ const CreateEducator = forwardRef(
                     placeholder="Enter category name"
                     autoComplete="off"
                     className={`form-control input input-md w-full ${formik.errors.name && formik.touched.name
-                        ? "border border-danger"
-                        : ""
+                      ? "border border-danger"
+                      : ""
                       }`}
                     {...formik.getFieldProps("name")}
                   />
@@ -216,8 +216,8 @@ const CreateEducator = forwardRef(
                   >
                     <SelectTrigger
                       className={`form-control input input-md w-full ${formik.errors.type && formik.touched.type
-                          ? "border border-danger"
-                          : ""
+                        ? "border border-danger"
+                        : ""
                         }`}
                     >
                       <SelectValue placeholder="Select" />

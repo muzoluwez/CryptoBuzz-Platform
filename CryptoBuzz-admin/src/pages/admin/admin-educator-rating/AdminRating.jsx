@@ -61,7 +61,7 @@ const AdminRating = () => {
             totalCount: res.pagination?.total || 0,
           };
         } catch (error) {
-          console.error("❌ Fetch educator ratings error:", error);
+          // console.error("❌ Fetch educator ratings error:", error);
           return { data: [], totalCount: 0 };
         }
       },

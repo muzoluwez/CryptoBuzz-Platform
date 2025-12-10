@@ -313,7 +313,7 @@ const CreatePostModal = ({ isOpen, onClose, editingPost = null }) => {
         }, 1000);
       }
     } catch (error) {
-      console.error("Failed to submit post:", error);
+      // console.error("Failed to submit post:", error);
 
       // Check for JWT expired error
       if (isJwtExpiredError(error)) {

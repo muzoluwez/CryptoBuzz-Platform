@@ -43,7 +43,7 @@ const LectureList = ({
       const response = await getAllLectures({ section: sectionId }, auth.token);
       setLectures(response.data);
     } catch (error) {
-      console.error("Failed to fetch lectures:", error);
+      // console.error("Failed to fetch lectures:", error);
     } finally {
       setIsLoading(false);
       if (forceUpdateLectureList) {
@@ -78,7 +78,7 @@ const LectureList = ({
           onLectureUpdate(null);
         }
       } catch (error) {
-        console.error("Failed to delete lecture:", error);
+        // console.error("Failed to delete lecture:", error);
       } finally {
         setDeleteLoading(null);
       }
@@ -170,11 +170,10 @@ const LectureList = ({
                 onMouseLeave={() => setHoveredLectureId(null)}
               >
                 <div
-                  className={`flex items-center gap-2 p-2.5 rounded-md cursor-pointer transition-all ${
-                    selectedLectureId === lecture._id
-                      ? "bg-primary-light border-l-4 border-l-primary"
-                      : "hover:bg-primary-light border-l-4 border-l-transparent"
-                  }`}
+                  className={`flex items-center gap-2 p-2.5 rounded-md cursor-pointer transition-all ${selectedLectureId === lecture._id
+                    ? "bg-primary-light border-l-4 border-l-primary"
+                    : "hover:bg-primary-light border-l-4 border-l-transparent"
+                    }`}
                   onClick={() => handleLectureSelect(lecture)}
                 >
                   {/* Lecture icon */}
@@ -203,9 +202,9 @@ const LectureList = ({
                       )}
                     </p>
                     )} */}
-            {/* {lecture.description ? <ShowMoreLess html={lecture.description} limit={10} />: "No description provided"} */}
+                    {/* {lecture.description ? <ShowMoreLess html={lecture.description} limit={10} />: "No description provided"} */}
 
-                    
+
                   </div>
 
                   {/* Preview indicator */}
@@ -217,12 +216,11 @@ const LectureList = ({
 
                   {/* Actions - only show on hover or when selected */}
                   <div
-                    className={`flex items-center gap-1 transition-opacity ${
-                      hoveredLectureId === lecture._id ||
+                    className={`flex items-center gap-1 transition-opacity ${hoveredLectureId === lecture._id ||
                       selectedLectureId === lecture._id
-                        ? "opacity-100"
-                        : "opacity-0"
-                    }`}
+                      ? "opacity-100"
+                      : "opacity-0"
+                      }`}
                   >
                     <button
                       className="p-1.5 text-gray-700 hover:text-primary rounded-md transition-colors"

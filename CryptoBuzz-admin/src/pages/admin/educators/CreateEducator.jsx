@@ -240,7 +240,7 @@ const CreateEducator = forwardRef(
           setSelectedRow({});
           refetch();
         } catch (err) {
-          console.error("API Error:", err);
+          // console.error("API Error:", err);
           const errorMessage =
             err?.data?.message || "An unexpected error occurred.";
           toast.error(errorMessage);
@@ -380,8 +380,8 @@ const CreateEducator = forwardRef(
                     placeholder="Enter first name"
                     autoComplete="off"
                     className={`form-control input input-md w-full ${formik.errors.first_name && formik.touched.first_name
-                        ? "border border-danger"
-                        : ""
+                      ? "border border-danger"
+                      : ""
                       }`}
                     {...formik.getFieldProps("first_name")}
                   />
@@ -402,8 +402,8 @@ const CreateEducator = forwardRef(
                     placeholder="Enter last name"
                     autoComplete="off"
                     className={`form-control input input-md w-full ${formik.errors.last_name && formik.touched.last_name
-                        ? "border border-danger"
-                        : ""
+                      ? "border border-danger"
+                      : ""
                       }`}
                     {...formik.getFieldProps("last_name")}
                   />
@@ -433,8 +433,8 @@ const CreateEducator = forwardRef(
                     autoComplete="off"
                     {...formik.getFieldProps("educatorRole")}
                     className={`form-control input input-md w-full ${formik.errors.educatorRole && formik.touched.educatorRole
-                        ? "border border-danger"
-                        : ""
+                      ? "border border-danger"
+                      : ""
                       }`}
                   />
                   {formik.touched.educatorRole &&
@@ -457,8 +457,8 @@ const CreateEducator = forwardRef(
                     autoComplete="off"
                     {...formik.getFieldProps("email")}
                     className={`form-control input input-md w-full ${formik.errors.email && formik.touched.email
-                        ? "border border-danger"
-                        : ""
+                      ? "border border-danger"
+                      : ""
                       }`}
                   />
                   {formik.touched.email && formik.errors.email && (
@@ -518,8 +518,8 @@ const CreateEducator = forwardRef(
                       formik.setFieldValue("status", value)
                     }
                     className={`form-control input input-md w-full ${formik.errors.status && formik.touched.status
-                        ? "border border-danger"
-                        : ""
+                      ? "border border-danger"
+                      : ""
                       }`}
                   >
                     <SelectTrigger>
@@ -610,8 +610,8 @@ const CreateEducator = forwardRef(
                     autoComplete="off"
                     {...formik.getFieldProps("projectId")}
                     className={`form-control input input-md w-full ${formik.errors.projectId && formik.touched.projectId
-                        ? "border border-danger"
-                        : ""
+                      ? "border border-danger"
+                      : ""
                       }`}
                   />
                   {formik.touched.projectId && formik.errors.projectId && (
@@ -704,8 +704,8 @@ const CreateEducator = forwardRef(
                     placeholder="Enter profile bio"
                     autoComplete="off"
                     className={`form-control input input-md w-full ${formik.errors.bio && formik.touched.bio
-                        ? "border border-danger"
-                        : ""
+                      ? "border border-danger"
+                      : ""
                       }`}
                     {...formik.getFieldProps("bio")}
                   />
