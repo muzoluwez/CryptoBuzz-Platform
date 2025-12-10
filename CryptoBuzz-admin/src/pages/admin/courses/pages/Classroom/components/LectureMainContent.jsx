@@ -1,7 +1,7 @@
 import { useEffect, useState, useCallback } from "react";
 import React from "react";
 import { Clock, Loader2, FileText, Video, AlertCircle } from "lucide-react";
-import ReactPlayer from "react-player/lazy";
+import ReactPlayer from "react-player";
 import ReactMarkdown from "react-markdown";
 import { motion } from "framer-motion";
 

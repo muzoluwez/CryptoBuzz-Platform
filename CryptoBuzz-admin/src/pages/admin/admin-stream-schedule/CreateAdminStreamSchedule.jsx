@@ -1,6 +1,7 @@
 import React, { forwardRef, useEffect, useState } from "react";
 import { useFormik } from "formik";
-import moment from "moment-timezone";
+import { format } from "date-fns";
+import { toZonedTime } from "date-fns-tz";
 import * as Yup from "yup";
 import {
   Dialog,
@@ -40,16 +41,22 @@ const CreateAdminStreamSchedule = forwardRef(
     { isCreateOpen, handleCloseCreate, selectedRow, setSelectedRow, refetch },
     ref
   ) => {
+    const getCurrentEstTime = () => {
+      const now = new Date();
+      return toZonedTime(now, EST_ZONE);
+    };
+
     const [time, setTime] = useState({
-      date: moment().tz(EST_ZONE).format("dddd, MMMM D, YYYY"),
-      clock: moment().tz(EST_ZONE).format("hh:mm:ss A"),
+      date: format(getCurrentEstTime(), "eeee, MMMM d, yyyy"),
+      clock: format(getCurrentEstTime(), "hh:mm:ss a"),
     });
 
     useEffect(() => {
       const interval = setInterval(() => {
+        const estTime = getCurrentEstTime();
         setTime({
-          date: moment().tz(EST_ZONE).format("dddd, MMMM D, YYYY"),
-          clock: moment().tz(EST_ZONE).format("hh:mm:ss A"),
+          date: format(estTime, "eeee, MMMM d, yyyy"),
+          clock: format(estTime, "hh:mm:ss a"),
         });
       }, 1000);
       return () => clearInterval(interval);
