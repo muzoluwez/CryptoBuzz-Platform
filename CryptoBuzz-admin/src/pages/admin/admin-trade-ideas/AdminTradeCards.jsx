@@ -30,7 +30,7 @@ const statusColorMap = {
   win: "blue",
   partialWin: "violet",
   loss: "red",
-  breakEven: "gray"  
+  breakEven: "gray"
 };
 const TradeUserView = [
   {
@@ -120,7 +120,7 @@ const AdminTradeCards = () => {
   //   page: page,
   //   limit: limit,
   // });
-  
+
   const { data: fetchData, isFetching } = useGetAdminWithoutTradeIdeasQuery({
     isview: false,
   });
@@ -308,7 +308,7 @@ const AdminTradeCards = () => {
                       </span>
                       <span
                         className={`bg-gray-100 text-${statusColorMap[trade.status]}-700 w-fit text-3xs font-normal px-2 py-2 truncate rounded-lg`}
-                        // className={`bg-${statusColorMap[trade.status]}-100 dark:bg-${statusColorMap[trade.status]}-700 text-${statusColorMap[trade.status]}-700 dark:text-${statusColorMap[trade.status]}-300 text-3xs font-normal px-2 py-2 truncate rounded-lg`}
+                      // className={`bg-${statusColorMap[trade.status]}-100 dark:bg-${statusColorMap[trade.status]}-700 text-${statusColorMap[trade.status]}-700 dark:text-${statusColorMap[trade.status]}-300 text-3xs font-normal px-2 py-2 truncate rounded-lg`}
                       >
                         {trade.timeFrame}
                       </span>
@@ -411,7 +411,7 @@ const AdminTradeCards = () => {
                   <div className="flex items-center">
                     <EducatorImage
                       educator={trade?.educatorDetails}
-                      // defaultImage={toAbsoluteUrl(`/media/avatars/300-6.png`)}
+                    // defaultImage={toAbsoluteUrl(`/media/avatars/300-6.png`)}
                     />
                     <div className="">
                       <Link
@@ -448,10 +448,10 @@ const AdminTradeCards = () => {
           selectedIdea={selectedIdea}
         />
         <ImageLightBox
-            isLightBoxOpen={isLightBoxOpen}
-            setIsLightBoxOpen={setIsLightBoxOpen}
-            selectedIdea={selectedIdea}
-          />
+          isLightBoxOpen={isLightBoxOpen}
+          setIsLightBoxOpen={setIsLightBoxOpen}
+          selectedIdea={selectedIdea}
+        />
       </div>
     </div>
   );

@@ -1,4 +1,5 @@
 import { streamClient } from "../../utils/constants.js";
+import LiveStreamModel from "../../models/liveStream.js";
 
 
 export const getToken = async (req, res) => {
@@ -23,7 +24,7 @@ export const getToken = async (req, res) => {
 
 export const createLiveStreamForSchedule = async (schedule) => {
   try {
-    
+
     const callId = `${schedule.callId}`
       ? `${schedule.callId}`
       : `callId-${uuidv4()}`;
@@ -69,10 +70,10 @@ export const createLiveStreamForSchedule = async (schedule) => {
     });
 
     // RTMP details nikaalo
-    rtmp_URl = response?.call?.ingress?.rtmp?.address || null;
+    let rtmp_URl = response?.call?.ingress?.rtmp?.address || null;
 
     // stable token generate karo (1 year valid)
-    token = streamClient.generateUserToken({
+    const token = streamClient.generateUserToken({
       user_id: schedule.educator,
       validity_in_seconds: 31536000,
       video: {
@@ -138,10 +139,10 @@ export const updateLiveStreamForSchedule = async (schedule) => {
 
     const response = await call.getOrCreate({
       data: {
-        created_by_id: schedule.educator.id,
+        created_by_id: schedule.educator,
         members: [
           {
-            user_id: schedule.educator.id,
+            user_id: schedule.educator,
             role: "admin",
           },
         ],
@@ -180,7 +181,7 @@ export const updateLiveStreamForSchedule = async (schedule) => {
 
     let rtmp_URl = response?.call?.ingress?.rtmp?.address || null;
 
-    let token = videoClient.generateUserToken({
+    let token = streamClient.generateUserToken({
       user_id: schedule.educator,
       validity_in_seconds: 31536000,
       video: {
@@ -241,4 +242,4 @@ export const updateLiveStreamForSchedule = async (schedule) => {
 };
 
 
-export default {updateLiveStreamForSchedule,createLiveStreamForSchedule,getToken}
+export default { updateLiveStreamForSchedule, createLiveStreamForSchedule, getToken }

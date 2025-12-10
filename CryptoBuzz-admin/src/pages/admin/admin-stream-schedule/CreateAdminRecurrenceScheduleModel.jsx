@@ -1,7 +1,6 @@
 import React, { useEffect, useState, forwardRef } from "react";
 import { useFormik } from "formik";
 import * as Yup from "yup";
-
 import { toast } from "sonner";
 
 import {
@@ -198,9 +197,11 @@ const CreateAdminRecurrenceScheduleModel = forwardRef(
           if (selectedRow?._id) {
             formData.append("id", selectedRow._id);
 
+
+
             await updateRecurrenceSchedule({
               id: selectedRow._id,
-              data: formData,
+              formData,
             }).unwrap();
             toast.success("Schedule updated successfully!");
           } else {
@@ -220,6 +221,7 @@ const CreateAdminRecurrenceScheduleModel = forwardRef(
         }
       },
     });
+
 
     useEffect(() => {
       if (selectedRow?._id) {

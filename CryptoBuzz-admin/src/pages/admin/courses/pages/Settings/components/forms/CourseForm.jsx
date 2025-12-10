@@ -7,7 +7,7 @@ import {
   useGetCoursesTypesQuery,
   useGetEducatorAcademyCategoryQuery,
   useGetLanguageListQuery,
-} from "../../../../../../../store/api/admin/adminAcademyCategoryApiSlice";
+} from "../../../../../../../store/api/educator/educatorAcademyCategoryApiSlice";
 import {
   Select,
   SelectContent,
@@ -479,24 +479,3 @@ const CourseForm = ({ onSubmit, initialData, isLoading }) => {
 };
 
 export default CourseForm;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

@@ -17,7 +17,7 @@ const DeleteTradeAnalysis = forwardRef(({ isDeleteOpen, handleDeleteClose, selec
             toast.success("IQ Insight deleted successfully!");
             handleDeleteClose();
         } catch (error) {
-            toast.error(err?.data?.message || "An error occurred");
+            toast.error(error?.data?.message || "An error occurred");
         }
     };
 

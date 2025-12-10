@@ -24,19 +24,19 @@ import LiveStream from "../../models/liveStream.js";
 // ======================= Validation =======================
 
 const scheduleValidationSchema = yup.object().shape({
-    title: yup.string().required("Title is required").max(100),
-    description: yup.string().max(500),
-    category: yup.string().required("Category is required")
+  title: yup.string().required("Title is required").max(100),
+  description: yup.string().max(500),
+  category: yup.string().required("Category is required")
     .test('is-objectid', 'Invalid category ID', value => {
-        return mongoose.Types.ObjectId.isValid(value);
+      return mongoose.Types.ObjectId.isValid(value);
     }),
-    educator: yup.string().required("Educator is required")
+  educator: yup.string().required("Educator is required")
     .test('is-objectid', 'Invalid educator ID', value => {
-        return mongoose.Types.ObjectId.isValid(value);
+      return mongoose.Types.ObjectId.isValid(value);
     }),
-    language: yup.string().required("language is required"),
-    tags: yup.array().of(yup.string().max(30)).min(1, "At least one tag is required"),
-    datetime: yup.date().required("Date and time is required")
+  language: yup.string().required("language is required"),
+  tags: yup.array().of(yup.string().max(30)).min(1, "At least one tag is required"),
+  datetime: yup.date().required("Date and time is required")
     .min(new Date(), "Schedule date must be in the future"),
 });
 
@@ -351,9 +351,9 @@ export const createRecurringSessions = async (req, res) => {
   try {
     const body = req.body;
 
-    await createRecurringScheduleSchema.validate(body, {
-      abortEarly: false,
-    });
+    // await createRecurringScheduleSchema.validate(body, {
+    //   abortEarly: false,
+    // });
 
     const createdUser = req.user;
 
@@ -485,7 +485,7 @@ export const updateRecurringSessions = async (req, res) => {
     const scheduleId = req.params.id;
     const body = req.body;
 
-    await createRecurringScheduleSchema.validate(body, { abortEarly: false });
+    // await createRecurringScheduleSchema.validate(body, { abortEarly: false });
 
     const updatedUser = req.user;
     const schedule = await Schedule.findById(scheduleId);
@@ -516,7 +516,7 @@ export const updateRecurringSessions = async (req, res) => {
     schedule.datetime = startDate;
     schedule.tags = Array.isArray(body.tags)
       ? body.tags
-      : body.tags.split(",").map((t) => t.trim());
+      : body.tags?.split(",").map((t) => t.trim());
     schedule.isRecurent = frequency !== "NONE";
     await schedule.save();
 
