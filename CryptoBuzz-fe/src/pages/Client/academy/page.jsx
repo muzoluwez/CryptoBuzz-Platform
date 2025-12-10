@@ -9,14 +9,11 @@ import {
 function CryptoUI({ activeTab, setActiveTab, toggle, open, introLessons, sections, courses }) {
   return (
     <>
-      {/* Header */}
       <div className="container my-6">
 
-        {/* Top Title */}
         <h1 className="text-2xl font-bold">Academy</h1>
         <p className="text-sm text-gray-500">Home / Academy / Crypto</p>
 
-        {/* Tabs */}
         <Card className="mt-5 p-4 rounded-xl shadow-sm">
           <div className="flex gap-3">
             {["Crypto", "Trading", "Digital Marketing"].map((tab) => (
@@ -33,9 +30,7 @@ function CryptoUI({ activeTab, setActiveTab, toggle, open, introLessons, section
         </Card>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-5">
-          {/* Main Content */}
           <div className="lg:col-span-2">
-            {/* Video Player */}
             <div className="relative bg-gradient-to-br from-yellow-600 via-yellow-700 to-gray-800 rounded-lg overflow-hidden aspect-video shadow-lg">
               <div className="absolute inset-0 flex items-center justify-center">
                 <button className="bg-white/20 backdrop-blur-sm hover:bg-white/30 transition-all rounded-xl p-6">
@@ -45,27 +40,21 @@ function CryptoUI({ activeTab, setActiveTab, toggle, open, introLessons, section
               <div className="absolute inset-0 bg-black/20"></div>
             </div>
 
-            {/* Video Title */}
             <div className="flex items-center justify-between flex-wrap gap-4 mt-6">
-              <h2 className="text-3xl font-bold text-gray-900 dark:text-gray-200">What is Forex ?</h2>
+              <h2 className="text-3xl font-bold text-gray-900 dark:text-gray-200">Lorem Ipsum Dolor Sit Amet</h2>
               <button className="mt-3 btn bg-transparent border border-white text-gray-800 dark:text-white cursor-pointer">
                 Mark as Complete
               </button>
             </div>
 
-            {/* Description */}
             <p className="text-gray-600 dark:text-gray-400 mt-4 leading-relaxed">
-              In this video, you'll explore how the Forex market evolved — from the gold standard and Bretton Woods system
-              to today's decentralized digital trading environment. Understand the key milestones that shaped modern
-              currency trading.
+              Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
             </p>
           </div>
 
-          {/* Sidebar */}
           <div className="lg:col-span-1">
             <Card className="rounded-lg shadow-md p-4 md:p-6 sticky top-6">
 
-              {/* ----------------- INTRO SERIES ACCORDION ----------------- */}
               <div className="mb-2">
                 <button
                   onClick={() => toggle("Intro Series")}
@@ -155,7 +144,6 @@ function CryptoUI({ activeTab, setActiveTab, toggle, open, introLessons, section
             </Card>
           </div>
         </div>
-        {/* Recommended Courses */}
         <div className="mt-12">
           <div className="flex items-center justify-between flex-wrap gap-4 mb-6">
             <h3 className="text-2xl font-bold text-gray-900 dark:text-gray-200">Recommended Courses</h3>
@@ -198,16 +186,11 @@ function CryptoUI({ activeTab, setActiveTab, toggle, open, introLessons, section
 function TradingUI({ activeTab, setActiveTab, toggle, open, introLessons, sections, courses }) {
   return (
     <>
-      {/* Header */}
-      
-
       <div className="container my-6">
 
-        {/* Top Title */}
         <h1 className="text-2xl font-bold">Academy</h1>
         <p className="text-sm text-gray-500">Home / Academy / Crypto</p>
 
-        {/* Tabs */}
         <Card className="mt-5 p-4 rounded-xl shadow-sm">
           <div className="flex gap-3">
             {["Crypto", "Trading", "Digital Marketing"].map((tab) => (
@@ -224,9 +207,7 @@ function TradingUI({ activeTab, setActiveTab, toggle, open, introLessons, sectio
         </Card>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-5">
-          {/* Main Content */}
           <div className="lg:col-span-2">
-            {/* Video Player */}
             <div className="relative bg-gradient-to-br from-green-600 via-green-700 to-gray-800 rounded-lg overflow-hidden aspect-video shadow-lg">
               <div className="absolute inset-0 flex items-center justify-center">
                 <button className="bg-white/20 backdrop-blur-sm hover:bg-white/30 transition-all rounded-xl p-6">
@@ -236,23 +217,18 @@ function TradingUI({ activeTab, setActiveTab, toggle, open, introLessons, sectio
               <div className="absolute inset-0 bg-black/20"></div>
             </div>
 
-            {/* Video Title */}
             <div className="flex items-center justify-between flex-wrap gap-4 mt-6">
-              <h2 className="text-3xl font-bold text-gray-900 dark:text-gray-200">What is Forex ?</h2>
+              <h2 className="text-3xl font-bold text-gray-900 dark:text-gray-200">Consectetur Adipiscing Elit</h2>
               <button className="mt-3 btn bg-transparent border border-white text-gray-800 dark:text-white cursor-pointer">
                 Mark as Complete
               </button>
             </div>
 
-            {/* Description */}
             <p className="text-gray-600 dark:text-gray-400 mt-4 leading-relaxed">
-              In this video, you'll explore how the Forex market evolved — from the gold standard and Bretton Woods system
-              to today's decentralized digital trading environment. Understand the key milestones that shaped modern
-              currency trading.
+              Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
             </p>
           </div>
 
-          {/* Sidebar */}
           <div className="lg:col-span-1">
             <Card className="rounded-lg shadow-md p-4 md:p-6 sticky top-6">
 
@@ -346,7 +322,6 @@ function TradingUI({ activeTab, setActiveTab, toggle, open, introLessons, sectio
             </Card>
           </div>
         </div>
-        {/* Recommended Courses */}
         <div className="mt-12">
           <div className="flex items-center justify-between flex-wrap gap-4 mb-6">
             <h3 className="text-2xl font-bold text-gray-900 dark:text-gray-200">Recommended Courses</h3>
@@ -389,16 +364,11 @@ function TradingUI({ activeTab, setActiveTab, toggle, open, introLessons, sectio
 function DigitalMarketingUI({ activeTab, setActiveTab, toggle, open, introLessons, sections, courses }) {
   return (
     <>
-      {/* Header */}
-      
-
       <div className="container my-6">
 
-        {/* Top Title */}
         <h1 className="text-2xl font-bold">Academy</h1>
         <p className="text-sm text-gray-500">Home / Academy / Crypto</p>
 
-        {/* Tabs */}
         <Card className="mt-5 p-4 rounded-xl shadow-sm">
           <div className="flex gap-3">
             {["Crypto", "Trading", "Digital Marketing"].map((tab) => (
@@ -415,9 +385,7 @@ function DigitalMarketingUI({ activeTab, setActiveTab, toggle, open, introLesson
         </Card>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-5">
-          {/* Main Content */}
           <div className="lg:col-span-2">
-            {/* Video Player */}
             <div className="relative bg-gradient-to-br from-blue-600 via-blue-700 to-gray-800 rounded-lg overflow-hidden aspect-video shadow-lg">
               <div className="absolute inset-0 flex items-center justify-center">
                 <button className="bg-white/20 backdrop-blur-sm hover:bg-white/30 transition-all rounded-xl p-6">
@@ -427,23 +395,18 @@ function DigitalMarketingUI({ activeTab, setActiveTab, toggle, open, introLesson
               <div className="absolute inset-0 bg-black/20"></div>
             </div>
 
-            {/* Video Title */}
             <div className="flex items-center justify-between flex-wrap gap-4 mt-6">
-              <h2 className="text-3xl font-bold text-gray-900 dark:text-gray-200">What is Forex ?</h2>
+              <h2 className="text-3xl font-bold text-gray-900 dark:text-gray-200">Sed Do Eiusmod Tempor</h2>
               <button className="mt-3 btn bg-transparent border border-white text-gray-800 dark:text-white cursor-pointer">
                 Mark as Complete
               </button>
             </div>
 
-            {/* Description */}
             <p className="text-gray-600 dark:text-gray-400 mt-4 leading-relaxed">
-              In this video, you'll explore how the Forex market evolved — from the gold standard and Bretton Woods system
-              to today's decentralized digital trading environment. Understand the key milestones that shaped modern
-              currency trading.
+              Incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat duis aute irure dolor.
             </p>
           </div>
 
-          {/* Sidebar */}
           <div className="lg:col-span-1">
             <Card className="rounded-lg shadow-md p-4 md:p-6 sticky top-6">
 
@@ -537,7 +500,6 @@ function DigitalMarketingUI({ activeTab, setActiveTab, toggle, open, introLesson
             </Card>
           </div>
         </div>
-        {/* Recommended Courses */}
         <div className="mt-12">
           <div className="flex items-center justify-between flex-wrap gap-4 mb-6">
             <h3 className="text-2xl font-bold text-gray-900 dark:text-gray-200">Recommended Courses</h3>
@@ -588,21 +550,21 @@ export function AcademyPage() {
   };
 
   const introLessons = [
-    { id: 1, title: "What is Forex?", active: true },
-    { id: 2, title: "Why Forex Market?", active: false },
-    { id: 3, title: "Basics of Trading", active: false },
+    { id: 1, title: "Lorem Ipsum Dolor", active: true },
+    { id: 2, title: "Sit Amet Consectetur", active: false },
+    { id: 3, title: "Adipiscing Elit Sed", active: false },
   ];
 
   const sections = {
-    "Software Series": ["MT4 Installation", "MT5 Installation", "TradingView Basics"],
-    "Terminology Series": ["Pips, Lots, Leverage", "Buy/Sell Concept"],
-    "Essentials Series": ["Risk Management", "Trading Psychology"],
+    "Dolor Sit Series": ["Lorem Ipsum Dolor Sit", "Consectetur Adipiscing", "Elit Sed Do Eiusmod"],
+    "Tempor Incididunt Series": ["Ut Labore Et Dolore", "Magna Aliqua Ut"],
+    "Enim Ad Minim Series": ["Veniam Quis Nostrud", "Exercitation Ullamco"],
   };
 
   const courses = [
-    { id: 1, title: "The Market Blueprint Bootcamp", description: "In this course, we dive deep into every element of Smart Mon", link: "Show more" },
-    { id: 2, title: "The Starting Point Blueprint Course", description: "The Starting Point Blueprint is a step-by-step trading frame", link: "Show more" },
-    { id: 2, title: "WEEKLY OVERVIEW", description: "Weekly Overview Every weekend I take the time to mark up th", link: "Show more" },
+    { id: 1, title: "Lorem Ipsum Dolor Bootcamp", description: "Sit amet consectetur adipiscing elit sed do eiusmod tempor incididunt ut labore et dolore magna", link: "Show more" },
+    { id: 2, title: "Sed Diam Nonumy Blueprint", description: "Eirmod tempor invidunt ut labore et dolore magna aliqua erat volutpat sed diam voluptua", link: "Show more" },
+    { id: 3, title: "Lorem Dolor", description: "Nonumy eirmod tempor invidunt ut labore et dolore magna aliqua erat volutpat amet consectetur", link: "Show more" },
   ];
 
   return (

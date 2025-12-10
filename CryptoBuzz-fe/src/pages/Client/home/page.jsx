@@ -41,8 +41,8 @@ export function HomePage() {
               <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent"></div>
 
               <div className="absolute left-6 bottom-6 text-white mb-4">
-                <h2 className="text-2xl md:text-3xl font-semibold drop-shadow-md">Cripto buzz</h2>
-                <p className="text-sm md:text-base drop-shadow-sm">Save thousands to millions of bucks by using tool great skills</p>
+                <h2 className="text-2xl md:text-3xl font-semibold drop-shadow-md">Cripto Buzz</h2>
+                <p className="text-sm md:text-base drop-shadow-sm">Lorem ipsum dolor sit amet, consectetur adipiscing elit sed do eiusmod tempor</p>
               </div>
             </div>
           </section>
@@ -57,9 +57,9 @@ export function HomePage() {
 
                     <CardContent className="flex flex-col justify-center h-full z-10 max-w-[75%]">
                       <div>
-                        <CardHeading className="text-2xl font-black">Free Membership Training</CardHeading>
+                        <CardHeading className="text-2xl font-black">Lorem Ipsum Dolor</CardHeading>
                         <p className="mt-2 text-lg">
-                          Begin your journey with us, let us guide you to the whole process
+                          Consectetur adipiscing elit sed do eiusmod tempor incididunt ut labore
                         </p>
                       </div>
                       <div className="mt-4">
@@ -71,9 +71,9 @@ export function HomePage() {
                   <Card className="relative text-white bg-[url('../../../../public/media/images/PremiumAcademy.png')] bg-cover h-64 overflow-hidden">
                     <CardContent className="flex flex-col justify-center h-full z-10 max-w-[75%]">
                       <div>
-                        <CardHeading className="text-2xl font-black">Premium Academy</CardHeading>
+                        <CardHeading className="text-2xl font-black">Sed Diam Nonumy</CardHeading>
                         <p className="mt-2 text-lg">
-                          Comprehensive trading education from basics to advanced strategies
+                          Eirmod tempor invidunt ut labore et dolore magna aliquam erat volutpat
                         </p>
                       </div>
                       <div className="mt-4">
@@ -92,15 +92,15 @@ export function HomePage() {
                 <CardContent className="flex flex-col items-center justify-between w-full z-10 h-full py-10">
                   <div className="text-center">
                     <CardHeading className="text-3xl font-black mb-5 leading-10">Who is live on <br /> Cripto Buzz</CardHeading>
-                    <p className="mt-2 text-lg opacity-95 leading-6">Comprehensive trading education from basics to <br /> advanced strategies</p>
+                    <p className="mt-2 text-lg opacity-95 leading-6">Sed diam voluptua at vero eos et accusam <br /> et justo duo dolores et ea rebum</p>
                   </div>
 
                   <div className="flex flex-col items-center mt-7">
                     <div className="h-34 w-34 radius-live-user overflow-hidden mb-3">
                       <img src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&w=800&auto=format&fit=crop" alt="host" className="w-full h-full object-cover" />
                     </div>
-                    <h4 className="font-semibold text-lg">Jania Garnbet</h4>
-                    <p className="text-sm text-white/90">Development Lead</p>
+                    <h4 className="font-semibold text-lg">Lorem Ipsum</h4>
+                    <p className="text-sm text-white/90">Dolor Sit Amet</p>
                     <button className="btn bg-white text-black mt-2">Watch Now</button>
                   </div>
                 </CardContent>
@@ -120,7 +120,7 @@ export function HomePage() {
                   />
                   <div className="absolute left-4 bottom-4 text-white z-10">
                     <h4 className=" text-2xl font-bold">Cripto Buzz Live Sessions</h4>
-                    <p className="text-md mt-1 mb-5">Join live trading sessions and webinars</p>
+                    <p className="text-md mt-1 mb-5">Consectetur adipiscing elit sed do eiusmod tempor</p>
                     <button className="mt-3 btn bg-transparent border border-white text-white cursor-pointer">Start Learning</button>
                   </div>
                 </div>
@@ -138,7 +138,7 @@ export function HomePage() {
                   />
                   <div className="absolute left-4 bottom-4 text-white z-10">
                     <h4 className=" text-2xl font-bold">Cripto Buzz Tools</h4>
-                    <p className="text-md mt-1 mb-5">Join live trading sessions and webinars</p>
+                    <p className="text-md mt-1 mb-5">Sed diam nonumy eirmod tempor invidunt ut labore</p>
                     <button className="mt-3 btn bg-transparent border border-white text-white cursor-pointer">Start Learning</button>
                   </div>
                 </div>
@@ -157,7 +157,7 @@ export function HomePage() {
                   />
                   <div className="absolute left-4 bottom-4 text-white z-10">
                     <h4 className=" text-2xl font-bold">Cripto Buzz Social Feed</h4>
-                    <p className="text-md mt-1 mb-5">Join live trading sessions and webinars</p>
+                    <p className="text-md mt-1 mb-5">Eiusmod tempor invidunt ut labore et dolore magna</p>
                     <button className="mt-3 btn bg-transparent border border-white text-white cursor-pointer">Start Learning</button>
                   </div>
                 </div>
@@ -193,8 +193,8 @@ export function HomePage() {
                         <div className="flex-1">
                           <div className="flex items-center justify-between">
                             <div>
-                              <p className="text-sm font-medium">Mr. Anderson</p>
-                              <p className="text-xs text-gray-500">Long before you sit down to put digital pen to paper you need to make sure you have to sit down and write. <span className="text-blue-500">See more</span></p>
+                              <p className="text-sm font-medium">Lorem Ipsum</p>
+                              <p className="text-xs text-gray-500">Sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliqua erat volutpat. <span className="text-blue-500">See more</span></p>
                             </div>
                             <time className="text-xs text-gray-400">2 Days ago</time>
                           </div>
@@ -217,8 +217,8 @@ export function HomePage() {
                     <div className="rounded-md p-3 bg-blue-100 text-black flex items-center gap-3">
                       <div className="h-10 w-10 rounded-md bg-blue-700 text-white flex items-center justify-center">C</div>
                       <div>
-                        <p className="text-sm font-medium">Follow Crypto Buzz</p>
-                        <p className="text-xs text-gray-500">@cryptobuzz</p>
+                        <p className="text-sm font-medium">Follow Cripto Buzz</p>
+                        <p className="text-xs text-gray-500">@criptobuzz</p>
                       </div>
                     </div>
                   </CardContent>

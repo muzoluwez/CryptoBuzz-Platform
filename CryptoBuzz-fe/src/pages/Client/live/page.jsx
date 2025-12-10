@@ -14,65 +14,65 @@ export function LivePage() {
   const educators = [
     {
       id: 1,
-      name: 'Fabrizio',
+      name: 'Lorem Ipsum',
       image: 'plaid',
       sessions: {
         'Current Week': {
           Monday: [
-            { title: 'Weekly Market Forecast', time: '9:00am-10:00am' }
+            { title: 'Dolor Sit Amet Consectetur', time: '9:00am-10:00am' }
           ],
           Wednesday: [
-            { title: 'Weekly Market Forecast', time: '9:00am-10:00am' },
-            { title: 'Forex Basics', time: '9:00am-10:00am' }
+            { title: 'Adipiscing Elit Sed Do', time: '9:00am-10:00am' },
+            { title: 'Eiusmod Tempor Incididunt', time: '9:00am-10:00am' }
           ],
           Friday: [
-            { title: 'Forex Basics', time: '9:00am-10:00am' }
+            { title: 'Ut Labore Et Dolore Magna', time: '9:00am-10:00am' }
           ],
           Saturday: [
-            { title: 'Weekly Market Forecast', time: '9:00am-10:00am' },
-            { title: 'Forex Basics', time: '9:00am-10:00am' }
+            { title: 'Aliqua Ut Enim Ad Minim', time: '9:00am-10:00am' },
+            { title: 'Veniam Quis Nostrud', time: '9:00am-10:00am' }
           ]
         },
         'Next Week': {
           Tuesday: [
-            { title: 'Advanced Trading Strategies', time: '10:00am-11:00am' }
+            { title: 'Exercitation Ullamco Laboris', time: '10:00am-11:00am' }
           ],
           Thursday: [
-            { title: 'Market Analysis Deep Dive', time: '2:00pm-3:00pm' }
+            { title: 'Nisi Ut Aliquip Ex Ea', time: '2:00pm-3:00pm' }
           ],
           Friday: [
-            { title: 'Weekly Wrap-up', time: '4:00pm-5:00pm' }
+            { title: 'Commodo Consequat Duis', time: '4:00pm-5:00pm' }
           ]
         }
       }
     },
     {
       id: 2,
-      name: 'Buzz Team',
+      name: 'Sed Diam Nonumy',
       image: 'blue',
       sessions: {
         'Current Week': {
           Monday: [
-            { title: 'Weekly Market Forecast', time: '9:00am-10:00am' }
+            { title: 'Eirmod Tempor Invidunt', time: '9:00am-10:00am' }
           ],
           Wednesday: [
-            { title: 'Weekly Market Forecast', time: '9:00am-10:00am' },
-            { title: 'Forex Basics', time: '9:00am-10:00am' }
+            { title: 'Ut Labore Et Dolore Magna', time: '9:00am-10:00am' },
+            { title: 'Aliquam Erat Volutpat', time: '9:00am-10:00am' }
           ],
           Saturday: [
-            { title: 'Weekly Market Forecast', time: '9:00am-10:00am' },
-            { title: 'Forex Basics', time: '9:00am-10:00am' }
+            { title: 'Sed Diam Voluptua', time: '9:00am-10:00am' },
+            { title: 'At Vero Eos Et Accusam', time: '9:00am-10:00am' }
           ]
         },
         'Next Week': {
           Monday: [
-            { title: 'Crypto Market Overview', time: '11:00am-12:00pm' }
+            { title: 'Et Justo Duo Dolores', time: '11:00am-12:00pm' }
           ],
           Wednesday: [
-            { title: 'Technical Analysis Workshop', time: '1:00pm-2:00pm' }
+            { title: 'Et Ea Rebum Stet Clita', time: '1:00pm-2:00pm' }
           ],
           Friday: [
-            { title: 'Q&A Session', time: '3:00pm-4:00pm' }
+            { title: 'Kasd Gubergren No Sea', time: '3:00pm-4:00pm' }
           ]
         }
       }
