@@ -18,10 +18,10 @@ module.exports = {
         '300': '300% 300%',
       },
       backgroundImage: {
-        'blue-gradient': 'linear-gradient(11deg, #7f80ff, #5b4bff, #1e0066)',
+        'blue-gradient': 'linear-gradient(11deg, #a68507, #FFCD0B, #a68507)',
       },
       backgroundImage: {
-        'animated-gradient': 'linear-gradient(230deg, #383987, #5b4bff, #1e0066)',
+        'animated-gradient': 'linear-gradient(230deg, #FFCD0B, #B48F00, #564400)',
       },
       utilities: {
         '.bg-blue-gradient': {
@@ -65,7 +65,7 @@ module.exports = {
               },
               primary: {
                 default: '#FFCD0B',
-                active: '#533ae3',
+                active: '#806706',
                 light: '#FFFAE7',
                 clarity: 'rgb(157 ,152, 217 , 0.20)',
                 inverse: '#ffffff'
@@ -130,7 +130,7 @@ module.exports = {
               },
               primary: {
                 default: '#FFCD0B',
-                active: '#533ae3',
+                active: '#806706',
                 light: '#FFFAE7',
                 clarity: 'rgb(157 ,152 ,217 , 0.20)',
                 inverse: '#ffffff'
@@ -347,8 +347,8 @@ module.exports = {
           clarity: 'rgba(24, 25, 31, 0.50)'
         },
         'dark-imperial-blue': {
-          DEFAULT: '#201946',
-          active: '#342B62',
+          DEFAULT: '#8c7106',
+          active: '#806706',
           light: '#CFC7FF99',
           clarity: 'rgba(32, 25, 70, 0.20)',
           inverse: '#ffffff'

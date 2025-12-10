@@ -10,7 +10,7 @@ const EntryCallout = ({
       {`
           @media screen and (min-width: 767px) {
             .entry-callout-bg {
-              background-image: url('${toAbsoluteUrl('/media/images/2600x1600/2.png')}');
+              background-image: url('${toAbsoluteUrl('/media/images/2600x1600/22.png')}');
             }
             .dark .entry-callout-bg {
               background-image: url('${toAbsoluteUrl('/media/images/2600x1600/2-dark.png')}');

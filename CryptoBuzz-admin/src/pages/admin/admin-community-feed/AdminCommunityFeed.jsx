@@ -102,7 +102,7 @@ const AdminCommunityFeed = () => {
               <div className="relative">
                 {/* Cover Image */}
                 <img
-                  src="https://i.ibb.co/gLV2tfjF/forex-banner.png"
+                  src="https://i.ibb.co/7tG6B8YX/forex-banner.png"
                   alt="Cover"
                   className="w-full h-20 object-cover"
                 />
@@ -111,11 +111,11 @@ const AdminCommunityFeed = () => {
                   <div className="absolute left-1/2 -translate-x-1/2 top-[-40px] h-[80px] w-[80px]">
                     <div className="w-20 h-20 rounded-full border-4 border-white overflow-hidden">
                       <img
-                        src={auth?.user?.image || `https://ui-avatars.com/api/?name=${encodeURIComponent(auth?.user?.first_name || 'Admin')}&background=4F46E5&color=fff&size=80`}
+                        src={auth?.user?.image || `https://ui-avatars.com/api/?name=${encodeURIComponent(auth?.user?.first_name || 'Admin')}&background=FFCD0B&color=fff&size=80`}
                         alt="Profile"
                         className="w-full h-full object-cover"
                         onError={(e) => {
-                          e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(auth?.user?.first_name || 'Admin')}&background=4F46E5&color=fff&size=80`;
+                          e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(auth?.user?.first_name || 'Admin')}&background=FFCD0B&color=fff&size=80`;
                         }}
                       />
                     </div>
@@ -142,11 +142,11 @@ const AdminCommunityFeed = () => {
               <div className="flex items-center gap-3">
                 <div className="w-12 h-12 rounded-full overflow-hidden">
                   <img
-                    src={auth?.user?.image || `https://ui-avatars.com/api/?name=${encodeURIComponent(auth?.user?.first_name || 'Admin')}&background=4F46E5&color=fff&size=48`}
+                    src={auth?.user?.image || `https://ui-avatars.com/api/?name=${encodeURIComponent(auth?.user?.first_name || 'Admin')}&background=FFCD0B&color=fff&size=48`}
                     alt="User"
                     className="w-full h-full object-cover"
                     onError={(e) => {
-                      e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(auth?.user?.first_name || 'Admin')}&background=4F46E5&color=fff&size=48`;
+                      e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(auth?.user?.first_name || 'Admin')}&background=FFCD0B&color=fff&size=48`;
                     }}
                   />
                 </div>

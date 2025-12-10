@@ -80,7 +80,7 @@ const Task = () => {
             <div className="card rounded-lg shadow-md overflow-hidden">
               <div className="relative">
                 <img
-                  src="https://i.ibb.co/gLV2tfjF/forex-banner.png"
+                  src="https://i.ibb.co/7tG6B8YX/forex-banner.png"
                   alt="Cover"
                   className="w-full h-20 object-cover"
                 />
