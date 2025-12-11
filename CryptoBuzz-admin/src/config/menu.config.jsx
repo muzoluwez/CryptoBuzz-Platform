@@ -1389,19 +1389,19 @@ export const sideMenus = {
       icon: <Lightbulb />,
       path: "/admin/ideas",
     },
-    {
-      title: "IQ Strategies",
-      icon: <ChartNoAxesCombined />,
-      children: [
-        {
-          title: "IQ Charts",
-          icon: <Dot />,
-          path: "https://www.iqcharts.com/",
-          externalLink: true,
-          newTab: true,
-        },
-      ],
-    },
+    // {
+    //   title: "IQ Strategies",
+    //   icon: <ChartNoAxesCombined />,
+    //   children: [
+    //     {
+    //       title: "IQ Charts",
+    //       icon: <Dot />,
+    //       path: "https://www.iqcharts.com/",
+    //       externalLink: true,
+    //       newTab: true,
+    //     },
+    //   ],
+    // },
     {
       title: "Educators",
       icon: <User />,
@@ -1520,19 +1520,19 @@ export const sideMenus = {
       icon: <Lightbulb />,
       path: "/admin/ideas",
     },
-    {
-      title: "IQ Strategies",
-      icon: <ChartNoAxesCombined />,
-      children: [
-        {
-          title: "IQ Charts",
-          icon: <Dot />,
-          path: "https://www.iqcharts.com/",
-          externalLink: true,
-          newTab: true,
-        },
-      ],
-    },
+    // {
+    //   title: "IQ Strategies",
+    //   icon: <ChartNoAxesCombined />,
+    //   children: [
+    //     {
+    //       title: "IQ Charts",
+    //       icon: <Dot />,
+    //       path: "https://www.iqcharts.com/",
+    //       externalLink: true,
+    //       newTab: true,
+    //     },
+    //   ],
+    // },
     {
       title: "Educators",
       icon: <User />,
@@ -1749,19 +1749,19 @@ export const sideMenus = {
       icon: <Lightbulb />,
       path: "/educator/ideas",
     },
-    {
-      title: "IQ Strategies",
-      icon: <ChartNoAxesCombined />,
-      children: [
-        {
-          title: "IQ Charts",
-          icon: <Dot />,
-          path: "https://www.iqcharts.com/",
-          externalLink: true,
-          newTab: true,
-        },
-      ],
-    },
+    // {
+    //   title: "IQ Strategies",
+    //   icon: <ChartNoAxesCombined />,
+    //   children: [
+    //     {
+    //       title: "IQ Charts",
+    //       icon: <Dot />,
+    //       path: "https://www.iqcharts.com/",
+    //       externalLink: true,
+    //       newTab: true,
+    //     },
+    //   ],
+    // },
     {
       title: "IQ Social",
       icon: <MessageCircleMore />,
@@ -1869,19 +1869,19 @@ export const sideMenus = {
     //   icon: <School />,
     //   path: "/iq-strategies",
     // },
-    {
-      title: "IQ Strategies",
-      icon: <ChartNoAxesCombined />,
-      children: [
-        {
-          title: "IQ Charts",
-          icon: <Dot />,
-          path: "https://www.iqcharts.com/",
-          externalLink: true,
-          newTab: true,
-        },
-      ],
-    },
+    // {
+    //   title: "IQ Strategies",
+    //   icon: <ChartNoAxesCombined />,
+    //   children: [
+    //     {
+    //       title: "IQ Charts",
+    //       icon: <Dot />,
+    //       path: "https://www.iqcharts.com/",
+    //       externalLink: true,
+    //       newTab: true,
+    //     },
+    //   ],
+    // },
     {
       title: "IQ Social",
       icon: <MessageCircleMore />,

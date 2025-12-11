@@ -15,9 +15,9 @@ export const adminTaskManagementApiSlice = createApi({
       providesTags: (result) =>
         result?.data
           ? [
-              ...result.data.map(({ id }) => ({ type: "Task", id })),
-              { type: "Task", id: "LIST" },
-            ]
+            ...result.data.map(({ id }) => ({ type: "Task", id })),
+            { type: "Task", id: "LIST" },
+          ]
           : [{ type: "Task", id: "LIST" }],
     }),
 

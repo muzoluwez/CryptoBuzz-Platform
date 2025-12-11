@@ -42,10 +42,10 @@ const CreatePackageModel = forwardRef(
       { label: "/iq-educators/:id", value: "/iq-educators/:id" },
       { label: "/iq-academy-educators", value: "/iq-academy-educators" },
       { label: "/iq-social", value: "/iq-social" },
-      {
-        label: "https://www.iqcharts.com/",
-        value: "https://www.iqcharts.com/",
-      },
+      // {
+      //   label: "https://www.iqcharts.com/",
+      //   value: "https://www.iqcharts.com/",
+      // },
     ];
 
     const validationSchema = Yup.object({
