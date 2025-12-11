@@ -5,22 +5,23 @@ import path from "path";
 
 const allowedTypes = ["image/png", "image/jpeg", "image/jpg", "video/mp4"];
 
-const storage = multer.diskStorage({
-    destination: function (req, file, cb) {
-        cb(null, "./public/temp");
-    },
-    filename: function (req, file, cb) {
-        const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
+// const storage = multer.diskStorage({
+//     destination: function (req, file, cb) {
+//         cb(null, "./public/temp");
+//     },
+//     filename: function (req, file, cb) {
+//         const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
 
-        const ext = path.extname(file.originalname);
-        const cleanName = path
-            .basename(file.originalname, ext)
-            .replace(/[^a-zA-Z0-9]/g, "");
+//         const ext = path.extname(file.originalname);
+//         const cleanName = path
+//             .basename(file.originalname, ext)
+//             .replace(/[^a-zA-Z0-9]/g, "");
 
-        cb(null, `${cleanName}-${uniqueSuffix}${ext}`);
-    },
-});
+//         cb(null, `${cleanName}-${uniqueSuffix}${ext}`);
+//     },
+// });
 
+const storage = multer.memoryStorage();
 function fileFilter(req, file, cb) {
     if (!allowedTypes.includes(file.mimetype)) {
         return cb(new Error("Invalid file type"));

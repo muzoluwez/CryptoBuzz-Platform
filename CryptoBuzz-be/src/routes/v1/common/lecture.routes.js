@@ -28,7 +28,7 @@ router.post("/", Auth.CommonAuth, createLecture);
 // Update lecture
 router.put(
   "/:id",
-  Auth.CommonAuth,
+  // Auth.CommonAuth,
   upload.fields([
     { name: "video", maxCount: 1 },
     { name: "thumbnail", maxCount: 1 }

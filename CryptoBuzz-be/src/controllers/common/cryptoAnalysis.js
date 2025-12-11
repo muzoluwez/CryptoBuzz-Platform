@@ -89,16 +89,8 @@ export const createCryptoAnalysis = async (req, res) => {
 
     const imageUrls = await Promise.all(
       req.files.map(async file => {
-        const localPath = path.resolve(
-          path.dirname(new URL(import.meta.url).pathname),
-          "../../../public/temp",
-          file.path
-        );
+        const uploadedUrl = await uploadImageToAzure(file.buffer, file.originalname);
 
-        const buffer = fs.readFileSync(localPath);
-        const uploadedUrl = await uploadImageToAzure(buffer, file.originalname);
-
-        fs.unlinkSync(localPath);
         return uploadedUrl;
       })
     );
@@ -150,16 +142,8 @@ export const updateCryptoAnalysis = async (req, res) => {
     if (req.files && req.files.length > 0) {
       const newImages = await Promise.all(
         req.files.map(async file => {
-          const localPath = path.resolve(
-            path.dirname(new URL(import.meta.url).pathname),
-            "../../../public/temp",
-            file.path
-          );
+          const azureUrl = await uploadImageToAzure(file.buffer, file.originalname);
 
-          const buffer = fs.readFileSync(localPath);
-          const azureUrl = await uploadImageToAzure(buffer, file.originalname);
-
-          fs.unlinkSync(localPath);
           return azureUrl;
         })
       );

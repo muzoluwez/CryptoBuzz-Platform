@@ -11,7 +11,7 @@ if (!AZURE_STORAGE_CONNECTION_STRING) {
 }
 
 const IMAGE_CONTAINER_NAME = "cryptobuzz";
-const VIDEO_CONTAINER_NAME = "edu-platform-videos";
+const VIDEO_CONTAINER_NAME = "crypto-buzz-video";
 
 const blobServiceClient = BlobServiceClient.fromConnectionString(
   AZURE_STORAGE_CONNECTION_STRING
