@@ -1,5 +1,5 @@
 import express from "express";
-import { cerateEducator, listEducator, updateEducator, deleteEducator } from "../../../controllers/admin/educators.js";
+import { createEducator, listEducator, updateEducator, deleteEducator } from "../../../controllers/admin/educators.js";
 import Auth from "../../../middlewares/auth.js";
 import { upload } from "../../../middlewares/multer.js";
 
@@ -14,7 +14,7 @@ router.post(
     { name: "icon", maxCount: 1 },
     { name: "image", maxCount: 1 }
   ]),
-  cerateEducator
+  createEducator
 );
 
 router.put(

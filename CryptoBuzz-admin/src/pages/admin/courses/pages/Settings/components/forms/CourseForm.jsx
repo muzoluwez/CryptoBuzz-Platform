@@ -4,10 +4,10 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { Loader2, Upload } from "lucide-react";
 import {
-  useGetCoursesTypesQuery,
   useGetEducatorAcademyCategoryQuery,
   useGetLanguageListQuery,
-} from "../../../../../../../store/api/educator/educatorAcademyCategoryApiSlice";
+} from "../../../../../../../store/api/admin/adminAcademyCategoryApiSlice";
+import { useGetAdminCoursesTypesQuery } from "../../../../../../../store/api/admin/adminCoursesTypesApiSlice";
 import {
   Select,
   SelectContent,
@@ -17,20 +17,7 @@ import {
 } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { languages } from "eslint-plugin-prettier";
-
-// Categories for the course
-const COURSE_CATEGORIES = [
-  "Programming",
-  "Finance",
-  "Development",
-  "Design",
-  "Business",
-  "Marketing",
-  "Language",
-  "Science",
-  "Art",
-  "Music",
-];
+;
 
 // Schema for course validation
 const createCourseSchema = z.object({
@@ -85,7 +72,7 @@ const CourseForm = ({ onSubmit, initialData, isLoading }) => {
   const [currentImageFile, setCurrentImageFile] = useState(null);
   const { data } = useGetEducatorAcademyCategoryQuery();
   const { data: languagesList } = useGetLanguageListQuery();
-  const { data: courseTypesList } = useGetCoursesTypesQuery();
+  const { data: courseTypesList } = useGetAdminCoursesTypesQuery()
 
   // Choose schema based on whether we're editing or creating
   const courseSchema = initialData ? editCourseSchema : createCourseSchema;
@@ -168,12 +155,18 @@ const CourseForm = ({ onSubmit, initialData, isLoading }) => {
     for (let [key, value] of formData.entries()) {
       console.log(key, value);
     }
-    await onSubmit(formData);
+    if (onSubmit) {
+      onSubmit(formData);
+    } else {
+      console.log("No onSubmit function provided");
+    }
   };
 
   return (
     <form
-      onSubmit={handleSubmit(submitHandler)}
+      onSubmit={handleSubmit(submitHandler, (errors) => {
+        console.log("Validation Errors:", errors);
+      })}
       className="space-y-6"
       encType="multipart/form-data"
     >
@@ -386,7 +379,7 @@ const CourseForm = ({ onSubmit, initialData, isLoading }) => {
             Course Tier <span className="text-red-500 font-bold">*</span>
           </label>
           <Select
-            defaultValue={selectedTier}
+            value={selectedTier}
             onValueChange={(value) => setValue("tier", value)}
             className={`form-control input input-md w-full ${errors.tier && "border border-danger"}`}
           >

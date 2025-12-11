@@ -1,6 +1,7 @@
 /* eslint-disable no-unused-vars */
 import axios from "axios";
-import { createContext, useState } from "react";
+import { useState } from "react";
+import { AuthContext } from "../AuthContext";
 import * as authHelper from "../_helpers";
 import * as lmsApi from "../../services/lms.api";
 import { lmsAuth } from "../../services";
@@ -61,7 +62,7 @@ const testUsers = {
   // },
 };
 
-const AuthContext = createContext(null);
+
 const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
   const [auth, setAuth] = useState(authHelper.getAuth());
@@ -389,7 +390,7 @@ const AuthProvider = ({ children }) => {
     </AuthContext.Provider>
   );
 };
-export { AuthContext, AuthProvider };
+export { AuthProvider };
 
 
 

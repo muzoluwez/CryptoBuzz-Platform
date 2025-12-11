@@ -119,7 +119,7 @@ export const listEducator = async (req, res) => {
 // ------------------------
 // CREATE EDUCATOR
 // ------------------------
-export const cerateEducator = async (req, res) => {
+export const createEducator = async (req, res) => {
   try {
     const {
       first_name,
@@ -296,7 +296,7 @@ export const deleteEducator = async (req, res) => {
     user.deletedAt = Date.now();
     await user.save();
 
-    return res.status(200).json(ApiResponse(200, newUser, "Educator deleted successfully"));
+    return res.status(200).json(ApiResponse(200, user, "Educator deleted successfully"));
   } catch (error) {
     return res.status(500).json({
       message: "Internal Server Error",
@@ -309,8 +309,8 @@ export const deleteEducator = async (req, res) => {
 // EXPORT ALL AS ESM
 // ------------------------
 export default {
-  cerateEducator,
-  listEducator,
+  createEducator,
   updateEducator,
+  listEducator,
   deleteEducator
 };

@@ -235,9 +235,9 @@ const Main = ({ onSelectCourse }) => {
         icon={<Bookmark className="w-5 h-5" />}
       >
         <div className="flex flex-wrap gap-3">
-          {categories.map((category) => (
+          {categories.map((category, index) => (
             <CategoryBadge
-              key={category._id}
+              key={index}
               category={category}
               isSelected={selectedCategory?._id === category?._id}
               onClick={handleCategoryClick}

@@ -14,7 +14,7 @@ import api from "./axiosConfig";
  */
 export const getAllCourses = async (params = {}, token = null) => {
   try {
-    const response = await api.get("/admin/course", {
+    const response = await api.get("/common/course", {
       params,
       headers: {
         Authorization: `Bearer ${token}`,
@@ -29,7 +29,7 @@ export const getAllCourses = async (params = {}, token = null) => {
 export const getCourseByEducatorId = async (id, token = null) => {
   try {
     const response = await api.get(
-      `/users/course?instructor=${id}&isPublished=true`,
+      `/common/course?instructor=${id}&isPublished=true`,
       {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -49,7 +49,7 @@ export const getCourseByEducatorId = async (id, token = null) => {
  */
 export const getCourseById = async (id, token = null) => {
   try {
-    const response = await api.get(`/admin/course/${id}`, {
+    const response = await api.get(`/common/course/${id}`, {
       headers: {
         Authorization: `Bearer ${token}`,
       },
@@ -69,7 +69,7 @@ export const getCourseById = async (id, token = null) => {
  */
 export const createCourse = async (courseData, token = null) => {
   try {
-    const response = await api.post("/admin/course", courseData, {
+    const response = await api.post("/common/course", courseData, {
       headers: {
         Authorization: `Bearer ${token}`,
         "Content-Type": "multipart/form-data",
@@ -97,7 +97,7 @@ export const createCourse = async (courseData, token = null) => {
  */
 export const updateCourse = async (id, courseData, token = null) => {
   try {
-    const response = await api.put(`/admin/course/${id}`, courseData, {
+    const response = await api.put(`/common/course/${id}`, courseData, {
       headers: {
         Authorization: `Bearer ${token}`,
         "Content-Type": "multipart/form-data",
@@ -116,7 +116,7 @@ export const updateCourse = async (id, courseData, token = null) => {
  */
 export const deleteCourse = async (id, token = null) => {
   try {
-    const response = await api.delete(`/admin/course/${id}`, {
+    const response = await api.delete(`/common/course/${id}`, {
       headers: {
         Authorization: `Bearer ${token}`,
       },
@@ -137,7 +137,7 @@ export const deleteCourse = async (id, token = null) => {
 export const reorderCourses = async (courses, token = null) => {
   try {
     const response = await api.put(
-      "/admin/course/reorder",
+      "/common/course/reorder",
       { courses },
       {
         headers: {

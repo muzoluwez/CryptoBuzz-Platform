@@ -513,7 +513,7 @@ const CreateEducator = forwardRef(
                     Status <span className="text-danger">*</span>
                   </label>
                   <Select
-                    defaultValue={formik.values.status}
+                    value={formik.values.status}
                     onValueChange={(value) =>
                       formik.setFieldValue("status", value)
                     }
@@ -543,7 +543,7 @@ const CreateEducator = forwardRef(
                     Can create a stream ?<span className="text-danger">*</span>
                   </label>
                   <Select
-                    defaultValue={formik.values.is_create_stream}
+                    value={formik.values.is_create_stream}
                     onValueChange={(value) =>
                       formik.setFieldValue("is_create_stream", value)
                     }
@@ -629,7 +629,7 @@ const CreateEducator = forwardRef(
                   </label>
 
                   <Select
-                    value={formik.values?.categories || []}
+                    value={""}
                     onValueChange={(value) => {
                       const prev = Array.isArray(formik.values?.categories)
                         ? formik.values.categories
@@ -643,7 +643,6 @@ const CreateEducator = forwardRef(
                         formik.setFieldValue("categories", [...prev, value]);
                       }
                     }}
-                    multiple
                   >
                     <SelectTrigger className="flex flex-wrap gap-1 min-h-[2.5rem] items-center">
                       {formik.values?.categories?.length ? (
