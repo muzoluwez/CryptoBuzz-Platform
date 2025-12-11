@@ -62,7 +62,7 @@ export const getLectures = async (req, res) => {
     const lectures = await Lecture.find(query)
       .sort({ order: 1, createdAt: 1 })
       .populate("section", "title")
-      .populate("completions");
+      // .populate("completions");
 
     const response = lectures.map((lecture) => ({
       _id: lecture._id,
@@ -74,7 +74,7 @@ export const getLectures = async (req, res) => {
       preview: lecture.preview,
       thumbnailUrl: lecture.thumbnailUrl,
       section: lecture.section,
-      completions: lecture.completions,
+      // completions: lecture.completions,
       createdAt: lecture.createdAt,
       updatedAt: lecture.updatedAt,
     }));
@@ -101,10 +101,10 @@ export const getOneLecture = async (req, res) => {
 
     const lecture = await Lecture.findById(id)
       .populate("section", "title")
-      .populate({
-        path: "completions",
-        match: { user: req.user?._id },
-      });
+      // .populate({
+      //   path: "completions",
+      //   match: { user: req.user?._id },
+      // });
 
     if (!lecture)
       return res.status(404).json({ message: "Lecture not found" });
@@ -205,7 +205,7 @@ export const updateLecture = async (req, res) => {
       if (videoUrl) await deleteVideoFromAzure(videoUrl);
 
       const file = req.files.video[0];
-      const buffer = fs.readFileSync(path.resolve("../../../", file.path));
+      const buffer = fs.readFileSync(path.resolve("../../../public/temp", file.path));
       videoUrl = await uploadVideoToAzure(buffer, file.originalname);
       fs.unlinkSync(file.path);
     }
@@ -214,7 +214,7 @@ export const updateLecture = async (req, res) => {
       if (thumbnailUrl) await deleteImageFromAzure(thumbnailUrl);
 
       const file = req.files.thumbnail[0];
-      const buffer = fs.readFileSync(path.resolve("../../../", file.path));
+      const buffer = fs.readFileSync(path.resolve("../../../public/temp", file.path));
       thumbnailUrl = await uploadImageToAzure(buffer, file.originalname);
       fs.unlinkSync(file.path);
     }
@@ -303,7 +303,7 @@ export const reorderLectures = async (req, res) => {
     const updated = await Lecture.find({ _id: { $in: ids } })
       .sort({ order: 1 })
       .populate("section", "title")
-      .populate("completions");
+      // .populate("completions");
 
     res.status(200).json({
       message: "Lectures reordered successfully",

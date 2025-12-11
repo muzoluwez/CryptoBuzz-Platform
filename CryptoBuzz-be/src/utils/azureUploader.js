@@ -160,7 +160,7 @@ const blobServiceClient1 = new BlobServiceClient(
   sharedKeyCredential
 );
 
-async function getSignedUrl(blobName) {
+export async function getSignedUrl(blobName) {
   const containerClient = blobServiceClient1.getContainerClient(VIDEO_CONTAINER_NAME);
   const blobClient = containerClient.getBlobClient(blobName);
 

@@ -321,7 +321,7 @@ export const deleteIdea = async (req, res) => {
 
     existingData.save();
 
-    await User.updateOne({ _id: req.user._id }, { $inc: { ideaCount: -1 } });
+    await UserModel.updateOne({ _id: req.user._id }, { $inc: { ideaCount: -1 } });
 
     return res.status(200).json({
       message: "Record delete successfully"
