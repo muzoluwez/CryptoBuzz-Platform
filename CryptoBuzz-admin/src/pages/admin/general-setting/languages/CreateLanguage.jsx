@@ -66,7 +66,7 @@ const CreateLanguage = forwardRef(
           setSelectedRow({});
           handleCloseCreate();
         } catch (err) {
-          console.error("API Error:", err);
+          // console.error("API Error:", err);
           const errorMessage =
             err?.data?.message || "An unexpected error occurred.";
           toast.error(errorMessage);
@@ -110,11 +110,10 @@ const CreateLanguage = forwardRef(
                     type="text"
                     placeholder="Enter name"
                     autoComplete="off"
-                    className={`form-control input input-md w-full ${
-                      formik.errors.name && formik.touched.name
-                        ? "border border-danger"
-                        : ""
-                    }`}
+                    className={`form-control input input-md w-full ${formik.errors.name && formik.touched.name
+                      ? "border border-danger"
+                      : ""
+                      }`}
                     {...formik.getFieldProps("name")}
                   />
                   {formik.touched.name && formik.errors.name && (

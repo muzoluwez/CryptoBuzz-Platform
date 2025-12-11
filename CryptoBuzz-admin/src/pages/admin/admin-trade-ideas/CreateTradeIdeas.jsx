@@ -13,14 +13,15 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogDescription,
 } from "@/components/ui/dialog";
 import { useAuthContext } from "../../../auth/useAuthContext";
 import { ImageInput } from "@/components/image-input";
 import { Alert } from "../../../components/alert/Alert";
 import { toast } from "sonner";
 import {
-  useCreateTradeIdeasMutation,
-  useUpdateTradeIdeaMutation,
+  useCreateIdeaMutation,
+  useUpdateIdeaMutation,
 } from "../../../store/api/admin/adminTradeIdeasApiSlice";
 import RichTextEditor from "../../../components/ui/rich-editor";
 import { useGetCommonCategoryQuery } from "../../../store/api/admin/adminTradeIdeasApiSlice";
@@ -31,10 +32,10 @@ const CreateTradeIdeas = forwardRef(
     ref
   ) => {
     const { auth } = useAuthContext();
-    const [createTradeIdeas] = useCreateTradeIdeasMutation();
-    const [updateTradeIdea] = useUpdateTradeIdeaMutation();
+    const [createIdea] = useCreateIdeaMutation();
+    const [updateIdea] = useUpdateIdeaMutation();
     const educatorId = auth?.user?._id;
-    const { data } = useGetCommonCategoryQuery();
+    const { data: categories } = useGetCommonCategoryQuery()
 
     const initialValues = {
       name: "",
@@ -48,18 +49,18 @@ const CreateTradeIdeas = forwardRef(
       exits: [""],
       description: "",
       category: "",
-       pips: 0,
-       
+      pips: 0,
+
     };
 
-     const numberField = () =>
-          Yup.number()
-            .nullable()
-            .transform((value, originalValue) => {
-              if (originalValue === "" || originalValue === undefined) return null;
-              const cleaned = Number(originalValue);
-              return isNaN(cleaned) ? 0 : cleaned;
-            });
+    const numberField = () =>
+      Yup.number()
+        .nullable()
+        .transform((value, originalValue) => {
+          if (originalValue === "" || originalValue === undefined) return null;
+          const cleaned = Number(originalValue);
+          return isNaN(cleaned) ? 0 : cleaned;
+        });
 
     const createSchema = Yup.object().shape({
       name: Yup.string().required("Symbol is required"),
@@ -107,7 +108,7 @@ const CreateTradeIdeas = forwardRef(
           formData.append("files", file?.file?.file)
         );
         formData.append("type", values.type);
-         formData.append("pips", values.pips ?? 0);
+        formData.append("pips", values.pips ?? 0);
         formData.append("timeFrame[]", [values.timeFrame]);
         formData.append("educatorId", values.educatorId);
         formData.append("status", values.status);
@@ -122,18 +123,18 @@ const CreateTradeIdeas = forwardRef(
 
         try {
           if (selectedRow?._id) {
-            await updateTradeIdea(formData).unwrap();
+            await updateIdea({ id: selectedRow?._id, formData }).unwrap();
             refetch();
             toast.success("Idea updated successfully!");
           } else {
-            await createTradeIdeas(formData).unwrap();
+            await createIdea(formData).unwrap();
             refetch();
             toast.success("Idea created successfully!");
           }
           formik.resetForm();
           handleCloseCreate();
         } catch (err) {
-          console.error("API Error:", err);
+          // console.error("API Error:", err);
           const errorMessage =
             err?.data?.message || "An unexpected error occurred.";
           toast.error(errorMessage);
@@ -224,8 +225,13 @@ const CreateTradeIdeas = forwardRef(
         <DialogContent className="p-5 max-w-[1200px]" ref={ref}>
           <DialogHeader>
             <DialogTitle>
-              {selectedRow?._id ? "Create IQ Idea" : "Create IQ Idea"}
+              {selectedRow?._id ? "Update IQ Idea" : "Create IQ Idea"}
             </DialogTitle>
+            <DialogDescription>
+              {selectedRow?._id
+                ? "Update the IQ idea details below."
+                : "Fill in the details to create a new IQ idea."}
+            </DialogDescription>
           </DialogHeader>
           <div className="grid gap-5 px-0 py-5">
             <div className="grid grid-cols-12 gap-4">
@@ -238,11 +244,10 @@ const CreateTradeIdeas = forwardRef(
                     type="text"
                     placeholder="Enter symbol"
                     autoComplete="off"
-                    className={`form-control input input-md w-full ${
-                      formik.errors.name && formik.touched.name
-                        ? "border border-danger"
-                        : ""
-                    }`}
+                    className={`form-control input input-md w-full ${formik.errors.name && formik.touched.name
+                      ? "border border-danger"
+                      : ""
+                      }`}
                     {...formik.getFieldProps("name")}
                   />
                   {formik.touched.name && formik.errors.name && (
@@ -267,11 +272,10 @@ const CreateTradeIdeas = forwardRef(
                     onBlur={() => formik.setFieldTouched("type", true)}
                   >
                     <SelectTrigger
-                      className={`form-control input input-md w-full ${
-                        formik.errors.type && formik.touched.type
-                          ? "border border-danger"
-                          : ""
-                      }`}
+                      className={`form-control input input-md w-full ${formik.errors.type && formik.touched.type
+                        ? "border border-danger"
+                        : ""
+                        }`}
                     >
                       <SelectValue placeholder="Select" />
                     </SelectTrigger>
@@ -327,11 +331,10 @@ const CreateTradeIdeas = forwardRef(
                     onBlur={() => formik.setFieldTouched("timeFrame", true)}
                   >
                     <SelectTrigger
-                      className={`form-control input input-md w-full ${
-                        formik.errors.timeFrame && formik.touched.timeFrame
-                          ? "border border-danger"
-                          : ""
-                      }`}
+                      className={`form-control input input-md w-full ${formik.errors.timeFrame && formik.touched.timeFrame
+                        ? "border border-danger"
+                        : ""
+                        }`}
                     >
                       <SelectValue placeholder="Select" />
                     </SelectTrigger>
@@ -365,11 +368,10 @@ const CreateTradeIdeas = forwardRef(
                     onBlur={() => formik.setFieldTouched("status", true)}
                   >
                     <SelectTrigger
-                      className={`form-control input input-md w-full ${
-                        formik.errors.status && formik.touched.status
-                          ? "border border-danger"
-                          : ""
-                      }`}
+                      className={`form-control input input-md w-full ${formik.errors.status && formik.touched.status
+                        ? "border border-danger"
+                        : ""
+                        }`}
                     >
                       <SelectValue placeholder="Select" />
                     </SelectTrigger>
@@ -401,11 +403,10 @@ const CreateTradeIdeas = forwardRef(
                     type="number"
                     placeholder="Enter entry"
                     autoComplete="off"
-                    className={`form-control input input-md w-full ${
-                      formik.errors.entry && formik.touched.entry
-                        ? "border border-danger"
-                        : ""
-                    }`}
+                    className={`form-control input input-md w-full ${formik.errors.entry && formik.touched.entry
+                      ? "border border-danger"
+                      : ""
+                      }`}
                   />
                   {formik.touched.entry && formik.errors.entry && (
                     <span role="alert" className="text-danger text-xs mt-1">
@@ -424,11 +425,10 @@ const CreateTradeIdeas = forwardRef(
                     placeholder="Enter invalidation"
                     autoComplete="off"
                     {...formik.getFieldProps("invalidation")}
-                    className={`form-control input input-md w-full ${
-                      formik.errors.invalidation && formik.touched.invalidation
-                        ? "border border-danger"
-                        : ""
-                    }`}
+                    className={`form-control input input-md w-full ${formik.errors.invalidation && formik.touched.invalidation
+                      ? "border border-danger"
+                      : ""
+                      }`}
                   />
                   {formik.touched.invalidation &&
                     formik.errors.invalidation && (
@@ -460,12 +460,11 @@ const CreateTradeIdeas = forwardRef(
                             newExits[index] = e.target.value;
                             formik.setFieldValue("exits", newExits);
                           }}
-                          className={`form-control input input-md w-full ${
-                            formik.errors.exits?.[index] &&
+                          className={`form-control input input-md w-full ${formik.errors.exits?.[index] &&
                             formik.touched.exits?.[index]
-                              ? "border border-danger"
-                              : ""
-                          }`}
+                            ? "border border-danger"
+                            : ""
+                            }`}
                         />
 
                         {/* Remove Button (if more than 1 exit) */}
@@ -507,8 +506,8 @@ const CreateTradeIdeas = forwardRef(
                       <SelectValue placeholder="Select" />
                     </SelectTrigger>
                     <SelectContent>
-                      {Array.isArray(data?.data) && data.data.length > 0 ? (
-                        data.data.map((item) => (
+                      {Array.isArray(categories?.data) && categories.data.length > 0 ? (
+                        categories.data.map((item) => (
                           <SelectItem key={item._id} value={item._id}>
                             {item.name}
                           </SelectItem>
@@ -549,9 +548,9 @@ const CreateTradeIdeas = forwardRef(
                 </div>
               </div> */}
 
-               {["win", "loss", "partialWin"].includes(
-                  formik.values.status
-                ) && (
+              {["win", "loss", "partialWin"].includes(
+                formik.values.status
+              ) && (
                   <div className="col-span-12 md:col-span-6">
                     <div className="flex flex-col gap-1">
                       <label className="form-label text-gray-900 gap-1">
@@ -562,11 +561,10 @@ const CreateTradeIdeas = forwardRef(
                         type="number"
                         placeholder="Enter Pips"
                         autoComplete="off"
-                        className={`form-control input input-md w-full ${
-                          formik.errors.pips && formik.touched.pips
-                            ? "border border-danger"
-                            : ""
-                        }`}
+                        className={`form-control input input-md w-full ${formik.errors.pips && formik.touched.pips
+                          ? "border border-danger"
+                          : ""
+                          }`}
                         {...formik.getFieldProps("pips")}
                       />
 
@@ -594,11 +592,10 @@ const CreateTradeIdeas = forwardRef(
                       >
                         <div
                           className={`flex border justify-center rounded-lg image-input-placeholder items-center 
-            ${
-              formik.touched.files && formik.errors.files
-                ? "border-danger"
-                : "border-gray-200"
-            }`}
+            ${formik.touched.files && formik.errors.files
+                              ? "border-danger"
+                              : "border-gray-200"
+                            }`}
                         >
                           <i className="ki-filled ki-picture"></i>
                         </div>

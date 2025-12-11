@@ -119,7 +119,7 @@ const Languages = ({ title = "Languages" }) => {
         totalCount: response.pagination?.total || 0,
       };
     } catch (error) {
-      console.error("Error fetching educators:", error);
+      // console.error("Error fetching educators:", error);
       return { data: [], totalCount: 0 };
     }
   };

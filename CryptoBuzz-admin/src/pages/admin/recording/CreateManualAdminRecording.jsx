@@ -371,11 +371,10 @@ const CreateManualAdminRecording = forwardRef(
                     type="text"
                     placeholder="Enter title"
                     autoComplete="off"
-                    className={`form-control input input-md w-full ${
-                      formik.errors.call_title && formik.touched.call_title
+                    className={`form-control input input-md w-full ${formik.errors.call_title && formik.touched.call_title
                         ? "border border-danger"
                         : ""
-                    }`}
+                      }`}
                     {...formik.getFieldProps("call_title")}
                   />
                   {formik.touched.call_title && formik.errors.call_title && (
@@ -418,15 +417,14 @@ const CreateManualAdminRecording = forwardRef(
                       Assign to Educator<span className="text-danger">*</span>
                     </label>
                     <Select
-                      defaultValue={formik.values.educator}
+                      value={formik.values.educator}
                       onValueChange={(value) =>
                         formik.setFieldValue("educator", value)
                       }
-                      className={`form-control input input-md w-full ${
-                        formik.errors.educator && formik.touched.educator
+                      className={`form-control input input-md w-full ${formik.errors.educator && formik.touched.educator
                           ? "border border-danger"
                           : ""
-                      }`}
+                        }`}
                     >
                       <SelectTrigger>
                         <SelectValue placeholder="Select" />
@@ -514,12 +512,11 @@ const CreateManualAdminRecording = forwardRef(
                       onValueChange={(value) =>
                         formik.setFieldValue("call_category", value)
                       }
-                      className={`form-control input input-md w-full ${
-                        formik.errors.call_category &&
-                        formik.touched.call_category
+                      className={`form-control input input-md w-full ${formik.errors.call_category &&
+                          formik.touched.call_category
                           ? "border border-danger"
                           : ""
-                      }`}
+                        }`}
                     >
                       <SelectTrigger>
                         <SelectValue placeholder="Select" />
@@ -552,11 +549,10 @@ const CreateManualAdminRecording = forwardRef(
                     value={formik.values.call_tags}
                     onChange={(tags) => formik.setFieldValue("call_tags", tags)}
                     placeholder="Add tags..."
-                    className={`form-control input input-md w-full ${
-                      formik.errors.call_tags && formik.touched.call_tags
+                    className={`form-control input input-md w-full ${formik.errors.call_tags && formik.touched.call_tags
                         ? "border border-danger"
                         : ""
-                    }`}
+                      }`}
                   />
                   {formik.touched.call_tags && formik.errors.call_tags && (
                     <span role="alert" className="text-danger text-xs mt-1">

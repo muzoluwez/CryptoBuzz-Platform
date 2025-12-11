@@ -6,7 +6,7 @@ export const adminEducatorsApiSlice = createApi({
   baseQuery: baseQueryWithReauth,
   endpoints: (builder) => ({
     getEducators: builder.query({
-      query: ({ page = 1, limit = 10, search = "" , educator = "" } = {}) =>
+      query: ({ page = 1, limit = 10, search = "", educator = "" } = {}) =>
         `/admin/educator/list?page=${page}&limit=${limit}&search=${search}&educator=${educator}`,
     }),
 
@@ -34,7 +34,7 @@ export const adminEducatorsApiSlice = createApi({
       query: ({ callId } = {}) => `/educator/kpi/${callId}`,
     }),
     kpis: builder.query({
-      query: ({ page = 1, limit = 10, educatorId, startDate, endDate , search="" } = {}) => {
+      query: ({ page = 1, limit = 10, educatorId, startDate, endDate, search = "" } = {}) => {
         let url = `/admin/kpi?page=${page}&limit=${limit}`;
         if (educatorId) {
           url += `&educatorId=${educatorId}`;
@@ -46,7 +46,7 @@ export const adminEducatorsApiSlice = createApi({
         if (endDate) {
           url += `&endDate=${endDate}`;
         }
-        if(search){
+        if (search) {
           url += `&search=${search}`
 
         }
@@ -54,9 +54,9 @@ export const adminEducatorsApiSlice = createApi({
       },
     }),
     logs: builder.query({
-      query: ({ page = 1, limit = 10, startDate, endDate , search="" } = {}) => {
+      query: ({ page = 1, limit = 10, startDate, endDate, search = "" } = {}) => {
         let url = `/logs?page=${page}&limit=${limit}`;
-        
+
         if (startDate) {
           url += `&startDate=${startDate}`;
         }
@@ -64,7 +64,7 @@ export const adminEducatorsApiSlice = createApi({
         if (endDate) {
           url += `&endDate=${endDate}`;
         }
-        if(search){
+        if (search) {
           url += `&search=${search}`
 
         }
@@ -74,7 +74,7 @@ export const adminEducatorsApiSlice = createApi({
 
     kpisExport: builder.mutation({
       query: (payload) => ({
-        url: "/educator/kpi/", // backend endpoint
+        url: "/admin/kpi/", // backend endpoint
         method: "POST",
         body: payload,
         responseHandler: async (response) => {

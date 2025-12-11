@@ -22,7 +22,7 @@ const DeletePackage = forwardRef(
         refetch?.();
         handleDeleteClose();
       } catch (error) {
-        console.error("Delete error:", error);
+        // console.error("Delete error:", error);
         toast.error(error?.data?.message || "Failed to delete package.");
       }
     };

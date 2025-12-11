@@ -64,9 +64,9 @@ module.exports = {
                 inverse: '#ffffff'
               },
               primary: {
-                default: '#5A3DFF',
+                default: '#FFCD0B',
                 active: '#533ae3',
-                light: '#e5e0ff',
+                light: '#FFFAE7',
                 clarity: 'rgb(157 ,152, 217 , 0.20)',
                 inverse: '#ffffff'
               },
@@ -129,9 +129,9 @@ module.exports = {
                 inverse: '#ffffff'
               },
               primary: {
-                default: '#5A3DFF',
+                default: '#FFCD0B',
                 active: '#533ae3',
-                light: '#3521c829',
+                light: '#FFFAE7',
                 clarity: 'rgb(157 ,152 ,217 , 0.20)',
                 inverse: '#ffffff'
               },

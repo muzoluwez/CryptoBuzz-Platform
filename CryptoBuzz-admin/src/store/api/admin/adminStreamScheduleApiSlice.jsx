@@ -19,13 +19,13 @@ export const adminStreamScheduleApiSlice = createApi({
                 educator = "",
                 status = "",
             } = {}) =>
-                `/admin/schedule/list?page=${page}&limit=${limit}&search=${search}&educator=${educator}&status=${status}`,
+                `/common/schedule?page=${page}&limit=${limit}&search=${search}&educator=${educator}&status=${status}`,
         }),
 
         // Create new stream schedule
         createEducatorStreamSchedule: builder.mutation({
             query: (payload) => ({
-                url: "/admin/schedule/create",
+                url: "/common/schedule/create",
                 method: "POST",
                 body: payload,
             }),
@@ -34,7 +34,7 @@ export const adminStreamScheduleApiSlice = createApi({
         // Update existing stream schedule
         updateEducatorStreamSchedule: builder.mutation({
             query: ({ id, ...payload } = {}) => ({
-                url: `/admin/schedule/${id}`,
+                url: `/common/schedule/${id}`,
                 method: "PUT",
                 body: payload,
             }),
@@ -43,7 +43,7 @@ export const adminStreamScheduleApiSlice = createApi({
         // Delete stream schedule
         deleteEducatorStreamSchedule: builder.mutation({
             query: (id) => ({
-                url: `/admin/schedule/${id}`,
+                url: `/common/schedule/${id}`,
                 method: "DELETE",
             }),
         }),
@@ -51,7 +51,7 @@ export const adminStreamScheduleApiSlice = createApi({
         // Create recurrence schedule
         createEducatorRecurrenceSchedule: builder.mutation({
             query: (payload) => ({
-                url: "/admin/schedule/create-recurrence",
+                url: "/common/schedule/recurrence",
                 method: "POST",
                 body: payload,
             }),
@@ -60,7 +60,7 @@ export const adminStreamScheduleApiSlice = createApi({
         // Create recurrence schedule (alias)
         createRecurrenceSchedule: builder.mutation({
             query: (payload) => ({
-                url: "/admin/schedule/create-recurrence",
+                url: "/common/schedule/recurrence",
                 method: "POST",
                 body: payload,
             }),
@@ -68,10 +68,11 @@ export const adminStreamScheduleApiSlice = createApi({
 
         // Update recurrence schedule
         updateRecurrenceSchedule: builder.mutation({
-            query: ({ id, ...payload } = {}) => ({
-                url: `/admin/schedule/recurrence/${id}`,
+            query: ({ id, formData } = {}) => ({
+                url: `/common/schedule/recurrence/${id}`,
                 method: "PUT",
-                body: payload,
+                body: formData,
+                formData: true,
             }),
         }),
     }),

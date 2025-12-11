@@ -29,7 +29,7 @@ const CreateLectureForm = ({ sectionId, onCancel, onSuccess }) => {
       onSuccess(response.data);
       onCancel();
     } catch (error) {
-      console.error("Failed to create lecture:", error);
+      // console.error("Failed to create lecture:", error);
     } finally {
       setIsSubmitting(false);
     }

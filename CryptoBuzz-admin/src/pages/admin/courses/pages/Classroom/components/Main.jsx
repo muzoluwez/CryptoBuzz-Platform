@@ -84,7 +84,7 @@ const Main = ({ onSelectCourse }) => {
           setIsLoading(false);
         })
         .catch((error) => {
-          console.error(error);
+          // console.error(error);
           setIsLoading(false);
         });
     }
@@ -159,11 +159,10 @@ const Main = ({ onSelectCourse }) => {
   // Category badge component
   const CategoryBadge = ({ category, isSelected, onClick }) => (
     <motion.button
-      className={`px-4 py-2 rounded-full text-sm font-medium transition-all flex items-center gap-2 ${
-        isSelected
-          ? "bg-primary-clarity text-primary border-2 border-primary-light"
-          : "bg-gray-100 text-gray-700 border-2 border-transparent hover:bg-gray-200"
-      }`}
+      className={`px-4 py-2 rounded-full text-sm font-medium transition-all flex items-center gap-2 ${isSelected
+        ? "bg-primary-clarity text-primary border-2 border-primary-light"
+        : "bg-gray-100 text-gray-700 border-2 border-transparent hover:bg-gray-200"
+        }`}
       onClick={() => onClick(category)}
       whileHover={{ scale: 1.05 }}
       whileTap={{ scale: 0.95 }}
@@ -236,9 +235,9 @@ const Main = ({ onSelectCourse }) => {
         icon={<Bookmark className="w-5 h-5" />}
       >
         <div className="flex flex-wrap gap-3">
-          {categories.map((category) => (
+          {categories.map((category, index) => (
             <CategoryBadge
-              key={category._id}
+              key={index}
               category={category}
               isSelected={selectedCategory?._id === category?._id}
               onClick={handleCategoryClick}

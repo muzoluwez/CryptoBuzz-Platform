@@ -15,42 +15,33 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { useAuthContext } from "../../../auth/useAuthContext";
-import { ImageInput } from "@/components/image-input";
 import { Alert } from "../../../components/alert/Alert";
 import { toast } from "sonner";
 import {
-  useCreateTradeIdeasMutation,
-  useUpdateTradeIdeaMutation,
-} from "../../../store/api/admin/adminTradeIdeasApiSlice";
-import RichTextEditor from "../../../components/ui/rich-editor";
-import { Avatar } from "stream-chat-react";
-import { AvatarUpload } from "./AvatarUpload";
-import clsx from "clsx";
-import { KeenIcon } from "@/components";
-import {
   useCreateAdminAcademyCategoryMutation,
-  useGetCoursesTypesQuery,
   useUpdateAdminAcademyCategoryMutation,
 } from "../../../store/api/admin/adminAcademyCategoryApiSlice";
+import { useGetAdminCoursesTypesQuery } from "../../../store/api/admin/adminCoursesTypesApiSlice";
 
 const CreateEducator = forwardRef(
   (
     { isCreateOpen, handleCloseCreate, selectedRow, refetch, setSelectedRow },
     ref
   ) => {
+
     const { auth } = useAuthContext();
     const [createAdminAcademyCategory] =
       useCreateAdminAcademyCategoryMutation();
     const [updateAdminAcademyCategory] =
       useUpdateAdminAcademyCategoryMutation();
-    const { data: courseTypesList } = useGetCoursesTypesQuery();
+    const { data: courseTypesList } = useGetAdminCoursesTypesQuery()
 
     const initialValues = {
       name: "",
       type: "",
       icon: null,
       image: null,
-      status: "true",
+      status: true,
     };
 
     const FILE_SIZE = 5 * 1024 * 1024; // 5MB
@@ -69,27 +60,27 @@ const CreateEducator = forwardRef(
         .required("category type is required")
         .max(100, "category type can't be longer than 100 characters"),
 
-      icon: Yup.mixed()
-        .required("Icon image is required")
-        .test("fileTypeOrUrl", "Unsupported icon image format", (value) => {
-          if (typeof value === "string") return true; // allow URLs
-          return value && SUPPORTED_FORMATS.includes(value.type);
-        })
-        .test("fileSize", "Icon image size is too large", (value) => {
-          if (typeof value === "string") return true; // skip size check for URLs
-          return value && value.size <= FILE_SIZE;
-        }),
+      // icon: Yup.mixed()
+      //   .required("Icon image is required")
+      //   .test("fileTypeOrUrl", "Unsupported icon image format", (value) => {
+      //     if (typeof value === "string") return true; // allow URLs
+      //     return value && SUPPORTED_FORMATS.includes(value.type);
+      //   })
+      //   .test("fileSize", "Icon image size is too large", (value) => {
+      //     if (typeof value === "string") return true; // skip size check for URLs
+      //     return value && value.size <= FILE_SIZE;
+      //   }),
 
-      image: Yup.mixed()
-        .required("Thumbnail image is required")
-        .test("fileTypeOrUrl", "Unsupported image format", (value) => {
-          if (typeof value === "string") return true;
-          return value && SUPPORTED_FORMATS.includes(value.type);
-        })
-        .test("fileSize", "Image size is too large", (value) => {
-          if (typeof value === "string") return true;
-          return value && value.size <= FILE_SIZE;
-        }),
+      // image: Yup.mixed()
+      //   .required("Thumbnail image is required")
+      //   .test("fileTypeOrUrl", "Unsupported image format", (value) => {
+      //     if (typeof value === "string") return true;
+      //     return value && SUPPORTED_FORMATS.includes(value.type);
+      //   })
+      //   .test("fileSize", "Image size is too large", (value) => {
+      //     if (typeof value === "string") return true;
+      //     return value && value.size <= FILE_SIZE;
+      //   }),
     });
 
     const formik = useFormik({
@@ -98,6 +89,7 @@ const CreateEducator = forwardRef(
       revalidateOnMount: true,
       validationSchema: createSchema,
       onSubmit: async (values, { setStatus, setSubmitting }) => {
+
         const payload = {
           ...values,
         };
@@ -106,24 +98,22 @@ const CreateEducator = forwardRef(
           payload.id = selectedRow?._id;
           delete payload.password;
         }
-
-        const formData = new FormData();
-        formData.append("name", values.name);
-        formData.append("status", values.status);
-        formData.append("type", values.type);
-        if (values.icon) formData.append("icon", values.icon);
-        if (values.image) formData.append("image", values.image);
+        const payloadData = {
+          name: values.name,
+          status: values.status || true,
+          type: values.type,
+        };
 
         try {
           if (selectedRow?._id) {
             await updateAdminAcademyCategory({
-              data: formData,
+              data: payloadData,
               id: selectedRow?._id,
             }).unwrap();
             refetch();
             toast.success("Academy category updated successfully!");
           } else {
-            await createAdminAcademyCategory(formData).unwrap();
+            await createAdminAcademyCategory(payloadData).unwrap();
             refetch();
             toast.success("Academy category created successfully!");
           }
@@ -138,6 +128,9 @@ const CreateEducator = forwardRef(
       },
     });
 
+    // Debugging Formik State
+
+
     useEffect(() => {
       if (selectedRow?._id) {
         const initData = {
@@ -145,7 +138,7 @@ const CreateEducator = forwardRef(
           image: selectedRow?.image,
           icon: selectedRow?.icon,
           type: selectedRow?.type,
-      
+
           status: String(selectedRow?.status),
         };
         formik.setValues(initData);
@@ -186,11 +179,10 @@ const CreateEducator = forwardRef(
                     type="text"
                     placeholder="Enter category name"
                     autoComplete="off"
-                    className={`form-control input input-md w-full ${
-                      formik.errors.name && formik.touched.name
-                        ? "border border-danger"
-                        : ""
-                    }`}
+                    className={`form-control input input-md w-full ${formik.errors.name && formik.touched.name
+                      ? "border border-danger"
+                      : ""
+                      }`}
                     {...formik.getFieldProps("name")}
                   />
                   {formik.touched.name && formik.errors.name && (
@@ -216,11 +208,10 @@ const CreateEducator = forwardRef(
                     onBlur={() => formik.setFieldTouched("type", true)}
                   >
                     <SelectTrigger
-                      className={`form-control input input-md w-full ${
-                        formik.errors.type && formik.touched.type
-                          ? "border border-danger"
-                          : ""
-                      }`}
+                      className={`form-control input input-md w-full ${formik.errors.type && formik.touched.type
+                        ? "border border-danger"
+                        : ""
+                        }`}
                     >
                       <SelectValue placeholder="Select" />
                     </SelectTrigger>
@@ -241,7 +232,7 @@ const CreateEducator = forwardRef(
                   )}
                 </div>
               </div>
-              <div className="col-span-12">
+              {/* <div className="col-span-12">
                 <div className="flex flex-col gap-1">
                   <label className="form-label text-gray-900 gap-1">
                     Icon Image
@@ -252,12 +243,12 @@ const CreateEducator = forwardRef(
                         ? typeof formik.values.icon === "string"
                           ? [{ dataURL: formik.values.icon }] // URL from backend
                           : [
-                              {
-                                dataURL: URL.createObjectURL(
-                                  formik.values.icon
-                                ),
-                              },
-                            ] // Local file
+                            {
+                              dataURL: URL.createObjectURL(
+                                formik.values.icon
+                              ),
+                            },
+                          ] // Local file
                         : []
                     }
                     accept="image/*"
@@ -283,12 +274,12 @@ const CreateEducator = forwardRef(
                         ? typeof formik.values.image === "string"
                           ? [{ dataURL: formik.values.image }] // URL from backend
                           : [
-                              {
-                                dataURL: URL.createObjectURL(
-                                  formik.values.image
-                                ),
-                              },
-                            ] // Local file
+                            {
+                              dataURL: URL.createObjectURL(
+                                formik.values.image
+                              ),
+                            },
+                          ] // Local file
                         : []
                     }
                     accept="image/*"
@@ -302,7 +293,7 @@ const CreateEducator = forwardRef(
                     </span>
                   )}
                 </div>
-              </div>
+              </div> */}
             </div>
           </div>
           <div className="flex border-gray-200 border-t justify-end py-5 pb-0 rounded-b dark:border-gray-200 gap-3">

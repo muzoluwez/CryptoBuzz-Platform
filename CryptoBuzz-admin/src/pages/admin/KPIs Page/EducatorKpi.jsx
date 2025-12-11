@@ -265,7 +265,7 @@ const EducatorKpi = ({ title = "Educator KPIs" }) => {
         totalCount: response.pagination?.totalRecords || 0,
       };
     } catch (error) {
-      console.error("Error fetching KPIs:", error);
+      // console.error("Error fetching KPIs:", error);
       return { data: [], totalCount: 0 };
     }
   };
@@ -292,7 +292,7 @@ const EducatorKpi = ({ title = "Educator KPIs" }) => {
 
       toast("Export successful");
     } catch (err) {
-      console.error(err);
+      // console.error(err);
       toast("Export failed", { type: "error" });
     } finally {
       setLoading(false); // loader stop

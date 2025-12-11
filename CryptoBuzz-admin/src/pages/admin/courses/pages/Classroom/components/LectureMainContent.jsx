@@ -1,7 +1,7 @@
 import { useEffect, useState, useCallback } from "react";
 import React from "react";
 import { Clock, Loader2, FileText, Video, AlertCircle } from "lucide-react";
-import ReactPlayer from "react-player/lazy";
+import ReactPlayer from "react-player";
 import ReactMarkdown from "react-markdown";
 import { motion } from "framer-motion";
 
@@ -29,7 +29,7 @@ const LectureMainContent = ({ currentLecture }) => {
         );
         setLectureContent(response.data);
       } catch (err) {
-        console.error("Error fetching lecture content:", err);
+        // console.error("Error fetching lecture content:", err);
         setError(err.message || "Failed to load lecture content");
       } finally {
         setIsLoading(false);

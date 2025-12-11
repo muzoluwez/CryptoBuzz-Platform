@@ -76,7 +76,7 @@ const AdminRecordingSession = () => {
           return [...prev, ...unique];
         });
       } catch (err) {
-        console.error("Error fetching recordings:", err);
+        // console.error("Error fetching recordings:", err);
       }
     },
     [id, trigger]
@@ -414,7 +414,7 @@ const AdminRecordingSession = () => {
         setIsCreateOpen={setIsCreateOpen}
         onUpdateSuccess={handleRefresh}
         selectedRow={updateDeleteRecording}
-        refetch={() => {}}
+        refetch={() => { }}
       />
     </div>
   );

@@ -7,9 +7,9 @@ export const adminCoursesTypesApiSlice = createApi({
     baseQuery: baseQueryWithReauth,
     endpoints: (builder) => ({
         getAdminCoursesTypes: builder.query({
-            query: ({ page = 1, limit = 10 ,search="" } = {}) => `/admin/course-type?page=${page}&limit=${limit}&search=${search}`,
+            query: ({ page = 1, limit = 10, search = "" } = {}) => `/admin/course-type?page=${page}&limit=${limit}&search=${search}`,
         }),
-       
+
         createAdminCoursesTypes: builder.mutation({
             query: (data) => ({
                 url: '/admin/course-type/',
@@ -33,7 +33,7 @@ export const adminCoursesTypesApiSlice = createApi({
     }),
 });
 
-export const { useLazyGetAdminCoursesTypesQuery, useCreateAdminCoursesTypesMutation, useUpdateAdminCoursesTypesMutation, useDeleteAdminCoursesTypesMutation } = adminCoursesTypesApiSlice;
+export const { useGetAdminCoursesTypesQuery, useLazyGetAdminCoursesTypesQuery, useCreateAdminCoursesTypesMutation, useUpdateAdminCoursesTypesMutation, useDeleteAdminCoursesTypesMutation } = adminCoursesTypesApiSlice;
 
 
 

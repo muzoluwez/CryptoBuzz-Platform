@@ -251,7 +251,7 @@ const AdminIqCrypto = ({ title = "IQ Crypto Projects" }) => {
         totalCount: response.pagination?.totalRecords || 0,
       };
     } catch (error) {
-      console.error("Error fetching IQ Crypto :", error);
+      // console.error("Error fetching IQ Crypto :", error);
       return { data: [], totalCount: 0 };
     }
   };

@@ -313,7 +313,7 @@ const CreatePostModal = ({ isOpen, onClose, editingPost = null }) => {
         }, 1000);
       }
     } catch (error) {
-      console.error("Failed to submit post:", error);
+      // console.error("Failed to submit post:", error);
 
       // Check for JWT expired error
       if (isJwtExpiredError(error)) {
@@ -380,14 +380,14 @@ const CreatePostModal = ({ isOpen, onClose, editingPost = null }) => {
         {createError && (
           <div className="px-5">
             <Alert variant="danger" icon="shield-cross">
-              {createError}
+              {/* {createError} */} Failed to create post
             </Alert>
           </div>
         )}
         {generalError && (
           <div className="px-5">
             <Alert variant="danger" icon="shield-cross">
-              {generalError}
+              {/* {generalError} */} Failed to create post
             </Alert>
           </div>
         )}
@@ -476,71 +476,71 @@ const CreatePostModal = ({ isOpen, onClose, editingPost = null }) => {
             {/* Selected Files Preview */}
             {(images.length > 0 ||
               videos.length > 0) /* || documents.length > 0 */ && (
-              <div className="space-y-3">
-                {/* Images */}
-                {images.length > 0 && (
-                  <div>
-                    <h4 className="text-sm font-medium text-gray-700 mb-2">
-                      Images ({images.length})
-                    </h4>
-                    <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
-                      {images.map((image, index) => (
-                        <div key={index} className="relative group">
-                          <img
-                            src={getFileSource(image)}
-                            alt={`Image ${index + 1}`}
-                            className="w-full h-24 object-cover rounded-lg"
-                          />
-                          {/* Only show remove button when not editing OR when editing but no existing images */}
-                          {(!editingPost ||
-                            (editingPost && !editingPost.images?.length)) && (
-                            <button
-                              type="button"
-                              onClick={() => removeFile(image, "image")}
-                              className="absolute top-1 right-1 p-1 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
-                            >
-                              <X size={12} />
-                            </button>
-                          )}
-                        </div>
-                      ))}
+                <div className="space-y-3">
+                  {/* Images */}
+                  {images.length > 0 && (
+                    <div>
+                      <h4 className="text-sm font-medium text-gray-700 mb-2">
+                        Images ({images.length})
+                      </h4>
+                      <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+                        {images.map((image, index) => (
+                          <div key={index} className="relative group">
+                            <img
+                              src={getFileSource(image)}
+                              alt={`Image ${index + 1}`}
+                              className="w-full h-24 object-cover rounded-lg"
+                            />
+                            {/* Only show remove button when not editing OR when editing but no existing images */}
+                            {(!editingPost ||
+                              (editingPost && !editingPost.images?.length)) && (
+                                <button
+                                  type="button"
+                                  onClick={() => removeFile(image, "image")}
+                                  className="absolute top-1 right-1 p-1 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                                >
+                                  <X size={12} />
+                                </button>
+                              )}
+                          </div>
+                        ))}
+                      </div>
                     </div>
-                  </div>
-                )}
+                  )}
 
-                {/* Videos */}
-                {videos.length > 0 && (
-                  <div>
-                    <h4 className="text-sm font-medium text-gray-700 mb-2">
-                      Videos ({videos.length})
-                    </h4>
-                    <div className="space-y-2">
-                      {videos.map((video, index) => (
-                        <div key={index} className="relative group">
-                          <video
-                            src={getFileSource(video)}
-                            controls
-                            className="w-full max-h-48 object-cover rounded-lg"
-                          />
-                          {/* Only show remove button when not editing OR when editing but no existing videos */}
-                          {(!editingPost ||
-                            (editingPost && !editingPost.videos?.length)) && (
-                            <button
-                              type="button"
-                              onClick={() => removeFile(video, "video")}
-                              className="absolute top-2 right-2 p-1 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
-                            >
-                              <X size={12} />
-                            </button>
-                          )}
-                        </div>
-                      ))}
+                  {/* Videos */}
+                  {videos.length > 0 && (
+                    <div>
+                      <h4 className="text-sm font-medium text-gray-700 mb-2">
+                        Videos ({videos.length})
+                      </h4>
+                      <div className="space-y-2">
+                        {videos.map((video, index) => (
+                          <div key={index} className="relative group">
+                            <video
+                              src={getFileSource(video)}
+                              controls
+                              className="w-full max-h-48 object-cover rounded-lg"
+                            />
+                            {/* Only show remove button when not editing OR when editing but no existing videos */}
+                            {(!editingPost ||
+                              (editingPost && !editingPost.videos?.length)) && (
+                                <button
+                                  type="button"
+                                  onClick={() => removeFile(video, "video")}
+                                  className="absolute top-2 right-2 p-1 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                                >
+                                  <X size={12} />
+                                </button>
+                              )}
+                          </div>
+                        ))}
+                      </div>
                     </div>
-                  </div>
-                )}
+                  )}
 
-                {/* Documents - Button commented out but functionality remains */}
-                {/* {documents.length > 0 && (
+                  {/* Documents - Button commented out but functionality remains */}
+                  {/* {documents.length > 0 && (
                                      <div>
                                          <h4 className="text-sm font-medium text-gray-700 mb-2">Documents ({documents.length})</h4>
                                          <div className="space-y-2">
@@ -565,22 +565,22 @@ const CreatePostModal = ({ isOpen, onClose, editingPost = null }) => {
                                      </div>
                                  )} */}
 
-                {/* Clear All Button - Only show when not editing OR when editing but no existing files */}
-                {(!editingPost ||
-                  (editingPost &&
-                    !editingPost.images?.length &&
-                    !editingPost.videos?.length &&
-                    !editingPost.documents?.length)) && (
-                  <button
-                    type="button"
-                    onClick={clearAllFiles}
-                    className="text-sm text-red-600 hover:text-red-800 hover:underline"
-                  >
-                    Clear all files
-                  </button>
-                )}
-              </div>
-            )}
+                  {/* Clear All Button - Only show when not editing OR when editing but no existing files */}
+                  {(!editingPost ||
+                    (editingPost &&
+                      !editingPost.images?.length &&
+                      !editingPost.videos?.length &&
+                      !editingPost.documents?.length)) && (
+                      <button
+                        type="button"
+                        onClick={clearAllFiles}
+                        className="text-sm text-red-600 hover:text-red-800 hover:underline"
+                      >
+                        Clear all files
+                      </button>
+                    )}
+                </div>
+              )}
 
             {/* Media Upload Buttons */}
             <div className="flex items-center gap-4 pt-2 border-t border-gray-100">
@@ -606,11 +606,10 @@ const CreatePostModal = ({ isOpen, onClose, editingPost = null }) => {
                     }
                   }}
                   disabled={editingPost && editingPost.images?.length > 0}
-                  className={`flex items-center gap-2 p-2 rounded-md transition-colors ${
-                    editingPost && editingPost.images?.length > 0
-                      ? "text-gray-400 cursor-not-allowed"
-                      : "text-gray-600 hover:text-blue-600 hover:bg-blue-50"
-                  }`}
+                  className={`flex items-center gap-2 p-2 rounded-md transition-colors ${editingPost && editingPost.images?.length > 0
+                    ? "text-gray-400 cursor-not-allowed"
+                    : "text-gray-600 hover:text-blue-600 hover:bg-blue-50"
+                    }`}
                 >
                   <Image size={20} />
                   <span>{editingPost ? "Images" : "Images"}</span>
@@ -638,11 +637,10 @@ const CreatePostModal = ({ isOpen, onClose, editingPost = null }) => {
                     }
                   }}
                   disabled={editingPost && editingPost.videos?.length > 0}
-                  className={`flex items-center gap-2 p-2 rounded-md transition-colors ${
-                    editingPost && editingPost.videos?.length > 0
-                      ? "text-gray-400 cursor-not-allowed"
-                      : "text-gray-600 hover:text-red-600 hover:bg-red-50"
-                  }`}
+                  className={`flex items-center gap-2 p-2 rounded-md transition-colors ${editingPost && editingPost.videos?.length > 0
+                    ? "text-gray-400 cursor-not-allowed"
+                    : "text-gray-600 hover:text-red-600 hover:bg-red-50"
+                    }`}
                 >
                   <Video size={20} />
                   <span>{editingPost ? "Videos" : "Videos"}</span>

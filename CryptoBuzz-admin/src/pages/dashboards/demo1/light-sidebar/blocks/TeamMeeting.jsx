@@ -2,13 +2,14 @@ import { KeenIcon } from '@/components';
 import { toAbsoluteUrl } from '@/utils';
 import { CommonAvatars } from '@/partials/common';
 import { Book, UserRound } from 'lucide-react';
+import { Link } from 'react-router-dom';
 const TeamMeeting = () => {
   return <div className="card h-full">
     <div className="card-body lg:p-7.5 lg:pt-6 p-5">
       <div className="flex items-center justify-between flex-wrap gap-5 mb-7.5">
         <div className="flex flex-col gap-1">
           <span className="text-1.5xl font-semibold text-gray-900">IQ Academy</span>
-          <span className="text-sm font-semibold text-gray-600">Live Market Sessions. <br/> In Real Time.</span>
+          <span className="text-sm font-semibold text-gray-600">Live Market Sessions. <br /> In Real Time.</span>
         </div>
 
         <img src={toAbsoluteUrl('/media/brand-logos/zoom.svg')} className="size-7" alt="" />
@@ -33,7 +34,7 @@ const TeamMeeting = () => {
             </div>
           </div>
           <div className="flex gap-5 justify-center mt-5">
-            <CommonAvatars  group={[{
+            <CommonAvatars group={[{
               filename: '300-4.png'
             }, {
               filename: '300-1.png'
@@ -49,9 +50,9 @@ const TeamMeeting = () => {
     </div>
 
     <div className="card-footer justify-center">
-      <a href="#" className="btn btn-link">
+      <Link to="#" className="btn btn-link">
         Join Meeting
-      </a>
+      </Link>
     </div>
   </div>;
 };

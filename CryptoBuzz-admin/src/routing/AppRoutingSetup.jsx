@@ -1,4 +1,6 @@
+import { lazy, Suspense } from 'react';
 import { Navigate, Route, Routes } from "react-router";
+import { ScreenLoader } from "@/components";
 import { DefaultPage } from "@/pages/dashboards";
 import { AuthPage } from "@/auth";
 import { RequireAuth } from "@/auth/RequireAuth";
@@ -11,50 +13,50 @@ import { useAuthContext } from "../auth/useAuthContext";
 // ============================================================================
 
 // Trade & Analysis Pages
-import AdminTradeIdeas from "../pages/admin/admin-trade-ideas/AdminTradeIdeas";
-import AdminTradeAnalysis from "../pages/admin/admin-trade-analysis/AdminTradeAnalysis";
+const AdminTradeIdeas = lazy(() => import("../pages/admin/admin-trade-ideas/AdminTradeIdeas"));
+const AdminTradeAnalysis = lazy(() => import("../pages/admin/admin-trade-analysis/AdminTradeAnalysis"));
 
 // Live Session & Recording Pages
-import LiveSession from "../pages/admin/live-session/LiveSession";
-import AdminLiveSessionView from "../pages/admin/live-session/AdminLiveSessionView";
-import AdminRecording from "../pages/admin/recording/AdminRecording";
-import AdminRecordingSession from "../pages/admin/recording/AdminRecordingSession";
+const LiveSession = lazy(() => import("../pages/admin/live-session/LiveSession"));
+const AdminLiveSessionView = lazy(() => import("../pages/admin/live-session/AdminLiveSessionView"));
+const AdminRecording = lazy(() => import("../pages/admin/recording/AdminRecording"));
+const AdminRecordingSession = lazy(() => import("../pages/admin/recording/AdminRecordingSession"));
 
 // Course & Academy Pages
-import Courses from "../pages/admin/courses/Courses";
-import AdminAcademyCategory from "../pages/admin/academy-category/AdminAcademyCategory";
+const Courses = lazy(() => import("../pages/admin/courses/Courses"));
+const AdminAcademyCategory = lazy(() => import("../pages/admin/academy-category/AdminAcademyCategory"));
 
 // Educator Management Pages
-import Educators from "../pages/admin/educators/Educators";
-import AdminRating from "../pages/admin/admin-educator-rating/AdminRating";
-import AdminEducatorRatings from "../pages/admin/admin-educator-rating/AdminEducatorRatings";
+const Educators = lazy(() => import("../pages/admin/educators/Educators"));
+const AdminRating = lazy(() => import("../pages/admin/admin-educator-rating/AdminRating"));
+const AdminEducatorRatings = lazy(() => import("../pages/admin/admin-educator-rating/AdminEducatorRatings"));
 
 // Schedule & Session Management Pages
-import AdminStreamSchedule from "../pages/admin/admin-stream-schedule/AdminStreamSchedule";
-import AdminEndSession from "../pages/admin/admin-end-session/AdminEndSession";
-import AdminEndSchedule from "../pages/admin/admin-end-schedule/AdminEndSchedule";
+const AdminStreamSchedule = lazy(() => import("../pages/admin/admin-stream-schedule/AdminStreamSchedule"));
+const AdminEndSession = lazy(() => import("../pages/admin/admin-end-session/AdminEndSession"));
+const AdminEndSchedule = lazy(() => import("../pages/admin/admin-end-schedule/AdminEndSchedule"));
 
 // Profile & Settings Pages
-import AdminProfile from "../pages/admin/admin-profile/AdminProfile";
-import GeneralSetting from "../pages/admin/general-setting/GeneralSetting";
+const AdminProfile = lazy(() => import("../pages/admin/admin-profile/AdminProfile"));
+const GeneralSetting = lazy(() => import("../pages/admin/general-setting/GeneralSetting"));
 
 // Community & Social Pages
-import AdminCommunityFeed from "../pages/admin/admin-community-feed/AdminCommunityFeed";
-import AdminIqCrypto from "../pages/admin/admin-iq-crypto/AdminIqCrypto";
-import IqSocial from "../pages/admin/iq-social/IqSocial";
+const AdminCommunityFeed = lazy(() => import("../pages/admin/admin-community-feed/AdminCommunityFeed"));
+const AdminIqCrypto = lazy(() => import("../pages/admin/admin-iq-crypto/AdminIqCrypto"));
+const IqSocial = lazy(() => import("../pages/admin/iq-social/IqSocial"));
 
 // KPIs & Analytics Pages
-import EducatorKpi from "../pages/admin/KPIs Page/EducatorKpi";
-import KpisDashboard from "../pages/admin/KPIs Page/Kpis";
+const EducatorKpi = lazy(() => import("../pages/admin/KPIs Page/EducatorKpi"));
+const KpisDashboard = lazy(() => import("../pages/admin/KPIs Page/Kpis"));
 
 // Package & Task Management Pages
-import Package from "../pages/admin/admin-package/Package";
-import Task from "../pages/admin/task-management/Task";
+const Package = lazy(() => import("../pages/admin/admin-package/Package"));
+const Task = lazy(() => import("../pages/admin/task-management/Task"));
 
 // Legal & Support Pages
-import PrivacyPolicy from "../auth/pages/PrivacyPolicy";
-import TermsOfService from "../auth/pages/TermsOfService";
-import Support from "../auth/pages/Support";
+const PrivacyPolicy = lazy(() => import("../auth/pages/PrivacyPolicy"));
+const TermsOfService = lazy(() => import("../auth/pages/TermsOfService"));
+const Support = lazy(() => import("../auth/pages/Support"));
 
 // ============================================================================
 // ADMIN ROUTES CONFIGURATION
@@ -170,34 +172,38 @@ const AppRoutingSetup = () => {
   const adminRoutes = routes.admin || [];
 
   return (
-    <Routes>
-      {/* Authentication wrapper - protects all routes */}
-      <Route element={<RequireAuth />}></Route>
+    <Suspense fallback={<ScreenLoader />}>
+      <Routes>
+        {/* Authentication wrapper - protects all routes */}
+        <Route element={<RequireAuth />}></Route>
 
-      {/* Admin Routes - All admin pages wrapped with Demo1Layout */}
-      {adminRoutes.map((route, index) => (
-        <Route key={index} element={<Demo1Layout />}>
-          <Route path={route.path} element={route.element} />
+        {/* Admin Routes - All admin pages wrapped with Demo1Layout and protected by RequireAuth */}
+        <Route element={<RequireAuth />}>
+          {adminRoutes.map((route, index) => (
+            <Route key={index} element={<Demo1Layout />}>
+              <Route path={route.path} element={route.element} />
+            </Route>
+          ))}
         </Route>
-      ))}
 
-      {/* Public Routes - Legal and Support Pages */}
-      <Route path="/privacy-policy" element={<PrivacyPolicy />} />
-      <Route path="/terms-of-service" element={<TermsOfService />} />
-      <Route path="/support" element={<Support />} />
+        {/* Public Routes - Legal and Support Pages */}
+        <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+        <Route path="/terms-of-service" element={<TermsOfService />} />
+        <Route path="/support" element={<Support />} />
 
-      {/* Error Handling Routes */}
-      <Route path="error/*" element={<ErrorsRouting />} />
+        {/* Error Handling Routes */}
+        <Route path="error/*" element={<ErrorsRouting />} />
 
-      {/* Authentication Routes - Login, Signup, etc. */}
-      <Route path="auth/*" element={<AuthPage />} />
+        {/* Authentication Routes - Login, Signup, etc. */}
+        <Route path="auth/*" element={<AuthPage />} />
 
-      {/* Catch-all Route - Redirect to 404 or login based on auth status */}
-      <Route
-        path="*"
-        element={<Navigate to={auth?.token ? "/error/404" : "/auth/login"} />}
-      />
-    </Routes>
+        {/* Catch-all Route - Redirect to 404 or login based on auth status */}
+        <Route
+          path="*"
+          element={<Navigate to={auth?.token ? "/error/404" : "/auth/login"} />}
+        />
+      </Routes>
+    </Suspense>
   );
 };
 

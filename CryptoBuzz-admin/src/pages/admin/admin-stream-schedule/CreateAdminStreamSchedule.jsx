@@ -1,6 +1,7 @@
 import React, { forwardRef, useEffect, useState } from "react";
 import { useFormik } from "formik";
-import moment from "moment-timezone";
+import { format } from "date-fns";
+import { toZonedTime } from "date-fns-tz";
 import * as Yup from "yup";
 import {
   Dialog,
@@ -40,16 +41,22 @@ const CreateAdminStreamSchedule = forwardRef(
     { isCreateOpen, handleCloseCreate, selectedRow, setSelectedRow, refetch },
     ref
   ) => {
+    const getCurrentEstTime = () => {
+      const now = new Date();
+      return toZonedTime(now, EST_ZONE);
+    };
+
     const [time, setTime] = useState({
-      date: moment().tz(EST_ZONE).format("dddd, MMMM D, YYYY"),
-      clock: moment().tz(EST_ZONE).format("hh:mm:ss A"),
+      date: format(getCurrentEstTime(), "eeee, MMMM d, yyyy"),
+      clock: format(getCurrentEstTime(), "hh:mm:ss a"),
     });
 
     useEffect(() => {
       const interval = setInterval(() => {
+        const estTime = getCurrentEstTime();
         setTime({
-          date: moment().tz(EST_ZONE).format("dddd, MMMM D, YYYY"),
-          clock: moment().tz(EST_ZONE).format("hh:mm:ss A"),
+          date: format(estTime, "eeee, MMMM d, yyyy"),
+          clock: format(estTime, "hh:mm:ss a"),
         });
       }, 1000);
       return () => clearInterval(interval);
@@ -171,7 +178,7 @@ const CreateAdminStreamSchedule = forwardRef(
           formik.resetForm();
           handleCloseCreate();
         } catch (err) {
-          console.error("API Error:", err);
+          // console.error("API Error:", err);
           const errorMessage =
             err?.data?.message || "An unexpected error occurred.";
           toast.error(errorMessage);
@@ -236,11 +243,10 @@ const CreateAdminStreamSchedule = forwardRef(
                     type="text"
                     placeholder="Enter title"
                     autoComplete="off"
-                    className={`form-control input input-md w-full ${
-                      formik.errors.title && formik.touched.title
-                        ? "border border-danger"
-                        : ""
-                    }`}
+                    className={`form-control input input-md w-full ${formik.errors.title && formik.touched.title
+                      ? "border border-danger"
+                      : ""
+                      }`}
                     {...formik.getFieldProps("title")}
                   />
                   {formik.touched.title && formik.errors.title && (
@@ -323,11 +329,10 @@ const CreateAdminStreamSchedule = forwardRef(
                       onValueChange={(value) =>
                         formik.setFieldValue("educator", value)
                       }
-                      className={`form-control input input-md w-full ${
-                        formik.errors.educator && formik.touched.educator
-                          ? "border border-danger"
-                          : ""
-                      }`}
+                      className={`form-control input input-md w-full ${formik.errors.educator && formik.touched.educator
+                        ? "border border-danger"
+                        : ""
+                        }`}
                     >
                       <SelectTrigger>
                         <SelectValue placeholder="Select" />
@@ -365,7 +370,7 @@ const CreateAdminStreamSchedule = forwardRef(
                     </SelectTrigger>
                     <SelectContent>
                       {Array.isArray(languagesList?.data) &&
-                      languagesList.data.length > 0 ? (
+                        languagesList.data.length > 0 ? (
                         languagesList.data.map((item) => (
                           <SelectItem key={item._id} value={item.name}>
                             {item.name}
@@ -397,11 +402,10 @@ const CreateAdminStreamSchedule = forwardRef(
                       onValueChange={(value) =>
                         formik.setFieldValue("category", value)
                       }
-                      className={`form-control input input-md w-full ${
-                        formik.errors.category && formik.touched.category
-                          ? "border border-danger"
-                          : ""
-                      }`}
+                      className={`form-control input input-md w-full ${formik.errors.category && formik.touched.category
+                        ? "border border-danger"
+                        : ""
+                        }`}
                     >
                       <SelectTrigger>
                         <SelectValue placeholder="Select" />
@@ -467,11 +471,10 @@ const CreateAdminStreamSchedule = forwardRef(
                           {...dragProps}
                           className={`
         border border-dashed rounded-lg text-center transition-colors 
-        p-5 ${isDragging ? "bg-gray-100" : ""} border-gray-300 ${
-          formik.touched.thumbnail && formik.errors.thumbnail
-            ? "validation-error-border"
-            : ""
-        }`}
+        p-5 ${isDragging ? "bg-gray-100" : ""} border-gray-300 ${formik.touched.thumbnail && formik.errors.thumbnail
+                              ? "validation-error-border"
+                              : ""
+                            }`}
                         >
                           {fileList.length === 0 ? (
                             <>

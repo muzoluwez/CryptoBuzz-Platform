@@ -1,6 +1,7 @@
 /* eslint-disable no-unused-vars */
 import axios from "axios";
-import { createContext, useState } from "react";
+import { useState } from "react";
+import { AuthContext } from "../AuthContext";
 import * as authHelper from "../_helpers";
 import * as lmsApi from "../../services/lms.api";
 import { lmsAuth } from "../../services";
@@ -61,7 +62,7 @@ const testUsers = {
   // },
 };
 
-const AuthContext = createContext(null);
+
 const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
   const [auth, setAuth] = useState(authHelper.getAuth());
@@ -107,8 +108,8 @@ const AuthProvider = ({ children }) => {
     try {
       const data = await lmsAuth.login(email, password);
       const auth = {
-        token: data.token,
-        user: data.user,
+        token: data?.data?.token,
+        user: data?.data?.user,
       };
       saveAuth(auth);
       // const {
@@ -354,7 +355,7 @@ const AuthProvider = ({ children }) => {
           }
         }
       } catch (err) {
-        console.error("Unexpected error:", err);
+        // console.error("Unexpected error:", err);
         return {
           success: false,
           error:
@@ -389,7 +390,7 @@ const AuthProvider = ({ children }) => {
     </AuthContext.Provider>
   );
 };
-export { AuthContext, AuthProvider };
+export { AuthProvider };
 
 
 

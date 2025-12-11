@@ -45,7 +45,6 @@ CategorySchema.pre("save", function (next) {
   if (this.isModified("name")) {
     this.slug = slugify(this.name, { lower: true, strict: true });
   }
-  next();
 });
 
 CategorySchema.pre("find", function () {

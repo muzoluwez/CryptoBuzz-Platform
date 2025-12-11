@@ -1,21 +1,21 @@
 import React, { forwardRef } from 'react';
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
-import { useDeleteTradeIdeaMutation } from '../../../store/api/admin/adminTradeIdeasApiSlice';
+import { useDeleteIdeaMutation } from '../../../store/api/admin/adminTradeIdeasApiSlice';
 import { toast } from 'sonner';
 
 
 const DeleteAdminTradeIdeas = forwardRef(({ isDeleteOpen, handleDeleteClose, selectedRow, refetch }, ref) => {
-    const [deleteTradeIdea, { isLoading, isSuccess, isError, error }] = useDeleteTradeIdeaMutation();
+    const [deleteIdea, { isLoading, isSuccess, isError, error }] = useDeleteIdeaMutation();
 
     const handleDelete = async () => {
         try {
-            await deleteTradeIdea(selectedRow?._id).unwrap();
+            await deleteIdea(selectedRow?._id).unwrap();
             refetch();
             toast.success("Trade idea deleted successfully!");
             handleDeleteClose();
         } catch (error) {
-            toast.error(err?.data?.message || "An error occurred");
+            toast.error(error?.data?.message || "An error occurred");
         }
     };
 

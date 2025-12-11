@@ -77,7 +77,7 @@ const AdminAcademyCategory = ({ title = "Academy Category" }) => {
       setToggleStatusData(toggleStatusData.map(type => type._id === typeId ? { ...type, status: newVisibility } : type));
       const payload = toggleStatusData.find(type => type._id === typeId);
       // Make API call
-      await updateAdminAcademyCategory({ id: payload?._id, data: { status: String(newVisibility), name: payload?.name }}).unwrap();
+      await updateAdminAcademyCategory({ id: payload?._id, data: { status: String(newVisibility), name: payload?.name } }).unwrap();
       toast.success(`Academy status updated to ${newVisibility ? 'Active' : 'Inactive'}`);
     } catch (error) {
       toast.error(error?.data?.message || 'Failed to update test visibility');
@@ -142,7 +142,7 @@ const AdminAcademyCategory = ({ title = "Academy Category" }) => {
       header: () => 'Status',
       enableSorting: false,
       cell: ({ row }) => {
-      
+
 
         return (
           <Switch
@@ -238,7 +238,7 @@ const AdminAcademyCategory = ({ title = "Academy Category" }) => {
         totalCount: response.pagination?.totalRecords || 0,
       };
     } catch (error) {
-      console.error("Error fetching IQ Ideas:", error);
+      console.error("Error fetching admin academy categories:", error);
       return { data: [], totalCount: 0 };
     }
   };

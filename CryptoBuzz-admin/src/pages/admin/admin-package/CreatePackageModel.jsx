@@ -42,10 +42,10 @@ const CreatePackageModel = forwardRef(
       { label: "/iq-educators/:id", value: "/iq-educators/:id" },
       { label: "/iq-academy-educators", value: "/iq-academy-educators" },
       { label: "/iq-social", value: "/iq-social" },
-      {
-        label: "https://www.iqcharts.com/",
-        value: "https://www.iqcharts.com/",
-      },
+      // {
+      //   label: "https://www.iqcharts.com/",
+      //   value: "https://www.iqcharts.com/",
+      // },
     ];
 
     const validationSchema = Yup.object({
@@ -82,7 +82,7 @@ const CreatePackageModel = forwardRef(
           setSelectedRow({});
           handleClose();
         } catch (err) {
-          console.error("API Error:", err);
+          // console.error("API Error:", err);
           toast.error(err?.data?.message || "Something went wrong.");
         }
       },
@@ -129,8 +129,8 @@ const CreatePackageModel = forwardRef(
                       placeholder="Enter package name"
                       autoComplete="off"
                       className={`form-control input dark:bg-[#2b2b2b] input-md w-full ${formik.errors.name && formik.touched.name
-                          ? "border border-danger"
-                          : ""
+                        ? "border border-danger"
+                        : ""
                         }`}
                       {...formik.getFieldProps("name")}
                     />

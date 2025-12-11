@@ -177,7 +177,6 @@ const TaskCard = ({ task, onEdit, onDelete, isOwnTask = false }) => {
 
   const safeHtml = makeClickableLinks(task?.description || "");
 
-  console.log(safeHtml, "safeHtml");
 
   return (
     <>
@@ -195,9 +194,8 @@ const TaskCard = ({ task, onEdit, onDelete, isOwnTask = false }) => {
               • {formatDate(task.createdAt)}
               {task.priority && (
                 <span
-                  className={`inline-flex items-center gap-1 px-2 py-0.5 text-[10px] font-semibold rounded-full ${
-                    priorityColors[task.priority] || "bg-gray-100 text-gray-700"
-                  }`}
+                  className={`inline-flex items-center gap-1 px-2 py-0.5 text-[10px] font-semibold rounded-full ${priorityColors[task.priority] || "bg-gray-100 text-gray-700"
+                    }`}
                 >
                   <Flag size={10} />{" "}
                   {task.priority.charAt(0).toUpperCase() +
