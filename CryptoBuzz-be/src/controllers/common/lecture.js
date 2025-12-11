@@ -176,18 +176,14 @@ export const updateLecture = async (req, res) => {
       if (videoUrl) await deleteVideoFromAzure(videoUrl);
 
       const file = req.files.video[0];
-      const buffer = fs.readFileSync(path.resolve("../../../public/temp", file.path));
-      videoUrl = await uploadVideoToAzure(buffer, file.originalname);
-      fs.unlinkSync(file.path);
+      videoUrl = await uploadVideoToAzure(file.buffer, file.originalname);
     }
 
     if (req.files?.thumbnail?.[0]) {
       if (thumbnailUrl) await deleteImageFromAzure(thumbnailUrl);
 
       const file = req.files.thumbnail[0];
-      const buffer = fs.readFileSync(path.resolve("../../../public/temp", file.path));
-      thumbnailUrl = await uploadImageToAzure(buffer, file.originalname);
-      fs.unlinkSync(file.path);
+      thumbnailUrl = await uploadImageToAzure(file.buffer, file.originalname);
     }
 
     const updatedLecture = await Lecture.findByIdAndUpdate(

@@ -101,12 +101,8 @@ export const createTradeAnalysis = async (req, res) => {
 
     const imageUrls = await Promise.all(
       req.files.map(async file => {
-        const filePath = path.resolve(process.cwd(), file.path);
-        const fileBuffer = fs.readFileSync(filePath);
+        const imageUrl = await uploadImageToAzure(file.buffer, file.originalname);
 
-        const imageUrl = await uploadImageToAzure(fileBuffer, file.originalname);
-
-        fs.unlinkSync(filePath);
         return imageUrl;
       })
     );
@@ -162,12 +158,8 @@ export const updateTradeAnalysis = async (req, res) => {
     if (req.files && req.files.length > 0) {
       const newImgUrls = await Promise.all(
         req.files.map(async file => {
-          const localPath = path.resolve(process.cwd(), file.path);
-          const buffer = fs.readFileSync(localPath);
+          const uploadedUrl = await uploadImageToAzure(file.buffer, file.originalname);
 
-          const uploadedUrl = await uploadImageToAzure(buffer, file.originalname);
-
-          fs.unlinkSync(localPath);
           return uploadedUrl;
         })
       );

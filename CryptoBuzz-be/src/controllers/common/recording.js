@@ -117,11 +117,7 @@ export const createPermanentRecording = async (req, res) => {
       language,
       is_temp: false
     });
-
-    res.status(201).json({
-      message: "Permanent Recording uploaded",
-      recording: newRecording
-    });
+    return res.status(200).json(ApiResponse(200, newRecording, "Permanent Recording uploaded"));
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
@@ -210,10 +206,7 @@ export const createTemporaryRecording = async (req, res) => {
       is_temp: true
     });
 
-    res.status(201).json({
-      message: "Temporary recording uploaded",
-      recording: newRecording
-    });
+    return res.status(200).json(ApiResponse(200, newRecording, "Temporary recording uploaded"));
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -265,7 +258,6 @@ export const getRecordings = async (req, res) => {
     return res
       .status(200)
       .json(GetApiResponse(200, { recorder, recordings: items }, pagination, "fetch recording successfully"));
-
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

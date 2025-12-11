@@ -101,26 +101,16 @@ export const createPost = async (req, res) => {
     const images = [];
     if (req.files?.images) {
       for (const file of req.files.images) {
-        const localPath = path.resolve(process.cwd(), file.path);
-        const buffer = fs.readFileSync(localPath);
-
-        const url = await uploadImageToAzure(buffer, file.originalname);
+        const url = await uploadImageToAzure(file.buffer, file.originalname);
         images.push({ url });
-
-        fs.unlinkSync(localPath);
       }
     }
 
     const videos = [];
     if (req.files?.videos) {
       for (const file of req.files.videos) {
-        const localPath = path.resolve(process.cwd(), file.path);
-        const buffer = fs.readFileSync(localPath);
-
-        const url = await uploadVideoToAzure(buffer, file.originalname);
+        const url = await uploadVideoToAzure(file.buffer, file.originalname);
         videos.push({ url });
-
-        fs.unlinkSync(localPath);
       }
     }
 
@@ -174,16 +164,13 @@ export const updatePost = async (req, res) => {
     // Replace images
     if (req.files?.images) {
       for (const img of post.images) {
-        if (img.url) await deleteImageFromAzure(img.url).catch(() => { });
+        if (img.url) await deleteImageFromAzure(img.url).catch(() => {});
       }
 
       const newImages = [];
       for (const file of req.files.images) {
-        const localPath = path.resolve(process.cwd(), file.path);
-        const buffer = fs.readFileSync(localPath);
-        const url = await uploadImageToAzure(buffer, file.originalname);
+        const url = await uploadImageToAzure(file.buffer, file.originalname);
         newImages.push({ url });
-        fs.unlinkSync(localPath);
       }
 
       post.images = newImages;
@@ -192,16 +179,13 @@ export const updatePost = async (req, res) => {
     // Replace videos
     if (req.files?.videos) {
       for (const vid of post.videos) {
-        if (vid.url) await deleteVideoFromAzure(vid.url).catch(() => { });
+        if (vid.url) await deleteVideoFromAzure(vid.url).catch(() => {});
       }
 
       const newVideos = [];
       for (const file of req.files.videos) {
-        const localPath = path.resolve(process.cwd(), file.path);
-        const buffer = fs.readFileSync(localPath);
-        const url = await uploadVideoToAzure(buffer, file.originalname);
+        const url = await uploadVideoToAzure(file.buffer, file.originalname);
         newVideos.push({ url });
-        fs.unlinkSync(localPath);
       }
 
       post.videos = newVideos;
@@ -232,11 +216,11 @@ export const deletePost = async (req, res) => {
     }
 
     for (const img of post.images) {
-      if (img.url) await deleteImageFromAzure(img.url).catch(() => { });
+      if (img.url) await deleteImageFromAzure(img.url).catch(() => {});
     }
 
     for (const vid of post.videos) {
-      if (vid.url) await deleteVideoFromAzure(vid.url).catch(() => { });
+      if (vid.url) await deleteVideoFromAzure(vid.url).catch(() => {});
     }
 
     await PostModel.findByIdAndDelete(req.params.id);

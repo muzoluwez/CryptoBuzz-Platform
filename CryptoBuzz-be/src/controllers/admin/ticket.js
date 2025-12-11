@@ -76,22 +76,16 @@ export const createTicket = async (req, res) => {
     const images = [];
     if (req.files?.images) {
       for (const file of req.files.images) {
-        const localPath = path.resolve(path.dirname(new URL(import.meta.url).pathname), "../../../", file.path);
-        const buffer = fs.readFileSync(localPath);
-        const azureUrl = await uploadImageToAzure(buffer, file.originalname);
+        const azureUrl = await uploadImageToAzure(file.buffer, file.originalname);
         images.push({ url: azureUrl });
-        fs.unlinkSync(localPath);
       }
     }
 
     const videos = [];
     if (req.files?.videos) {
       for (const file of req.files.videos) {
-        const localPath = path.resolve(path.dirname(new URL(import.meta.url).pathname), "../../../", file.path);
-        const buffer = fs.readFileSync(localPath);
-        const azureUrl = await uploadVideoToAzure(buffer, file.originalname);
+        const azureUrl = await uploadVideoToAzure(file.buffer, file.originalname);
         videos.push({ url: azureUrl });
-        fs.unlinkSync(localPath);
       }
     }
 
@@ -141,11 +135,8 @@ export const updateTicket = async (req, res) => {
 
       const newImages = [];
       for (const file of req.files.images) {
-        const localPath = path.resolve(path.dirname(new URL(import.meta.url).pathname), "../../../", file.path);
-        const buffer = fs.readFileSync(localPath);
-        const azureUrl = await uploadImageToAzure(buffer, file.originalname);
+        const azureUrl = await uploadImageToAzure(file.buffer, file.originalname);
         newImages.push({ url: azureUrl });
-        fs.unlinkSync(localPath);
       }
       ticket.images = newImages;
     }
@@ -158,11 +149,8 @@ export const updateTicket = async (req, res) => {
 
       const newVideos = [];
       for (const file of req.files.videos) {
-        const localPath = path.resolve(path.dirname(new URL(import.meta.url).pathname), "../../../", file.path);
-        const buffer = fs.readFileSync(localPath);
-        const azureUrl = await uploadVideoToAzure(buffer, file.originalname);
+        const azureUrl = await uploadVideoToAzure(file.buffer, file.originalname);
         newVideos.push({ url: azureUrl });
-        fs.unlinkSync(localPath);
       }
       ticket.videos = newVideos;
     }

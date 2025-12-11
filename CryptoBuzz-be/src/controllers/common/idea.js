@@ -58,7 +58,10 @@ export const getIdea = async (req, res) => {
     const limit = parseInt(req.query.limit) || 10;
     const categoryId = req.query.category;
 
-    const filter = { educatorId: user._id };
+    let filter = {};
+    if (user.role == "educator") {
+      filter = { educatorId: user._id };
+    }
 
     if (categoryId && mongoose.Types.ObjectId.isValid(categoryId)) {
       filter.category = new mongoose.Types.ObjectId(categoryId);
@@ -176,12 +179,8 @@ export const createIdea = async (req, res) => {
     }
     const imageUrls = await Promise.all(
       req.files.map(async file => {
-        const filePath = path.resolve(file.path);
-        const fileBuffer = fs.readFileSync(filePath);
+        const imageUrl = await uploadImageToAzure(file.buffer, file.originalname);
 
-        const imageUrl = await uploadImageToAzure(fileBuffer, file.originalname);
-
-        fs.unlinkSync(filePath); // delete local file
         return imageUrl;
       })
     );
@@ -270,12 +269,8 @@ export const updateIdea = async (req, res) => {
 
       updatedImageUrls = await Promise.all(
         req.files.map(async file => {
-          const localPath = path.resolve(file.path);
-          const buffer = fs.readFileSync(localPath);
+          const azureUrl = await uploadImageToAzure(file.buffer, file.originalname);
 
-          const azureUrl = await uploadImageToAzure(buffer, file.originalname);
-
-          fs.unlinkSync(localPath); // Clean local temp file
           return azureUrl;
         })
       );
