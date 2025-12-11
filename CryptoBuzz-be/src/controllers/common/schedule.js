@@ -9,45 +9,43 @@ import { v4 as uuidv4 } from "uuid";
 import fs from "fs";
 import path from "path";
 
+import { createLiveStreamForSchedule, updateLiveStreamForSchedule } from "../common/stream.js";
 
-import {
-  createLiveStreamForSchedule,
-  updateLiveStreamForSchedule,
-} from "../common/stream.js";
-
-import RecurrenceSchedule from "../../models/recurrenceSchedule.js"
+import RecurrenceSchedule from "../../models/recurrenceSchedule.js";
 import RecurrenceRule from "../../models/RecurrenceRule.js";
-import pkg from 'rrule';
+import pkg from "rrule";
 const { RRule } = pkg;
 import LiveStream from "../../models/liveStream.js";
+import { ApiResponse, GetApiResponse } from "../../utils/ApiResponse.js";
 
 // ======================= Validation =======================
 
 const scheduleValidationSchema = yup.object().shape({
   title: yup.string().required("Title is required").max(100),
   description: yup.string().max(500),
-  category: yup.string().required("Category is required")
-    .test('is-objectid', 'Invalid category ID', value => {
+  category: yup
+    .string()
+    .required("Category is required")
+    .test("is-objectid", "Invalid category ID", value => {
       return mongoose.Types.ObjectId.isValid(value);
     }),
-  educator: yup.string().required("Educator is required")
-    .test('is-objectid', 'Invalid educator ID', value => {
+  educator: yup
+    .string()
+    .required("Educator is required")
+    .test("is-objectid", "Invalid educator ID", value => {
       return mongoose.Types.ObjectId.isValid(value);
     }),
   language: yup.string().required("language is required"),
   tags: yup.array().of(yup.string().max(30)).min(1, "At least one tag is required"),
-  datetime: yup.date().required("Date and time is required")
-    .min(new Date(), "Schedule date must be in the future"),
+  datetime: yup.date().required("Date and time is required").min(new Date(), "Schedule date must be in the future")
 });
-
 
 // ======================= LIST SCHEDULE =======================
 
 export const listSchedule = async (req, res) => {
   try {
     const educator = req.user;
-    const { page = 1, limit = 10, sort = "-datetime", search = "", category } =
-      req.query;
+    const { page = 1, limit = 10, sort = "-datetime", search = "", category } = req.query;
 
     const query = { isDeleted: false };
 
@@ -74,16 +72,13 @@ export const listSchedule = async (req, res) => {
       .populate("educator", "first_name last_name image")
       .populate("create_by", "first_name last_name")
       .populate("language", "name")
-      .populate(
-        "recurrenceRuleId",
-        "frequency interval byWeekday hasEndLimit occurrences endType endDateTime"
-      )
+      .populate("recurrenceRuleId", "frequency interval byWeekday hasEndLimit occurrences endType endDateTime")
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit)
       .exec();
 
-    const response = schedules.map((item) => ({
+    const response = schedules.map(item => ({
       _id: item._id,
       title: item.title,
       image: item.image,
@@ -100,20 +95,16 @@ export const listSchedule = async (req, res) => {
       createdAt: item.createdAt,
       updatedAt: item.updatedAt,
       isRecurent: item.isRecurent || false,
-      recurrenceRuleId: item.recurrenceRuleId || "",
+      recurrenceRuleId: item.recurrenceRuleId || ""
     }));
 
-    res.status(200).json({
-      success: true,
-      message: "Schedules fetched successfully",
-      data: response,
-      pagination: {
-        currentPage: Number(page),
-        limit: Number(limit),
-        totalPages,
-        totalRecords: totalCount,
-      },
-    });
+    const pagination = {
+      currentPage: Number(page),
+      limit: Number(limit),
+      totalPages,
+      totalRecords: totalCount
+    };
+    return res.status(200).json(GetApiResponse(200, response, pagination, "Schedules fetched successfully"));
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }
@@ -129,7 +120,7 @@ export const createSchedule = async (req, res) => {
     if (!createdUser) {
       return res.status(400).json({
         success: false,
-        message: "Create user is required..!",
+        message: "Create user is required..!"
       });
     }
 
@@ -138,11 +129,9 @@ export const createSchedule = async (req, res) => {
     const scheduleData = {
       ...body,
       callId: `callId-${uuidv4()}`,
-      tags: Array.isArray(body.tags)
-        ? body.tags
-        : body.tags.split(",").map((tag) => tag.trim()),
+      tags: Array.isArray(body.tags) ? body.tags : body.tags.split(",").map(tag => tag.trim()),
       datetime: new Date(body.datetime),
-      create_by: createdUser,
+      create_by: createdUser
     };
 
     const schedule = await Schedule.create(scheduleData);
@@ -158,7 +147,7 @@ export const createSchedule = async (req, res) => {
       success: true,
       message: "Schedule created successfully",
       data: populatedSchedule,
-      stream: result,
+      stream: result
     });
   } catch (error) {
     res.status(500).json({ success: false, message: error.errors || error.message });
@@ -171,17 +160,14 @@ export const viewSchedule = async (req, res) => {
   try {
     const { id } = req.params;
 
-    if (!mongoose.Types.ObjectId.isValid(id))
-      return res.status(400).json({ success: false, message: "Invalid ID" });
+    if (!mongoose.Types.ObjectId.isValid(id)) return res.status(400).json({ success: false, message: "Invalid ID" });
 
     const schedule = await Schedule.findOne({ _id: id, isDeleted: false })
       .populate("category", "name")
       .populate("educator", "firstName lastName");
 
-    if (!schedule)
-      return res.status(404).json({ success: false, message: "Not found" });
-
-    res.status(200).json({ success: true, data: schedule });
+    if (!schedule) return res.status(404).json({ success: false, message: "Not found" });
+    return res.status(200).json(ApiResponse(200, schedule, "Schedules fetched successfully"));
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }
@@ -194,8 +180,7 @@ export const updateSchedule = async (req, res) => {
     const { id } = req.params;
     const { body } = req;
 
-    if (!mongoose.Types.ObjectId.isValid(id))
-      return res.status(400).json({ success: false, message: "Invalid ID" });
+    if (!mongoose.Types.ObjectId.isValid(id)) return res.status(400).json({ success: false, message: "Invalid ID" });
 
     await scheduleValidationSchema.validate(body, { abortEarly: false });
 
@@ -203,20 +188,18 @@ export const updateSchedule = async (req, res) => {
     if (!schedule) {
       return res.status(404).json({
         success: false,
-        message: "Schedule not found",
+        message: "Schedule not found"
       });
     }
 
     const updateData = {
       ...body,
-      tags: Array.isArray(body.tags)
-        ? body.tags
-        : body.tags.split(",").map((t) => t.trim()),
-      datetime: new Date(body.datetime),
+      tags: Array.isArray(body.tags) ? body.tags : body.tags.split(",").map(t => t.trim()),
+      datetime: new Date(body.datetime)
     };
 
     const updated = await Schedule.findByIdAndUpdate(id, updateData, {
-      new: true,
+      new: true
     })
       .populate("category", "name")
       .populate("language", "name")
@@ -233,16 +216,11 @@ export const updateSchedule = async (req, res) => {
           category: updated.category,
           language: updated.language,
           tags: updated.tags,
-          datetime: updated.datetime,
-        },
+          datetime: updated.datetime
+        }
       }
     );
-
-    res.status(200).json({
-      success: true,
-      message: "Schedule updated successfully",
-      data: updated,
-    });
+    return res.status(200).json(ApiResponse(200, updated, "Schedules updated successfully"));
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }
@@ -254,8 +232,7 @@ export const deleteSchedule = async (req, res) => {
   try {
     const { id } = req.params;
 
-    if (!mongoose.Types.ObjectId.isValid(id))
-      return res.status(400).json({ success: false, message: "Invalid ID" });
+    if (!mongoose.Types.ObjectId.isValid(id)) return res.status(400).json({ success: false, message: "Invalid ID" });
 
     const schedule = await Schedule.findOneAndUpdate(
       { _id: id, isDeleted: false },
@@ -263,24 +240,17 @@ export const deleteSchedule = async (req, res) => {
       { new: true }
     );
 
-    if (!schedule)
-      return res
-        .status(404)
-        .json({ success: false, message: "Schedule not found" });
+    if (!schedule) return res.status(404).json({ success: false, message: "Schedule not found" });
 
     await LiveStream.deleteMany({ callId: schedule.callId });
 
     if (schedule.recurrenceRuleId) {
       await RecurrenceRule.deleteMany({ _id: schedule.recurrenceRuleId });
       await RecurrenceSchedule.deleteMany({
-        recurrenceRuleId: schedule.recurrenceRuleId,
+        recurrenceRuleId: schedule.recurrenceRuleId
       });
     }
-
-    res.status(200).json({
-      success: true,
-      message: "Schedule deleted successfully",
-    });
+    return res.status(200).json(ApiResponse(200, {}, "Schedule deleted successfully"));
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }
@@ -294,16 +264,11 @@ export const statusUpdate = async (req, res) => {
     const { status } = req.body;
 
     const schedule = await Schedule.findById(userId);
-    if (!schedule)
-      return res.status(404).json({ success: false, message: "Not found" });
+    if (!schedule) return res.status(404).json({ success: false, message: "Not found" });
 
     schedule.status = status;
     await schedule.save();
-
-    res.status(200).json({
-      success: true,
-      message: "Status updated successfully",
-    });
+    return res.status(200).json(ApiResponse(200, {}, "Schedules updated successfully"));
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }
@@ -321,25 +286,22 @@ function generateDatesFromRule(rule) {
     TH: RRule.TH,
     FR: RRule.FR,
     SA: RRule.SA,
-    SU: RRule.SU,
+    SU: RRule.SU
   };
 
   const options = {
     freq: RRule[rule.frequency],
     interval: Number(rule.interval) || 1,
-    dtstart: start,
+    dtstart: start
   };
 
-  if (rule.endType === "DATE" && rule.endDate)
-    options.until = new Date(rule.endDate);
+  if (rule.endType === "DATE" && rule.endDate) options.until = new Date(rule.endDate);
 
-  if (rule.endType === "OCCURRENCES" && rule.occurrences)
-    options.count = rule.occurrences;
+  if (rule.endType === "OCCURRENCES" && rule.occurrences) options.count = rule.occurrences;
 
-  if (rule.frequency === "WEEKLY")
-    options.byweekday = rule.byWeekday?.map((d) => weekdayMap[d]);
+  if (rule.frequency === "WEEKLY") options.byweekday = rule.byWeekday?.map(d => weekdayMap[d]);
 
-  return new RRule(options).all().map((d) => {
+  return new RRule(options).all().map(d => {
     d.setHours(start.getHours(), start.getMinutes());
     return d;
   });
@@ -378,12 +340,10 @@ export const createRecurringSessions = async (req, res) => {
       language: body.language,
       educator: body.educator || createdUser._id,
       callId: `callId-${uuidv4()}`,
-      tags: Array.isArray(body.tags)
-        ? body.tags
-        : body.tags.split(",").map((tag) => tag.trim()),
+      tags: Array.isArray(body.tags) ? body.tags : body.tags.split(",").map(tag => tag.trim()),
       datetime: startDate,
       create_by: createdUser,
-      isRecurent: frequency !== "NONE",
+      isRecurent: frequency !== "NONE"
     };
 
     const schedule = await Schedule.create(scheduleData);
@@ -406,7 +366,7 @@ export const createRecurringSessions = async (req, res) => {
         hasEndLimit: false,
         startDate,
         endDate: null,
-        endType: null,
+        endType: null
       });
 
       schedule.recurrenceRuleId = rule._id;
@@ -421,14 +381,14 @@ export const createRecurringSessions = async (req, res) => {
         language: body.language,
         tags: body.tags,
         datetime: startDate,
-        recurrenceRuleId: rule._id,
+        recurrenceRuleId: rule._id
       });
 
       return res.status(201).json({
         success: true,
         message: "Single session created successfully",
         schedule: populatedSchedule,
-        session,
+        session
       });
     }
 
@@ -443,7 +403,7 @@ export const createRecurringSessions = async (req, res) => {
       startDate,
       endDate,
       endType: recurrence.endType,
-      occurrences: recurrence.occurrences || null,
+      occurrences: recurrence.occurrences || null
     });
 
     schedule.recurrenceRuleId = rule._id;
@@ -452,7 +412,7 @@ export const createRecurringSessions = async (req, res) => {
     const sessionDates = generateDatesFromRule(rule);
 
     const createdSessions = await Promise.all(
-      sessionDates.map((d) =>
+      sessionDates.map(d =>
         RecurrenceSchedule.create({
           educator: createdUser._id,
           schedule: populatedSchedule._id,
@@ -462,7 +422,7 @@ export const createRecurringSessions = async (req, res) => {
           language: body.language,
           tags: body.tags,
           datetime: d,
-          recurrenceRuleId: rule._id,
+          recurrenceRuleId: rule._id
         })
       )
     );
@@ -471,7 +431,7 @@ export const createRecurringSessions = async (req, res) => {
       success: true,
       message: "Recurring sessions created successfully",
       rule,
-      schedules: createdSessions,
+      schedules: createdSessions
     });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
@@ -490,8 +450,7 @@ export const updateRecurringSessions = async (req, res) => {
     const updatedUser = req.user;
     const schedule = await Schedule.findById(scheduleId);
 
-    if (!schedule)
-      return res.status(404).json({ success: false, message: "Not found" });
+    if (!schedule) return res.status(404).json({ success: false, message: "Not found" });
 
     const recurrence = body.recurrenceRule || {};
     const frequency = recurrence.frequency;
@@ -514,9 +473,7 @@ export const updateRecurringSessions = async (req, res) => {
     schedule.language = body.language;
     schedule.educator = body.educator;
     schedule.datetime = startDate;
-    schedule.tags = Array.isArray(body.tags)
-      ? body.tags
-      : body.tags?.split(",").map((t) => t.trim());
+    schedule.tags = Array.isArray(body.tags) ? body.tags : body.tags?.split(",").map(t => t.trim());
     schedule.isRecurent = frequency !== "NONE";
     await schedule.save();
 
@@ -539,7 +496,7 @@ export const updateRecurringSessions = async (req, res) => {
         startDate,
         endDate,
         endType: null,
-        occurrences: null,
+        occurrences: null
       });
 
       const session = await RecurrenceSchedule.create({
@@ -551,21 +508,21 @@ export const updateRecurringSessions = async (req, res) => {
         language: body.language,
         tags: schedule.tags,
         datetime: startDate,
-        recurrenceRuleId: rule._id,
+        recurrenceRuleId: rule._id
       });
 
       return res.status(200).json({
         success: true,
         message: "Single session updated successfully",
         schedule,
-        session,
+        session
       });
     }
 
     // Recurring Sessions (Update rule + regenerate)
     if (schedule.recurrenceRuleId) {
       await RecurrenceSchedule.deleteMany({
-        recurrenceRuleId: schedule.recurrenceRuleId,
+        recurrenceRuleId: schedule.recurrenceRuleId
       });
       await RecurrenceRule.findByIdAndDelete(schedule.recurrenceRuleId);
     }
@@ -580,13 +537,13 @@ export const updateRecurringSessions = async (req, res) => {
       startDate,
       endDate,
       endType: recurrence.endType,
-      occurrences: recurrence.occurrences,
+      occurrences: recurrence.occurrences
     });
 
     const dates = generateDatesFromRule(newRule);
 
     const newSessions = await Promise.all(
-      dates.map((dt) =>
+      dates.map(dt =>
         RecurrenceSchedule.create({
           educator: updatedUser._id,
           schedule: schedule._id,
@@ -596,7 +553,7 @@ export const updateRecurringSessions = async (req, res) => {
           language: body.language,
           tags: schedule.tags,
           datetime: dt,
-          recurrenceRuleId: newRule._id,
+          recurrenceRuleId: newRule._id
         })
       )
     );
@@ -605,7 +562,7 @@ export const updateRecurringSessions = async (req, res) => {
       success: true,
       message: "Recurring sessions updated successfully",
       rule: newRule,
-      schedules: newSessions,
+      schedules: newSessions
     });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
@@ -622,5 +579,5 @@ export default {
   viewSchedule,
   statusUpdate,
   createRecurringSessions,
-  updateRecurringSessions,
+  updateRecurringSessions
 };

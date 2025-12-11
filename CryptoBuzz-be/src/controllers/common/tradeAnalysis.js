@@ -34,7 +34,10 @@ export const getTradeAnalysis = async (req, res) => {
     const limit = parseInt(req.query.limit) || 10;
     const categoryId = req.query.category;
 
-    const filter = { createdBy: user._id };
+    let filter = {};
+    if (user.role == "educator") {
+      filter = { createdBy: user._id };
+    }
 
     if (categoryId && mongoose.Types.ObjectId.isValid(categoryId)) {
       filter.category = new mongoose.Types.ObjectId(categoryId);

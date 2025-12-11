@@ -1,5 +1,5 @@
 import axios from "axios";
-import recordingModel from "../../models/recording.js"
+import recordingModel from "../../models/recording.js";
 import path from "path";
 import fs from "fs";
 import FormData from "form-data";
@@ -12,9 +12,9 @@ import {
   uploadVideoToAzure,
   uploadImageToAzure,
   getSignedUrl,
-  deleteImageFromAzure,
+  deleteImageFromAzure
 } from "../../utils/azureUploader.js";
-
+import { ApiResponse, GetApiResponse } from "../../utils/ApiResponse.js";
 
 // 🛠 Normalize Blob Name
 function normalizeBlobName(blobName) {
@@ -45,18 +45,17 @@ export const createPermanentRecording = async (req, res) => {
       call_title,
       call_description,
       call_category,
-      call_tags,
+      call_tags
     } = req.body;
 
     const session = await Schedule.findOne({
       educator: educator_id,
-      callId: call_id,
+      callId: call_id
     })
       .populate("educator", "first_name last_name projectId")
       .populate("category", "name");
 
-    if (!session)
-      return res.status(404).json({ message: "Session not found" });
+    if (!session) return res.status(404).json({ message: "Session not found" });
 
     const educator_name = `${session.educator?.first_name || ""} ${session.educator?.last_name || ""}`.trim();
     const category_name = session.category?.name || call_category || "General";
@@ -65,17 +64,14 @@ export const createPermanentRecording = async (req, res) => {
     const projectId = session.educator?.projectId || "IcryHgzSpkys2tRtl3M8FQ";
 
     const exists = await recordingModel.findOne({
-      streamio_filename: filename,
+      streamio_filename: filename
     });
 
-    if (exists)
-      return res.status(400).json({ message: "Recording already exist" });
+    if (exists) return res.status(400).json({ message: "Recording already exist" });
 
-    if (!url)
-      return res.status(400).json({ message: "url is required" });
+    if (!url) return res.status(400).json({ message: "url is required" });
 
-    if (!DYNTUBE_API_KEY)
-      return res.status(400).json({ message: "DYNTUBE_API_KEY missing" });
+    if (!DYNTUBE_API_KEY) return res.status(400).json({ message: "DYNTUBE_API_KEY missing" });
 
     const formData = new FormData();
     formData.append("url", url);
@@ -87,7 +83,7 @@ export const createPermanentRecording = async (req, res) => {
     formData.append("tags", language);
 
     if (Array.isArray(call_tags)) {
-      call_tags.forEach((t) => formData.append("tags", t));
+      call_tags.forEach(t => formData.append("tags", t));
     } else if (call_tags) {
       formData.append("tags", call_tags);
     }
@@ -95,8 +91,8 @@ export const createPermanentRecording = async (req, res) => {
     const dyntubeResponse = await axios.post(DYNTUBE_UPLOAD_URL, formData, {
       headers: {
         Authorization: `Bearer ${DYNTUBE_API_KEY}`,
-        ...formData.getHeaders(),
-      },
+        ...formData.getHeaders()
+      }
     });
 
     const data = dyntubeResponse.data;
@@ -119,12 +115,12 @@ export const createPermanentRecording = async (req, res) => {
       educator_name,
       category_name,
       language,
-      is_temp: false,
+      is_temp: false
     });
 
     res.status(201).json({
       message: "Permanent Recording uploaded",
-      recording: newRecording,
+      recording: newRecording
     });
   } catch (err) {
     res.status(500).json({ message: err.message });
@@ -147,12 +143,12 @@ export const createTemporaryRecording = async (req, res) => {
       call_title,
       call_description,
       call_category,
-      call_tags,
+      call_tags
     } = req.body;
 
     const session = await Schedule.findOne({
       educator: educator_id,
-      callId: call_id,
+      callId: call_id
     })
       .populate("educator", "first_name last_name projectId")
       .populate("category", "name");
@@ -165,14 +161,12 @@ export const createTemporaryRecording = async (req, res) => {
     const projectId = session.educator?.projectId || "IcryHgzSpkys2tRtl3M8FQ";
 
     const exists = await recordingModel.findOne({
-      streamio_filename: filename,
+      streamio_filename: filename
     });
 
-    if (exists)
-      return res.status(400).json({ message: "Recording already exist" });
+    if (exists) return res.status(400).json({ message: "Recording already exist" });
 
-    if (!url)
-      return res.status(400).json({ message: "url is required" });
+    if (!url) return res.status(400).json({ message: "url is required" });
 
     const formData = new FormData();
     formData.append("url", url);
@@ -184,14 +178,13 @@ export const createTemporaryRecording = async (req, res) => {
     formData.append("tags", category_name);
     formData.append("tags", language);
 
-    if (Array.isArray(call_tags))
-      call_tags.forEach((t) => formData.append("tags", t));
+    if (Array.isArray(call_tags)) call_tags.forEach(t => formData.append("tags", t));
 
     const dyntubeResponse = await axios.post(DYNTUBE_UPLOAD_URL, formData, {
       headers: {
         Authorization: `Bearer ${DYNTUBE_API_KEY}`,
-        ...formData.getHeaders(),
-      },
+        ...formData.getHeaders()
+      }
     });
 
     const data = dyntubeResponse.data;
@@ -214,12 +207,12 @@ export const createTemporaryRecording = async (req, res) => {
       educator_name,
       category_name,
       language,
-      is_temp: true,
+      is_temp: true
     });
 
     res.status(201).json({
       message: "Temporary recording uploaded",
-      recording: newRecording,
+      recording: newRecording
     });
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -237,12 +230,9 @@ export const getRecordings = async (req, res) => {
     const pageNumber = Number(page);
     const limitNumber = Number(limit);
 
-    const recorder = await User.findById(id).select(
-      "_id first_name last_name image role email bannerImage"
-    );
+    const recorder = await User.findById(id).select("_id first_name last_name image role email bannerImage");
 
-    if (!recorder)
-      return res.status(404).json({ error: "Recorder not found" });
+    if (!recorder) return res.status(404).json({ error: "Recorder not found" });
 
     const query = { educator_id: recorder._id };
     if (call_id) query.call_id = call_id;
@@ -257,7 +247,7 @@ export const getRecordings = async (req, res) => {
       .lean();
 
     await Promise.all(
-      items.map(async (rec) => {
+      items.map(async rec => {
         if (rec.url) {
           const clean = normalizeBlobName(rec.url);
           rec.url = await getSignedUrl(clean);
@@ -265,18 +255,17 @@ export const getRecordings = async (req, res) => {
       })
     );
 
-    res.status(200).json({
-      data: {
-        recorder,
-        recordings: items,
-        pagination: {
-          total: totalCount,
-          page: pageNumber,
-          limit: limitNumber,
-          totalPages: Math.ceil(totalCount / limitNumber),
-        },
-      },
-    });
+    const pagination = {
+      total: totalCount,
+      page: pageNumber,
+      limit: limitNumber,
+      totalPages: Math.ceil(totalCount / limitNumber)
+    };
+
+    return res
+      .status(200)
+      .json(GetApiResponse(200, { recorder, recordings: items }, pagination, "fetch recording successfully"));
+
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -337,23 +326,13 @@ export const updateRecording = async (req, res) => {
 
     const payload = {
       ...req.body,
-      thumbnail: thumbnailUrl,
+      thumbnail: thumbnailUrl
     };
 
-    const updated = await recordingModel.findByIdAndUpdate(
-      req.params.id,
-      payload,
-      { new: true }
-    );
+    const updated = await recordingModel.findByIdAndUpdate(req.params.id, payload, { new: true });
 
-    if (!updated)
-      return res.status(404).json({ success: false, message: "Not found" });
-
-    res.status(200).json({
-      success: true,
-      message: "Recording updated",
-      data: updated,
-    });
+    if (!updated) return res.status(404).json({ success: false, message: "Not found" });
+    return res.status(200).json(ApiResponse(200, updated, "Recording updated successfully"));
   } catch (err) {
     res.status(400).json({ success: false, message: err.message });
   }
@@ -371,15 +350,14 @@ export const deleteRecording = async (req, res) => {
 
     try {
       await axios.delete(`https://api.dyntube.com/v1/videos/${rec.dyntube_id}`, {
-        headers: { Authorization: `Bearer ${DYNTUBE_API_KEY}` },
+        headers: { Authorization: `Bearer ${DYNTUBE_API_KEY}` }
       });
     } catch (err) {
       console.log("Dyntube delete error:", err.message);
     }
 
     await recordingModel.deleteOne({ _id: rec._id });
-
-    res.json({ message: "Recording deleted" });
+    return res.status(200).json(ApiResponse(200, {}, "Recording delete successfully"));
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -400,14 +378,14 @@ export const streamVideo = async (req, res) => {
 
     const response = await axios.get(blobUrl, {
       responseType: "stream",
-      headers: { Range: range },
+      headers: { Range: range }
     });
 
     res.writeHead(206, {
       "Content-Range": response.headers["content-range"],
       "Accept-Ranges": "bytes",
       "Content-Length": response.headers["content-length"],
-      "Content-Type": "video/mp4",
+      "Content-Type": "video/mp4"
     });
 
     response.data.pipe(res);
@@ -421,16 +399,8 @@ export const streamVideo = async (req, res) => {
 ---------------------------------------------------------- */
 export const createManuallyRecording = async (req, res) => {
   try {
-    const {
-      educator_id,
-      videoUrl,
-      start_time,
-      end_time,
-      call_title,
-      call_description,
-      call_category,
-      call_tags,
-    } = req.body;
+    const { educator_id, videoUrl, start_time, end_time, call_title, call_description, call_category, call_tags } =
+      req.body;
 
     const videoFile = req.files?.video?.[0];
 
@@ -440,17 +410,12 @@ export const createManuallyRecording = async (req, res) => {
       const filePath = path.resolve(__dirname, "../../../", videoFile.path);
       const buffer = fs.readFileSync(filePath);
 
-      finalVideoUrl = await uploadVideoToAzure(
-        buffer,
-        videoFile.originalname,
-        "video/mp4"
-      );
+      finalVideoUrl = await uploadVideoToAzure(buffer, videoFile.originalname, "video/mp4");
 
       fs.unlinkSync(filePath);
     }
 
-    if (!finalVideoUrl)
-      return res.status(400).json({ message: "Video file or URL required" });
+    if (!finalVideoUrl) return res.status(400).json({ message: "Video file or URL required" });
 
     const newRec = await recordingModel.create({
       educator_id,
@@ -463,13 +428,9 @@ export const createManuallyRecording = async (req, res) => {
       call_title,
       call_description,
       call_category,
-      call_tags,
+      call_tags
     });
-
-    res.status(201).json({
-      message: "Manual recording created",
-      recording: newRec,
-    });
+    return res.status(200).json(ApiResponse(200, newRec, "Manual recording created"));
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
@@ -478,7 +439,7 @@ export const createManuallyRecording = async (req, res) => {
 /* ---------------------------------------------------------
    CRON JOB TO DELETE OLD TEMP RECORDINGS
 ---------------------------------------------------------- */
-const delay = (ms) => new Promise((r) => setTimeout(r, ms));
+const delay = ms => new Promise(r => setTimeout(r, ms));
 
 cron.schedule("0 0 * * *", async () => {
   try {
@@ -487,17 +448,14 @@ cron.schedule("0 0 * * *", async () => {
 
     const old = await recordingModel.find({
       createdAt: { $lt: cutoff },
-      is_temp: true,
+      is_temp: true
     });
 
     for (const rec of old) {
       try {
-        await axios.delete(
-          `https://api.dyntube.com/v1/videos/${rec.dyntube_id}`,
-          {
-            headers: { Authorization: `Bearer ${DYNTUBE_API_KEY}` },
-          }
-        );
+        await axios.delete(`https://api.dyntube.com/v1/videos/${rec.dyntube_id}`, {
+          headers: { Authorization: `Bearer ${DYNTUBE_API_KEY}` }
+        });
 
         await recordingModel.deleteOne({ _id: rec._id });
       } catch (err) {

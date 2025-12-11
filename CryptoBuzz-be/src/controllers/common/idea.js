@@ -2,7 +2,7 @@ import IdeaModel from "../../models/idea.js";
 import yup from "yup";
 import path from "path";
 import fs from "fs";
-import { uploadImageToAzure, deleteImageFromAzure, } from "../../utils/azureUploader.js";
+import { uploadImageToAzure, deleteImageFromAzure } from "../../utils/azureUploader.js";
 // import { notifyUsersOnTradeIdea, notifyFollowersOfEducator } from "../../firebase/messaging";
 import CategoryModel from "../../models/category.js";
 import mongoose from "mongoose";
@@ -323,9 +323,7 @@ export const deleteIdea = async (req, res) => {
 
     await UserModel.updateOne({ _id: req.user._id }, { $inc: { ideaCount: -1 } });
 
-    return res.status(200).json({
-      message: "Record delete successfully"
-    });
+    return res.status(200).json(ApiResponse(200, {}, "Record delete successfully"));
   } catch (error) {
     return res.status(500).json({
       error: "Internal Server Error",
