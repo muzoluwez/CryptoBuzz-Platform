@@ -14,6 +14,7 @@ const Task = () => {
   const [triggerGetTasks, { data, isLoading, isFetching }] =
     useLazyGetTasksQuery();
 
+
   const [tasks, setTasks] = useState([]);
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
@@ -32,7 +33,7 @@ const Task = () => {
         page: pageNum,
         limit: 10,
       }).unwrap();
-      const newData = response?.tickets || [];
+      const newData = response?.data || [];
 
       if (pageNum === 1) setTasks(newData);
       else setTasks((prev) => [...prev, ...newData]);

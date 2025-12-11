@@ -16,7 +16,7 @@ import api from "./axiosConfig";
  */
 export const getAllLectures = async (params = {}, token = null) => {
   try {
-    const response = await api.get("/admin/lecture", {
+    const response = await api.get("/common/lecture", {
       params,
       headers: {
         Authorization: `Bearer ${token}`,
@@ -36,7 +36,7 @@ export const getAllLectures = async (params = {}, token = null) => {
  */
 export const getLectureById = async (id, token = null) => {
   try {
-    const response = await api.get(`/admin/lecture/${id}`, {
+    const response = await api.get(`/common/lecture/${id}`, {
       headers: {
         Authorization: `Bearer ${token}`,
       },
@@ -63,7 +63,7 @@ export const getLectureById = async (id, token = null) => {
  */
 export const createLecture = async (lectureData, token = null) => {
   try {
-    const response = await api.post("/admin/lecture", lectureData, {
+    const response = await api.post("/common/lecture", lectureData, {
       headers: {
         Authorization: `Bearer ${token}`,
       },
@@ -91,7 +91,7 @@ export const createLecture = async (lectureData, token = null) => {
  */
 export const updateLecture = async (id, lectureData, token = null) => {
   try {
-    const response = await api.put(`/admin/lecture/${id}`, lectureData, {
+    const response = await api.put(`/common/lecture/${id}`, lectureData, {
       headers: {
         Authorization: `Bearer ${token}`,
         "Content-Type": "multipart/form-data",
@@ -111,7 +111,7 @@ export const updateLecture = async (id, lectureData, token = null) => {
  */
 export const deleteLecture = async (id, token = null) => {
   try {
-    const response = await api.delete(`/admin/lecture/${id}`, {
+    const response = await api.delete(`/common/lecture/${id}`, {
       headers: {
         Authorization: `Bearer ${token}`,
       },
