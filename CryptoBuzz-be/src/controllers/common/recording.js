@@ -399,12 +399,7 @@ export const createManuallyRecording = async (req, res) => {
     let finalVideoUrl = videoUrl;
 
     if (!videoUrl && videoFile) {
-      const filePath = path.resolve(__dirname, "../../../", videoFile.path);
-      const buffer = fs.readFileSync(filePath);
-
-      finalVideoUrl = await uploadVideoToAzure(buffer, videoFile.originalname, "video/mp4");
-
-      fs.unlinkSync(filePath);
+      finalVideoUrl = await uploadVideoToAzure(videoFile.buffer, videoFile.originalname, "video/mp4");
     }
 
     if (!finalVideoUrl) return res.status(400).json({ message: "Video file or URL required" });
