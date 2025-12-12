@@ -21,18 +21,18 @@ import {
   ToolbarPageTitle,
 } from "@/partials/toolbar";
 import { MenuIcon, MenuLink, MenuSub, MenuTitle } from "@/components";
-import { useLazyGetAdminCryptoAnalysisQuery } from "../../../store/api/admin/adminCryptoAnalysisApiSlice";
-import DeleteAdminIqCrypto from "./DeleteEducatorIqCrypto";
-import CreateAdminIqCrypto from "./CreateEducatorIqCrypto";
-import ViewAdminIqCrypto from "./ViewEducatorIqCrypto";
+import { useLazyGetEducatorIqCryptoQuery } from "../../../store/api/educator/EducatorIqCryptoApiSlice";
+import DeleteEducatorIqCrypto from "./DeleteEducatorIqCrypto";
+import CreateEducatorIqCrypto from "./CreateEducatorIqCrypto";
+import ViewEducatorIqCrypto from "./ViewEducatorIqCrypto";
 
 const EducatorIqCrypto = ({ title = "IQ Crypto Projects" }) => {
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [selectedRow, setSelectedRow] = useState({});
   const [isLightBoxOpen, setIsLightBoxOpen] = useState(false);
-  const [getAdminCryptoAnalysis, { data, isLoading, refetch }] =
-    useLazyGetAdminCryptoAnalysisQuery();
+  const [getEducatorIqCrypto, { data, isLoading, refetch }] =
+    useLazyGetEducatorIqCryptoQuery();
 
   const handleCloseView = () => {
     setIsLightBoxOpen(false);
@@ -241,7 +241,7 @@ const EducatorIqCrypto = ({ title = "IQ Crypto Projects" }) => {
 
     try {
       // Fetch API Data
-      const response = await getAdminCryptoAnalysis({
+      const response = await getEducatorIqCrypto({
         page: newPage,
         limit: newLimit,
       }).unwrap();
@@ -295,14 +295,14 @@ const EducatorIqCrypto = ({ title = "IQ Crypto Projects" }) => {
           onFetchData={handleFetchData}
         />
 
-        <ViewAdminIqCrypto
+        <ViewEducatorIqCrypto
           isViewOpen={isLightBoxOpen}
           setIsLightBoxOpen={setIsLightBoxOpen}
           handleCloseView={handleCloseView}
           selectedIdea={selectedRow}
         />
 
-        <CreateAdminIqCrypto
+        <CreateEducatorIqCrypto
           setSelectedRow={setSelectedRow}
           handleCloseCreate={handleCloseCreate}
           refetch={reloadTable}
@@ -312,7 +312,7 @@ const EducatorIqCrypto = ({ title = "IQ Crypto Projects" }) => {
         />
 
         {isDeleteOpen && (
-          <DeleteAdminIqCrypto
+          <DeleteEducatorIqCrypto
             refetch={reloadTable}
             isDeleteOpen={isDeleteOpen}
             handleDeleteClose={handleDeleteClose}

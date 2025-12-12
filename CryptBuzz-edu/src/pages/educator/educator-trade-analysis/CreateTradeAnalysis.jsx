@@ -19,11 +19,8 @@ import { ImageInput } from "@/components/image-input";
 import { Alert } from "../../../components/alert/Alert";
 import { toast } from "sonner";
 import RichTextEditor from "../../../components/ui/rich-editor";
-import {
-  useCreateEducatorTradeAnalysisMutation,
-  useUpdateEducatorTradeAnalysisMutation,
-} from "../../../store/api/educator/educatorTradeAnalysisApiSlice";
-import { useGetEducatorAcademyCategoryQuery } from "../../../store/api/educator/educatorAcademyCategoryApiSlice";
+import { useFetchCategoriesQuery } from "../../../store/api/educator/EducatorAcademyCategoryApiSlice";
+import { useCreateTradeAnalysisMutation, useUpdateTradeAnalysisMutation } from "../../../store/api/educator/EducatorTradeAnalysisApiSlice";
 
 const CreateTradeAnalysis = forwardRef(
   (
@@ -31,12 +28,12 @@ const CreateTradeAnalysis = forwardRef(
     ref
   ) => {
     const { auth } = useAuthContext();
-    const [createEducatorTradeAnalysis] =
-      useCreateEducatorTradeAnalysisMutation();
-    const [updateEducatorTradeAnalysis] =
-      useUpdateEducatorTradeAnalysisMutation();
+    const [createTradeAnalysis] =
+      useCreateTradeAnalysisMutation();
+    const [updateTradeAnalysis] =
+      useUpdateTradeAnalysisMutation();
     const createdBy = auth?.user?._id ?? null;
-    const { data } = useGetEducatorAcademyCategoryQuery();
+    const { data } = useFetchCategoriesQuery();
 
     const initialValues = {
       title: "",
@@ -79,11 +76,11 @@ const CreateTradeAnalysis = forwardRef(
 
         try {
           if (selectedRow?._id) {
-            let a = await updateEducatorTradeAnalysis(formData).unwrap();
+            let a = await updateTradeAnalysis({ id: selectedRow?._id, formData }).unwrap();
 
             toast.success("IQ Insight updated successfully!");
           } else {
-            await createEducatorTradeAnalysis(formData).unwrap();
+            await createTradeAnalysis(formData).unwrap();
 
             toast.success("IQ Insight created successfully!");
           }
@@ -191,8 +188,8 @@ const CreateTradeAnalysis = forwardRef(
                       placeholder="Enter Title"
                       autoComplete="off"
                       className={`form-control input input-md w-full ${formik.errors.title && formik.touched.title
-                          ? "border border-danger"
-                          : ""
+                        ? "border border-danger"
+                        : ""
                         }`}
                       {...formik.getFieldProps("title")}
                     />
@@ -239,8 +236,8 @@ const CreateTradeAnalysis = forwardRef(
                       placeholder="Enter url"
                       autoComplete="off"
                       className={`form-control input input-md w-full ${formik.errors.url && formik.touched.url
-                          ? "border border-danger"
-                          : ""
+                        ? "border border-danger"
+                        : ""
                         }`}
                       {...formik.getFieldProps("url")}
                     />

@@ -16,7 +16,8 @@ import { useAuthContext } from "../auth/useAuthContext";
 const AdminTradeIdeas = lazy(() => import("../pages/admin/admin-trade-ideas/AdminTradeIdeas"));
 const EducatorTradeIdeas = lazy(() => import("../pages/educator/educator-trade-ideas/EducatorTradeIdeas"));
 
-const AdminTradeAnalysis = lazy(() => import("../pages/admin/admin-trade-analysis/AdminTradeAnalysis"));
+// const AdminTradeAnalysis = lazy(() => import("../pages/admin/admin-trade-analysis/AdminTradeAnalysis"));
+const EducatorTradeAnalysis = lazy(() => import("../pages/educator/educator-trade-analysis/EducatorTradeAnalysis"));
 
 // Live Session & Recording Pages
 const LiveSession = lazy(() => import("../pages/admin/live-session/LiveSession"));
@@ -45,6 +46,7 @@ const GeneralSetting = lazy(() => import("../pages/admin/general-setting/General
 // Community & Social Pages
 const AdminCommunityFeed = lazy(() => import("../pages/admin/admin-community-feed/AdminCommunityFeed"));
 const AdminIqCrypto = lazy(() => import("../pages/admin/admin-iq-crypto/AdminIqCrypto"));
+const EducatorIqCrypto = lazy(() => import("../pages/educator/educator-iq-crypto/EducatorIqCrypto"));
 const IqSocial = lazy(() => import("../pages/admin/iq-social/IqSocial"));
 
 // KPIs & Analytics Pages
@@ -83,7 +85,8 @@ const routes = {
 
 
     // Trade Analysis - View and analyze trading data
-    { path: "/admin/trade-analysis", element: <AdminTradeAnalysis /> },
+    // { path: "/admin/trade-analysis", element: <AdminTradeAnalysis /> },
+    { path: "/educator/trade-analysis", element: <EducatorTradeAnalysis /> },
 
     // Courses - Manage all educational courses
     { path: "/admin/courses", element: <Courses /> },
@@ -149,7 +152,8 @@ const routes = {
     },
 
     // IQ Crypto - Cryptocurrency analysis and insights
-    { path: "/admin/iq-crypto", element: <AdminIqCrypto /> },
+    // { path: "/admin/iq-crypto", element: <AdminIqCrypto /> },
+    { path: "/educator/iq-crypto", element: <EducatorIqCrypto /> },
   ],
 };
 

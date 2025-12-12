@@ -33,7 +33,8 @@ import { adminCryptoAnalysisApiSlice } from "./api/admin/adminCryptoAnalysisApiS
 // ============================================================================
 import { educatorTradeIdeasApiSlice } from "./api/educator/EducatorTradeIdeasApiSlice";
 import { educatorAcademyCategoryApiSlice } from "./api/educator/EducatorAcademyCategoryApiSlice";
-import { educatorIqCryptoApiSlice } from "./api/educator/EducatorIqCrypto";
+import { educatorIqCryptoApiSlice } from "./api/educator/EducatorIqCryptoApiSlice";
+import { educatorTradeAnalysisApiSlice } from "./api/educator/EducatorTradeAnalysisApiSlice";
 
 // ============================================================================
 // REDUX PERSIST CONFIGURATION
@@ -97,6 +98,7 @@ export const store = configureStore({
     [educatorTradeIdeasApiSlice.reducerPath]: educatorTradeIdeasApiSlice.reducer,
     [educatorAcademyCategoryApiSlice.reducerPath]: educatorAcademyCategoryApiSlice.reducer,
     [educatorIqCryptoApiSlice.reducerPath]: educatorIqCryptoApiSlice.reducer,
+    [educatorTradeAnalysisApiSlice.reducerPath]: educatorTradeAnalysisApiSlice.reducer,
   },
 
   middleware: (getDefaultMiddleware) =>
@@ -125,6 +127,7 @@ export const store = configureStore({
       educatorTradeIdeasApiSlice.middleware,
       educatorAcademyCategoryApiSlice.middleware,
       educatorIqCryptoApiSlice.middleware,
+      educatorTradeAnalysisApiSlice.middleware,
     ),
 });
 

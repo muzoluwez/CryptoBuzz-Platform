@@ -2,8 +2,8 @@ import React, { forwardRef } from "react";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import { toast } from "sonner";
-import { useDeleteAdminCryptoAnalysisMutation } from "../../../store/api/admin/adminCryptoAnalysisApiSlice";
 import { set } from "date-fns";
+import { useDeleteEducatorIqCryptoMutation } from "../../../store/api/educator/EducatorIqCryptoApiSlice";
 
 // Delete eductor trade idea
 
@@ -12,12 +12,12 @@ const DeleteEducatorIqCrypto = forwardRef(
     { isDeleteOpen, handleDeleteClose, setSelectedRow, selectedRow, refetch },
     ref
   ) => {
-    const [DeleteCryptoAnalysis, { isLoading, isSuccess, isError, error }] =
-      useDeleteAdminCryptoAnalysisMutation();
+    const [DeleteEducatorIqCrypto, { isLoading, isSuccess, isError, error }] =
+      useDeleteEducatorIqCryptoMutation();
 
     const handleDelete = async () => {
       try {
-        await DeleteCryptoAnalysis(selectedRow?._id).unwrap();
+        await DeleteEducatorIqCrypto(selectedRow?._id).unwrap();
         refetch();
         toast.success("IQ Crypto deleted successfully!");
 

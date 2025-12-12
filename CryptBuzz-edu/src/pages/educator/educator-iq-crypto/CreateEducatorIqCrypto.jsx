@@ -20,18 +20,17 @@ import { Alert } from "../../../components/alert/Alert";
 import { toast } from "sonner";
 import RichTextEditor from "../../../components/ui/rich-editor";
 import {
-  useCreateAdminCryptoAnalysisMutation,
-  useUpdateAdminCryptoAnalysisMutation,
-} from "../../../store/api/admin/adminCryptoAnalysisApiSlice";
-
+  useCreateEducatorIqCryptoMutation,
+  useUpdateEducatorIqCryptoMutation,
+} from "../../../store/api/educator/EducatorIqCryptoApiSlice";
 const CreateEducatorIqCrypto = forwardRef(
   (
     { setSelectedRow, isCreateOpen, handleCloseCreate, selectedRow, refetch },
     ref
   ) => {
     const { auth } = useAuthContext();
-    const [createAdminCryptoAnalysis] = useCreateAdminCryptoAnalysisMutation();
-    const [updateAdminCryptoAnalysis] = useUpdateAdminCryptoAnalysisMutation();
+    const [createEducatorIqCrypto] = useCreateEducatorIqCryptoMutation();
+    const [updateEducatorIqCrypto] = useUpdateEducatorIqCryptoMutation();
     const createdBy = auth?.user?._id ?? null;
 
     const initialValues = {
@@ -72,12 +71,12 @@ const CreateEducatorIqCrypto = forwardRef(
 
         try {
           if (selectedRow?._id) {
-            let a = await updateAdminCryptoAnalysis(formData).unwrap();
+            let a = await updateEducatorIqCrypto({ id: selectedRow?._id, formData }).unwrap();
 
             refetch();
             toast.success("IQ Crypto updated successfully!");
           } else {
-            await createAdminCryptoAnalysis(formData).unwrap();
+            await createEducatorIqCrypto(formData).unwrap();
             refetch();
             toast.success("IQ Crypto created successfully!");
           }

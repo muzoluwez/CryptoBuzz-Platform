@@ -2,12 +2,12 @@ import React, { forwardRef } from 'react';
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import { toast } from 'sonner';
-import { useDeleteEducatorTradeAnalysisMutation } from '../../../store/api/educator/educatorTradeAnalysisApiSlice';
+import { useDeleteTradeAnalysisMutation } from '../../../store/api/educator/educatorTradeAnalysisApiSlice';
 
 // Delete eductor trade idea
 
 const DeleteTradeAnalysis = forwardRef(({ isDeleteOpen, handleDeleteClose, selectedRow, setSelectedRow, refetch }, ref) => {
-    const [DeleteTradeAnalysis, { isLoading, isSuccess, isError, error }] = useDeleteEducatorTradeAnalysisMutation();
+    const [DeleteTradeAnalysis, { isLoading, isSuccess, isError, error }] = useDeleteTradeAnalysisMutation();
 
     const handleDelete = async () => {
         try {
@@ -18,7 +18,7 @@ const DeleteTradeAnalysis = forwardRef(({ isDeleteOpen, handleDeleteClose, selec
             handleDeleteClose();
 
         } catch (error) {
-            toast.error(err.data.message);
+            toast.error(error?.data?.message);
         }
     };
 

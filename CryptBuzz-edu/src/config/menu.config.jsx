@@ -1508,12 +1508,12 @@ export const sideMenus = {
     {
       title: "IQ Insight",
       icon: <ChartCandlestick />,
-      path: "/admin/trade-analysis",
+      path: "/educator/trade-analysis",
     },
     {
       title: "IQ Crypto Projects",
       icon: <BadgeCent />,
-      path: "/admin/iq-crypto",
+      path: "/educator/iq-crypto",
     },
     {
       title: "IQ Ideas",
@@ -1533,11 +1533,11 @@ export const sideMenus = {
     //     },
     //   ],
     // },
-    {
-      title: "Educators",
-      icon: <User />,
-      path: "/admin/educators",
-    },
+    // {
+    //   title: "Educators",
+    //   icon: <User />,
+    //   path: "/admin/educators",
+    // },
     // {
     //   title: 'Video Library',
     //   icon: <Clapperboard />,
@@ -1548,32 +1548,32 @@ export const sideMenus = {
     //   icon: <Layers />,
     //   path: '/admin/academy-category'
     // },
-    {
-      title: "KPIs",
-      icon: <ChartSpline />,
-      path: "/admin/kpis",
-    },
-    {
-      title: "Package",
-      icon: <Package />,
-      path: "/admin/package",
-    },
-    {
-      title: "General Setting",
-      icon: <Layers />,
-      path: "/admin/general-setting",
-    },
+    // {
+    //   title: "KPIs",
+    //   icon: <ChartSpline />,
+    //   path: "/admin/kpis",
+    // },
+    // {
+    //   title: "Package",
+    //   icon: <Package />,
+    //   path: "/admin/package",
+    // },
+    // {
+    //   title: "General Setting",
+    //   icon: <Layers />,
+    //   path: "/admin/general-setting",
+    // },
 
     {
       title: "IQ Social",
       icon: <MessageCircleMore />,
       path: "/admin/iq-social",
     },
-    {
-      title: "Tickets",
-      icon: <ListTodo />,
-      path: "/admin/ticket",
-    },
+    // {
+    //   title: "Tickets",
+    //   icon: <ListTodo />,
+    //   path: "/admin/ticket",
+    // },
     {
       title: "Educator Ratings",
       icon: <Star />,

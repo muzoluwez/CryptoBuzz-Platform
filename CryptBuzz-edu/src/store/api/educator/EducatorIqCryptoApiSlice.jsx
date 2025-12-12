@@ -1,7 +1,7 @@
 import { createApi } from "@reduxjs/toolkit/query/react";
 import baseQueryWithReauth from "../apiSlice";
 
-export const EducatorIqCryptoApiSlice = createApi({
+export const educatorIqCryptoApiSlice = createApi({
     reducerPath: "educatorIqCrypto",
     baseQuery: baseQueryWithReauth,
     endpoints: (builder) => ({
@@ -10,23 +10,26 @@ export const EducatorIqCryptoApiSlice = createApi({
                 `/common/crypto-analysis/?page=${page}&limit=${limit}`,
         }),
         createEducatorIqCrypto: builder.mutation({
-            query: (payload) => ({
+            query: (formData) => ({
                 url: "/common/crypto-analysis",
                 method: "POST",
-                body: payload,
+                body: formData,
+                formData: true,
             }),
         }),
         updateEducatorIqCrypto: builder.mutation({
-            query: ({ id, ...payload }) => ({
+            query: ({ id, formData }) => ({
                 url: `/common/crypto-analysis/${id}`,
                 method: "PUT",
-                body: payload,
+                body: formData,
+                formData: true,
             }),
         }),
         deleteEducatorIqCrypto: builder.mutation({
             query: (id) => ({
                 url: `/common/crypto-analysis/${id}`,
                 method: "DELETE",
+
             }),
         }),
     }),
@@ -37,4 +40,4 @@ export const {
     useCreateEducatorIqCryptoMutation,
     useUpdateEducatorIqCryptoMutation,
     useDeleteEducatorIqCryptoMutation,
-} = EducatorIqCryptoApiSlice;
+} = educatorIqCryptoApiSlice;

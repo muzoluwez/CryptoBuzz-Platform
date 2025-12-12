@@ -13,29 +13,21 @@ import {
   MenuToggle,
 } from "@/components";
 import { toast } from "sonner";
-import { Input } from "@/components/ui/input";
+import { MenuIcon, MenuLink, MenuSub, MenuTitle } from "@/components";
 import {
   Toolbar,
   ToolbarActions,
   ToolbarDescription,
   ToolbarHeading,
   ToolbarPageTitle,
-} from "@/partials/toolbar";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+} from "@/partials/toolbar";;
 import CreateTradeAnalysis from "./CreateTradeAnalysis";
-// import DeleteAdminTradeIdeas from "./DeleteAdminTradeIdeas";
-import { MenuIcon, MenuLink, MenuSub, MenuTitle } from "@/components";
-import ViewEducatorTradeAnalysis from "./ViewEducatorTradeAnalysis";
-
-import { useLazyGetEducatorTradeAnalysisQuery } from "../../../store/api/educator/educatorTradeAnalysisApiSlice";
 import DeleteTradeAnalysis from "./DeleteTradeAnalysis";
-import { useGetEducatorAcademyCategoryQuery } from "../../../store/api/educator/educatorLiveStreamApiSlice";
+
+import ViewEducatorTradeAnalysis from "./ViewEducatorTradeAnalysis";
+import { useFetchCategoriesQuery } from "../../../store/api/educator/EducatorAcademyCategoryApiSlice";
+import { useLazyGetTradeAnalysisQuery } from "../../../store/api/educator/EducatorTradeAnalysisApiSlice";
+
 
 const EducatorTradeAnalysis = ({ title = "IQ Insight" }) => {
   const [isCreateOpen, setIsCreateOpen] = useState(false);
@@ -44,8 +36,8 @@ const EducatorTradeAnalysis = ({ title = "IQ Insight" }) => {
   const [isLightBoxOpen, setIsLightBoxOpen] = useState(false);
   const [category, setCategory] = useState(null);
   const [getEducatorTradeAnalysis, { data, isLoading, refetch }] =
-    useLazyGetEducatorTradeAnalysisQuery();
-  const { data: categoryList } = useGetEducatorAcademyCategoryQuery();
+    useLazyGetTradeAnalysisQuery();
+  const { data: categoryList } = useFetchCategoriesQuery();
 
   const handleCloseView = () => {
     setIsLightBoxOpen(false);
@@ -65,37 +57,6 @@ const EducatorTradeAnalysis = ({ title = "IQ Insight" }) => {
 
   const { isRTL } = useLanguage();
   const storageFilterId = "members-filter";
-  const ColumnInputFilter = ({ column }) => {
-    return (
-      <Input
-        placeholder="Filter..."
-        value={column.getFilterValue() ?? ""}
-        onChange={(event) => column.setFilterValue(event.target.value)}
-        className="h-9 w-full max-w-40"
-      />
-    );
-  };
-
-  const LabelMap = {
-    active: "Active",
-    pending: "Pending",
-    win: "Win",
-    partialWin: "Partial Win",
-    loss: "Loss",
-    buy: "Buy",
-    sell: "Sell",
-    scalp: "Scalp",
-    intraday: "Intraday",
-    swing: "Swing",
-  };
-
-  const statusColorMap = {
-    active: "badge-success",
-    pending: "badge-warning",
-    win: "badge-primary",
-    partialWin: "badge-info",
-    loss: "badge-danger",
-  };
 
   const ActionMenu = (row) => {
     return (
@@ -130,9 +91,6 @@ const EducatorTradeAnalysis = ({ title = "IQ Insight" }) => {
     );
   };
 
-  const truncateText = (text, maxLength) => {
-    return text.length > maxLength ? text.slice(0, maxLength) + "..." : text;
-  };
 
   const columns = useMemo(
     () => [
@@ -240,17 +198,7 @@ const EducatorTradeAnalysis = ({ title = "IQ Insight" }) => {
     [isRTL]
   );
 
-  // Initialize search term from localStorage if available
-  const [searchTerm, setSearchTerm] = useState(() => {
-    return localStorage.getItem(storageFilterId) || "";
-  });
 
-  // Filtered data based on search term
-  const filteredData = useMemo(() => {
-    if (!searchTerm) return data?.data; // If no search term, return full data
-
-    // return data.filter(member => member.member.name.toLowerCase().includes(searchTerm.toLowerCase()) || member.member.tasks.toLowerCase().includes(searchTerm.toLowerCase()));
-  }, [searchTerm, data?.data]);
   const handleRowSelection = (state) => {
     const selectedRowIds = Object.keys(state);
     if (selectedRowIds.length > 0) {
@@ -270,19 +218,6 @@ const EducatorTradeAnalysis = ({ title = "IQ Insight" }) => {
         <h3 className="card-title">{title}</h3>
 
         <div className="flex flex-wrap items-center gap-2.5">
-          <div className="relative">
-            {/* <KeenIcon
-              icon="magnifier"
-              className="leading-none text-md text-gray-500 absolute top-1/2 start-0 -translate-y-1/2 ms-3"
-            />
-            <input
-              type="text"
-              placeholder="Search Members"
-              className="input input-md ps-8 h-8"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)} // Update search term
-            /> */}
-          </div>
           <DataGridColumnVisibility table={table} />
         </div>
       </div>
