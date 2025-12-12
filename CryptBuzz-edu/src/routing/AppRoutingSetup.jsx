@@ -9,11 +9,13 @@ import { ErrorsRouting } from "@/errors";
 import { useAuthContext } from "../auth/useAuthContext";
 
 // ============================================================================
-// ADMIN PAGE IMPORTS
+// EDUCATOR PAGE IMPORTS
 // ============================================================================
 
 // Trade & Analysis Pages
 const AdminTradeIdeas = lazy(() => import("../pages/admin/admin-trade-ideas/AdminTradeIdeas"));
+const EducatorTradeIdeas = lazy(() => import("../pages/educator/educator-trade-ideas/EducatorTradeIdeas"));
+
 const AdminTradeAnalysis = lazy(() => import("../pages/admin/admin-trade-analysis/AdminTradeAnalysis"));
 
 // Live Session & Recording Pages
@@ -76,7 +78,9 @@ const routes = {
     { path: "/", element: <DefaultPage /> },
 
     // Trade Ideas - Manage and view all trade ideas
-    { path: "/admin/ideas", element: <AdminTradeIdeas /> },
+    // { path: "/admin/ideas", element: <AdminTradeIdeas /> },
+    { path: "/educator/ideas", element: <EducatorTradeIdeas /> },
+
 
     // Trade Analysis - View and analyze trading data
     { path: "/admin/trade-analysis", element: <AdminTradeAnalysis /> },

@@ -1518,7 +1518,7 @@ export const sideMenus = {
     {
       title: "IQ Ideas",
       icon: <Lightbulb />,
-      path: "/admin/ideas",
+      path: "/educator/ideas",
     },
     // {
     //   title: "IQ Strategies",

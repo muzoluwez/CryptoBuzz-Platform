@@ -27,6 +27,14 @@ import { adminTaskManagementApiSlice } from "./api/admin/adminTaskManagementApiS
 import { ratingApiSlice } from "./api/admin/adminRatingApiSlice";
 import { adminCryptoAnalysisApiSlice } from "./api/admin/adminCryptoAnalysisApiSlice";
 
+
+// ============================================================================
+// EDUCATOR API SLICES - Only educator-related API endpoints
+// ============================================================================
+import { educatorTradeIdeasApiSlice } from "./api/educator/EducatorTradeIdeasApiSlice";
+import { educatorAcademyCategoryApiSlice } from "./api/educator/EducatorAcademyCategoryApiSlice";
+import { educatorIqCryptoApiSlice } from "./api/educator/EducatorIqCrypto";
+
 // ============================================================================
 // REDUX PERSIST CONFIGURATION
 // ============================================================================
@@ -86,6 +94,9 @@ export const store = configureStore({
     [adminTaskManagementApiSlice.reducerPath]: adminTaskManagementApiSlice.reducer,
     [ratingApiSlice.reducerPath]: ratingApiSlice.reducer,
     [adminCryptoAnalysisApiSlice.reducerPath]: adminCryptoAnalysisApiSlice.reducer,
+    [educatorTradeIdeasApiSlice.reducerPath]: educatorTradeIdeasApiSlice.reducer,
+    [educatorAcademyCategoryApiSlice.reducerPath]: educatorAcademyCategoryApiSlice.reducer,
+    [educatorIqCryptoApiSlice.reducerPath]: educatorIqCryptoApiSlice.reducer,
   },
 
   middleware: (getDefaultMiddleware) =>
@@ -110,7 +121,10 @@ export const store = configureStore({
       superAdminApiSlice.middleware,
       adminTaskManagementApiSlice.middleware,
       ratingApiSlice.middleware,
-      adminCryptoAnalysisApiSlice.middleware
+      adminCryptoAnalysisApiSlice.middleware,
+      educatorTradeIdeasApiSlice.middleware,
+      educatorAcademyCategoryApiSlice.middleware,
+      educatorIqCryptoApiSlice.middleware,
     ),
 });
 
