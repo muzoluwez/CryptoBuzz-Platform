@@ -90,7 +90,7 @@ const AuthProvider = ({ children }) => {
       } else {
         throw new Error("No valid auth token");
       }
-    } catch {
+    } catch (error) {
       saveAuth(undefined);
       setCurrentUser(undefined);
     }
@@ -108,14 +108,12 @@ const AuthProvider = ({ children }) => {
     try {
       const data = await lmsAuth.login(email, password);
       const auth = {
-        token: data?.data?.token,
-        user: data?.data?.user,
+        token: data?.data?.token || data?.token,
+        user: data?.data?.user || data?.user,
       };
+
       saveAuth(auth);
-      // const {
-      //   data: user
-      // } = await getUser();
-      dispatch(setToken(auth.token));
+      dispatch(setToken(auth?.token));
       setCurrentUser(auth?.user);
     } catch (error) {
       saveAuth(undefined);

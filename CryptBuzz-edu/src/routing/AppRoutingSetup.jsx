@@ -58,7 +58,7 @@ const EducatorLiveSessionView = lazy(() => import("../pages/educator/live-sessio
  * - element: The React component to render for this route
  */
 const routes = {
-  admin: [
+  educator: [
     // Dashboard - Default landing page for Educator
     { path: "/", element: <DefaultPage /> },
 
@@ -131,14 +131,13 @@ const AppRoutingSetup = () => {
   const { auth } = useAuthContext();
 
   // Get educator routes from configuration
-  const educatorRoutes = routes.educator || [];
+  const educatorRoutes = auth?.user?.role?.toLowerCase() === "educator" ? routes?.educator || [] : [];
+
 
   return (
     <Suspense fallback={<ScreenLoader />}>
       <Routes>
-        {/* Authentication wrapper - protects all routes */}
         <Route element={<RequireAuth />}></Route>
-
         {/* Educator Routes - All educator pages wrapped with Demo1Layout and protected by RequireAuth */}
         <Route element={<RequireAuth />}>
           {educatorRoutes.map((route, index) => (

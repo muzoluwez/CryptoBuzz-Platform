@@ -7,7 +7,7 @@ export const educatorLanguageApiSlice = createApi({
     baseQuery: baseQueryWithReauth,
     endpoints: (builder) => ({
         getLanguages: builder.query({
-            query: () => `/admin/language`,
+            query: () => `/admin/language/list`,
         }),
 
     }),
