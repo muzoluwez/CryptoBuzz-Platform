@@ -6,7 +6,6 @@ import { useInitChat } from "../hooks/useInitChat";
 import { MessageUI } from "./MessageUI";
 import { GiphyPreview } from "./GiphyPreview";
 import { ChannelInner } from "./ChannelInner";
-import { useGetClientTokenMutation } from "../../../../../store/api/educator/educatorLiveStreamApiSlice";
 import { useLocation, useParams } from "react-router";
 import { useAuthContext } from "../../../../../auth/useAuthContext";
 import { MessageInputUI } from "./MessageInput";

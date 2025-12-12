@@ -1,6 +1,6 @@
 import { Fragment, useEffect, useState } from 'react';
 import { toAbsoluteUrl } from '@/utils/Assets';
-import { useGetAdminDashboardQuery } from '../../../../../store/api/admin/adminProfileApiSlice';
+import { useGetEducatorDashboardQuery } from '../../../../../store/api/educator/EducatorProfileApiSlice';
 const ChannelStats = () => {
   const items = [{
     logo: 'total-educators.png',
@@ -30,7 +30,7 @@ const ChannelStats = () => {
 
   const [details, setDetails] = useState({});
 
-  const { data } = useGetAdminDashboardQuery();
+  const { data } = useGetEducatorDashboardQuery();
 
   // setDetails(data?.data);
 
