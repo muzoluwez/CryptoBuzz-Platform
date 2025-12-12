@@ -13,53 +13,25 @@ import { useAuthContext } from "../auth/useAuthContext";
 // ============================================================================
 
 // Trade & Analysis Pages
-const AdminTradeIdeas = lazy(() => import("../pages/admin/admin-trade-ideas/AdminTradeIdeas"));
 const EducatorTradeIdeas = lazy(() => import("../pages/educator/educator-trade-ideas/EducatorTradeIdeas"));
-
-// const AdminTradeAnalysis = lazy(() => import("../pages/admin/admin-trade-analysis/AdminTradeAnalysis"));
 const EducatorTradeAnalysis = lazy(() => import("../pages/educator/educator-trade-analysis/EducatorTradeAnalysis"));
 
 // Live Session & Recording Pages
-const LiveSession = lazy(() => import("../pages/admin/live-session/LiveSession"));
-const AdminLiveSessionView = lazy(() => import("../pages/admin/live-session/AdminLiveSessionView"));
-const AdminRecording = lazy(() => import("../pages/admin/recording/AdminRecording"));
-const EducatorRecordingSession = lazy(() => import("../pages/educator/recording/EducatorRecordingSession"));
-const AdminRecordingSession = lazy(() => import("../pages/admin/recording/AdminRecordingSession"));
+const EducatorRecordingSession = lazy(() => import("../pages/educator/recording/EducatorRecordingSession"));;
 
 // Course & Academy Pages
-// const Courses = lazy(() => import("../pages/admin/courses/Courses"));
 const Courses = lazy(() => import("../pages/educator/courses/Courses"));
-const AdminAcademyCategory = lazy(() => import("../pages/admin/academy-category/AdminAcademyCategory"));
 
 // Educator Management Pages
-const Educators = lazy(() => import("../pages/admin/educators/Educators"));
-const AdminRating = lazy(() => import("../pages/admin/admin-educator-rating/AdminRating"));
 const EducatorRating = lazy(() => import("../pages/educator/educator-rating/EducatoRating"));
-const AdminEducatorRatings = lazy(() => import("../pages/admin/admin-educator-rating/AdminEducatorRatings"));
-
-// Schedule & Session Management Pages
-const AdminStreamSchedule = lazy(() => import("../pages/admin/admin-stream-schedule/AdminStreamSchedule"));
-const AdminEndSession = lazy(() => import("../pages/admin/admin-end-session/AdminEndSession"));
-const AdminEndSchedule = lazy(() => import("../pages/admin/admin-end-schedule/AdminEndSchedule"));
 
 // Profile & Settings Pages
-const AdminProfile = lazy(() => import("../pages/admin/admin-profile/AdminProfile"));
-const GeneralSetting = lazy(() => import("../pages/admin/general-setting/GeneralSetting"));
+const EducatorProfile = lazy(() => import("../pages/educator/educator-profile/EducatorProfile"));
 
 // Community & Social Pages
-const AdminCommunityFeed = lazy(() => import("../pages/admin/admin-community-feed/AdminCommunityFeed"));
 const EducatorCommunityFeed = lazy(() => import("../pages/educator/educator-community-feed/EducatorCommunityFeed"));
-const AdminIqCrypto = lazy(() => import("../pages/admin/admin-iq-crypto/AdminIqCrypto"));
 const EducatorIqCrypto = lazy(() => import("../pages/educator/educator-iq-crypto/EducatorIqCrypto"));
-const IqSocial = lazy(() => import("../pages/admin/iq-social/IqSocial"));
 
-// KPIs & Analytics Pages
-const EducatorKpi = lazy(() => import("../pages/admin/KPIs Page/EducatorKpi"));
-const KpisDashboard = lazy(() => import("../pages/admin/KPIs Page/Kpis"));
-
-// Package & Task Management Pages
-const Package = lazy(() => import("../pages/admin/admin-package/Package"));
-const Task = lazy(() => import("../pages/admin/task-management/Task"));
 
 // Legal & Support Pages
 const PrivacyPolicy = lazy(() => import("../auth/pages/PrivacyPolicy"));
@@ -74,98 +46,44 @@ const EducatorEndSchedule = lazy(() => import("../pages/educator/educator-endStr
 const EducatorLiveSessionView = lazy(() => import("../pages/educator/live-session/EducatorLiveSessionView"));
 
 // ============================================================================
-// ADMIN ROUTES CONFIGURATION
+// Educator ROUTES CONFIGURATION
 // ============================================================================
 
 /**
- * Admin Routes Configuration
+ * Educator Routes Configuration
  * 
- * This object defines all available routes for admin users.
+ * This object defines all available routes for Educator users.
  * Each route includes:
  * - path: The URL path for the route
  * - element: The React component to render for this route
  */
 const routes = {
   admin: [
-    // Dashboard - Default landing page for admin
+    // Dashboard - Default landing page for Educator
     { path: "/", element: <DefaultPage /> },
 
-    // Trade Ideas - Manage and view all trade ideas
-    // { path: "/admin/ideas", element: <AdminTradeIdeas /> },
+    // Trade Ideas - Manage and view all trade idea
     { path: "/educator/ideas", element: <EducatorTradeIdeas /> },
 
 
     // Trade Analysis - View and analyze trading data
-    // { path: "/admin/trade-analysis", element: <AdminTradeAnalysis /> },
     { path: "/educator/trade-analysis", element: <EducatorTradeAnalysis /> },
 
     // Courses - Manage all educational courses
     { path: "/educator/courses", element: <Courses /> },
 
-    // Live Session - View all active and scheduled live sessions
-    { path: "/admin/live-session", element: <LiveSession /> },
-
-    // Live Session View - Join/view a specific live session by callId
-    { path: "/admin/live-session/:callId", element: <AdminLiveSessionView /> },
-
     // Recordings - View all recorded sessions
-    // { path: "/admin/recordings", element: <AdminRecording /> },
     { path: "educator/stream-recording", element: <EducatorRecordingSession /> },
-    // Educators - Manage all educators on the platform
-    { path: "/admin/educators", element: <Educators /> },
 
-    // Profile - Admin user profile and settings
-    { path: "/admin/profile", element: <AdminProfile /> },
-
-    // Academy Category - Manage course categories
-    { path: "/admin/academy-category", element: <AdminAcademyCategory /> },
-
-    // Stream Schedule - View and manage streaming schedules
-    { path: "/admin/stream-schedule", element: <AdminStreamSchedule /> },
-
-    // Stream Recording - Alternative route for recordings
-    { path: "/admin/stream-recording", element: <AdminRecording /> },
-
-    // Stream Recording Session - View specific recording by id
-    { path: "/admin/stream-recording/:id", element: <AdminRecordingSession /> },
-
-    // General Settings - Platform-wide configuration
-    { path: "admin/general-setting", element: <GeneralSetting /> },
+    // Profile - Educator user profile and settings
+    { path: "/educator/profile", element: <EducatorProfile /> },
 
     // IQ Social - Manage community feed and social interactions
-    // { path: "/admin/iq-social", element: <IqSocial /> },
+
     { path: "/educator/iq-social", element: <EducatorCommunityFeed /> },
 
-    // KPIs - View educator performance metrics
-    { path: "/admin/kpis", element: <EducatorKpi /> },
-
-    // KPIs Dashboard - Detailed KPI dashboard for specific educator/session
-    { path: "/admin/kpis/:callId", element: <KpisDashboard /> },
-
-    // Ended Live Sessions - View history of completed sessions
-    { path: "/admin/ended-live-sessions", element: <AdminEndSession /> },
-
-    // Educator Ended Schedule - View completed educator schedules
-    { path: "/admin/educator-ended-schedule", element: <AdminEndSchedule /> },
-
-    // Package - Manage subscription packages
-    { path: "/admin/package", element: <Package /> },
-
-    // Ticket - Task and ticket management system
-    { path: "/admin/ticket", element: <Task /> },
-
-    // Educator Rating - View all educator ratings
-    { path: "/admin/educator-rating", element: <AdminRating /> },
-
-    // Educator Ratings Detail - View ratings for specific educator
-    {
-      path: "/admin/educator-rating/:educatorId",
-      element: <AdminEducatorRatings />,
-    },
     { path: "/educator/rating", element: <EducatorRating /> },
 
-    // IQ Crypto - Cryptocurrency analysis and insights
-    // { path: "/admin/iq-crypto", element: <AdminIqCrypto /> },
     { path: "/educator/iq-crypto", element: <EducatorIqCrypto /> },
 
 
@@ -185,6 +103,11 @@ const routes = {
       element: <EducatorLiveSessionView />,
     },
 
+    {
+      path: "/educator/live-session/:callId",
+      element: <EducatorLiveSessionView />,
+    },
+
   ],
 };
 
@@ -195,10 +118,10 @@ const routes = {
 /**
  * AppRoutingSetup Component
  * 
- * Main routing configuration for the CryptoBuzz Admin application.
+ * Main routing configuration for the CryptoBuzz Educator application.
  * 
  * Features:
- * - Admin-only routes with Demo1Layout wrapper
+ * - Educator-only routes with Demo1Layout wrapper
  * - Authentication handling via RequireAuth
  * - Public routes for auth, errors, and legal pages
  * - Automatic redirect to login for unauthenticated users
@@ -207,8 +130,8 @@ const routes = {
 const AppRoutingSetup = () => {
   const { auth } = useAuthContext();
 
-  // Get admin routes from configuration
-  const adminRoutes = routes.admin || [];
+  // Get educator routes from configuration
+  const educatorRoutes = routes.educator || [];
 
   return (
     <Suspense fallback={<ScreenLoader />}>
@@ -216,9 +139,9 @@ const AppRoutingSetup = () => {
         {/* Authentication wrapper - protects all routes */}
         <Route element={<RequireAuth />}></Route>
 
-        {/* Admin Routes - All admin pages wrapped with Demo1Layout and protected by RequireAuth */}
+        {/* Educator Routes - All educator pages wrapped with Demo1Layout and protected by RequireAuth */}
         <Route element={<RequireAuth />}>
-          {adminRoutes.map((route, index) => (
+          {educatorRoutes.map((route, index) => (
             <Route key={index} element={<Demo1Layout />}>
               <Route path={route.path} element={route.element} />
             </Route>
