@@ -310,10 +310,7 @@ export const updateRecording = async (req, res) => {
     let thumbnailUrl = null;
 
     if (req.file) {
-      const localPath = path.resolve(__dirname, "../../../", req.file.path);
-      const buffer = fs.readFileSync(localPath);
-      thumbnailUrl = await uploadImageToAzure(buffer, req.file.originalname);
-      fs.unlinkSync(localPath);
+      thumbnailUrl = await uploadImageToAzure(req.file.buffer, req.file.originalname);
     }
 
     const payload = {
