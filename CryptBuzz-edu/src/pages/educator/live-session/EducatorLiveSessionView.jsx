@@ -2,10 +2,10 @@ import React, { useEffect, useState, useCallback, useRef } from "react";
 import { useLocation, useParams } from "react-router";
 import { StreamVideoClient } from "@stream-io/video-react-sdk";
 import { useAuthContext } from "../../../auth/useAuthContext";
-import { useGetClientTokenMutation } from "../../../store/api/educator/educatorLiveStreamApiSlice";
 import StreamWrapper from "./StreamWrapper";
 import StreamClient from "./StreamClient";
 import { EventProvider } from "./chat-room/context/EventContext";
+import { useGetClientTokenMutation } from "../../../store/api/educator/educatorClientApiSlice";
 
 const apiKey = import.meta.env.VITE_APP_STREAM_API_KEY;
 
