@@ -7,7 +7,6 @@ import TagInput from "../../../components/ui/tagInput";
 import * as Yup from "yup";
 import { useCall } from "@stream-io/video-react-sdk";
 import RichTextEditor from "../../../components/ui/rich-editor";
-import { useGetEducatorAcademyCategoryQuery } from "../../../store/api/educator/educatorAcademyCategoryApiSlice";
 import {
   Select,
   SelectContent,
@@ -15,12 +14,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useFetchCategoriesQuery } from "../../../store/api/educator/educatorAcademyCategoryApiSlice";
 
 const UpdateLiveSession = ({ selectedRow }) => {
   const { auth } = useAuthContext();
   const educatorId = auth?.user?._id ?? null;
   const call = useCall();
-  const { data } = useGetEducatorAcademyCategoryQuery();
+  const { data } = useFetchCategoriesQuery();
 
   const initialValues = {
     title: "",
@@ -141,8 +141,8 @@ const UpdateLiveSession = ({ selectedRow }) => {
                   formik.setFieldValue("category", value)
                 }
                 className={`form-control input input-md w-full ${formik.errors.category && formik.touched.category
-                    ? "border border-danger"
-                    : ""
+                  ? "border border-danger"
+                  : ""
                   }`}
               >
                 <SelectTrigger>
