@@ -66,6 +66,13 @@ const PrivacyPolicy = lazy(() => import("../auth/pages/PrivacyPolicy"));
 const TermsOfService = lazy(() => import("../auth/pages/TermsOfService"));
 const Support = lazy(() => import("../auth/pages/Support"));
 
+//Educator Routes
+const EducatorStreamSchedule = lazy(() => import("../pages/educator/educator-stream-schedule/EducatorStreamSchedule"));
+const EducatorEndSession = lazy(() => import("../pages/educator/educator-end-session/EducatorEndSession"));
+const EducatorLiveSession = lazy(() => import("../pages/educator/live-session/EducatorLiveSession"));
+const EducatorEndSchedule = lazy(() => import("../pages/educator/educator-endStream-schedule/EducatorEndSchedule"));
+const EducatorLiveSessionView = lazy(() => import("../pages/educator/live-session/EducatorLiveSessionView"));
+
 // ============================================================================
 // ADMIN ROUTES CONFIGURATION
 // ============================================================================
@@ -160,6 +167,24 @@ const routes = {
     // IQ Crypto - Cryptocurrency analysis and insights
     // { path: "/admin/iq-crypto", element: <AdminIqCrypto /> },
     { path: "/educator/iq-crypto", element: <EducatorIqCrypto /> },
+
+
+
+    //IQ Live 
+    { path: "/educator/stream-schedule", element: <EducatorStreamSchedule /> },
+    {
+      path: "/educator/ended-schedule",
+      element: <EducatorEndSchedule />,
+    },
+    { path: "/educator/live-session", element: <EducatorLiveSession /> },
+    { path: "/educator/ended-live-sessions", element: <EducatorEndSession /> },
+
+
+    {
+      path: "/educator/live-session/:callId",
+      element: <EducatorLiveSessionView />,
+    },
+
   ],
 };
 

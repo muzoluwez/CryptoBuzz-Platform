@@ -7,48 +7,42 @@ import {
   DataGrid,
   DataGridColumnHeader,
   DataGridColumnVisibility,
-  DataGridRowSelect,
-  DataGridRowSelectAll,
   KeenIcon,
   useDataGrid,
   Menu,
   MenuItem,
   MenuToggle,
 } from "@/components";
+
+import { format } from "date-fns";
 import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
 import {
   Toolbar,
-  ToolbarActions,
   ToolbarDescription,
   ToolbarHeading,
   ToolbarPageTitle,
 } from "@/partials/toolbar";
-import { format, set } from "date-fns";
 import {
   MenuIcon,
   MenuLink,
-  MenuSeparator,
   MenuSub,
   MenuTitle,
 } from "@/components";
-import { useLazyGetEducatorTradeIdeasQuery } from "../../../store/api/educator/educatorTradeIdeasApiSlice";
-import { useLazyGetLiveSessionListQuery } from "../../../store/api/educator/educatorLiveStreamApiSlice";
-import { formatSecondsToHMS } from "../../../lib/utils";
-import CreateEducatorStreamSchedule from "./CreateEducatorStreamSchedule";
-import { useLazyGetEducatorStreamScheduleQuery } from "../../../store/api/educator/educatorStreamScheduleApiSlice";
-import DeleteEducatorStreamSchedule from "./DeleteEducatorStreamSchedule";
+
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
-import { useEndCallMutation } from "../../../store/api/educator/educatorLiveStreamApiSlice";
 import CreateRecurrenceScheduleModel from "./CreateRecurrenceScheduleModel";
+import DeleteEducatorStreamSchedule from "./DeleteEducatorStreamSchedule";
+import CreateEducatorStreamSchedule from "./CreateEducatorStreamSchedule";
 import { SearchFilterInput } from "@/components";
+import { useLazyGetEducatorStreamScheduleQuery } from "../../../store/api/educator/educatorStreamScheduleApiSlice";
+import { useEndCallMutation } from "../../../store/api/educator/educatorLiveStreamApiSlice";
 
 const EducatorStreamSchedule = ({ title = "Live Schedule" }) => {
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [selectedRow, setSelectedRow] = useState({});
-  const [isLightBoxOpen, setIsLightBoxOpen] = useState(false);
   const [getEducatorStreamSchedule, { data, isLoading }] =
     useLazyGetEducatorStreamScheduleQuery();
   const [endCall, { isLoading: isEnding }] = useEndCallMutation();
@@ -213,9 +207,7 @@ const EducatorStreamSchedule = ({ title = "Live Schedule" }) => {
         cell: (info) => (
           <div className="flex items-center gap-2.5">
             <span className="leading-none text-gray-800 font-normal">
-              {info.row.original.educator?.first_name +
-                " " +
-                info.row.original.educator?.last_name}
+              {info.row.original.educator?.first_name ? `${info.row.original.educator?.first_name} ${info.row.original.educator?.last_name}` : `${info.row.original.educator?.name}`}
             </span>
           </div>
         ),
@@ -254,13 +246,12 @@ const EducatorStreamSchedule = ({ title = "Live Schedule" }) => {
         cell: (info) => (
           <div className="flex items-center gap-2.5">
             <span
-              className={`badge capitalize badge-outline ${
-                info.row.original.status === "active"
-                  ? "badge-primary"
-                  : info.row.original.status === "pending"
-                    ? "badge-warning"
-                    : "badge-danger"
-              }`}
+              className={`badge capitalize badge-outline ${info.row.original.status === "active"
+                ? "badge-primary"
+                : info.row.original.status === "pending"
+                  ? "badge-warning"
+                  : "badge-danger"
+                }`}
             >
               {info.row.original.status}
             </span>
@@ -288,9 +279,8 @@ const EducatorStreamSchedule = ({ title = "Live Schedule" }) => {
         cell: (info) => (
           <div className="flex items-center gap-2.5">
             <span
-              className={`badge capitalize badge-outline ml-9 ${
-                info.row.original.isRecurent ? "badge-success" : "badge-danger"
-              }`}
+              className={`badge capitalize badge-outline ml-9 ${info.row.original.isRecurent ? "badge-success" : "badge-danger"
+                }`}
             >
               {info.row.original.isRecurent ? "Yes" : "No"}
             </span>

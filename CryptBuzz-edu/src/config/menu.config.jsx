@@ -1475,27 +1475,26 @@ export const sideMenus = {
     {
       title: "IQ Live",
       icon: <CalendarClock />,
-      // path: "/admin/stream-schedule",
       children: [
         {
           title: "Live Schedule",
           icon: <CalendarClock />,
-          path: "/admin/stream-schedule",
+          path: "/educator/stream-schedule",
         },
         {
           title: "Ended Schedule",
           icon: <CalendarClock />,
-          path: "/admin/educator-ended-schedule",
+          path: "/educator/ended-schedule",
         },
         {
           title: "Live Sessions",
           icon: <PlayCircle />,
-          path: "/admin/live-session",
+          path: "/educator/live-session",
         },
         {
           title: "Ended Sessions ",
           icon: <PlayCircle />,
-          path: "/admin/ended-live-sessions",
+          path: "/educator/ended-live-sessions",
         },
       ],
     },

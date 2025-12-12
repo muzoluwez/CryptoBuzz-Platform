@@ -1,6 +1,5 @@
 import React, { forwardRef, useEffect, useState } from "react";
 import { useFormik } from "formik";
-import moment from "moment-timezone";
 import * as Yup from "yup";
 import {
   Dialog,
@@ -8,18 +7,12 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { ImageInput } from "@/components/image-input";
 import { toast } from "sonner";
 import { useAuthContext } from "../../../auth/useAuthContext";
-// import { useCreateLiveSessionMutation } from "../../../store/api/educator/educatorLiveStreamApiSlice"; // Unused and nonexistent
 import { useNavigate } from "react-router";
-import { v4 as uuidv4 } from "uuid";
 import TagInput from "../../../components/ui/tagInput";
 import RichTextEditor from "../../../components/ui/rich-editor";
-import {
-  useGetEducatorAcademyCategoryQuery,
-  useGetLanguageListQuery,
-} from "../../../store/api/educator/educatorAcademyCategoryApiSlice";
+import DateTimePicker from "./DateTimePicker";
 import {
   Select,
   SelectContent,
@@ -27,31 +20,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  useCreateEducatorStreamScheduleMutation,
-  useUpdateEducatorStreamScheduleMutation,
-} from "../../../store/api/educator/educatorStreamScheduleApiSlice";
-import DateTimePicker from "./DateTimePicker";
-import { set } from "date-fns";
-const EST_ZONE = "America/New_York";
+import { useCreateEducatorStreamScheduleMutation, useUpdateEducatorStreamScheduleMutation } from "../../../store/api/educator/educatorStreamScheduleApiSlice";
+import { useFetchCategoriesQuery } from "../../../store/api/educator/educatorAcademyCategoryApiSlice";
+import { useGetLanguagesQuery } from "../../../store/api/educator/educatorLanguageApiSlice";
 const CreateEducatorStreamSchedule = forwardRef(
   (
     { isCreateOpen, handleCloseCreate, selectedRow, setSelectedRow, refetch },
     ref
   ) => {
-    const [time, setTime] = useState({
-      date: moment().tz(EST_ZONE).format("dddd, MMMM D, YYYY"),
-      clock: moment().tz(EST_ZONE).format("hh:mm:ss A"),
-    });
-    useEffect(() => {
-      const interval = setInterval(() => {
-        setTime({
-          date: moment().tz(EST_ZONE).format("dddd, MMMM D, YYYY"),
-          clock: moment().tz(EST_ZONE).format("hh:mm:ss A"),
-        });
-      }, 1000);
-      return () => clearInterval(interval);
-    }, []);
     const { auth } = useAuthContext();
     const [createEducatorStreamSchedule] =
       useCreateEducatorStreamScheduleMutation();
@@ -59,9 +35,9 @@ const CreateEducatorStreamSchedule = forwardRef(
       useUpdateEducatorStreamScheduleMutation();
     const educatorId = auth?.user?._id ?? null;
     const navigate = useNavigate();
-    const { data, isLoading } = useGetEducatorAcademyCategoryQuery();
+    const { data: categoryList, isLoading } = useFetchCategoriesQuery();
     const [isPickerOpen, setIsPickerOpen] = useState(false);
-    const { data: languagesList } = useGetLanguageListQuery();
+    const { data: languagesList } = useGetLanguagesQuery();
 
     const initialValues = {
       title: "",
@@ -238,8 +214,8 @@ const CreateEducatorStreamSchedule = forwardRef(
                     placeholder="Enter title"
                     autoComplete="off"
                     className={`form-control input input-md w-full ${formik.errors.title && formik.touched.title
-                        ? "border border-danger"
-                        : ""
+                      ? "border border-danger"
+                      : ""
                       }`}
                     {...formik.getFieldProps("title")}
                   />
@@ -430,15 +406,15 @@ const CreateEducatorStreamSchedule = forwardRef(
                         formik.setFieldValue("category", value)
                       }
                       className={`form-control input input-md w-full ${formik.errors.category && formik.touched.category
-                          ? "border border-danger"
-                          : ""
+                        ? "border border-danger"
+                        : ""
                         }`}
                     >
                       <SelectTrigger>
                         <SelectValue placeholder="Select" />
                       </SelectTrigger>
                       <SelectContent>
-                        {data?.data?.map((item) => (
+                        {categoryList?.data?.map((item) => (
                           <SelectItem key={item._id} value={item._id}>
                             {item.name}
                           </SelectItem>

@@ -153,10 +153,9 @@ export const createCourse = async (req, res) => {
 
     if (!req.file) return res.status(400).json({ message: "Image is required" });
 
-   
+
 
     const azureUrl = await uploadImageToAzure(req.file.buffer, req.file.originalname);
-    fs.unlinkSync(localPath);
 
     const newCoursePayload = {
       ...body,
@@ -204,7 +203,7 @@ export const updateCourse = async (req, res) => {
 
 
       const azureUrl = await uploadImageToAzure(req.file.buffer, req.file.originalname);
-  
+
 
       updatePayload.imageUrl = azureUrl;
     }

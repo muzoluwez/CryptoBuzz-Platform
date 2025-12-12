@@ -7,49 +7,35 @@ import {
   DataGrid,
   DataGridColumnHeader,
   DataGridColumnVisibility,
-  DataGridRowSelect,
-  DataGridRowSelectAll,
   KeenIcon,
   useDataGrid,
-  Menu,
   MenuItem,
-  MenuToggle,
 } from "@/components";
 import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
 import {
   Toolbar,
-  ToolbarActions,
   ToolbarDescription,
   ToolbarHeading,
   ToolbarPageTitle,
 } from "@/partials/toolbar";
-import { format, set } from "date-fns";
 import {
   MenuIcon,
   MenuLink,
-  MenuSeparator,
   MenuSub,
   MenuTitle,
 } from "@/components";
-import { useLazyGetEducatorTradeIdeasQuery } from "../../../store/api/educator/educatorTradeIdeasApiSlice";
-import CreateLiveSession from "./CreateLiveSession";
-import { formatSecondsToHMS } from "../../../lib/utils";
 import { useNavigate } from "react-router";
-import OverlayTrigger from "react-bootstrap/OverlayTrigger";
-import Tooltip from "react-bootstrap/Tooltip";
-
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
+import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
+import CreateLiveStream from "./CreateLiveNow";
+import { SearchFilterInput } from "@/components";
 import {
   useLazyGetLiveSessionListQuery,
   useEndCallMutation,
   useStartCallMutation,
   useEndAndCreateMutation,
 } from "../../../store/api/educator/educatorLiveStreamApiSlice";
-import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
-import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
-import { ro, tr } from "@faker-js/faker";
-import CreateLiveStream from "./CreateLiveNow";
-import { SearchFilterInput } from "@/components";
 
 const EducatorLiveSession = ({ title = "Live Session" }) => {
   const [isCreateOpen, setIsCreateOpen] = useState(false);
@@ -343,93 +329,12 @@ const EducatorLiveSession = ({ title = "Live Session" }) => {
         meta: {
           headerClassName: "min-w-[120px]",
         },
-      },
-      // {
-      //   accessorFn: (row) => row.datetime,
-      //   id: "datetime",
-      //   header: ({ column }) => (
-      //     <DataGridColumnHeader
-      //       title="Scheduled from this date"
-      //       column={column}
-      //     />
-      //   ),
-      //   enableSorting: true,
-      //   cell: (info) => (
-      //     <div className="flex items-center gap-2.5">
-      //       <span className="leading-none text-gray-800 font-normal">
-      //         {info.row.original.datetime
-      //           ? format(info.row.original.datetime, "MMM dd, yyyy, hh:mm a")
-      //           : "N/A"}
-      //       </span>
-      //     </div>
-      //   ),
-      //   meta: {
-      //     headerClassName: "min-w-[200px]",
-      //   },
-      // },
-      // {
-      //   accessorFn: row => row.createdAt,
-      //   id: 'createdAt',
-      //   header: ({
-      //     column
-      //   }) => <DataGridColumnHeader title='Created At' column={column} />,
-      //   enableSorting: true,
-      //   cell: info => <div className="flex items-center gap-2.5">
-      //     <span className="leading-none text-gray-800 font-normal">
-      //       {format(info.row.original.createdAt, "MMM dd, yyyy, hh:mm a")}
-      //     </span>
-      //   </div>,
-      //   meta: {
-      //     headerClassName: 'min-w-[200px]'
-      //   }
-      // },
-      // {
-      //   accessorFn: row => row.duration,
-      //   id: 'duration',
-      //   header: ({
-      //     column
-      //   }) => <DataGridColumnHeader title='Duration' column={column} />,
-      //   enableSorting: true,
-      //   cell: info => <div className="flex items-center gap-2.5">
-      //     <span className="leading-none text-gray-800 font-normal">
-      //       {formatSecondsToHMS(info.row.original.duration)}
-      //     </span>
-      //   </div>,
-      //   meta: {
-      //     headerClassName: 'min-w-[200px]'
-      //   }
-      // },
-      // {
-      //   accessorFn: row => row.viewerCount,
-      //   id: 'viewerCount',
-      //   header: ({
-      //     column
-      //   }) => <DataGridColumnHeader title='Viewer Count' column={column} />,
-      //   enableSorting: true,
-      //   cell: info => <div className="flex items-center gap-2.5">
-      //     <span className="leading-none text-gray-800 font-normal">
-      //       {info.row.original.viewerCount}
-      //     </span>
-      //   </div>,
-      //   meta: {
-      //     headerClassName: 'min-w-[200px]'
-      //   }
-      // },
+      }
     ],
     [isRTL]
   );
 
-  // Initialize search term from localStorage if available
-  const [searchTerm, setSearchTerm] = useState(() => {
-    return localStorage.getItem(storageFilterId) || "";
-  });
 
-  // Filtered data based on search term
-  const filteredData = useMemo(() => {
-    if (!searchTerm) return data?.data; // If no search term, return full data
-
-    // return data.filter(member => member.member.name.toLowerCase().includes(searchTerm.toLowerCase()) || member.member.tasks.toLowerCase().includes(searchTerm.toLowerCase()));
-  }, [searchTerm, data?.data]);
   const handleRowSelection = (state) => {
     const selectedRowIds = Object.keys(state);
     if (selectedRowIds.length > 0) {
@@ -480,7 +385,7 @@ const EducatorLiveSession = ({ title = "Live Session" }) => {
         totalCount: response.pagination?.totalRecords || 0,
       };
     } catch (error) {
-      console.error("Error fetching IQ Ideas:", error);
+      console.error("Error fetching Live Session List:", error);
       return { data: [], totalCount: 0 };
     }
   };
@@ -528,13 +433,6 @@ const EducatorLiveSession = ({ title = "Live Session" }) => {
             </div>
           </div>
         </div>
-        {/* <ToolbarActions>
-          <div className="text-end pb-4">
-            <button className='btn btn-primary' onClick={handleClickOpen}>
-              Create IQ Academy
-            </button>
-          </div>
-        </ToolbarActions> */}
       </Toolbar>
 
       <DataGrid
@@ -554,13 +452,6 @@ const EducatorLiveSession = ({ title = "Live Session" }) => {
         onFetchData={handleFetchData}
       />
 
-      {/* <CreateLiveSession
-        handleCloseCreate={handleCloseCreate}
-        refetch={reloadTable}
-        isCreateOpen={isCreateOpen}
-        setIsCreateOpen={setIsCreateOpen}
-        selectedRow={selectedRow}
-      /> */}
       {isConfirmOpen && (
         <Dialog
           open={isConfirmOpen}
@@ -590,17 +481,6 @@ const EducatorLiveSession = ({ title = "Live Session" }) => {
               >
                 Cancel
               </button>
-              {/* <button
-                type="button"
-                className="btn btn-danger"
-                onClick={async () => {
-                  await handleEndCall(selectedRow);
-                  setIsConfirmOpen(false);
-                }}
-                disabled={isEnding}
-              >
-                {isEnding ? "Ending..." : "Yes, End Call"}
-              </button> */}
               {lastRecurrence ? (
                 <button
                   type="button"

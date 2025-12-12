@@ -37,6 +37,11 @@ import { educatorIqCryptoApiSlice } from "./api/educator/EducatorIqCryptoApiSlic
 import { educatorTradeAnalysisApiSlice } from "./api/educator/EducatorTradeAnalysisApiSlice";
 import { educatorRecordingApiSlice } from "./api/educator/EducatorRecordingApiSlice";
 import { educatorRatingApiSlice } from "./api/educator/EducatorRatingApiSlice";
+import { educatorLanguageApiSlice } from "./api/educator/EducatorLanguageApiSlice";
+import { educatorLiveStreamApiSlice } from "./api/educator/EducatorLiveStreamApiSlice";
+import { educatorStreamScheduleApiSlice } from "./api/educator/EducatorStreamScheduleApiSlice";
+import { educatorProfileApiSlice } from "./api/educator/EducatorProfileApiSlice";
+
 
 // ============================================================================
 // REDUX PERSIST CONFIGURATION
@@ -103,6 +108,10 @@ export const store = configureStore({
     [educatorTradeAnalysisApiSlice.reducerPath]: educatorTradeAnalysisApiSlice.reducer,
     [educatorRecordingApiSlice.reducerPath]: educatorRecordingApiSlice.reducer,
     [educatorRatingApiSlice.reducerPath]: educatorRatingApiSlice.reducer,
+    [educatorLanguageApiSlice.reducerPath]: educatorLanguageApiSlice.reducer,
+    [educatorLiveStreamApiSlice.reducerPath]: educatorLiveStreamApiSlice.reducer,
+    [educatorStreamScheduleApiSlice.reducerPath]: educatorStreamScheduleApiSlice.reducer,
+    [educatorProfileApiSlice.reducerPath]: educatorProfileApiSlice.reducer,
   },
 
   middleware: (getDefaultMiddleware) =>
@@ -134,6 +143,10 @@ export const store = configureStore({
       educatorTradeAnalysisApiSlice.middleware,
       educatorRecordingApiSlice.middleware,
       educatorRatingApiSlice.middleware,
+      educatorLanguageApiSlice.middleware,
+      educatorLiveStreamApiSlice.middleware,
+      educatorStreamScheduleApiSlice.middleware,
+      educatorProfileApiSlice.middleware,
     ),
 });
 

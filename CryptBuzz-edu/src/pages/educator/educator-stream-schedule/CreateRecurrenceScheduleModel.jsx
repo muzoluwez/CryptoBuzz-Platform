@@ -1,7 +1,6 @@
 import React, { useEffect, useState, forwardRef } from "react";
 import { useFormik } from "formik";
 import * as Yup from "yup";
-import moment from "moment-timezone";
 import { toast } from "sonner";
 
 import {
@@ -10,7 +9,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { ImageInput } from "@/components/image-input";
 import TagInput from "@/components/ui/tagInput";
 import RichTextEditor from "@/components/ui/rich-editor";
 import DateTimePicker from "./DateTimePicker";
@@ -24,15 +22,9 @@ import {
 } from "@/components/ui/select";
 
 import { useAuthContext } from "../../../auth/useAuthContext";
-import {
-  useGetEducatorAcademyCategoryQuery,
-  useGetLanguageListQuery,
-} from "../../../store/api/educator/educatorAcademyCategoryApiSlice";
-import {
-  useCreateRecurrenceScheduleMutation,
-  useUpdateRecurrenceScheduleMutation,
-} from "../../../store/api/educator/educatorStreamScheduleApiSlice";
-const EST_ZONE = "America/New_York";
+import { useCreateRecurrenceScheduleMutation, useUpdateRecurrenceScheduleMutation } from "../../../store/api/educator/educatorStreamScheduleApiSlice";
+import { useGetLanguagesQuery } from "../../../store/api/educator/educatorLanguageApiSlice";
+import { useFetchCategoriesQuery } from "../../../store/api/educator/educatorAcademyCategoryApiSlice";
 
 const CreateRecurrenceScheduleModel = forwardRef(
   (
@@ -45,8 +37,8 @@ const CreateRecurrenceScheduleModel = forwardRef(
     const [isPickerOpen, setIsPickerOpen] = useState(false);
     const [isEndDatePickerOpen, setIsEndDatePickerOpen] = useState(false);
 
-    const { data: categoryList } = useGetEducatorAcademyCategoryQuery();
-    const { data: languagesList } = useGetLanguageListQuery();
+    const { data: categoryList } = useFetchCategoriesQuery();
+    const { data: languagesList } = useGetLanguagesQuery();
 
     const [createRecurrenceSchedule] = useCreateRecurrenceScheduleMutation();
     const [updateRecurrenceSchedule] = useUpdateRecurrenceScheduleMutation();
@@ -282,11 +274,10 @@ const CreateRecurrenceScheduleModel = forwardRef(
                     type="text"
                     placeholder="Enter title"
                     autoComplete="off"
-                    className={`form-control input input-md w-full ${
-                      formik.errors.title && formik.touched.title
-                        ? "border border-danger"
-                        : ""
-                    }`}
+                    className={`form-control input input-md w-full ${formik.errors.title && formik.touched.title
+                      ? "border border-danger"
+                      : ""
+                      }`}
                     {...formik.getFieldProps("title")}
                   />
                   {formik.touched.title && formik.errors.title && (
@@ -363,7 +354,7 @@ const CreateRecurrenceScheduleModel = forwardRef(
                     </SelectTrigger>
                     <SelectContent>
                       {Array.isArray(languagesList?.data) &&
-                      languagesList.data.length > 0 ? (
+                        languagesList.data.length > 0 ? (
                         languagesList.data.map((item) => (
                           <SelectItem key={item._id} value={item.name}>
                             {item.name}
@@ -394,11 +385,10 @@ const CreateRecurrenceScheduleModel = forwardRef(
                       onValueChange={(value) =>
                         formik.setFieldValue("category", value)
                       }
-                      className={`form-control input input-md w-full ${
-                        formik.errors.category && formik.touched.category
-                          ? "border border-danger"
-                          : ""
-                      }`}
+                      className={`form-control input input-md w-full ${formik.errors.category && formik.touched.category
+                        ? "border border-danger"
+                        : ""
+                        }`}
                     >
                       <SelectTrigger>
                         <SelectValue placeholder="Select" />
@@ -429,11 +419,10 @@ const CreateRecurrenceScheduleModel = forwardRef(
                     value={formik.values.tags}
                     onChange={(tags) => formik.setFieldValue("tags", tags)}
                     placeholder="Add tags..."
-                    className={`form-control input input-md w-full ${
-                      formik.errors.tags && formik.touched.tags
-                        ? "border border-danger"
-                        : ""
-                    }`}
+                    className={`form-control input input-md w-full ${formik.errors.tags && formik.touched.tags
+                      ? "border border-danger"
+                      : ""
+                      }`}
                   />
                   {formik.touched.tags && formik.errors.tags && (
                     <span role="alert" className="text-danger text-xs mt-1">
@@ -453,12 +442,11 @@ const CreateRecurrenceScheduleModel = forwardRef(
                       onValueChange={(v) =>
                         formik.setFieldValue("recurrenceRule.frequency", v)
                       }
-                      className={`form-control input input-md w-full ${
-                        formik.errors.recurrenceRule?.frequency &&
+                      className={`form-control input input-md w-full ${formik.errors.recurrenceRule?.frequency &&
                         formik.touched.recurrenceRule?.frequency
-                          ? "border border-danger"
-                          : ""
-                      }`}
+                        ? "border border-danger"
+                        : ""
+                        }`}
                     >
                       <SelectTrigger>
                         <SelectValue placeholder="Select frequency" />
@@ -498,12 +486,11 @@ const CreateRecurrenceScheduleModel = forwardRef(
                                   Number(v)
                                 )
                               }
-                              className={`form-control input input-md w-full ${
-                                formik.errors.recurrenceRule?.interval &&
+                              className={`form-control input input-md w-full ${formik.errors.recurrenceRule?.interval &&
                                 formik.touched.recurrenceRule?.interval
-                                  ? "border border-danger"
-                                  : ""
-                              }`}
+                                ? "border border-danger"
+                                : ""
+                                }`}
                             >
                               <SelectTrigger>
                                 <SelectValue placeholder="Select frequency" />
@@ -548,12 +535,11 @@ const CreateRecurrenceScheduleModel = forwardRef(
                                     Number(v)
                                   )
                                 }
-                                className={`form-control input input-md w-full ${
-                                  formik.errors.recurrenceRule?.interval &&
+                                className={`form-control input input-md w-full ${formik.errors.recurrenceRule?.interval &&
                                   formik.touched.recurrenceRule?.interval
-                                    ? "border border-danger"
-                                    : ""
-                                }`}
+                                  ? "border border-danger"
+                                  : ""
+                                  }`}
                               >
                                 <SelectTrigger>
                                   <SelectValue placeholder="Select frequency" />
@@ -607,19 +593,18 @@ const CreateRecurrenceScheduleModel = forwardRef(
                                           ?.byWeekday || [];
                                       const newDays = isSelected
                                         ? currentDays.filter(
-                                            (d) => d !== day.key
-                                          )
+                                          (d) => d !== day.key
+                                        )
                                         : [...currentDays, day.key];
                                       formik.setFieldValue(
                                         "recurrenceRule.byWeekday",
                                         newDays
                                       );
                                     }}
-                                    className={`px-2 py-1 rounded text-sm font-medium transition-colors duration-200 min-w-[30px] ${
-                                      isSelected
-                                        ? "bg-blue-500 text-white hover:bg-blue-600"
-                                        : "bg-gray-100 text-gray-700 hover:bg-gray-200 border border-gray-300"
-                                    }`}
+                                    className={`px-2 py-1 rounded text-sm font-medium transition-colors duration-200 min-w-[30px] ${isSelected
+                                      ? "bg-blue-500 text-white hover:bg-blue-600"
+                                      : "bg-gray-100 text-gray-700 hover:bg-gray-200 border border-gray-300"
+                                      }`}
                                   >
                                     {day.label}
                                   </button>
@@ -644,54 +629,54 @@ const CreateRecurrenceScheduleModel = forwardRef(
               {["DAILY", "WEEKLY"].includes(
                 formik.values.recurrenceRule?.frequency
               ) && (
-                <div className="col-span-12 bg-gray-100 p-4 rounded-md border border-gray-200 dark:border-gray-200 mt-1">
-                  {/* END LIMIT SECTION */}
-                  <div className="col-span-12 mt-1">
-                    <label className="flex items-center gap-2 text-gray-900 text-sm font-medium">
-                      <input
-                        type="checkbox"
-                        checked={
-                          formik.values.recurrenceRule?.hasEndLimit || false
-                        }
-                        onChange={(e) =>
-                          formik.setFieldValue(
-                            "recurrenceRule.hasEndLimit",
-                            e.target.checked
-                          )
-                        }
-                        className="h-4 w-4"
-                      />
-                      Set end limit (otherwise continues for 2 months)
-                    </label>
-
-                    {formik.values.recurrenceRule?.hasEndLimit && (
-                      <div className="mt-4 flex flex-col gap-3">
-                        <label className="form-label text-gray-900">
-                          End After
-                        </label>
-
-                        {/* Dropdown */}
-                        <Select
-                          value={
-                            formik.values.recurrenceRule?.endType ||
-                            "OCCURRENCES"
+                  <div className="col-span-12 bg-gray-100 p-4 rounded-md border border-gray-200 dark:border-gray-200 mt-1">
+                    {/* END LIMIT SECTION */}
+                    <div className="col-span-12 mt-1">
+                      <label className="flex items-center gap-2 text-gray-900 text-sm font-medium">
+                        <input
+                          type="checkbox"
+                          checked={
+                            formik.values.recurrenceRule?.hasEndLimit || false
                           }
-                          onValueChange={(v) =>
-                            formik.setFieldValue("recurrenceRule.endType", v)
+                          onChange={(e) =>
+                            formik.setFieldValue(
+                              "recurrenceRule.hasEndLimit",
+                              e.target.checked
+                            )
                           }
-                          className="form-control input input-md w-[200px]"
-                        >
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select option" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="OCCURRENCES">
-                              Number of occurrences
-                            </SelectItem>
-                            <SelectItem value="DATE">End date</SelectItem>
-                          </SelectContent>
-                        </Select>
-                        {/* {formik.touched.recurrenceRule?.endType &&
+                          className="h-4 w-4"
+                        />
+                        Set end limit (otherwise continues for 2 months)
+                      </label>
+
+                      {formik.values.recurrenceRule?.hasEndLimit && (
+                        <div className="mt-4 flex flex-col gap-3">
+                          <label className="form-label text-gray-900">
+                            End After
+                          </label>
+
+                          {/* Dropdown */}
+                          <Select
+                            value={
+                              formik.values.recurrenceRule?.endType ||
+                              "OCCURRENCES"
+                            }
+                            onValueChange={(v) =>
+                              formik.setFieldValue("recurrenceRule.endType", v)
+                            }
+                            className="form-control input input-md w-[200px]"
+                          >
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select option" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="OCCURRENCES">
+                                Number of occurrences
+                              </SelectItem>
+                              <SelectItem value="DATE">End date</SelectItem>
+                            </SelectContent>
+                          </Select>
+                          {/* {formik.touched.recurrenceRule?.endType &&
                           formik.errors.recurrenceRule?.endType && (
                             <span
                               role="alert"
@@ -701,65 +686,65 @@ const CreateRecurrenceScheduleModel = forwardRef(
                             </span>
                           )} */}
 
-                        {/* Input box by default visible when OCCURRENCES is selected */}
-                        {(!formik.values.recurrenceRule?.endType ||
-                          formik.values.recurrenceRule?.endType ===
+                          {/* Input box by default visible when OCCURRENCES is selected */}
+                          {(!formik.values.recurrenceRule?.endType ||
+                            formik.values.recurrenceRule?.endType ===
                             "OCCURRENCES") && (
-                          <input
-                            type="number"
-                            min={1}
-                            placeholder="Occurrence"
-                            value={
-                              formik.values.recurrenceRule?.occurrences || ""
-                            }
-                            onChange={(e) =>
-                              formik.setFieldValue(
-                                "recurrenceRule.occurrences",
-                                e.target.value
-                              )
-                            }
-                            className="form-control input input-md w-full"
-                          />
-                        )}
-                        {formik.touched.recurrenceRule?.occurrences &&
-                          formik.errors.recurrenceRule?.occurrences && (
-                            <span
-                              role="alert"
-                              className="text-danger text-xs mt-1"
-                            >
-                              {formik.errors.recurrenceRule.occurrences}
-                            </span>
-                          )}
+                              <input
+                                type="number"
+                                min={1}
+                                placeholder="Occurrence"
+                                value={
+                                  formik.values.recurrenceRule?.occurrences || ""
+                                }
+                                onChange={(e) =>
+                                  formik.setFieldValue(
+                                    "recurrenceRule.occurrences",
+                                    e.target.value
+                                  )
+                                }
+                                className="form-control input input-md w-full"
+                              />
+                            )}
+                          {formik.touched.recurrenceRule?.occurrences &&
+                            formik.errors.recurrenceRule?.occurrences && (
+                              <span
+                                role="alert"
+                                className="text-danger text-xs mt-1"
+                              >
+                                {formik.errors.recurrenceRule.occurrences}
+                              </span>
+                            )}
 
-                        {/* Date picker only if DATE selected */}
-                        {formik.values.recurrenceRule?.endType === "DATE" && (
-                          <DateTimePicker
-                            isPickerOpen={isEndDatePickerOpen}
-                            setIsPickerOpen={setIsEndDatePickerOpen}
-                            value={formik.values.recurrenceRule?.endDateTime}
-                            onChange={(date) =>
-                              formik.setFieldValue(
-                                "recurrenceRule.endDateTime",
-                                date
-                              )
-                            }
-                            className="form-control input input-md w-full"
-                          />
-                        )}
-                        {formik.touched.recurrenceRule?.endDateTime &&
-                          formik.errors.recurrenceRule?.endDateTime && (
-                            <span
-                              role="alert"
-                              className="text-danger text-xs mt-1"
-                            >
-                              {formik.errors.recurrenceRule.endDateTime}
-                            </span>
+                          {/* Date picker only if DATE selected */}
+                          {formik.values.recurrenceRule?.endType === "DATE" && (
+                            <DateTimePicker
+                              isPickerOpen={isEndDatePickerOpen}
+                              setIsPickerOpen={setIsEndDatePickerOpen}
+                              value={formik.values.recurrenceRule?.endDateTime}
+                              onChange={(date) =>
+                                formik.setFieldValue(
+                                  "recurrenceRule.endDateTime",
+                                  date
+                                )
+                              }
+                              className="form-control input input-md w-full"
+                            />
                           )}
-                      </div>
-                    )}
+                          {formik.touched.recurrenceRule?.endDateTime &&
+                            formik.errors.recurrenceRule?.endDateTime && (
+                              <span
+                                role="alert"
+                                className="text-danger text-xs mt-1"
+                              >
+                                {formik.errors.recurrenceRule.endDateTime}
+                              </span>
+                            )}
+                        </div>
+                      )}
+                    </div>
                   </div>
-                </div>
-              )}
+                )}
             </div>
           </div>
           <div className="flex border-gray-200 border-t justify-end pt-5 rounded-b dark:border-gray-200 gap-3">
