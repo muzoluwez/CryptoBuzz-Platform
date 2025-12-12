@@ -184,7 +184,7 @@ const EducatorCommunityFeed = () => {
                             >
                                 {posts?.map((post) => (
                                     <PostCard
-                                        key={post._id}
+                                        key={post.id}
                                         post={post}
                                         onEdit={handleEditPost}
                                         isOwnPost={true} // TODO: Compare with actual user ID

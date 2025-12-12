@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Loader2, Star } from "lucide-react";
 import { format } from "date-fns";
-import { useGetMyRatingsQuery } from "../../../store/api/educator/educatorRatingApiSlice";
+import { useLazyGetMyRatingsQuery } from "../../../store/api/educator/educatorRatingApiSlice";
 import { useAuthContext } from "../../../auth/useAuthContext";
 import {
   Toolbar,
@@ -38,19 +38,11 @@ export default function EducatorRating() {
   const educatorId = auth?.user._id;
   const [allRatings, setAllRatings] = useState([]);
 
-  const {
-    data: ratingsRes,
-    isLoading,
-    isFetching,
-    isError,
-    error,
-  } = useGetMyRatingsQuery({
-    educatorId,
-    page,
-    limit,
-    search: "",
-    sort: "-createdAt",
-  });
+  const [getMyRatings, { data: ratingsRes, isLoading, isFetching, isError, error }] = useLazyGetMyRatingsQuery();
+
+  useEffect(() => {
+    getMyRatings({ educatorId, page, limit, search: "", sort: "-createdAt" });
+  }, [educatorId, page, limit]);
 
   const loadMoreRef = useRef(null);
   const hasMore = ratingsRes?.pagination?.hasMore;
@@ -218,8 +210,8 @@ export default function EducatorRating() {
                             <Star
                               key={i}
                               className={`w-6 h-5 ${i < Math.floor(fb.rating || 0)
-                                  ? "text-yellow-400 fill-yellow-400"
-                                  : "text-gray-300"
+                                ? "text-yellow-400 fill-yellow-400"
+                                : "text-gray-300"
                                 }`}
                             />
                           ))}

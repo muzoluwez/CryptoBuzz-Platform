@@ -27,12 +27,14 @@ const EducatorRecordingSession = lazy(() => import("../pages/educator/recording/
 const AdminRecordingSession = lazy(() => import("../pages/admin/recording/AdminRecordingSession"));
 
 // Course & Academy Pages
-const Courses = lazy(() => import("../pages/admin/courses/Courses"));
+// const Courses = lazy(() => import("../pages/admin/courses/Courses"));
+const Courses = lazy(() => import("../pages/educator/courses/Courses"));
 const AdminAcademyCategory = lazy(() => import("../pages/admin/academy-category/AdminAcademyCategory"));
 
 // Educator Management Pages
 const Educators = lazy(() => import("../pages/admin/educators/Educators"));
 const AdminRating = lazy(() => import("../pages/admin/admin-educator-rating/AdminRating"));
+const EducatorRating = lazy(() => import("../pages/educator/educator-rating/EducatoRating"));
 const AdminEducatorRatings = lazy(() => import("../pages/admin/admin-educator-rating/AdminEducatorRatings"));
 
 // Schedule & Session Management Pages
@@ -91,7 +93,7 @@ const routes = {
     { path: "/educator/trade-analysis", element: <EducatorTradeAnalysis /> },
 
     // Courses - Manage all educational courses
-    { path: "/admin/courses", element: <Courses /> },
+    { path: "/educator/courses", element: <Courses /> },
 
     // Live Session - View all active and scheduled live sessions
     { path: "/admin/live-session", element: <LiveSession /> },
@@ -153,6 +155,7 @@ const routes = {
       path: "/admin/educator-rating/:educatorId",
       element: <AdminEducatorRatings />,
     },
+    { path: "/educator/rating", element: <EducatorRating /> },
 
     // IQ Crypto - Cryptocurrency analysis and insights
     // { path: "/admin/iq-crypto", element: <AdminIqCrypto /> },

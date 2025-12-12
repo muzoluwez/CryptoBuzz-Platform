@@ -1469,7 +1469,7 @@ export const sideMenus = {
     {
       title: "Academy",
       icon: <BookOpen />,
-      path: "/admin/courses",
+      path: "/educator/courses",
     },
 
     {
@@ -1528,7 +1528,7 @@ export const sideMenus = {
     {
       title: "Educator Ratings",
       icon: <Star />,
-      path: "/educator/educator-rating",
+      path: "/educator/rating",
     },
   ],
   educator: [

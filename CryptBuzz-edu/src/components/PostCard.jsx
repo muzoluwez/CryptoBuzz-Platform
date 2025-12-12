@@ -272,7 +272,6 @@ const PostCard = ({ post, onEdit, isOwnPost = false, refetch }) => {
           <div className="flex justify-between items-start">
             <div>
               <h3 className="font-semibold text-gray-800 font-termina">
-                {console.log(post.author)}
                 {post.author?.name || `${post.author?.firstName} ${post.author?.lastName}` || post.author?.role || "User"}
               </h3>
               <p className="text-gray-500 text-xs font-termina capitalize">
