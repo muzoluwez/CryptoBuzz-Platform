@@ -12,7 +12,7 @@ const router = express.Router();
 
 // Admin Course Type Routes
 router.get("/list", Auth.AdminAuth, getCourseTypeList);
-router.get("/", Auth.AdminAuth, getCourseType);
+router.get("/", Auth.CommonAuth, getCourseType);
 router.post("/", Auth.AdminAuth, createCourseType);
 router.put("/:id", Auth.AdminAuth, updateCourseType);
 router.delete("/:id", Auth.AdminAuth, deleteCourseType);
