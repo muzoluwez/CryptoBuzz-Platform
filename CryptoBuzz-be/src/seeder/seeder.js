@@ -3,7 +3,7 @@ import bcrypt from "bcrypt";
 const admins = [
   {
     first_name:"Admin",
-    last_name:"One"
+    last_name:"One",
     name: "Admin One",
     email: "admin@cryptobuzz.in",
     password: "3XC^c^@NpZu",
