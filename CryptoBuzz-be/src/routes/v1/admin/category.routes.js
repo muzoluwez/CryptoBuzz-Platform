@@ -8,7 +8,7 @@ const router = express.Router();
 router.get("/",  Auth.AdminAuth, getCategories);
 
 // Get all category with status true
-router.get("/list",  Auth.AdminAuth, fetchCategories);
+router.get("/list",  Auth.CommonAuth, fetchCategories);
 
 // Get single category by ID
 router.get("/:id",Auth.AdminAuth, getOneCategory);
