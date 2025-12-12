@@ -2,22 +2,18 @@ import { Container } from "@/components/container";
 import {
   Toolbar,
   ToolbarActions,
-  ToolbarDescription,
   ToolbarHeading,
   ToolbarPageTitle,
 } from "@/partials/toolbar";
 
-import { Calendar, CirclePlay, Clock3, Timer, Videotape } from "lucide-react";
-import React, { useCallback, useEffect, useRef, useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Calendar, Clock3, Videotape } from "lucide-react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useSettings } from "@/providers";
 import { toAbsoluteUrl } from "@/utils";
-import Spinner from "@/components/common/LoadingSpinner"; // Optional loader component
-import { it } from "@faker-js/faker";
+import Spinner from "@/components/common/LoadingSpinner";
 import VideoPlayerModal from "./VideoPlayerModal";
 import { useLazyGetEducatorRecordingQuery } from "../../../store/api/educator/educatorRecordingApiSlice";
-import VideoThumbnail from "../live-session/VideoThumbnail";
-import RecordingThumbnail from "@/shared/components/RecordingThumbnail";
+import RecordingThumbnail from "./RecordingThumbnail";
 import {
   KeenIcon,
   MenuIcon,
@@ -30,9 +26,7 @@ import {
 } from "@/components";
 import DeleteEducatorRecording from "./DeleteEducatorRecording";
 import CreateEducatorRecording from "./CreateEducatorRecording";
-import { reload } from "@firebase/auth";
 import UpdateEducatorRecording from "./UpdateEducatorRecording";
-import { set } from "date-fns";
 
 const EducatorRecordingSession = () => {
   const [showAllTags, setShowAllTags] = useState({});

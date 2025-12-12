@@ -258,7 +258,8 @@ const educatorPostSlice = createSlice({
             id: post.author._id,
             name:
               `${post.author.first_name || ""} ${post.author.last_name || ""}`.trim() ||
-              "Anonymous User",
+              `${post.author.name || ""}`.trim() || `${post.author.role || ""}`.trim() ||
+              "Educator",
             first_name: post.author.first_name,
             last_name: post.author.last_name,
             role: post.author.role,
@@ -326,7 +327,8 @@ const educatorPostSlice = createSlice({
             id: postData.author._id || postData.author.id,
             name:
               `${postData.author.first_name || ""} ${postData.author.last_name || ""}`.trim() ||
-              "Anonymous User",
+              `${postData.author.name || ""}`.trim() || `${postData.author.role || ""}`.trim() ||
+              "Educator",
             first_name: postData.author.first_name,
             last_name: postData.author.last_name,
             role: postData.author.role,
@@ -377,7 +379,8 @@ const educatorPostSlice = createSlice({
             id: postData.author._id || postData.author.id,
             name:
               `${postData.author.first_name || ""} ${postData.author.last_name || ""}`.trim() ||
-              "Anonymous User",
+              `${postData.author.name || ""}`.trim() || `${postData.author.role || ""}`.trim() ||
+              "Educator",
             first_name: postData.author.first_name,
             last_name: postData.author.last_name,
             role: postData.author.role,

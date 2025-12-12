@@ -7,18 +7,9 @@ import PostCard from '@/components/PostCard';
 import CreatePostModal from '@/components/CreatePostModal';
 import { useAuthContext } from '@/auth/useAuthContext';
 import {
-    Save,
-    Users,
     Rss,
-    Edit,
-    X,
-    Smile,
-    Globe,
-    Plus,
-    Play,
     Video,
     Image,
-    FileText,
 } from 'lucide-react';
 
 const EducatorCommunityFeed = () => {
@@ -31,8 +22,6 @@ const EducatorCommunityFeed = () => {
 
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingPost, setEditingPost] = useState(null);
-    const [isPostExpanded, setIsPostExpanded] = useState(false);
-    const fileInputRef = useRef(null);
 
     // Fetch posts on component mount (StrictMode-safe, run once)
     const didInitRef = useRef(false);
@@ -61,13 +50,6 @@ const EducatorCommunityFeed = () => {
         }
     };
 
-    const handleFileChange = (event) => {
-        const file = event.target.files[0];
-        if (file) {
-            // You can now handle the file. For example, log its name to the console.
-            console.log('Selected file:', file.name);
-        }
-    };
 
     const handleCreatePost = () => {
         setEditingPost(null);
@@ -163,18 +145,6 @@ const EducatorCommunityFeed = () => {
                                         <span className="text-sm font-medium text-gray-700 group-hover:text-green-700 font-termina">Photo</span>
                                         <span className="text-xs text-gray-500">JPG, PNG</span>
                                     </button>
-
-                                    {/* Document Upload Button - Commented out */}
-                                    {/* <button 
-                                        onClick={handleCreatePost}
-                                        className="group flex flex-col items-center gap-2 p-3 rounded-xl transition-all duration-200 hover:bg-purple-50 hover:scale-105"
-                                    >
-                                        <div className="p-2 rounded-full bg-purple-100 group-hover:bg-purple-200 transition-colors">
-                                            <FileText size={20} className="text-purple-600" />
-                                        </div>
-                                        <span className="text-sm font-medium text-gray-700 group-hover:text-purple-700 font-termina">Document</span>
-                                        <span className="text-xs text-gray-500">PDF, DOC</span>
-                                    </button> */}
                                 </div>
 
 
@@ -212,9 +182,9 @@ const EducatorCommunityFeed = () => {
                                     <div className="text-center text-sm text-gray-400 py-4 font-termina">No more posts</div>
                                 ) : null}
                             >
-                                {posts.map((post) => (
+                                {posts?.map((post) => (
                                     <PostCard
-                                        key={post.id}
+                                        key={post._id}
                                         post={post}
                                         onEdit={handleEditPost}
                                         isOwnPost={true} // TODO: Compare with actual user ID

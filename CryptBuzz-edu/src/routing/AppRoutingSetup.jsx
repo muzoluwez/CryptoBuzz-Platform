@@ -23,6 +23,7 @@ const EducatorTradeAnalysis = lazy(() => import("../pages/educator/educator-trad
 const LiveSession = lazy(() => import("../pages/admin/live-session/LiveSession"));
 const AdminLiveSessionView = lazy(() => import("../pages/admin/live-session/AdminLiveSessionView"));
 const AdminRecording = lazy(() => import("../pages/admin/recording/AdminRecording"));
+const EducatorRecordingSession = lazy(() => import("../pages/educator/recording/EducatorRecordingSession"));
 const AdminRecordingSession = lazy(() => import("../pages/admin/recording/AdminRecordingSession"));
 
 // Course & Academy Pages
@@ -45,6 +46,7 @@ const GeneralSetting = lazy(() => import("../pages/admin/general-setting/General
 
 // Community & Social Pages
 const AdminCommunityFeed = lazy(() => import("../pages/admin/admin-community-feed/AdminCommunityFeed"));
+const EducatorCommunityFeed = lazy(() => import("../pages/educator/educator-community-feed/EducatorCommunityFeed"));
 const AdminIqCrypto = lazy(() => import("../pages/admin/admin-iq-crypto/AdminIqCrypto"));
 const EducatorIqCrypto = lazy(() => import("../pages/educator/educator-iq-crypto/EducatorIqCrypto"));
 const IqSocial = lazy(() => import("../pages/admin/iq-social/IqSocial"));
@@ -98,8 +100,8 @@ const routes = {
     { path: "/admin/live-session/:callId", element: <AdminLiveSessionView /> },
 
     // Recordings - View all recorded sessions
-    { path: "/admin/recordings", element: <AdminRecording /> },
-
+    // { path: "/admin/recordings", element: <AdminRecording /> },
+    { path: "educator/stream-recording", element: <EducatorRecordingSession /> },
     // Educators - Manage all educators on the platform
     { path: "/admin/educators", element: <Educators /> },
 
@@ -122,7 +124,8 @@ const routes = {
     { path: "admin/general-setting", element: <GeneralSetting /> },
 
     // IQ Social - Manage community feed and social interactions
-    { path: "/admin/iq-social", element: <IqSocial /> },
+    // { path: "/admin/iq-social", element: <IqSocial /> },
+    { path: "/educator/iq-social", element: <EducatorCommunityFeed /> },
 
     // KPIs - View educator performance metrics
     { path: "/admin/kpis", element: <EducatorKpi /> },

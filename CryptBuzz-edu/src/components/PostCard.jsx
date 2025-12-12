@@ -28,9 +28,9 @@ const PostCard = ({ post, onEdit, isOwnPost = false, refetch }) => {
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const deleteDialogRef = useRef(null);
   const [isOpen, setIsOpen] = useState(false);
-   const [isExpanded, setIsExpanded] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(false);
 
-  
+
   const htmlToPlainText = (html) => {
     if (!html) return "";
     try {
@@ -125,7 +125,7 @@ const PostCard = ({ post, onEdit, isOwnPost = false, refetch }) => {
     }
   };
 
- 
+
 
   const renderMedia = () => {
     const hasImages = post.images && post.images.length > 0;
@@ -240,7 +240,7 @@ const PostCard = ({ post, onEdit, isOwnPost = false, refetch }) => {
     );
   };
 
-    const displayText = isExpanded
+  const displayText = isExpanded
     ? plainTextContent
     : plainTextContent.substring(0, 200);
   const finalHtml =
@@ -272,7 +272,8 @@ const PostCard = ({ post, onEdit, isOwnPost = false, refetch }) => {
           <div className="flex justify-between items-start">
             <div>
               <h3 className="font-semibold text-gray-800 font-termina">
-                {post.author?.name || "Anonymous User"}
+                {console.log(post.author)}
+                {post.author?.name || `${post.author?.firstName} ${post.author?.lastName}` || post.author?.role || "User"}
               </h3>
               <p className="text-gray-500 text-xs font-termina capitalize">
                 {post.author?.role && `${post.author.role} • `}
@@ -313,7 +314,7 @@ const PostCard = ({ post, onEdit, isOwnPost = false, refetch }) => {
       </div>
 
       {/* Post Content */}
-        {/* {post.content && (
+      {/* {post.content && (
                 <div className="mb-3">
                     <p className="text-sm text-gray-700 leading-relaxed font-termina whitespace-pre-wrap break-words">
                         {post.content.length > 200 && !isContentExpanded
@@ -339,7 +340,7 @@ const PostCard = ({ post, onEdit, isOwnPost = false, refetch }) => {
                     </p>
                 </div>
             )} */}
-     {plainTextContent && (
+      {plainTextContent && (
         <div className="mb-3">
           <p
             className="text-sm text-gray-700 leading-relaxed font-termina whitespace-pre-wrap break-words"

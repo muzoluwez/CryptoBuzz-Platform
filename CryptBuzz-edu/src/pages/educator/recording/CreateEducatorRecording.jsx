@@ -16,19 +16,12 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { useAuthContext } from "../../../auth/useAuthContext";
-import { ImageInput } from "@/components/image-input";
 import { Alert } from "../../../components/alert/Alert";
 import { toast } from "sonner";
 import RichTextEditor from "../../../components/ui/rich-editor";
-import { Avatar } from "stream-chat-react";
-import { AvatarUpload } from "./AvatarUpload";
-import clsx from "clsx";
-import { KeenIcon } from "@/components";
-import { useUpdateEducatorRecordingMutation } from "../../../store/api/educator/educatorRecordingApiSlice";
-import { useGetEducatorAcademyCategoryQuery } from "../../../store/api/educator/educatorAcademyCategoryApiSlice";
-import { useCreateEducatorRecordingMutation } from "../../../store/api/educator/educatorRecordingApiSlice";
-import { Input } from "postcss";
 import DateTimePicker from "../educator-stream-schedule/DateTimePicker";
+import { useUpdateEducatorRecordingMutation, useCreateEducatorRecordingMutation } from "../../../store/api/educator/EducatorRecordingApiSlice";
+import { useFetchCategoriesQuery } from "../../../store/api/educator/educatorAcademyCategoryApiSlice";
 
 const CreateEducatorRecording = forwardRef(
   ({ isCreateOpen, handleCloseCreate, refetch }, ref) => {
@@ -38,7 +31,7 @@ const CreateEducatorRecording = forwardRef(
     const { auth } = useAuthContext();
     const educatorId = auth?.user?._id ?? null;
 
-    const { data: categoryList } = useGetEducatorAcademyCategoryQuery();
+    const { data: categoryList } = useFetchCategoriesQuery();
     const [showPreviewVideo, setShowPreviewVideo] = useState(false);
     const [uploadProgress, setUploadProgress] = useState(0);
     const [videoInputType, setVideoInputType] = useState("");
@@ -58,7 +51,6 @@ const CreateEducatorRecording = forwardRef(
       videoInputType: "", // "url" or "upload"
       videoFile: null, // if uploaded
       videoPreview: null,
-      // thumbnail: null,
     };
 
     const createSchema = Yup.object().shape({
@@ -72,23 +64,7 @@ const CreateEducatorRecording = forwardRef(
 
       call_tags: Yup.array().min(1, "At least one tag is required"),
       call_category: Yup.string().required("Category is required"),
-      // videoFile: Yup.mixed()
-      //   .required("videoFile is required")
-      //   // .test(
-      //   //   "fileSize",
-      //   //   // "Thumbnail size too large (max 20MB)",
-      //   //   (value) => !value || (value && value.size <= 20000000)
-      //   // )
-      //   .test(
-      //     "fileType",
-      //     "Unsupported file format. Please use JPEG, PNG, JPG, or WebP",
-      //     (value) =>
-      //       !value ||
-      //       (value &&
-      //         ["image/jpeg", "image/png", "image/jpg", "image/webp"].includes(
-      //           value.type
-      //         ))
-      //   ),
+
     });
 
     const formik = useFormik({
@@ -366,8 +342,8 @@ const CreateEducatorRecording = forwardRef(
                     placeholder="Enter title"
                     autoComplete="off"
                     className={`form-control input input-md w-full ${formik.errors.call_title && formik.touched.call_title
-                        ? "border border-danger"
-                        : ""
+                      ? "border border-danger"
+                      : ""
                       }`}
                     {...formik.getFieldProps("call_title")}
                   />
@@ -432,33 +408,6 @@ const CreateEducatorRecording = forwardRef(
                 </div>
               </div>
 
-              {/* <div className="col-span-12">
-                <div className="flex flex-col gap-1">
-                  <label className="form-label text-gray-900 gap-1">
-                    End Date<span className="text-danger">*</span>
-                  </label>
-                  <div className="custom_datepicket">
-                    <DateTimePicker
-                      isPickerOpen={isEndPickerOpen}
-                      setIsPickerOpen={setEndIsPickerOpen}
-                      value={formik.values.end_time}
-                      onChange={(date) =>
-                        formik.setFieldValue("end_time", date)
-                      }
-                      className={
-                        formik.errors.end_time && formik.touched.end_time
-                          ? "border border-danger"
-                          : ""
-                      }
-                    />
-                  </div>
-                  {formik.touched.end_time && formik.errors.end_time && (
-                    <span className="text-danger text-xs">
-                      {formik.errors.end_time}
-                    </span>
-                  )}
-                </div>
-              </div> */}
 
               <div className="col-span-12">
                 <div className="col-span-6">
@@ -472,9 +421,9 @@ const CreateEducatorRecording = forwardRef(
                         formik.setFieldValue("call_category", value)
                       }
                       className={`form-control input input-md w-full ${formik.errors.call_category &&
-                          formik.touched.call_category
-                          ? "border border-danger"
-                          : ""
+                        formik.touched.call_category
+                        ? "border border-danger"
+                        : ""
                         }`}
                     >
                       <SelectTrigger>
@@ -509,8 +458,8 @@ const CreateEducatorRecording = forwardRef(
                     onChange={(tags) => formik.setFieldValue("call_tags", tags)}
                     placeholder="Add tags..."
                     className={`form-control input input-md w-full ${formik.errors.call_tags && formik.touched.call_tags
-                        ? "border border-danger"
-                        : ""
+                      ? "border border-danger"
+                      : ""
                       }`}
                   />
                   {formik.touched.call_tags && formik.errors.call_tags && (
