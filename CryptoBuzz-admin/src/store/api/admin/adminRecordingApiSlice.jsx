@@ -13,28 +13,28 @@ export const adminRecordingApiSlice = createApi({
         // Get admin recordings list
         getAdminRecordings: builder.query({
             query: ({ page = 1, limit = 10, search = "", educator = "" } = {}) =>
-                `/common/recordings?page=${page}&limit=${limit}&search=${search}&educator=${educator}`,
+                `/common/recording?page=${page}&limit=${limit}&search=${search}&educator=${educator}`,
         }),
 
         // Get specific recording by ID
         getAdminRecordingById: builder.query({
-            query: (id) => `/common/recordings/${id}`,
+            query: (id) => `/common/recording/${id}`,
         }),
 
         // Get recording by user ID
         getAdminRecordingByUserID: builder.query({
-            query: (userId) => `/common/recordings/user/${userId}`,
+            query: (userId) => `/common/recording/user/${userId}`,
         }),
 
         // Get educator recording by call ID
         getEducatorRecordingByCallID: builder.query({
-            query: (callId) => `/common/recordings/call/${callId}`,
+            query: (callId) => `/common/recording/call/${callId}`,
         }),
 
         // Create manual recording
         createManualRecording: builder.mutation({
             query: (data) => ({
-                url: "/common/recordings/manual",
+                url: "/common/recording/manual",
                 method: "POST",
                 body: data,
             }),
@@ -43,7 +43,7 @@ export const adminRecordingApiSlice = createApi({
         // Create admin recording
         createAdminRecording: builder.mutation({
             query: (data) => ({
-                url: "/common/recordings",
+                url: "/common/recording",
                 method: "POST",
                 body: data,
             }),
@@ -52,7 +52,7 @@ export const adminRecordingApiSlice = createApi({
         // Save educator recording
         saveEducatorRecording: builder.mutation({
             query: (data) => ({
-                url: "/common/recordings/save",
+                url: "/common/recording/save",
                 method: "POST",
                 body: data,
             }),
@@ -61,7 +61,7 @@ export const adminRecordingApiSlice = createApi({
         // Update recording
         updateAdminRecording: builder.mutation({
             query: ({ id, ...data } = {}) => ({
-                url: `/common/recordings/${id}`,
+                url: `/common/recording/${id}`,
                 method: "PUT",
                 body: data,
             }),
@@ -70,7 +70,7 @@ export const adminRecordingApiSlice = createApi({
         // Delete recording
         deleteAdminRecording: builder.mutation({
             query: (id) => ({
-                url: `/common/recordings/${id}`,
+                url: `/common/recording/${id}`,
                 method: "DELETE",
             }),
         }),
@@ -78,7 +78,7 @@ export const adminRecordingApiSlice = createApi({
         // Get educator recordings (for admin view)
         getEducatorRecordings: builder.query({
             query: ({ page = 1, limit = 10, search = "" } = {}) =>
-                `/common/educator-recordings?page=${page}&limit=${limit}&search=${search}`,
+                `/common/educator-recording?page=${page}&limit=${limit}&search=${search}`,
         }),
     }),
 });

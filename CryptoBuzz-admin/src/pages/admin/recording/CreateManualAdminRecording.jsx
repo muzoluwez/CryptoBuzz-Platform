@@ -21,12 +21,12 @@ import { useAuthContext } from "../../../auth/useAuthContext";
 import { Alert } from "../../../components/alert/Alert";
 import DateTimePicker from "../../../components/common/DateTimePicker";
 import { useGetEducatorsQuery } from "../../../store/api/admin/adminEducatorsApiSlice";
-import { useCreateAdminRecordingMutation } from "../../../store/api/admin/adminRecordingApiSlice";
+import { useCreateManualRecordingMutation } from "../../../store/api/admin/adminRecordingApiSlice";
 import { useGetEducatorAcademyCategoryQuery } from "../../../store/api/admin/adminAcademyCategoryApiSlice";
 
 const CreateManualAdminRecording = forwardRef(
   ({ isCreateOpen, handleCloseCreate, refetch }, ref) => {
-    const [createAdminRecording] = useCreateAdminRecordingMutation();
+    const [createManualRecording] = useCreateManualRecordingMutation();
     const { data: educators } = useGetEducatorsQuery({ page: 1, limit: 100 });
     const { data: categoryList } = useGetEducatorAcademyCategoryQuery();
 
@@ -117,7 +117,7 @@ const CreateManualAdminRecording = forwardRef(
           } else {
             dataToSend = payload;
           }
-          await createAdminRecording(dataToSend).unwrap();
+          await createManualRecording(dataToSend).unwrap();
           await refetch();
           toast.success("Recording created successfully!");
 
@@ -372,8 +372,8 @@ const CreateManualAdminRecording = forwardRef(
                     placeholder="Enter title"
                     autoComplete="off"
                     className={`form-control input input-md w-full ${formik.errors.call_title && formik.touched.call_title
-                        ? "border border-danger"
-                        : ""
+                      ? "border border-danger"
+                      : ""
                       }`}
                     {...formik.getFieldProps("call_title")}
                   />
@@ -422,8 +422,8 @@ const CreateManualAdminRecording = forwardRef(
                         formik.setFieldValue("educator", value)
                       }
                       className={`form-control input input-md w-full ${formik.errors.educator && formik.touched.educator
-                          ? "border border-danger"
-                          : ""
+                        ? "border border-danger"
+                        : ""
                         }`}
                     >
                       <SelectTrigger>
@@ -513,9 +513,9 @@ const CreateManualAdminRecording = forwardRef(
                         formik.setFieldValue("call_category", value)
                       }
                       className={`form-control input input-md w-full ${formik.errors.call_category &&
-                          formik.touched.call_category
-                          ? "border border-danger"
-                          : ""
+                        formik.touched.call_category
+                        ? "border border-danger"
+                        : ""
                         }`}
                     >
                       <SelectTrigger>
@@ -550,8 +550,8 @@ const CreateManualAdminRecording = forwardRef(
                     onChange={(tags) => formik.setFieldValue("call_tags", tags)}
                     placeholder="Add tags..."
                     className={`form-control input input-md w-full ${formik.errors.call_tags && formik.touched.call_tags
-                        ? "border border-danger"
-                        : ""
+                      ? "border border-danger"
+                      : ""
                       }`}
                   />
                   {formik.touched.call_tags && formik.errors.call_tags && (
