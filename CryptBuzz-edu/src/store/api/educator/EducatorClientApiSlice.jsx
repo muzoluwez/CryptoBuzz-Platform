@@ -8,7 +8,7 @@ export const educatorClientApiSlice = createApi({
         getClientToken: builder.mutation({
 
             query: (payload) => ({
-                url: '/admin/stream/get-token',
+                url: '/common/stream/get-token',
                 method: 'POST',
                 body: payload,
             }),

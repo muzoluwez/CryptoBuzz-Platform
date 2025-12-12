@@ -14,7 +14,7 @@ export const educatorRatingApiSlice = createApi({
                 search = "",
                 sort = "-createdAt",
             }) =>
-                `/common/rating?page=${page}&limit=${limit}&search=${search}&sort=${sort}&educatorId=${educatorId}`,
+                `/educator/rating/list?page=${page}&limit=${limit}&search=${search}&sort=${sort}&educatorId=${educatorId}`,
 
             providesTags: ["Rating"],
         }),
