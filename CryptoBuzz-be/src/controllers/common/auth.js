@@ -6,6 +6,7 @@ import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
 import mongoose from "mongoose";
 import { ApiResponse, GetApiResponse } from "../../utils/ApiResponse.js";
+import { RestClientV5 } from "bybit-api";
 
 const loginSchema = yup.object().shape({
   email: yup.string().email().required("Email is required"),
@@ -45,12 +46,12 @@ export const signinUser = async (req, res) => {
     };
 
     const response = {
-      user:data,
+      user: data,
       token
     };
     return res.status(200).json(ApiResponse(200, response, "User login successfully"));
   } catch (error) {
-    console.log(error)
+    console.log(error);
     return res.status(500).json({
       message: "Internal Server Error",
       error: error.errors || error.message
@@ -58,4 +59,27 @@ export const signinUser = async (req, res) => {
   }
 };
 
-export default { signinUser };
+export const getAffiliateInfo = async (req, res) => {
+  try {
+    const clientTest = new RestClientV5({
+      testnet: true,
+      key: process.env.BYBIT_KEY,
+      secret: process.env.BYBIT_SECRET,
+    });
+
+    const response = await clientTest.getAffiliateUserInfo({
+      name: "CryptoBuzzTest1",
+    });
+
+    return res
+      .status(200)
+      .json(ApiResponse(200, response, "Fetch data successfully"));
+  } catch (error) {
+    console.error("BYBIT API ERROR:", error);
+    return res
+      .status(500)
+      .json(ApiResponse(500, null, "Something went wrong"));
+  }
+};
+
+export default { signinUser,getAffiliateInfo };
