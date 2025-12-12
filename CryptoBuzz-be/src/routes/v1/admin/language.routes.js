@@ -9,7 +9,7 @@ import {
 import Auth from "../../../middlewares/auth.js";
 const router = express.Router();
 
-router.get("/list", Auth.AdminAuth, getLanguageList);
+router.get("/list", Auth.CommonAuth, getLanguageList);
 router.get("/", Auth.AdminAuth, getLanguage);
 router.post("/", Auth.AdminAuth, createLanguage);
 router.put("/:id", Auth.AdminAuth, updateLanguage);

@@ -1,5 +1,5 @@
-import { ChannelStats, EarningsChart, EntryCallout, Highlights, TeamMeeting, Teams } from './blocks';
-import AdminCommunityFeed from '../../../admin/admin-community-feed/AdminCommunityFeed';
+import EducatorCommunityFeed from '../../../educator/educator-community-feed/EducatorCommunityFeed';
+import { ChannelStats, EntryCallout, TeamMeeting } from './blocks';
 
 const Demo1LightSidebarContent = () => {
   return <div className="grid gap-5 lg:gap-7.5">
@@ -29,7 +29,7 @@ const Demo1LightSidebarContent = () => {
     {/* Community Feed Section */}
     <div className="grid lg:grid-cols-1 gap-5 lg:gap-7.5">
       <div className="lg:col-span-1">
-        <AdminCommunityFeed />
+        <EducatorCommunityFeed />
       </div>
     </div>
 

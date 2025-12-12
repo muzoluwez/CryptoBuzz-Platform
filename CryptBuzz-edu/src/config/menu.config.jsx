@@ -1460,7 +1460,7 @@ export const sideMenus = {
       path: "/admin/educator-rating",
     },
   ],
-  admin: [
+  educator: [
     {
       title: "Dashboard",
       icon: <LayoutDashboard />,
@@ -1529,100 +1529,7 @@ export const sideMenus = {
       icon: <Star />,
       path: "/educator/rating",
     },
-  ],
-  educator: [
-    {
-      title: "Dashboard",
-      icon: <LayoutDashboard />,
-      path: "/",
-    },
-    {
-      title: "Academy",
-      icon: <BookOpen />,
-      path: "/educator/courses",
-    },
-
-    {
-      title: "IQ Live",
-      icon: <CalendarClock />,
-      // path: "/admin/stream-schedule",
-      children: [
-        {
-          title: "Live Schedule",
-          icon: <CalendarClock />,
-          path: "/educator/stream-schedule",
-        },
-        {
-          title: "Ended Schedule",
-          icon: <CalendarClock />,
-          path: "/educator/ended-stream-schedule",
-        },
-        {
-          title: "Live Sessions",
-          icon: <PlayCircle />,
-          path: "/educator/live-session",
-        },
-        {
-          title: "Ended Sessions ",
-          icon: <PlayCircle />,
-          path: "/educator/ended-live-sessions",
-        },
-      ],
-    },
-    {
-      title: "Recorded Live",
-      icon: <CircleDot />,
-      path: "/educator/stream-recording/list",
-    },
-    {
-      title: "IQ Insight",
-      icon: <ChartCandlestick />,
-      path: "/educator/trade-analysis",
-    },
-    {
-      title: "IQ Crypto Projects",
-      icon: <BadgeCent />,
-      path: "/educator/iq-crypto",
-    },
-    {
-      title: "IQ Ideas",
-      icon: <Lightbulb />,
-      path: "/educator/ideas",
-    },
-    // {
-    //   title: "IQ Strategies",
-    //   icon: <ChartNoAxesCombined />,
-    //   children: [
-    //     {
-    //       title: "IQ Charts",
-    //       icon: <Dot />,
-    //       path: "https://www.iqcharts.com/",
-    //       externalLink: true,
-    //       newTab: true,
-    //     },
-    //   ],
-    // },
-    {
-      title: "IQ Social",
-      icon: <MessageCircleMore />,
-      path: "/educator/iq-social",
-    },
-    {
-      title: "Educator Ratings",
-      icon: <Star />,
-      path: "/educator/rating",
-    },
-    // {
-    //   title: 'Video Library',
-    //   icon: <Clapperboard />,
-    //   path: '/educator/video-library'
-    // },
-    // {
-    //   title: 'Community Feed',
-    //   icon: <LayoutDashboard />,
-    //   path: '/community-feed'
-    // },
-  ],
+  ]
 };
 
 
