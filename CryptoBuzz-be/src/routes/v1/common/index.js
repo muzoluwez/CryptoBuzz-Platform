@@ -11,6 +11,7 @@ import CourseRoute from "./course.routes.js";
 import LectureRoute from "./lecture.routes.js";
 import RecordingRoute from "./recording.routes.js";
 import CryptoAnalysisRoute from "./cryptoAnalysis.routes.js";
+import StreamRoute from "./stream.routes.js";
 import healthcheckRoute from "./healthcheck.routes.js";
 
 router.use("/auth", AuthRoute);
@@ -23,6 +24,7 @@ router.use("/schedule", scheduleRoute);
 router.use("/lecture", LectureRoute);
 router.use("/recording", RecordingRoute);
 router.use("/crypto-analysis", CryptoAnalysisRoute);
+router.use("/stream", StreamRoute);
 router.use("/healthCheck", healthcheckRoute);
 
 export default router;
