@@ -4,7 +4,7 @@ const RecordingSchema = new mongoose.Schema(
   {
     educator_id: { type: String, required: true },
 
-    streamio_filename: { type: String, required: true },
+    streamio_filename: { type: String, },
 
     thumbnail: { type: String },
 
