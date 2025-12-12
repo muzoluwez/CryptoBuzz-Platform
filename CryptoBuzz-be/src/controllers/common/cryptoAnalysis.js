@@ -27,7 +27,7 @@ export const getCryptoAnalysis = async (req, res) => {
     const user = req.user;
     if (!user) return res.status(400).json({ message: "User not found" });
 
-    const filter = {};
+    let filter = {};
     if (user.role == "educator") {
       filter = {
         createdBy: user?._id
