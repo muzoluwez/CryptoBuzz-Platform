@@ -11,7 +11,7 @@ export const adminRecordingApiSlice = createApi({
     baseQuery: baseQueryWithReauth,
     endpoints: (builder) => ({
         // Get admin recordings list
-        getAdminRecordings: builder.query({
+        getAdminRecording: builder.query({
             query: ({ page = 1, limit = 10, search = "", educator = "" } = {}) =>
                 `/common/recording?page=${page}&limit=${limit}&search=${search}&educator=${educator}`,
         }),
@@ -84,7 +84,7 @@ export const adminRecordingApiSlice = createApi({
 });
 
 export const {
-    useLazyGetAdminRecordingsQuery,
+    useLazyGetAdminRecordingQuery,
     useGetAdminRecordingByIdQuery,
     useLazyGetAdminRecordingByUserIDQuery,
     useGetEducatorRecordingByCallIDQuery,

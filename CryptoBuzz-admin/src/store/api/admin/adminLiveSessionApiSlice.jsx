@@ -14,7 +14,7 @@ export const adminLiveSessionApiSlice = createApi({
         // Create new live session
         createLiveSession: builder.mutation({
             query: (payload) => ({
-                url: "/admin/stream/create-livestream",
+                url: "/educator/live-stream/create",
                 method: "POST",
                 body: payload,
             }),
@@ -23,13 +23,13 @@ export const adminLiveSessionApiSlice = createApi({
         // Get list of live sessions with filters
         getLiveSessionList: builder.query({
             query: ({ page = 1, limit = 10, status = "", search = "", educator = "" } = {}) =>
-                `/admin/stream/list?page=${page}&limit=${limit}&status=${status}&search=${search}&educator=${educator}`,
+                `/educator/live-stream/list?page=${page}&limit=${limit}&status=${status}&search=${search}&educator=${educator}`,
         }),
 
         // Get client token for joining live session
         getClientToken: builder.mutation({
             query: (payload) => ({
-                url: "/admin/stream/get-token",
+                url: "/common/stream/get-token",
                 method: "POST",
                 body: payload,
             }),
@@ -38,7 +38,7 @@ export const adminLiveSessionApiSlice = createApi({
         // Start a call/session
         startCall: builder.mutation({
             query: (payload) => ({
-                url: "/admin/stream/start-call",
+                url: "/educator/live-stream/start",
                 method: "POST",
                 body: payload,
             }),
@@ -47,7 +47,7 @@ export const adminLiveSessionApiSlice = createApi({
         // End live session and create recording
         endAndCreate: builder.mutation({
             query: (payload) => ({
-                url: "/admin/stream/end-and-create",
+                url: "/educator/live-stream/end-and-create",
                 method: "POST",
                 body: payload,
             }),
@@ -56,7 +56,7 @@ export const adminLiveSessionApiSlice = createApi({
         // End live call/session
         endCall: builder.mutation({
             query: (payload) => ({
-                url: "/admin/stream/end-call",
+                url: "/educator/live-stream/end-and-create",
                 method: "POST",
                 body: payload,
             }),

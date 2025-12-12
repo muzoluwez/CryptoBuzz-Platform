@@ -10,17 +10,17 @@ export const adminCryptoAnalysisApiSlice = createApi({
         `/common/crypto-analysis/?page=${page}&limit=${limit}`,
     }),
     createAdminCryptoAnalysis: builder.mutation({
-      query: (payload) => ({
+      query: (formData) => ({
         url: "/common/crypto-analysis",
         method: "POST",
-        body: payload,
+        body: formData,
       }),
     }),
     updateAdminCryptoAnalysis: builder.mutation({
-      query: ({ id, ...payload }) => ({
+      query: ({ id, formData }) => ({
         url: `/common/crypto-analysis/${id}`,
         method: "PUT",
-        body: payload,
+        body: formData,
       }),
     }),
     deleteAdminCryptoAnalysis: builder.mutation({

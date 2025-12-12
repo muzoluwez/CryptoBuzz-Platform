@@ -44,14 +44,12 @@ export const updateEducatorProfile = async (req, res) => {
       return res.status(400).json({ message: "Token verification is required...!" });
     }
 
-    const { first_name, last_name, email, password } = req.body;
+    const { first_name, last_name, email } = req.body;
 
     const existingUser = await UserModel.findById(req.user._id);
     if (!existingUser) {
       return res.status(400).json({ message: "Admin not exist" });
     }
-
-    const newPass = await bcrypt.hash(password, 10);
 
     let updateData = {};
 
@@ -61,7 +59,6 @@ export const updateEducatorProfile = async (req, res) => {
         first_name,
         last_name,
         email,
-        password: newPass
       };
     } else {
       // 📌 Delete old image from Azure
@@ -76,7 +73,6 @@ export const updateEducatorProfile = async (req, res) => {
         last_name,
         email,
         image: azureUrl,
-        password: newPass
       };
     }
 

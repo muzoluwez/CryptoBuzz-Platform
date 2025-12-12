@@ -22,13 +22,8 @@ import {
   ToolbarPageTitle,
 } from "@/partials/toolbar";
 import { MenuIcon, MenuLink, MenuSub, MenuTitle } from "@/components";
-import { TruncatedText } from "../../../lib/utils";
-import { useLazyGetEducatorsQuery } from "../../../store/api/admin/adminEducatorsApiSlice";
-import { toAbsoluteUrl } from "@/utils/Assets";
-import { Create } from "@mui/icons-material";
 import DeleteAdminRecording from "./DeleteAdminRecording";
-import CreateAdminRecording from "./CreateAdminRecording";
-import { useLazyGetAdminRecordingsQuery } from "../../../store/api/admin/adminRecordingApiSlice";
+import { useLazyGetAdminRecordingQuery } from "../../../store/api/admin/adminRecordingApiSlice";
 import { PlayCircle } from "lucide-react";
 import ShowMoreLess from "../../../components/ui/showmoreless";
 import EducatorViseRecording from "./EducatorViseRecording";
@@ -43,7 +38,7 @@ const AdminRecording = ({ title = "Recorded Academy" }) => {
   const [
     getEducators,
     { data, isLoading, refetch, error, isError, isFetching },
-  ] = useLazyGetAdminRecordingsQuery();
+  ] = useLazyGetAdminRecordingQuery();
 
   const handleClickOpen = () => {
     setIsCreateOpen(true);
@@ -111,7 +106,7 @@ const AdminRecording = ({ title = "Recorded Academy" }) => {
       //       setSelectedRow(row.original)
       //       setIsLightBoxOpen(true);
       //     }}>
-      //       <img src={row?.original?.url?.includes("undefined") ? toAbsoluteUrl(`/media/avatars/blank.png`) : row?.original?.url} className="rounded-full cursor-pointer size-9 shrink-0" alt="" />
+      //       <img src={row.original.url?.includes("undefined") ? toAbsoluteUrl(`/media/avatars/blank.png`) : row.original.url} class="rounded-full cursor-pointer size-9 shrink-0" alt="" />
 
       //     </div>,
       //   meta: {
@@ -126,7 +121,7 @@ const AdminRecording = ({ title = "Recorded Academy" }) => {
         ),
         enableSorting: true,
         cell: ({ row }) => {
-          const videoUrl = row?.original?.url;
+          const videoUrl = row.original.url;
 
           return (
             <a
@@ -187,8 +182,8 @@ const AdminRecording = ({ title = "Recorded Academy" }) => {
       //     column
       //   }) => <DataGridColumnHeader title='Status' column={column} />,
       //   enableSorting: true,
-      //   cell: info => <span className={`badge badge-sm badge-outline capitalize ${info.row?.original?.status === true ? "badge-success" : "badge-danger"}`}>
-      //     {info.row?.original?.status === true ? "Active" : "Inactive"}
+      //   cell: info => <span className={`badge badge-sm badge-outline capitalize ${info.row.original.status === true ? "badge-success" : "badge-danger"}`}>
+      //     {info.row.original.status === true ? "Active" : "Inactive"}
       //   </span>,
       //   meta: {
       //     headerClassName: 'w-[225px]'
@@ -297,7 +292,7 @@ const AdminRecording = ({ title = "Recorded Academy" }) => {
         totalCount: response.pagination?.totalRecords || 0,
       };
     } catch (error) {
-      // console.error("Error fetching educators:", error);
+      console.error("Error fetching educators:", error);
       return { data: [], totalCount: 0 };
     }
   };
@@ -371,24 +366,3 @@ const AdminRecording = ({ title = "Recorded Academy" }) => {
   );
 };
 export default AdminRecording;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

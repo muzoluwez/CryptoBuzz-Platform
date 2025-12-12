@@ -267,57 +267,57 @@ const LiveSession = ({ title = "Live Session" }) => {
           headerClassName: "min-w-[200px]",
         },
       },
-      {
-        accessorFn: (row) => row.status,
-        id: "status",
-        header: ({ column }) => (
-          <DataGridColumnHeader title="Status" column={column} />
-        ),
-        enableSorting: true,
-        cell: (info) => {
-          const row = info.row.original;
+      // {
+      //   accessorFn: (row) => row.status,
+      //   id: "status",
+      //   header: ({ column }) => (
+      //     <DataGridColumnHeader title="Status" column={column} />
+      //   ),
+      //   enableSorting: true,
+      //   cell: (info) => {
+      //     const row = info.row.original;
 
-          return (
-            <div className="flex items-center gap-2.5">
-              {/* Badge */}
-              {row.status === "active" && (
-                <button className="badge capitalize badge-outline badge-primary">
-                  Active
-                </button>
-              )}
-              {row.status === "ended" && (
-                <button className="badge capitalize badge-outline badge-danger">
-                  Ended
-                </button>
-              )}
+      //     return (
+      //       <div className="flex items-center gap-2.5">
+      //         {/* Badge */}
+      //         {row.status === "active" && (
+      //           <button className="badge capitalize badge-outline badge-primary">
+      //             Active
+      //           </button>
+      //         )}
+      //         {row.status === "ended" && (
+      //           <button className="badge capitalize badge-outline badge-danger">
+      //             Ended
+      //           </button>
+      //         )}
 
-              {/* ✅ pending → Start button */}
-              {row.status === "pending" && (
-                <button
-                  disabled={isStarting}
-                  className="btn btn-sm btn-success"
-                  onClick={() => handleStartCall(row)}
-                >
-                  {isStarting ? "Starting..." : "Start"}
-                </button>
-              )}
+      //         {/* ✅ pending → Start button */}
+      //         {row.status === "pending" && (
+      //           <button
+      //             disabled={isStarting}
+      //             className="btn btn-sm btn-success"
+      //             onClick={() => handleStartCall(row)}
+      //           >
+      //             {isStarting ? "Starting..." : "Start"}
+      //           </button>
+      //         )}
 
-              {/* ✅ active → End Call button */}
-              {row.status === "active" && (
-                <button
-                  className="btn btn-sm btn-danger"
-                  onClick={() => openConfirmEnd(row)}
-                >
-                  End Call
-                </button>
-              )}
-            </div>
-          );
-        },
-        meta: {
-          headerClassName: "min-w-[120px]",
-        },
-      },
+      //         {/* ✅ active → End Call button */}
+      //         {row.status === "active" && (
+      //           <button
+      //             className="btn btn-sm btn-danger"
+      //             onClick={() => openConfirmEnd(row)}
+      //           >
+      //             End Call
+      //           </button>
+      //         )}
+      //       </div>
+      //     );
+      //   },
+      //   meta: {
+      //     headerClassName: "min-w-[120px]",
+      //   },
+      // },
       {
         accessorFn: (row) => row.datetime,
         id: "datetime",

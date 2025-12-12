@@ -2,12 +2,12 @@ import React, { useEffect } from "react";
 import { Container } from "@/components/container";
 import { useFormik } from "formik";
 import { toast } from "sonner";
-import { AvatarUpload } from "@/shared/components";
 import * as Yup from "yup";
 import {
   useGetEducatorProfileQuery,
   useUpdateEducatorProfileMutation,
 } from "../../../store/api/educator/educatorProfileApiSlice";
+import { AvatarUpload } from "./AvatarUpload";
 
 const AdminProfile = () => {
   const { data, refetch } = useGetEducatorProfileQuery();

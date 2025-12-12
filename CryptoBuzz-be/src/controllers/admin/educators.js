@@ -33,16 +33,13 @@ const educatorSchema = yup.object().shape({
 // IMAGE UPLOAD HELPER
 // ------------------------
 async function uploadData(file) {
-  const filePath = path.resolve(process.cwd(), file.path);
-  const fileBuffer = fs.readFileSync(filePath);
 
   try {
-    const imageUrl = await uploadImageToAzure(fileBuffer, file.originalname);
+    const imageUrl = await uploadImageToAzure(file.buffer, file.originalname);
     return imageUrl;
-  } finally {
-    fs.unlink(filePath, err => {
-      if (err) console.error("Failed to delete local file:", err);
-    });
+  } catch (error) {
+    console.log(error);
+    return null;
   }
 }
 
@@ -253,6 +250,7 @@ export const updateEducator = async (req, res) => {
         updateObj.bannerImage = await uploadData(req.files.icon[0]);
       }
     }
+
 
     const updated = await UserModel.findByIdAndUpdate(id, updateObj, {
       new: true

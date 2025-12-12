@@ -25,7 +25,7 @@ export const adminStreamScheduleApiSlice = createApi({
         // Create new stream schedule
         createEducatorStreamSchedule: builder.mutation({
             query: (payload) => ({
-                url: "/common/schedule/create",
+                url: "/common/schedule/",
                 method: "POST",
                 body: payload,
             }),

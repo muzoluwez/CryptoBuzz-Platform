@@ -148,7 +148,7 @@ export const createTradeAnalysis = async (req, res) => {
 // ------------------------
 export const updateTradeAnalysis = async (req, res) => {
   try {
-    const { title, description, createdBy, url, category } = req.body;
+    const { title, description, url, category } = req.body;
 
     const trade = await TradeAnalysisModel.findById(req.params.id);
     if (!trade) return res.status(404).json({ error: "Not found" });
@@ -172,7 +172,6 @@ export const updateTradeAnalysis = async (req, res) => {
 
     trade.title = title ?? trade.title;
     trade.description = description ?? trade.description;
-    trade.createdBy = createdBy ?? trade.createdBy;
     trade.category = category ?? trade.category;
     trade.url = url ?? trade.url;
     trade.photos = updatedImages;

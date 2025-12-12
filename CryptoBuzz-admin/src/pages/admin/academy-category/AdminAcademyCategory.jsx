@@ -85,42 +85,42 @@ const AdminAcademyCategory = ({ title = "Academy Category" }) => {
   };
 
   const columns = useMemo(() => [
-    {
-      accessorFn: row => row.icon,
-      id: 'icon',
-      header: ({
-        column
-      }) => <DataGridColumnHeader title='Icon' column={column} />,
-      enableSorting: true,
-      cell: ({ row }) =>
-        <div className="flex flex-col justify-center items-center gap-0.5" onClick={() => {
-          setSelectedRow(row.original)
-          setIsLightBoxOpen(true);
-        }}>
-          <img src={row?.original?.icon?.includes("undefined") ? toAbsoluteUrl(`/media/avatars/blank.png`) : row?.original?.icon} className="rounded-full cursor-pointer size-9 shrink-0" alt="" />
-        </div>,
-      meta: {
-        headerClassName: 'min-w-[100px]'
-      }
-    },
-    {
-      accessorFn: row => row.image,
-      id: 'image',
-      header: ({
-        column
-      }) => <DataGridColumnHeader title='Images' column={column} />,
-      enableSorting: true,
-      cell: ({ row }) =>
-        <div className="flex flex-col justify-center items-center gap-0.5" onClick={() => {
-          setSelectedRow(row.original)
-          setIsLightBoxOpen(true);
-        }}>
-          <img src={row?.original?.image?.includes("undefined") ? toAbsoluteUrl(`/media/avatars/blank.png`) : row?.original?.image} className="rounded-full cursor-pointer size-9 shrink-0" alt="" />
-        </div>,
-      meta: {
-        headerClassName: 'min-w-[100px]'
-      }
-    },
+    // {
+    //   accessorFn: row => row.icon,
+    //   id: 'icon',
+    //   header: ({
+    //     column
+    //   }) => <DataGridColumnHeader title='Icon' column={column} />,
+    //   enableSorting: true,
+    //   cell: ({ row }) =>
+    //     <div className="flex flex-col justify-center items-center gap-0.5" onClick={() => {
+    //       setSelectedRow(row.original)
+    //       setIsLightBoxOpen(true);
+    //     }}>
+    //       <img src={row?.original?.icon?.includes("undefined") ? toAbsoluteUrl(`/media/avatars/blank.png`) : row?.original?.icon} className="rounded-full cursor-pointer size-9 shrink-0" alt="" />
+    //     </div>,
+    //   meta: {
+    //     headerClassName: 'min-w-[100px]'
+    //   }
+    // },
+    // {
+    //   accessorFn: row => row.image,
+    //   id: 'image',
+    //   header: ({
+    //     column
+    //   }) => <DataGridColumnHeader title='Images' column={column} />,
+    //   enableSorting: true,
+    //   cell: ({ row }) =>
+    //     <div className="flex flex-col justify-center items-center gap-0.5" onClick={() => {
+    //       setSelectedRow(row.original)
+    //       setIsLightBoxOpen(true);
+    //     }}>
+    //       <img src={row?.original?.image?.includes("undefined") ? toAbsoluteUrl(`/media/avatars/blank.png`) : row?.original?.image} className="rounded-full cursor-pointer size-9 shrink-0" alt="" />
+    //     </div>,
+    //   meta: {
+    //     headerClassName: 'min-w-[100px]'
+    //   }
+    // },
     {
       accessorFn: row => row.name,
       id: 'name',

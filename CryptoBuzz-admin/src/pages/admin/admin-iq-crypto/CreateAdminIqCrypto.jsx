@@ -72,7 +72,7 @@ const CreateAdminIqCrypto = forwardRef(
 
         try {
           if (selectedRow?._id) {
-            let a = await updateAdminCryptoAnalysis(formData).unwrap();
+            let a = await updateAdminCryptoAnalysis({ id: selectedRow?._id, formData }).unwrap();
 
             refetch();
             toast.success("IQ Crypto updated successfully!");

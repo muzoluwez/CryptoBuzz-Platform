@@ -247,7 +247,6 @@ export const updateIdea = async (req, res) => {
       name,
       type,
       timeFrame,
-      educatorId,
       category,
       status,
       entry,
@@ -279,7 +278,6 @@ export const updateIdea = async (req, res) => {
     idea.name = name;
     idea.type = type;
     idea.timeFrame = timeFrame;
-    idea.educatorId = educatorId;
     idea.category = category;
     idea.status = status;
     idea.entry = entry;
