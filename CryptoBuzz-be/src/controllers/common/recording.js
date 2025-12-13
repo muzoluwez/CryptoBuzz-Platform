@@ -390,7 +390,7 @@ export const secureUrl = (req, res) => {
 
 export const getRecordingById = async (req, res) => {
   try {
-    const recording = await recordingModel.findById(req.params.id);
+    const recording = await recordingModel.find({ educator_id: req.params.id });
     if (!recording) return res.status(404).json({ error: "Recording not found" });
 
     const recordings = recording.map(item => ({
