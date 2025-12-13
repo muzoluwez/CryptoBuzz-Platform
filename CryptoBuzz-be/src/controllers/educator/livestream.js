@@ -57,7 +57,11 @@ export const getLiveDetails = async (req, res) => {
     const search = req.query.search?.trim() || "";
     const skip = (page - 1) * limit;
 
-    const baseFilter = { educator: user._id };
+    const baseFilter = {};
+
+    if (user.role === "educator") {
+      baseFilter.educator = user._id;
+    }
 
     if (status === "ended") baseFilter.status = "ended";
     else baseFilter.status = { $in: ["pending", "active"] };
