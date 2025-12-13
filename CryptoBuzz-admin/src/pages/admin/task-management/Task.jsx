@@ -163,7 +163,7 @@ const Task = () => {
 
             {isLoading ? (
               <div className="card rounded-lg shadow-md p-8 text-center">
-                <div className="animate-spin h-12 w-12 border-b-2 border-blue-500 mx-auto rounded-full"></div>
+                <div className="animate-spin h-12 w-12 border-b-2 border-yellow-500 mx-auto rounded-full"></div>
                 <p className="mt-4 text-gray-600 font-termina">
                   Loading tickets...
                 </p>

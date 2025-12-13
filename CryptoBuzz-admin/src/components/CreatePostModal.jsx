@@ -443,7 +443,7 @@ const CreatePostModal = ({ isOpen, onClose, editingPost = null }) => {
                   onValueChange={(value) => setCategory(value)}
                   defaultValue={category}
                 >
-                  <SelectTrigger className="text-xs text-gray-700 border border-gray-200 rounded px-2 py-1 focus:outline-none focus:ring-1 focus:ring-blue-500">
+                  <SelectTrigger className="text-xs text-gray-700 border border-gray-200 rounded px-2 py-1 focus:outline-none focus:ring-1 focus:ring-yellow-500">
                     <SelectValue placeholder="Select a category" />
                   </SelectTrigger>
                   <SelectContent>
@@ -462,7 +462,7 @@ const CreatePostModal = ({ isOpen, onClose, editingPost = null }) => {
               <textarea
                 value={content}
                 onChange={(e) => setContent(e.target.value)}
-                className="w-full min-h-32 p-3 border border-gray-200 bg-gray-200 rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent placeholder-gray-600 text-lg"
+                className="w-full min-h-32 p-3 border border-gray-200 bg-gray-200 rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent placeholder-gray-600 text-lg"
                 placeholder="What do you want to talk about?"
                 maxLength={2000}
               />
