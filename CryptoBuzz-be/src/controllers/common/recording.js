@@ -390,25 +390,40 @@ export const secureUrl = (req, res) => {
 
 export const getRecordingById = async (req, res) => {
   try {
-    const recording = await recordingModel.find({ educator_id: req.params.id });
+    const { id } = req.params.id;
+    const recorders = await User.findById({ _id: id }).select("_id first_name last_name image role email bannerImage");
+
+    const recording = await recordingModel.find({ educator_id: id });
     if (!recording) return res.status(404).json({ error: "Recording not found" });
 
-    const recordings = recording.map(item => ({
-      _id: item._id,
-      session_id: item.session_id,
-      url: item.url ? item.url : item.videoUrl ? item.videoUrl : null,
-      stream_url: item?.stream_url,
-      start_time: item.start_time,
-      end_time: item.end_time,
-      thumbnail: item?.thumbnail,
-      call_id: item.call_id,
-      call_title: item.call_title,
-      call_description: item.call_description,
-      call_category: item.call_category,
-      call_tags: item.call_tags,
-      createdAt: item.createdAt,
-      updatedAt: item.updatedAt
-    }));
+    result.push({
+      recorder: {
+        id: recorders._id,
+        first_name: recorders.first_name || "",
+        last_name: recorders.last_name || "",
+        full_name: `${recorders.first_name || ""} ${recorders.last_name || ""}`.trim(),
+        image: recorders.image || null,
+        role: recorders.role || "educator",
+        email: recorders.email || null,
+        bannerImage: recorders.bannerImage || null
+      },
+      recordings: recording.map(item => ({
+        _id: item._id,
+        session_id: item.session_id,
+        url: item.url ? item.url : item.videoUrl ? item.videoUrl : null,
+        stream_url: item?.stream_url,
+        start_time: item.start_time,
+        end_time: item.end_time,
+        thumbnail: item?.thumbnail,
+        call_id: item.call_id,
+        call_title: item.call_title,
+        call_description: item.call_description,
+        call_category: item.call_category,
+        call_tags: item.call_tags,
+        createdAt: item.createdAt,
+        updatedAt: item.updatedAt
+      }))
+    });
     return res.status(200).json(ApiResponse(200, recordings, "Recording educator successfully"));
   } catch (err) {
     res.status(500).json({ error: err.message });
