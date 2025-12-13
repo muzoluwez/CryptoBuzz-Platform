@@ -276,7 +276,7 @@ export const getAdminRecordings = async (req, res) => {
     const limitNumber = parseInt(limit, 10);
 
     // Get distinct educator IDs from recordings
-    let recorderIds = await recording.distinct("educator_id");
+    let recorderIds = await recordingModel.distinct("educator_id");
 
     // If a user_id is provided, filter only that ID (if it exists in the list)
     if (user_id) {
