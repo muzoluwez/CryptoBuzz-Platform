@@ -36,7 +36,7 @@ const EducatorCommunityFeed = () => {
     // Loader for react-infinite-scroll-component
     const loader = (
         <div className="card rounded-lg shadow-md p-6 text-center">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mx-auto"></div>
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-yellow-500 mx-auto"></div>
             <p className="mt-2 text-gray-600 font-termina">Loading more...</p>
         </div>
     );
@@ -153,7 +153,7 @@ const EducatorCommunityFeed = () => {
                         {/* Posts Feed */}
                         {postsStatus === 'loading' ? (
                             <div className="card rounded-lg shadow-md p-8 text-center">
-                                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto"></div>
+                                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-yellow-500 mx-auto"></div>
                                 <p className="mt-4 text-gray-600 font-termina">Loading posts...</p>
                             </div>
                         ) : posts.length === 0 ? (
