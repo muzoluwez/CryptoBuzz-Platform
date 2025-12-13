@@ -7,7 +7,8 @@ import {
   getRecordingById,
   updateRecording,
   deleteRecording,
-  streamVideo
+  streamVideo,
+  getAdminRecordings
 } from "../../../controllers/common/recording.js";
 import Auth from "../../../middlewares/auth.js";
 import { upload } from "../../../middlewares/multer.js";
@@ -29,6 +30,7 @@ router.post(
 
 // Get recordings
 router.get("/", Auth.CommonAuth, getRecordings);
+router.get("/admin-recording", Auth.CommonAuth, getAdminRecordings);
 router.get("/:id", Auth.CommonAuth, getRecordingById);
 
 // Update & delete
