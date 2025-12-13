@@ -6,6 +6,8 @@ import { App } from './App';
 import { setupAxios } from './auth';
 import { ProvidersWrapper } from './providers';
 import React from 'react';
+// import the SDK provided styles
+import "@stream-io/video-react-sdk/dist/css/styles.css";
 
 /**
  * Inject interceptors for axios.
@@ -15,9 +17,9 @@ import React from 'react';
 setupAxios(axios);
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(<React.StrictMode>
-    <ProvidersWrapper>
-      <App />
-    </ProvidersWrapper>
-  </React.StrictMode>);
+  <ProvidersWrapper>
+    <App />
+  </ProvidersWrapper>
+</React.StrictMode>);
 
 
