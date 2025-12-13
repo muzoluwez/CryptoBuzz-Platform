@@ -1,30 +1,58 @@
-import React from 'react';
+import React, { useRef, useCallback } from "react";
+import { toAbsoluteUrl } from "@/utils/Assets";
 
-/**
- * RecordingThumbnail Component
- * 
- * Displays a thumbnail for a recording with play button overlay.
- * Used in admin recording session views.
- */
-const RecordingThumbnail = ({ thumbnail, title, duration }) => {
+const RecordingThumbnail = ({
+    videoUrl,
+    image,
+    defaultImage,
+    onRecordingClick,
+}) => {
+    const containerRef = useRef(null);
+    const displayImage = image
+        ? image
+        : defaultImage
+            ? defaultImage
+            : toAbsoluteUrl("/media/images/2600x1600/live_banner.jpg");
+
+
+    const handleClick = useCallback(() => {
+        if (onRecordingClick) onRecordingClick();
+        else if (videoUrl) window.open(videoUrl, "_blank");
+    }, [onRecordingClick, videoUrl]);
+
     return (
-        <div className="relative rounded-lg overflow-hidden bg-gray-200 dark:bg-gray-800">
-            {thumbnail ? (
-                <img
-                    src={thumbnail}
-                    alt={title || 'Recording thumbnail'}
-                    className="w-full h-full object-cover"
-                />
+        <div
+            ref={containerRef}
+            onClick={handleClick}
+            className="w-full h-[28vh] cursor-pointer bg-light flex justify-center items-center rounded-lg relative overflow-hidden"
+        >
+            {displayImage ? (
+                <>
+                    <img
+                        src={displayImage}
+                        alt="Thumbnail"
+                        className="rounded-lg w-full h-[28vh] object-cover"
+                    />
+                    <div className="rounded-lg absolute inset-0 flex justify-center items-center bg-black/25">
+                        <svg
+                            width="48"
+                            height="48"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="white"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                        >
+                            <circle cx="12" cy="12" r="10" />
+                            <polygon points="10 8 16 12 10 16 10 8" />
+                        </svg>
+                    </div>
+                </>
             ) : (
-                <div className="w-full h-48 flex items-center justify-center bg-gradient-to-br from-purple-500 to-blue-500">
-                    <svg className="w-16 h-16 text-white" fill="currentColor" viewBox="0 0 20 20">
-                        <path d="M6.3 2.841A1.5 1.5 0 004 4.11V15.89a1.5 1.5 0 002.3 1.269l9.344-5.89a1.5 1.5 0 000-2.538L6.3 2.84z" />
-                    </svg>
-                </div>
-            )}
-            {duration && (
-                <div className="absolute bottom-2 right-2 bg-black bg-opacity-75 text-white text-xs px-2 py-1 rounded">
-                    {duration}
+                <div className="w-full h-full flex justify-center items-center rounded-lg bg-gray-200 animate-pulse">
+                    {/* Skeleton loader */}
+                    <div className="w-full h-full rounded-lg bg-gray-300" />
                 </div>
             )}
         </div>
@@ -32,6 +60,3 @@ const RecordingThumbnail = ({ thumbnail, title, duration }) => {
 };
 
 export default RecordingThumbnail;
-
-
-

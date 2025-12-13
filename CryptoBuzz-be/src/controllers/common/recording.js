@@ -390,13 +390,13 @@ export const secureUrl = (req, res) => {
 
 export const getRecordingById = async (req, res) => {
   try {
-    const { id } = req.params.id;
-    const recorders = await User.findById({ _id: id }).select("_id first_name last_name image role email bannerImage");
+    const { id } = req.params;
+    const recorders = await User.findById(id).select("_id first_name last_name image role email bannerImage");
 
     const recording = await recordingModel.find({ educator_id: id });
     if (!recording) return res.status(404).json({ error: "Recording not found" });
 
-    result.push({
+    const result = {
       recorder: {
         id: recorders._id,
         first_name: recorders.first_name || "",
@@ -423,8 +423,8 @@ export const getRecordingById = async (req, res) => {
         createdAt: item.createdAt,
         updatedAt: item.updatedAt
       }))
-    });
-    return res.status(200).json(ApiResponse(200, recordings, "Recording educator successfully"));
+    };
+    return res.status(200).json(ApiResponse(200, result, "Recording educator successfully"));
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

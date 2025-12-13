@@ -59,14 +59,14 @@ const AdminRecordingSession = () => {
       if (!id) return;
       try {
         const res = await trigger({
-          user_id: id,
+          id: id,
           page: currentPage,
           limit,
         }).unwrap();
-        const newData = Array.isArray(res?.data?.[0]?.recordings)
-          ? res.data[0].recordings
+        const newData = Array.isArray(res?.data?.recordings)
+          ? res.data.recordings
           : [];
-        setTotalPages(res?.data?.[0]?.pagination?.totalPages || 1);
+        setTotalPages(res?.data?.pagination?.totalPages || 1);
 
         setRecordingList((prev) => {
           if (currentPage === 1) return newData;
@@ -215,8 +215,8 @@ const AdminRecordingSession = () => {
           <div className="flex flex-col items-center gap-2 lg:gap-3.5 py-4 lg:pt-5 lg:pb-10">
             <img
               src={
-                data?.data?.[0]?.recorder?.image
-                  ? data?.data?.[0]?.recorder?.image
+                data?.data?.recorder?.image
+                  ? data?.data?.recorder?.image
                   : "/media/avatars/300-1.png"
               }
               className="rounded-full border-3 border-success size-[100px] shrink-0 object-cover"
@@ -224,24 +224,24 @@ const AdminRecordingSession = () => {
             <div className="flex items-center gap-1.5">
               <div className="text-lg leading-5 font-semibold text-gray-900"></div>
               <h6 className="text-lg font-medium text-gray-900">
-                {data?.data?.[0]?.recorder?.full_name}
+                {data?.data?.recorder?.full_name}
               </h6>
             </div>
             <div className="flex flex-wrap justify-center gap-1 lg:gap-4.5 text-sm">
               <div className="flex gap-1.25 items-center">
                 <i className="ki-filled ki-user text-gray-500 text-sm"></i>
                 <span className="text-gray-600 font-medium">
-                  {data?.data?.[0]?.recorder?.role}
+                  {data?.data?.recorder?.role}
                 </span>
               </div>
               <div className="flex gap-1.25 items-center">
                 <i className="ki-filled ki-sms text-gray-500 text-sm"></i>
                 <a
-                  href={`mailto:${data?.data?.[0]?.recorder?.email}`}
+                  href={`mailto:${data?.data?.recorder?.email}`}
                   className="text-gray-600 font-medium hover:text-primary"
                   rel="noreferrer"
                 >
-                  {data?.data?.[0]?.recorder?.email}
+                  {data?.data?.recorder?.email}
                 </a>
               </div>
             </div>
@@ -269,16 +269,10 @@ const AdminRecordingSession = () => {
         ) : (
           <div className="grid grid-cols-12 gap-4">
             {recordingList.map((item, index) => {
-              const showTags = showAllTags[index] || false;
-              const visibleTags = showTags
-                ? item.call_tags
-                : item.call_tags.slice(0, 3);
-              const remainingCount = item.call_tags.length - 3;
-
               return (
                 <div
                   className="recorded_card col-span-12 sm:col-span-6 xl:col-span-4"
-                  key={index}
+                  key={item._id}
                   ref={
                     index === recordingList?.length - 1
                       ? lastRecordingRef
@@ -301,7 +295,7 @@ const AdminRecordingSession = () => {
                       <RecordingThumbnail
                         videoUrl={item?.url}
                         image={item?.thumbnail}
-                        defaultImage={data?.data?.[0]?.recorder.bannerImage}
+                        defaultImage={data?.data?.recorder?.bannerImage}
                         seekTime={2}
                         onRecordingClick={() => handleOpen(item?.url)}
                       />

@@ -13,7 +13,7 @@ export const adminRecordingApiSlice = createApi({
         // Get admin recordings list
         getAdminRecording: builder.query({
             query: ({ page = 1, limit = 10, search = "", educator = "" } = {}) =>
-                `/common/recording?page=${page}&limit=${limit}&search=${search}&educator=${educator}`,
+                `/common/recording/admin-recording?page=${page}&limit=${limit}&search=${search}&educator=${educator}`,
         }),
 
         // Get specific recording by ID
@@ -23,12 +23,12 @@ export const adminRecordingApiSlice = createApi({
 
         // Get recording by user ID
         getAdminRecordingByUserID: builder.query({
-            query: (userId) => `/common/recording/user/${userId}`,
+            query: ({ id }) => `/common/recording/${id}`,
         }),
 
         // Get educator recording by call ID
         getEducatorRecordingByCallID: builder.query({
-            query: (callId) => `/common/recording/call/${callId}`,
+            query: (callId) => `/common/recording/admin-recording/call/${callId}`,
         }),
 
         // Create manual recording

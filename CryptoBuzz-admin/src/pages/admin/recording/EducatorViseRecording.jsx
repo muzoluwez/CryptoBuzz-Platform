@@ -32,7 +32,7 @@ const EducatorViseRecording = ({ data, isLoading, isError, error }) => {
         );
     }
 
-    const hasNoData = Array.isArray(data) && data.length === 0;
+    const hasNoData = data?.length === 0;
 
     return (
         <div>
@@ -47,7 +47,7 @@ const EducatorViseRecording = ({ data, isLoading, isError, error }) => {
                 </div>
             ) : (
                 <div className="grid xl:grid-cols-3 sm:grid-cols-2 gap-4">
-                    {Array.isArray(data) &&
+                    {data?.length > 0 &&
                         data.map(({ recorder }) => (
                             <div key={recorder.id} className="card">
                                 <Link
