@@ -326,22 +326,22 @@ export const getAdminRecordings = async (req, res) => {
           email: recorder.email || null,
           bannerImage: recorder.bannerImage || null
         },
-        recordings: userRecordings.map(item => ({
-          _id: item._id,
-          session_id: item.session_id,
-          url: item.url ? item.url : item.videoUrl ? item.videoUrl : null,
-          stream_url: item?.stream_url,
-          start_time: item.start_time,
-          end_time: item.end_time,
-          thumbnail: item?.thumbnail,
-          call_id: item.call_id,
-          call_title: item.call_title,
-          call_description: item.call_description,
-          call_category: item.call_category,
-          call_tags: item.call_tags,
-          createdAt: item.createdAt,
-          updatedAt: item.updatedAt
-        })),
+        // recordings: userRecordings.map(item => ({
+        //   _id: item._id,
+        //   session_id: item.session_id,
+        //   url: item.url ? item.url : item.videoUrl ? item.videoUrl : null,
+        //   stream_url: item?.stream_url,
+        //   start_time: item.start_time,
+        //   end_time: item.end_time,
+        //   thumbnail: item?.thumbnail,
+        //   call_id: item.call_id,
+        //   call_title: item.call_title,
+        //   call_description: item.call_description,
+        //   call_category: item.call_category,
+        //   call_tags: item.call_tags,
+        //   createdAt: item.createdAt,
+        //   updatedAt: item.updatedAt
+        // })),
         pagination: {
           total: totalRecordings,
           page: pageNumber,
@@ -387,16 +387,33 @@ export const secureUrl = (req, res) => {
 /* ---------------------------------------------------------
    GET SINGLE RECORDING
 ---------------------------------------------------------- */
+
 export const getRecordingById = async (req, res) => {
   try {
-    const rec = await recordingModel.findById(req.params.id);
-    if (!rec) return res.status(404).json({ error: "Recording not found" });
-    res.json(rec);
+    const recording = await recording.findById(req.params.id);
+    if (!recording) return res.status(404).json({ error: "Recording not found" });
+
+    const recordings = recording.map(item => ({
+      _id: item._id,
+      session_id: item.session_id,
+      url: item.url ? item.url : item.videoUrl ? item.videoUrl : null,
+      stream_url: item?.stream_url,
+      start_time: item.start_time,
+      end_time: item.end_time,
+      thumbnail: item?.thumbnail,
+      call_id: item.call_id,
+      call_title: item.call_title,
+      call_description: item.call_description,
+      call_category: item.call_category,
+      call_tags: item.call_tags,
+      createdAt: item.createdAt,
+      updatedAt: item.updatedAt
+    }));
+    return res.status(200).json(ApiResponse(200, recordings, "Recording educator successfully"));
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 };
-
 /* ---------------------------------------------------------
    UPDATE RECORDING
 ---------------------------------------------------------- */
