@@ -61,6 +61,7 @@ export const signinUser = async (req, res) => {
 
 export const getAffiliateInfo = async (req, res) => {
   try {
+
     const clientTest = new RestClientV5({
       testnet: true,
       key: process.env.BYBIT_KEY,
@@ -68,7 +69,7 @@ export const getAffiliateInfo = async (req, res) => {
     });
 
     const response = await clientTest.getAffiliateUserInfo({
-      name: "CryptoBuzzTest1",
+      uid: "531503812",
     });
 
     return res

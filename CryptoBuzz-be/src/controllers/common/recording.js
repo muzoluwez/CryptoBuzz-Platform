@@ -268,6 +268,96 @@ export const getRecordings = async (req, res) => {
   }
 };
 
+export const getAdminRecordings = async (req, res) => {
+  try {
+    const { user_id, page = 1, limit = 10 } = req.query;
+
+    const pageNumber = parseInt(page, 10);
+    const limitNumber = parseInt(limit, 10);
+
+    // Get distinct educator IDs from recordings
+    let recorderIds = await recording.distinct("educator_id");
+
+    // If a user_id is provided, filter only that ID (if it exists in the list)
+    if (user_id) {
+      if (!recorderIds.includes(user_id)) {
+        return res.status(200).json({ data: [] }); // No recordings for this user
+      }
+      recorderIds = [user_id];
+    }
+
+    // Fetch all users (admin + educator) who have recordings
+    const recorders = await User.find({ _id: { $in: recorderIds } }).select(
+      "_id first_name last_name image role email bannerImage"
+    );
+
+    const result = [];
+
+    for (const recorder of recorders) {
+      // Count total recordings for pagination
+      const totalRecordings = await recording.countDocuments({
+        educator_id: recorder._id
+      });
+
+      // Paginate recordings for this educator
+      const userRecordings = await recording
+        .find({ educator_id: recorder._id })
+        .sort({ createdAt: -1 })
+        .skip((pageNumber - 1) * limitNumber)
+        .limit(limitNumber);
+
+      // Generate signed URLs for Azure videos
+      for (let rec of userRecordings) {
+        if (rec.url) {
+          const cleanName = normalizeBlobName(rec.url);
+          rec.url = await getSignedUrl(cleanName);
+        }
+      }
+
+      result.push({
+        recorder: {
+          id: recorder._id,
+          first_name: recorder.first_name || "",
+          last_name: recorder.last_name || "",
+          full_name: `${recorder.first_name || ""} ${recorder.last_name || ""}`.trim(),
+          total_recording: totalRecordings,
+          image: recorder.image || null,
+          role: recorder.role || "educator",
+          email: recorder.email || null,
+          bannerImage: recorder.bannerImage || null
+        },
+        recordings: userRecordings.map(item => ({
+          _id: item._id,
+          session_id: item.session_id,
+          url: item.url ? item.url : item.videoUrl ? item.videoUrl : null,
+          stream_url: item?.stream_url,
+          start_time: item.start_time,
+          end_time: item.end_time,
+          thumbnail: item?.thumbnail,
+          call_id: item.call_id,
+          call_title: item.call_title,
+          call_description: item.call_description,
+          call_category: item.call_category,
+          call_tags: item.call_tags,
+          createdAt: item.createdAt,
+          updatedAt: item.updatedAt
+        })),
+        pagination: {
+          total: totalRecordings,
+          page: pageNumber,
+          limit: limitNumber,
+          totalPages: Math.ceil(totalRecordings / limitNumber)
+        }
+      });
+    }
+
+    return res.status(200).json({ data: result });
+  } catch (err) {
+    console.error("Error in getRecordings:", err);
+    return res.status(500).json({ error: err.message });
+  }
+};
+
 /* ---------------------------------------------------------
    SECURE DYNTUBE URL
 ---------------------------------------------------------- */
