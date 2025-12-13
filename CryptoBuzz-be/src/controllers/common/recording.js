@@ -227,7 +227,10 @@ export const getRecordings = async (req, res) => {
 
     if (!recorder) return res.status(404).json({ error: "Recorder not found" });
 
-    const query = { educator_id: recorder._id };
+    const query = {};
+    if (recorder.role === "educator") {
+      query.educator_id = recorder._id;
+    }
     if (call_id) query.call_id = call_id;
 
     const totalCount = await recordingModel.countDocuments(query);
@@ -238,6 +241,8 @@ export const getRecordings = async (req, res) => {
       .skip((pageNumber - 1) * limitNumber)
       .limit(limitNumber)
       .lean();
+
+    console.log(items, "items");
 
     await Promise.all(
       items.map(async rec => {
