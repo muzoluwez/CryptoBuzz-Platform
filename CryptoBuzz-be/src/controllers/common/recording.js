@@ -295,12 +295,12 @@ export const getAdminRecordings = async (req, res) => {
 
     for (const recorder of recorders) {
       // Count total recordings for pagination
-      const totalRecordings = await recording.countDocuments({
+      const totalRecordings = await recordingModel.countDocuments({
         educator_id: recorder._id
       });
 
       // Paginate recordings for this educator
-      const userRecordings = await recording
+      const userRecordings = await recordingModel
         .find({ educator_id: recorder._id })
         .sort({ createdAt: -1 })
         .skip((pageNumber - 1) * limitNumber)
@@ -390,7 +390,7 @@ export const secureUrl = (req, res) => {
 
 export const getRecordingById = async (req, res) => {
   try {
-    const recording = await recording.findById(req.params.id);
+    const recording = await recordingModel.findById(req.params.id);
     if (!recording) return res.status(404).json({ error: "Recording not found" });
 
     const recordings = recording.map(item => ({
