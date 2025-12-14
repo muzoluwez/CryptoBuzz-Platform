@@ -13,37 +13,54 @@ import { useAuthContext } from "../auth/useAuthContext";
 // ============================================================================
 
 // Trade & Analysis Pages
-const EducatorTradeIdeas = lazy(() => import("../pages/educator/educator-trade-ideas/EducatorTradeIdeas"));
-const EducatorTradeAnalysis = lazy(() => import("../pages/educator/educator-trade-analysis/EducatorTradeAnalysis"));
+// const EducatorTradeIdeas = lazy(() => import("../pages/educator/educator-trade-ideas/EducatorTradeIdeas"));
+// const EducatorTradeAnalysis = lazy(() => import("../pages/educator/educator-trade-analysis/EducatorTradeAnalysis"));
 
-// Live Session & Recording Pages
-const EducatorRecordingSession = lazy(() => import("../pages/educator/recording/EducatorRecordingSession"));;
+// // Live Session & Recording Pages
+// const EducatorRecordingSession = lazy(() => import("../pages/educator/recording/EducatorRecordingSession"));;
 
-// Course & Academy Pages
-const Courses = lazy(() => import("../pages/educator/courses/Courses"));
+// // Course & Academy Pages
+// const Courses = lazy(() => import("../pages/educator/courses/Courses"));
 
-// Educator Management Pages
-const EducatorRating = lazy(() => import("../pages/educator/educator-rating/EducatoRating"));
+// // Educator Management Pages
+// const EducatorRating = lazy(() => import("../pages/educator/educator-rating/EducatoRating"));
 
-// Profile & Settings Pages
-const EducatorProfile = lazy(() => import("../pages/educator/educator-profile/EducatorProfile"));
+// // Profile & Settings Pages
+// const EducatorProfile = lazy(() => import("../pages/educator/educator-profile/EducatorProfile"));
 
-// Community & Social Pages
-const EducatorCommunityFeed = lazy(() => import("../pages/educator/educator-community-feed/EducatorCommunityFeed"));
-const EducatorIqCrypto = lazy(() => import("../pages/educator/educator-iq-crypto/EducatorIqCrypto"));
+// // Community & Social Pages
+// const EducatorCommunityFeed = lazy(() => import("../pages/educator/educator-community-feed/EducatorCommunityFeed"));
+// const EducatorIqCrypto = lazy(() => import("../pages/educator/educator-iq-crypto/EducatorIqCrypto"));
 
 
-// Legal & Support Pages
-const PrivacyPolicy = lazy(() => import("../auth/pages/PrivacyPolicy"));
-const TermsOfService = lazy(() => import("../auth/pages/TermsOfService"));
-const Support = lazy(() => import("../auth/pages/Support"));
+// // Legal & Support Pages
+// const PrivacyPolicy = lazy(() => import("../auth/pages/PrivacyPolicy"));
+// const TermsOfService = lazy(() => import("../auth/pages/TermsOfService"));
+// const Support = lazy(() => import("../auth/pages/Support"));
 
-//Educator Routes
-const EducatorStreamSchedule = lazy(() => import("../pages/educator/educator-stream-schedule/EducatorStreamSchedule"));
-const EducatorEndSession = lazy(() => import("../pages/educator/educator-end-session/EducatorEndSession"));
-const EducatorLiveSession = lazy(() => import("../pages/educator/live-session/EducatorLiveSession"));
-const EducatorEndSchedule = lazy(() => import("../pages/educator/educator-endStream-schedule/EducatorEndSchedule"));
-const EducatorLiveSessionView = lazy(() => import("../pages/educator/live-session/EducatorLiveSessionView"));
+// //Educator Routes
+// const EducatorStreamSchedule = lazy(() => import("../pages/educator/educator-stream-schedule/EducatorStreamSchedule"));
+// const EducatorEndSession = lazy(() => import("../pages/educator/educator-end-session/EducatorEndSession"));
+// const EducatorLiveSession = lazy(() => import("../pages/educator/live-session/EducatorLiveSession"));
+// const EducatorEndSchedule = lazy(() => import("../pages/educator/educator-endStream-schedule/EducatorEndSchedule"));
+// const EducatorLiveSessionView = lazy(() => import("../pages/educator/live-session/EducatorLiveSessionView"));
+
+import EducatorTradeIdeas from "../pages/educator/educator-trade-ideas/EducatorTradeIdeas";
+import EducatorTradeAnalysis from "../pages/educator/educator-trade-analysis/EducatorTradeAnalysis";
+import Courses from "../pages/educator/courses/Courses";
+import EducatorRecordingSession from "../pages/educator/recording/EducatorRecordingSession";
+import EducatorProfile from "../pages/educator/educator-profile/EducatorProfile";
+import EducatorCommunityFeed from "../pages/educator/educator-community-feed/EducatorCommunityFeed";
+import EducatorIqCrypto from "../pages/educator/educator-iq-crypto/EducatorIqCrypto";
+import EducatorRating from "../pages/educator/educator-rating/EducatoRating";
+import EducatorStreamSchedule from "../pages/educator/educator-stream-schedule/EducatorStreamSchedule";
+import EducatorEndSession from "../pages/educator/educator-end-session/EducatorEndSession";
+import EducatorLiveSession from "../pages/educator/live-session/EducatorLiveSession";
+import EducatorEndSchedule from "../pages/educator/educator-endStream-schedule/EducatorEndSchedule";
+import EducatorLiveSessionView from "../pages/educator/live-session/EducatorLiveSessionView";
+import PrivacyPolicy from "../auth/pages/PrivacyPolicy";
+import TermsOfService from "../auth/pages/TermsOfService";
+import Support from "../auth/pages/Support";
 
 // ============================================================================
 // Educator ROUTES CONFIGURATION

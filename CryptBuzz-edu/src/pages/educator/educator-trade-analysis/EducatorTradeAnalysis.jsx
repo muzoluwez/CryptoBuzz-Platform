@@ -111,7 +111,7 @@ const EducatorTradeAnalysis = ({ title = "IQ Insight" }) => {
           >
             <img
               src={row.original.image[0]}
-              class="rounded-full cursor-pointer size-9 shrink-0"
+              className="rounded-full cursor-pointer size-9 shrink-0"
               alt=""
             />
           </div>

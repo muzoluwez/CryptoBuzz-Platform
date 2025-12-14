@@ -190,33 +190,33 @@ const EducatorRecordingSession = () => {
                 : `url('${toAbsoluteUrl("/media/images/2600x1200/bg-1.png")}')`,
           }}
         >
-          <div class="flex flex-col items-center gap-2 lg:gap-3.5 py-4 lg:pt-5 lg:pb-10">
+          <div className="flex flex-col items-center gap-2 lg:gap-3.5 py-4 lg:pt-5 lg:pb-10">
             <img
               src={
                 data?.data?.recorder?.image
                   ? data?.data?.recorder?.image
                   : "/media/avatars/300-1.png"
               }
-              class="rounded-full border-3 border-success size-[100px] shrink-0 object-cover"
+              className="rounded-full border-3 border-success size-[100px] shrink-0 object-cover"
             />
-            <div class="flex items-center gap-1.5">
-              <div class="text-lg leading-5 font-semibold text-gray-900"></div>
-              <h6 class="text-lg font-medium text-gray-900">
+            <div className="flex items-center gap-1.5">
+              <div className="text-lg leading-5 font-semibold text-gray-900"></div>
+              <h6 className="text-lg font-medium text-gray-900">
                 {data?.data?.recorder?.full_name}
               </h6>
             </div>
-            <div class="flex flex-wrap justify-center gap-1 lg:gap-4.5 text-sm">
-              <div class="flex gap-1.25 items-center">
-                <i class="ki-filled ki-user text-gray-500 text-sm"></i>
-                <span class="text-gray-600 font-medium">
+            <div className="flex flex-wrap justify-center gap-1 lg:gap-4.5 text-sm">
+              <div className="flex gap-1.25 items-center">
+                <i className="ki-filled ki-user text-gray-500 text-sm"></i>
+                <span className="text-gray-600 font-medium">
                   {data?.data?.recorder?.role}
                 </span>
               </div>
-              <div class="flex gap-1.25 items-center">
-                <i class="ki-filled ki-sms text-gray-500 text-sm"></i>
+              <div className="flex gap-1.25 items-center">
+                <i className="ki-filled ki-sms text-gray-500 text-sm"></i>
                 <a
                   href={`mailto:${data?.data?.recorder?.email}`}
-                  class="text-gray-600 font-medium hover:text-primary"
+                  className="text-gray-600 font-medium hover:text-primary"
                   rel="noreferrer"
                 >
                   {data?.data?.recorder?.email}

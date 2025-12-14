@@ -111,13 +111,13 @@ const EducatorTradeCards = () => {
     //                     <div className="flex gap-10 mb-3">
     //                       <div>
     //                         <div className="text-2sm text-gray-800 uppercase">Entry</div>
-    //                         <span class="mt-1 inline-flex items-center rounded-md bg-green-50 px-2 py-1 text-xs font-medium text-green-700 ring-1 ring-green-600/20 ring-inset">{idea?.entry}</span>
+    //                          <span className="mt-1 inline-flex items-center rounded-md bg-green-50 px-2 py-1 text-xs font-medium text-green-700 ring-1 ring-green-600/20 ring-inset">{idea?.entry}</span>
     //                       </div>
     //                       <div>
     //                         <div className="text-2sm text-gray-800 uppercase">
     //                           Invalidation
     //                         </div>
-    //                         <span class="mt-1 inline-flex items-center rounded-md bg-red-50 px-2 py-1 text-xs font-medium text-red-700 ring-1 ring-red-600/10 ring-inset">{idea?.invalidation}</span>
+    //                          <span className="mt-1 inline-flex items-center rounded-md bg-red-50 px-2 py-1 text-xs font-medium text-red-700 ring-1 ring-red-600/10 ring-inset">{idea?.invalidation}</span>
     //                       </div>
     //                     </div>
     //                     <div className="">
