@@ -242,8 +242,6 @@ export const getRecordings = async (req, res) => {
       .limit(limitNumber)
       .lean();
 
-    console.log(items, "items");
-
     await Promise.all(
       items.map(async rec => {
         if (rec.url) {
