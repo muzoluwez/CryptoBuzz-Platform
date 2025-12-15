@@ -2,14 +2,13 @@ import React, { forwardRef } from 'react';
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import { toast } from 'sonner';
-import { useDeleteEducatorMutation } from '../../../store/api/admin/adminEducatorsApiSlice';
 import { useDeleteEducatorRecordingMutation } from '../../../store/api/educator/educatorRecordingApiSlice';
 
 
-const DeleteEducatorRecording = forwardRef(({ isDeleteOpen, handleDeleteClose, selectedRow, refetch}, ref) => {
+const DeleteEducatorRecording = forwardRef(({ isDeleteOpen, handleDeleteClose, selectedRow, refetch }, ref) => {
     const [deleteEducatorRecording, { isLoading, isSuccess, isError, error }] = useDeleteEducatorRecordingMutation();
 
-  
+
 
     const handleDelete = async () => {
         try {
@@ -18,7 +17,7 @@ const DeleteEducatorRecording = forwardRef(({ isDeleteOpen, handleDeleteClose, s
             handleDeleteClose();
             refetch();
         } catch (error) {
-              toast.error(err?.data?.message || "Failed to delete recording!");
+            toast.error(err?.data?.message || "Failed to delete recording!");
         }
     };
 
@@ -31,7 +30,7 @@ const DeleteEducatorRecording = forwardRef(({ isDeleteOpen, handleDeleteClose, s
                     <DialogTitle>Hidden Title</DialogTitle>
                 </VisuallyHidden>
                 <div className="text-center">
-                <i className="ki-filled text-3xl ki-trash text-gray-500 dark:text-gray-700 mb-3.5 mx-auto"></i>
+                    <i className="ki-filled text-3xl ki-trash text-gray-500 dark:text-gray-700 mb-3.5 mx-auto"></i>
 
                 </div>
                 {/* Modal Text */}

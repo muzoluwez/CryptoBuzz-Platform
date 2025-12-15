@@ -46,6 +46,17 @@ export const educatorAcademyCategoryApiSlice = createApi({
             providesTags: (result, error, id) => [{ type: "Category", id }],
         }),
 
+        getEducatorCoursesTypes: builder.query({
+            query: ({ page = 1, limit = 10, search = "" } = {}) => `/admin/course-type?page=${page}&limit=${limit}&search=${search}`,
+            providesTags: (result) =>
+                result?.data
+                    ? [
+                        ...result.data.map(({ _id }) => ({ type: "CourseType", id: _id })),
+                        { type: "CourseType", id: "LIST" },
+                    ]
+                    : [{ type: "CourseType", id: "LIST" }],
+        }),
+
     }),
 });
 
@@ -56,6 +67,7 @@ export const {
     useLazyFetchCategoriesQuery,
     useGetOneCategoryQuery,
     useLazyGetOneCategoryQuery,
+    useGetEducatorCoursesTypesQuery,
 } = educatorAcademyCategoryApiSlice;
 
 

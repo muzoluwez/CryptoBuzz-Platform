@@ -27,7 +27,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useGetLanguageQuery } from "../../../store/api/admin/adminLanguagesApiSlice";
+import { useGetLanguagesQuery } from "../../../store/api/educator/EducatorLanguageApiSlice";
 
 const HeaderTopbar = () => {
   const STUDENT_ALLOWED_ROUTES = [
@@ -71,7 +71,7 @@ const HeaderTopbar = () => {
   const dispatch = useDispatch();
   const languages = useSelector(selectLanguages);
   const selectedLanguage = useSelector(selectSelectedLanguage);
-  const { data } = useGetLanguageQuery();
+  const { data } = useGetLanguagesQuery();
 
   useEffect(() => {
     if (data) {

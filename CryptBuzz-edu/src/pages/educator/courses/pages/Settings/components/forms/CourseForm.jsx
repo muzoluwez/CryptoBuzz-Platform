@@ -4,11 +4,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { Loader2, Upload } from "lucide-react";
 import {
-  useGetEducatorAcademyCategoryQuery,
-  useGetLanguageListQuery,
-} from "../../../../../../../store/api/admin/adminAcademyCategoryApiSlice";
-import { useGetAdminCoursesTypesQuery } from "../../../../../../../store/api/admin/adminCoursesTypesApiSlice";
-import {
   Select,
   SelectContent,
   SelectItem,
@@ -16,7 +11,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
-import { languages } from "eslint-plugin-prettier";
+import { useGetLanguagesQuery } from "../../../../../../../store/api/educator/EducatorLanguageApiSlice";
+import { useFetchCategoriesQuery, useGetEducatorCoursesTypesQuery } from "../../../../../../../store/api/educator/EducatorAcademyCategoryApiSlice";
 ;
 
 // Schema for course validation
@@ -70,9 +66,9 @@ const CourseForm = ({ onSubmit, initialData, isLoading }) => {
     initialData?.imageUrl || null
   );
   const [currentImageFile, setCurrentImageFile] = useState(null);
-  const { data } = useGetEducatorAcademyCategoryQuery();
-  const { data: languagesList } = useGetLanguageListQuery();
-  const { data: courseTypesList } = useGetAdminCoursesTypesQuery()
+  const { data } = useFetchCategoriesQuery();
+  const { data: languagesList } = useGetLanguagesQuery();
+  const { data: courseTypesList } = useGetEducatorCoursesTypesQuery()
 
   // Choose schema based on whether we're editing or creating
   const courseSchema = initialData ? editCourseSchema : createCourseSchema;
