@@ -59,13 +59,39 @@ export const signinUser = async (req, res) => {
   }
 };
 
+// export const getAffiliateInfo = async (req, res) => {
+//   try {
+
+//     const clientTest = new RestClientV5({
+//       testnet: true,
+//       key: process.env.BYBIT_KEY,
+//       secret: process.env.BYBIT_SECRET,
+//     });
+
+//     const response = await clientTest.getAffiliateUserInfo({
+//       uid: "531503812",
+//     });
+
+//     return res
+//       .status(200)
+//       .json(ApiResponse(200, response, "Fetch data successfully"));
+//   } catch (error) {
+//     console.error("BYBIT API ERROR:", error);
+//     return res
+//       .status(500)
+//       .json(ApiResponse(500, null, "Something went wrong"));
+//   }
+// };
+
 export const getAffiliateInfo = async (req, res) => {
   try {
-
     const clientTest = new RestClientV5({
       testnet: true,
       key: process.env.BYBIT_KEY,
       secret: process.env.BYBIT_SECRET,
+      // timestamp/recv_window issue ke liye yeh add karo
+      recvWindow: 20000, // 20s window
+      strictParamValidation: false,
     });
 
     const response = await clientTest.getAffiliateUserInfo({
@@ -76,7 +102,7 @@ export const getAffiliateInfo = async (req, res) => {
       .status(200)
       .json(ApiResponse(200, response, "Fetch data successfully"));
   } catch (error) {
-    console.error("BYBIT API ERROR:", error);
+    console.error("BYBIT API ERROR:", JSON.stringify(error, null, 2));
     return res
       .status(500)
       .json(ApiResponse(500, null, "Something went wrong"));

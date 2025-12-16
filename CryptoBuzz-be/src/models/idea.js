@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 
- const IdeaSchema = new mongoose.Schema(
+const IdeaSchema = new mongoose.Schema(
   {
     name: {
       type: String
@@ -63,6 +63,19 @@ import mongoose from "mongoose";
         required: true
       }
     ],
+    accessType: {
+      type: String,
+      enum: ["PUBLIC", "LOGGED_IN", "UUID_ONLY", "PLAN_BASED"],
+      default: "PUBLIC",
+      required: true
+    },
+
+    // Only for PLAN_BASED access
+    allowedPlans: {
+      type: [String],
+      enum: ["MAX", "PRO"],
+      default: []
+    },
     isDeleted: {
       type: Boolean,
       default: false
