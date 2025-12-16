@@ -3,11 +3,10 @@ import Schedule from "../../models/schedule.js";
 import User from "../../models/user.js";
 import mongoose from "mongoose";
 import { v4 as uuidv4 } from "uuid";
-import RecurrenceSchedule from "../../models/recurrenceSchedule.js"
+import RecurrenceSchedule from "../../models/recurrenceSchedule.js";
 import { createLiveStreamForSchedule } from "../common/stream.js";
 import { streamClient } from "../../utils/constants.js";
-
-
+import { ApiResponse, GetApiResponse } from "../../utils/ApiResponse.js";
 
 // ✔ Find admin user
 async function getAdminUser() {
@@ -31,7 +30,7 @@ async function getAllCalls(streamClient, educatorId) {
         created_by_user_id: { $in: [educatorId, admin._id] },
         sort: [{ field: "created_at", direction: -1 }],
         limit: 100,
-        ...(next ? { next } : {}),
+        ...(next ? { next } : {})
       });
 
       allCalls.push(...response.calls);
@@ -48,8 +47,7 @@ async function getAllCalls(streamClient, educatorId) {
 export const getLiveDetails = async (req, res) => {
   try {
     const user = req.user;
-    if (!user)
-      return res.status(400).json({ message: "User not found" });
+    if (!user) return res.status(400).json({ message: "User not found" });
 
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
@@ -67,9 +65,7 @@ export const getLiveDetails = async (req, res) => {
     else baseFilter.status = { $in: ["pending", "active"] };
 
     if (search) {
-      baseFilter.$or = [
-        { title: { $regex: search, $options: "i" } },
-      ];
+      baseFilter.$or = [{ title: { $regex: search, $options: "i" } }];
     }
 
     // Parallel DB calls
@@ -80,7 +76,7 @@ export const getLiveDetails = async (req, res) => {
         .limit(limit)
         .sort({ createdAt: -1 })
         .populate("educator")
-        .populate("schedule", "isRecurent recurrenceRuleId"),
+        .populate("schedule", "isRecurent recurrenceRuleId")
     ]);
 
     let finalData = existingData;
@@ -88,14 +84,14 @@ export const getLiveDetails = async (req, res) => {
     // Add recurrence check
     if (status !== "ended") {
       finalData = await Promise.all(
-        existingData.map(async (item) => {
+        existingData.map(async item => {
           if (!item.schedule?._id) {
             return { ...item.toObject(), checkLastRecurrence: false };
           }
 
           let checkLastRecurrence = false;
           const recurrence = await RecurrenceSchedule.findOne({
-            recurrenceRuleId: item.schedule.recurrenceRuleId,
+            recurrenceRuleId: item.schedule.recurrenceRuleId
           }).sort({ createdAt: -1 });
 
           if (recurrence && Date.now() > new Date(recurrence.datetime)) {
@@ -107,22 +103,20 @@ export const getLiveDetails = async (req, res) => {
       );
     }
 
-    return res.status(200).json({
-      message: "Records fetched successfully",
-      data: finalData,
-      pagination: {
-        currentPage: page,
-        limit,
-        totalPages: Math.ceil(totalCount / limit),
-        currentRecords: existingData.length,
-        totalRecords: totalCount,
-      },
-    });
+    const pagination = {
+      currentPage: page,
+      limit,
+      totalPages: Math.ceil(totalCount / limit),
+      currentRecords: existingData.length,
+      totalRecords: totalCount
+    };
+
+    return res.status(200).json(GetApiResponse(200, finalData, pagination, "Records fetched successfully"));
   } catch (error) {
     console.error("❌ getLiveDetails Error:", error);
     res.status(500).json({
       error: "Internal Server Error",
-      message: error.message,
+      message: error.message
     });
   }
 };
@@ -132,22 +126,20 @@ export const startCall = async (req, res) => {
     const { Id, callId } = req.body;
     const user = req.user;
 
-    if (!mongoose.Types.ObjectId.isValid(Id))
-      return res.status(400).json({ message: "Invalid Id format" });
+    if (!mongoose.Types.ObjectId.isValid(Id)) return res.status(400).json({ message: "Invalid Id format" });
 
-    if (!Id || !callId)
-      return res.status(400).send("Both Id and callId are required");
+    if (!Id || !callId) return res.status(400).send("Both Id and callId are required");
 
     // Only 1 session can be active
     const activeSession = await LiveStreamModel.findOne({
       educator: user._id,
-      status: "active",
+      status: "active"
     });
 
     if (activeSession) {
       return res.status(400).json({
         success: false,
-        message: "Another session is active. End it first.",
+        message: "Another session is active. End it first."
       });
     }
 
@@ -160,15 +152,10 @@ export const startCall = async (req, res) => {
     if (!updatedSchedule) {
       return res.status(404).json({
         success: false,
-        message: "Schedule not found",
+        message: "Schedule not found"
       });
     }
-
-    return res.status(200).json({
-      success: true,
-      message: "Live session started",
-      data: updatedSchedule,
-    });
+    return res.status(200).json(ApiResponse(200, updatedSchedule, "Live session started"));
   } catch (error) {
     console.error("Error in startCall:", error);
     res.status(500).send("Error starting call");
@@ -191,7 +178,7 @@ export const createLive = async (schedule, createdUser) => {
         members: [{ user_id: educator, role: "admin" }],
         settings_override: {
           broadcast: {
-            hls: { enabled: true, auto_start: true },
+            hls: { enabled: true, auto_start: true }
           },
           recording: {
             mode: "available",
@@ -201,18 +188,18 @@ export const createLive = async (schedule, createdUser) => {
               name: "single-participant",
               options: {
                 "layout.background_color": "#000",
-                "participant.aspect_ratio": "16/9",
-              },
-            },
-          },
+                "participant.aspect_ratio": "16/9"
+              }
+            }
+          }
         },
         custom: {
           title: schedule.title,
           description: schedule.description,
           category: schedule.category,
-          tags: schedule.tags,
-        },
-      },
+          tags: schedule.tags
+        }
+      }
     });
 
     const rtmp_URl = response.call?.ingress?.rtmp?.address || null;
@@ -221,8 +208,8 @@ export const createLive = async (schedule, createdUser) => {
       user_id: schedule.educator,
       validity_in_seconds: 31536000,
       video: {
-        livestream: ["JoinCall", "CreateCall", "StartRecording", "StopRecording"],
-      },
+        livestream: ["JoinCall", "CreateCall", "StartRecording", "StopRecording"]
+      }
     });
 
     await LiveStreamModel.create({
@@ -231,7 +218,7 @@ export const createLive = async (schedule, createdUser) => {
       educator: schedule.educator,
       callId,
       token,
-      rtmp_URl,
+      rtmp_URl
     });
 
     schedule.generateToken = true;
@@ -241,7 +228,7 @@ export const createLive = async (schedule, createdUser) => {
 
     return {
       success: true,
-      message: "Live stream created",
+      message: "Live stream created"
     };
   } catch (error) {
     return { success: false, message: error.message };
@@ -255,11 +242,9 @@ export const createLiveStreamOnTime = async (req, res) => {
     const scheduleData = {
       ...req.body,
       callId: `callId-${uuidv4()}`,
-      tags: Array.isArray(req.body.tags)
-        ? req.body.tags
-        : req.body.tags.split(",").map((tag) => tag.trim()),
+      tags: Array.isArray(req.body.tags) ? req.body.tags : req.body.tags.split(",").map(tag => tag.trim()),
       datetime: new Date(),
-      educator: createdUser._id,
+      educator: createdUser._id
     };
 
     const schedule = new Schedule(scheduleData);
@@ -272,16 +257,17 @@ export const createLiveStreamOnTime = async (req, res) => {
       .populate("educator", "first_name last_name image")
       .populate("language", "name");
 
+
     res.status(201).json({
       success: true,
       data: populatedSchedule,
       stream: result,
-      message: "Schedule created successfully",
+      message: "Schedule created successfully"
     });
   } catch (error) {
     res.status(500).json({
       success: false,
-      message: error.message,
+      message: error.message
     });
   }
 };
@@ -296,8 +282,7 @@ export const stopLiveStream = async (req, res) => {
     const findSchedule = await Schedule.findOne({ callId });
     const findLiveStream = await LiveStreamModel.findOne({ callId });
 
-    if (!findLiveStream)
-      return res.status(404).json({ message: "Live session not found" });
+    if (!findLiveStream) return res.status(404).json({ message: "Live session not found" });
 
     findLiveStream.status = "ended";
     await findLiveStream.save();
@@ -313,7 +298,7 @@ export const stopLiveStream = async (req, res) => {
 
     res.status(200).json({
       success: true,
-      message: "Live stream ended successfully",
+      message: "Live stream ended successfully"
     });
   } catch (error) {
     res.status(500).send("Error stopping livestream");
@@ -338,7 +323,7 @@ export const updateLiveStreamStatus = async (req, res) => {
     res.status(200).json({
       success: true,
       data: schedule,
-      message: "Status updated",
+      message: "Status updated"
     });
   } catch (error) {
     res.status(500).send("Error updating livestream status");
@@ -350,14 +335,12 @@ export const changeLiveStreamStatus = async (req, res) => {
   const { callId } = req.params;
   const { status } = req.body;
 
-  if (!callId || status !== "ended")
-    return res.status(400).send("Invalid request");
+  if (!callId || status !== "ended") return res.status(400).send("Invalid request");
 
   try {
     const stream = await LiveStreamModel.findOne({ callId });
 
-    if (!stream)
-      return res.status(404).json({ message: "Not found" });
+    if (!stream) return res.status(404).json({ message: "Not found" });
 
     stream.status = "ended";
     await stream.save();
@@ -365,7 +348,7 @@ export const changeLiveStreamStatus = async (req, res) => {
     res.status(200).json({
       success: true,
       data: stream,
-      message: "Status updated",
+      message: "Status updated"
     });
   } catch (error) {
     res.status(500).send("Error updating livestream status");
@@ -380,8 +363,7 @@ async function retryAsync(fn, retries = 3, delay = 1000) {
       return await fn();
     } catch (err) {
       lastError = err;
-      if (i < retries)
-        await new Promise((r) => setTimeout(r, delay));
+      if (i < retries) await new Promise(r => setTimeout(r, delay));
     }
   }
   throw lastError;
@@ -397,8 +379,7 @@ export const endAndCreate = async (req, res) => {
     const findSchedule = await Schedule.findOne({ callId });
     const findLiveStream = await LiveStreamModel.findOne({ callId });
 
-    if (!findLiveStream)
-      return res.status(400).json({ message: "Invalid callId" });
+    if (!findLiveStream) return res.status(400).json({ message: "Invalid callId" });
 
     findLiveStream.status = "ended";
     await findLiveStream.save();
@@ -418,7 +399,7 @@ export const endAndCreate = async (req, res) => {
         ...findSchedule.toObject(),
         _id: undefined,
         callId: `callId-${uuidv4()}`,
-        status: "pending",
+        status: "pending"
       };
 
       delete scheduleData.createdAt;
@@ -432,7 +413,7 @@ export const endAndCreate = async (req, res) => {
 
     res.status(200).json({
       success: true,
-      message: "Ended and recreated successfully",
+      message: "Ended and recreated successfully"
     });
   } catch (error) {
     res.status(500).send("Error processing livestream");

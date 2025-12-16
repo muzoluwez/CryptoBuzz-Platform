@@ -24,7 +24,7 @@ const SubscriptionSchema = new mongoose.Schema(
   { _id: false } // subdocument ke liye
 );
 
-const UserSchema = new mongoose.Schema(
+const UserCredentialSchema = new mongoose.Schema(
   {
     name: {
       type: String
@@ -45,8 +45,11 @@ const UserSchema = new mongoose.Schema(
     image: {
       type: String
     },
-    crm_id: {
-      type: String
+    uid: {
+      type: String,
+      unique: true,
+      sparse: true, // optional but unique
+      index: true
     },
 
     status: {
@@ -75,12 +78,6 @@ const UserSchema = new mongoose.Schema(
       type: String,
       default: null
     },
-    uuid: {
-      type: String,
-      unique: true,
-      sparse: true, // optional but unique
-      index: true
-    },
     subscription: {
       type: SubscriptionSchema,
       default: () => ({})
@@ -89,16 +86,16 @@ const UserSchema = new mongoose.Schema(
   { timestamps: true, toJSON: { virtuals: true }, toObject: { virtuals: true } }
 );
 
-UserSchema.pre("find", function () {
+UserCredentialSchema.pre("find", function () {
   this.where({ isDeleted: false });
 });
-UserSchema.pre("findOne", function () {
+UserCredentialSchema.pre("findOne", function () {
   this.where({ isDeleted: false });
 });
-UserSchema.pre("countDocuments", function () {
+UserCredentialSchema.pre("countDocuments", function () {
   this.where({ isDeleted: false });
 });
 
-export const User = mongoose.model("user", UserSchema);
+export const User = mongoose.model("userCredential", UserCredentialSchema);
 
 export default User;
