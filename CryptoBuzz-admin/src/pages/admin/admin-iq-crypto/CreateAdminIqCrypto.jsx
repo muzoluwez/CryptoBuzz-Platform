@@ -40,6 +40,7 @@ const CreateAdminIqCrypto = forwardRef(
       createdBy: "",
       description: "",
       url: "",
+      accessType: "PUBLIC",
     };
 
     const createSchema = Yup.object().shape({
@@ -47,6 +48,7 @@ const CreateAdminIqCrypto = forwardRef(
       files: Yup.array().min(1, "At least one file is required"),
       createdBy: Yup.string().required("Educator ID is required"),
       description: Yup.string().required("Entry is required"),
+      accessType: Yup.string().required("Access Type is required"),
       url: Yup.string()
         .url("Please enter a valid URL")
         .optional("URL is required"),
@@ -66,6 +68,7 @@ const CreateAdminIqCrypto = forwardRef(
         formData.append("createdBy", values.createdBy);
         formData.append("description", values.description);
         formData.append("url", values.url);
+        formData.append("accessType", values.accessType || "PUBLIC");
         if (selectedRow?._id) {
           formData.append("id", selectedRow?._id);
         }
@@ -113,6 +116,7 @@ const CreateAdminIqCrypto = forwardRef(
           description: selectedRow.description ?? "",
           url: selectedRow.url ?? "",
           createdBy: selectedRow.createdBy?._id ?? "",
+          accessType: selectedRow.accessType ?? "PUBLIC",
         });
       } else {
         // reset when switching back to create mode
@@ -228,6 +232,33 @@ const CreateAdminIqCrypto = forwardRef(
                       </span>
                     )}
                   </div>
+                </div>
+                <div className="col-span-12">
+                  <label className="form-label text-gray-900">
+                    Access Type<span className="text-danger">*</span>
+                  </label>
+
+                  <div className="flex flex-wrap gap-4 mt-2">
+                    {["PUBLIC", "LOGGED_IN", "UID_ONLY"].map((type) => (
+                      <label key={type} className="flex items-center gap-2 cursor-pointer">
+                        <input
+                          type="radio"
+                          name="accessType"
+                          value={type}
+                          checked={formik.values.accessType === type}
+                          onChange={() => formik.setFieldValue("accessType", type)}
+                          className="radio radio-primary"
+                        />
+                        <span className="text-sm">{type.replace("_", " ")}</span>
+                      </label>
+                    ))}
+                  </div>
+
+                  {formik.touched.accessType && formik.errors.accessType && (
+                    <span className="text-danger text-xs mt-1 block">
+                      {formik.errors.accessType}
+                    </span>
+                  )}
                 </div>
 
                 <div className="col-span-12">

@@ -58,6 +58,7 @@ const CreateAdminRecurrenceScheduleModel = forwardRef(
       tags: [],
       category: "",
       language: "",
+      accessType: "PUBLIC",
 
       educator: "",
       recurrenceRule: {
@@ -80,6 +81,7 @@ const CreateAdminRecurrenceScheduleModel = forwardRef(
       category: Yup.string().required("Category is required"),
       language: Yup.string().required("Language is required"),
       tags: Yup.array().min(1, "At least one tag is required"),
+      accessType: Yup.string().required("Access Type is required"),
       recurrenceRule: Yup.object().shape({
         frequency: Yup.string().required(),
         interval: Yup.number()
@@ -165,6 +167,7 @@ const CreateAdminRecurrenceScheduleModel = forwardRef(
           formData.append("category", values.category);
           formData.append("language", values.language);
           formData.append("educator", values?.educator);
+          formData.append("accessType", values.accessType || "PUBLIC");
 
           values.tags.forEach((tag) => {
             formData.append("tags[]", tag);
@@ -235,6 +238,7 @@ const CreateAdminRecurrenceScheduleModel = forwardRef(
           category: selectedRow?.category?._id,
           language: selectedRow?.language,
           educator: selectedRow?.educator?._id,
+          accessType: selectedRow?.accessType || "PUBLIC",
           recurrenceRule: {
             frequency: selectedRow?.recurrenceRuleId?.frequency || "NONE",
             interval: selectedRow?.recurrenceRuleId?.interval || 1,
@@ -477,6 +481,33 @@ const CreateAdminRecurrenceScheduleModel = forwardRef(
                     </span>
                   )}
                 </div>
+              </div>
+              <div className="col-span-12">
+                <label className="form-label text-gray-900">
+                  Access Type<span className="text-danger">*</span>
+                </label>
+
+                <div className="flex flex-wrap gap-4 mt-2">
+                  {["PUBLIC", "LOGGED_IN", "UID_ONLY"].map((type) => (
+                    <label key={type} className="flex items-center gap-2 cursor-pointer">
+                      <input
+                        type="radio"
+                        name="accessType"
+                        value={type}
+                        checked={formik.values.accessType === type}
+                        onChange={() => formik.setFieldValue("accessType", type)}
+                        className="radio radio-primary"
+                      />
+                      <span className="text-sm">{type.replace("_", " ")}</span>
+                    </label>
+                  ))}
+                </div>
+
+                {formik.touched.accessType && formik.errors.accessType && (
+                  <span className="text-danger text-xs mt-1 block">
+                    {formik.errors.accessType}
+                  </span>
+                )}
               </div>
               <div className="col-span-12">
                 <div className="col-span-6">

@@ -23,7 +23,8 @@ const CreateLiveSession = forwardRef(({ isCreateOpen, handleCloseCreate, selecte
         tags: [],
         category: "",
         thumbnail: null,
-        userId: ""
+        userId: "",
+        accessType: "PUBLIC"
     };
 
     const createSchema = Yup.object().shape({
@@ -48,6 +49,7 @@ const CreateLiveSession = forwardRef(({ isCreateOpen, handleCloseCreate, selecte
                 const maxSize = 2 * 1024 * 1024; // 2MB
                 return file && file.size <= maxSize;
             }),
+        accessType: Yup.string().required("Access Type is required"),
     });
 
     const formik = useFormik({
@@ -68,7 +70,7 @@ const CreateLiveSession = forwardRef(({ isCreateOpen, handleCloseCreate, selecte
             values.tags.forEach((tag) => {
                 formData.append(`tags[]`, tag);
             });
-
+            formData.append('accessType', values?.accessType || "PUBLIC");
             formData.append('userId', values?.userId);
 
             if (thumbnailFile) {
@@ -107,6 +109,7 @@ const CreateLiveSession = forwardRef(({ isCreateOpen, handleCloseCreate, selecte
                 entry: selectedRow?.entry,
                 invalidation: selectedRow?.invalidation,
                 exits: selectedRow?.exits,
+                accessType: selectedRow?.accessType,
             }
             formik.setValues(initData)
         }
@@ -209,6 +212,34 @@ const CreateLiveSession = forwardRef(({ isCreateOpen, handleCloseCreate, selecte
                                     </span>
                                 )}
                             </div>
+                        </div>
+
+                        <div className="col-span-12">
+                            <label className="form-label text-gray-900">
+                                Access Type<span className="text-danger">*</span>
+                            </label>
+
+                            <div className="flex flex-wrap gap-4 mt-2">
+                                {["PUBLIC", "LOGGED_IN", "UID_ONLY"].map((type) => (
+                                    <label key={type} className="flex items-center gap-2 cursor-pointer">
+                                        <input
+                                            type="radio"
+                                            name="accessType"
+                                            value={type}
+                                            checked={formik.values.accessType === type}
+                                            onChange={() => formik.setFieldValue("accessType", type)}
+                                            className="radio radio-primary"
+                                        />
+                                        <span className="text-sm">{type.replace("_", " ")}</span>
+                                    </label>
+                                ))}
+                            </div>
+
+                            {formik.touched.accessType && formik.errors.accessType && (
+                                <span className="text-danger text-xs mt-1 block">
+                                    {formik.errors.accessType}
+                                </span>
+                            )}
                         </div>
                         <div className="col-span-12">
                             <div className="flex flex-col gap-1">
