@@ -19,8 +19,8 @@ import { ImageInput } from "@/components/image-input";
 import { Alert } from "../../../components/alert/Alert";
 import { toast } from "sonner";
 import RichTextEditor from "../../../components/ui/rich-editor";
-import { useFetchCategoriesQuery } from "../../../store/api/educator/EducatorAcademyCategoryApiSlice";
-import { useCreateTradeAnalysisMutation, useUpdateTradeAnalysisMutation } from "../../../store/api/educator/EducatorTradeAnalysisApiSlice";
+import { useFetchCategoriesQuery } from "../../../store/api/educator/educatorAcademyCategoryApiSlice";
+import { useCreateTradeAnalysisMutation, useUpdateTradeAnalysisMutation } from "../../../store/api/educator/educatorTradeAnalysisApiSlice";
 
 const CreateTradeAnalysis = forwardRef(
   (
@@ -42,6 +42,7 @@ const CreateTradeAnalysis = forwardRef(
       description: "",
       url: "",
       category: "",
+      accessType: "PUBLIC",
     };
 
     const createSchema = Yup.object().shape({
@@ -53,6 +54,7 @@ const CreateTradeAnalysis = forwardRef(
         .url("Please enter a valid URL")
         .required("URL is required"),
       category: Yup.string().required("Category is required"),
+      accessType: Yup.string().required("Access Type is required"),
     });
 
     const formik = useFormik({
@@ -70,6 +72,7 @@ const CreateTradeAnalysis = forwardRef(
         formData.append("description", values.description);
         formData.append("category", values.category);
         formData.append("url", values.url);
+        formData.append("accessType", values.accessType ?? "PUBLIC");
         if (selectedRow?._id) {
           formData.append("id", selectedRow?._id);
         }
@@ -117,6 +120,7 @@ const CreateTradeAnalysis = forwardRef(
           description: selectedRow?.description,
           category: selectedRow?.category?._id,
           url: selectedRow?.url,
+          accessType: selectedRow?.accessType ?? "PUBLIC",
         };
         formik.setValues(initData);
       }
@@ -304,6 +308,33 @@ const CreateTradeAnalysis = forwardRef(
                       </span>
                     )}
                   </div>
+                </div>
+                <div className="col-span-12">
+                  <label className="form-label text-gray-900">
+                    Access Type<span className="text-danger">*</span>
+                  </label>
+
+                  <div className="flex flex-wrap gap-4 mt-2">
+                    {["PUBLIC", "LOGGED_IN", "UID_ONLY"].map((type) => (
+                      <label key={type} className="flex items-center gap-2 cursor-pointer">
+                        <input
+                          type="radio"
+                          name="accessType"
+                          value={type}
+                          checked={formik.values.accessType === type}
+                          onChange={() => formik.setFieldValue("accessType", type)}
+                          className="radio radio-primary"
+                        />
+                        <span className="text-sm">{type.replace("_", " ")}</span>
+                      </label>
+                    ))}
+                  </div>
+
+                  {formik.touched.accessType && formik.errors.accessType && (
+                    <span className="text-danger text-xs mt-1 block">
+                      {formik.errors.accessType}
+                    </span>
+                  )}
                 </div>
                 <div className="col-span-12">
                   <div className="flex flex-wrap gap-5">

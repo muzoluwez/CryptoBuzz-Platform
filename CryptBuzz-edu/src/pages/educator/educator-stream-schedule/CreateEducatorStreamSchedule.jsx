@@ -49,6 +49,7 @@ const CreateEducatorStreamSchedule = forwardRef(
       userId: "",
       streamType: "",
       language: "",
+      accessType: "",
       // files: ""
     };
 
@@ -86,6 +87,7 @@ const CreateEducatorStreamSchedule = forwardRef(
       //     return file.size <= maxSize;
       //   }),
       language: Yup.string().required("Language is required"),
+      accessType: Yup.string().required("Access Type is required"),
     });
 
     const formik = useFormik({
@@ -105,6 +107,7 @@ const CreateEducatorStreamSchedule = forwardRef(
         formData.append("description", values.description);
         formData.append("datetime", values.datetime);
         formData.append("language", values.language);
+        formData.append("accessType", values.accessType || "PUBLIC");
         values.tags.forEach((tag) => {
           formData.append(`tags[]`, tag);
         });
@@ -174,6 +177,7 @@ const CreateEducatorStreamSchedule = forwardRef(
           // files: [{ file: null, dataURL: selectedRow?.image }],
           userId: selectedRow?.userId,
           language: selectedRow?.language,
+          accessType: selectedRow?.accessType,
           // files: selectedRow?.image
         };
         formik.setValues(initData);
@@ -531,6 +535,33 @@ const CreateEducatorStreamSchedule = forwardRef(
                   )}
                 </div> */}
               {/* </div> */}
+              <div className="col-span-12">
+                <label className="form-label text-gray-900">
+                  Access Type<span className="text-danger">*</span>
+                </label>
+
+                <div className="flex flex-wrap gap-4 mt-2">
+                  {["PUBLIC", "LOGGED_IN", "UID_ONLY"].map((type) => (
+                    <label key={type} className="flex items-center gap-2 cursor-pointer">
+                      <input
+                        type="radio"
+                        name="accessType"
+                        value={type}
+                        checked={formik.values.accessType === type}
+                        onChange={() => formik.setFieldValue("accessType", type)}
+                        className="radio radio-primary"
+                      />
+                      <span className="text-sm">{type.replace("_", " ")}</span>
+                    </label>
+                  ))}
+                </div>
+
+                {formik.touched.accessType && formik.errors.accessType && (
+                  <span className="text-danger text-xs mt-1 block">
+                    {formik.errors.accessType}
+                  </span>
+                )}
+              </div>
             </div>
           </div>
           <div className="flex border-gray-200 border-t justify-end pt-5 rounded-b dark:border-gray-200 gap-3">

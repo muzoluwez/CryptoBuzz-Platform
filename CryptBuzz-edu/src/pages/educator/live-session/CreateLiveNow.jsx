@@ -46,6 +46,7 @@ const CreateLiveStream = forwardRef(
       tags: [],
       category: "",
       language: "",
+      accessType: "PUBLIC",
     };
 
     const createSchema = Yup.object().shape({
@@ -57,6 +58,7 @@ const CreateLiveStream = forwardRef(
         .of(Yup.string().required("Tag cannot be empty")),
 
       language: Yup.string().required("Language is required"),
+      accessType: Yup.string().required("Access type is required"),
     });
 
 
@@ -75,6 +77,7 @@ const CreateLiveStream = forwardRef(
             category: values.category, // category _id
             tags: values.tags,
             language: values.language,
+            accessType: values.accessType || "PUBLIC",
           };
 
 
@@ -248,6 +251,35 @@ const CreateLiveStream = forwardRef(
                   {formik.touched.tags && formik.errors.tags && (
                     <span role="alert" className="text-danger text-xs mt-1">
                       {formik.errors.tags}
+                    </span>
+                  )}
+                </div>
+              </div>
+              <div className="col-span-12">
+                <div className="flex flex-col gap-2">
+                  <label className="form-label text-gray-900">
+                    Access Type<span className="text-danger">*</span>
+                  </label>
+
+                  <div className="flex gap-6">
+                    {["PUBLIC", "LOGGED_IN", "UID_ONLY"].map((type) => (
+                      <label key={type} className="flex items-center gap-2 cursor-pointer">
+                        <input
+                          type="radio"
+                          name="accessType"
+                          value={type}
+                          checked={formik.values.accessType === type}
+                          onChange={() => formik.setFieldValue("accessType", type)}
+                          className="radio radio-primary"
+                        />
+                        <span className="text-sm">{type.replace("_", " ")}</span>
+                      </label>
+                    ))}
+                  </div>
+
+                  {formik.touched.accessType && formik.errors.accessType && (
+                    <span role="alert" className="text-danger text-xs">
+                      {formik.errors.accessType}
                     </span>
                   )}
                 </div>

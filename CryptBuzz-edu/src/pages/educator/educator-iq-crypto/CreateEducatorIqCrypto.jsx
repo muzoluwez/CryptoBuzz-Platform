@@ -22,7 +22,7 @@ import RichTextEditor from "../../../components/ui/rich-editor";
 import {
   useCreateEducatorIqCryptoMutation,
   useUpdateEducatorIqCryptoMutation,
-} from "../../../store/api/educator/EducatorIqCryptoApiSlice";
+} from "../../../store/api/educator/educatorIqCryptoApiSlice";
 const CreateEducatorIqCrypto = forwardRef(
   (
     { setSelectedRow, isCreateOpen, handleCloseCreate, selectedRow, refetch },
@@ -39,6 +39,7 @@ const CreateEducatorIqCrypto = forwardRef(
       createdBy: "",
       description: "",
       url: "",
+      accessType: "PUBLIC",
     };
 
     const createSchema = Yup.object().shape({
@@ -49,6 +50,7 @@ const CreateEducatorIqCrypto = forwardRef(
       url: Yup.string()
         .url("Please enter a valid URL")
         .optional("URL is required"),
+      accessType: Yup.string().required("Access type is required"),
     });
 
     const formik = useFormik({
@@ -65,6 +67,7 @@ const CreateEducatorIqCrypto = forwardRef(
         formData.append("createdBy", values.createdBy);
         formData.append("description", values.description);
         formData.append("url", values.url);
+        formData.append("accessType", values.accessType ?? "PUBLIC");
         if (selectedRow?._id) {
           formData.append("id", selectedRow?._id);
         }
@@ -92,6 +95,8 @@ const CreateEducatorIqCrypto = forwardRef(
       },
     });
 
+    console.log(formik, "formik");
+
     useEffect(() => {
       if (createdBy && formik.values) {
         formik.setFieldValue("createdBy", createdBy);
@@ -112,6 +117,7 @@ const CreateEducatorIqCrypto = forwardRef(
           description: selectedRow.description ?? "",
           url: selectedRow.url ?? "",
           createdBy: selectedRow.createdBy?._id ?? "",
+          accessType: selectedRow.accessType ?? "PUBLIC",
         });
       } else {
         // reset when switching back to create mode
@@ -228,6 +234,37 @@ const CreateEducatorIqCrypto = forwardRef(
                     )}
                   </div>
                 </div>
+                <div className="col-span-12">
+                  <div className="flex flex-col gap-2">
+                    <label className="form-label text-gray-900">
+                      Access Type<span className="text-danger">*</span>
+                    </label>
+
+                    <div className="flex gap-6">
+                      {["PUBLIC", "LOGGED_IN", "UID_ONLY"].map((type) => (
+                        <label key={type} className="flex items-center gap-2 cursor-pointer">
+                          <input
+                            type="radio"
+                            name="accessType"
+                            value={type}
+                            checked={formik.values.accessType === type}
+                            onChange={() => formik.setFieldValue("accessType", type)}
+                            className="radio radio-primary"
+                          />
+                          <span className="text-sm">{type.replace("_", " ")}</span>
+                        </label>
+                      ))}
+                    </div>
+
+                    {formik.touched.accessType && formik.errors.accessType && (
+                      <span role="alert" className="text-danger text-xs">
+                        {formik.errors.accessType}
+                      </span>
+                    )}
+                  </div>
+                </div>
+
+
 
                 <div className="col-span-12">
                   <div className="flex flex-wrap gap-5">

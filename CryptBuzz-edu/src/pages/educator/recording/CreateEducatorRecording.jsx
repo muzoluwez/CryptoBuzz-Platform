@@ -51,6 +51,7 @@ const CreateEducatorRecording = forwardRef(
       videoInputType: "", // "url" or "upload"
       videoFile: null, // if uploaded
       videoPreview: null,
+      accessType: "PUBLIC",
     };
 
     const createSchema = Yup.object().shape({
@@ -64,6 +65,7 @@ const CreateEducatorRecording = forwardRef(
 
       call_tags: Yup.array().min(1, "At least one tag is required"),
       call_category: Yup.string().required("Category is required"),
+      accessType: Yup.string().required("Access type is required"),
 
     });
 
@@ -82,6 +84,7 @@ const CreateEducatorRecording = forwardRef(
             call_description: values.call_description,
             call_category: values.call_category,
             call_tags: values.call_tags,
+            accessType: values.accessType || "PUBLIC",
           };
 
           // If video is uploaded, use FormData
@@ -468,6 +471,34 @@ const CreateEducatorRecording = forwardRef(
                     </span>
                   )}
                 </div>
+              </div>
+
+              <div className="col-span-12">
+                <label className="form-label text-gray-900">
+                  Access Type<span className="text-danger">*</span>
+                </label>
+
+                <div className="flex flex-wrap gap-4 mt-2">
+                  {["PUBLIC", "LOGGED_IN", "UID_ONLY"].map((type) => (
+                    <label key={type} className="flex items-center gap-2 cursor-pointer">
+                      <input
+                        type="radio"
+                        name="accessType"
+                        value={type}
+                        checked={formik.values.accessType === type}
+                        onChange={() => formik.setFieldValue("accessType", type)}
+                        className="radio radio-primary"
+                      />
+                      <span className="text-sm">{type.replace("_", " ")}</span>
+                    </label>
+                  ))}
+                </div>
+
+                {formik.touched.accessType && formik.errors.accessType && (
+                  <span className="text-danger text-xs mt-1 block">
+                    {formik.errors.accessType}
+                  </span>
+                )}
               </div>
 
               <div className="col-span-12">

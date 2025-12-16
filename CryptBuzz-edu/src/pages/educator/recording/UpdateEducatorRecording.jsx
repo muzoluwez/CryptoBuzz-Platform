@@ -9,8 +9,8 @@ import {
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import RichTextEditor from "../../../components/ui/rich-editor";
-import { useUpdateEducatorRecordingMutation } from "../../../store/api/educator/educatorRecordingApiSlice";
 import { Alert } from "../../../components/alert/Alert";
+import { useUpdateEducatorRecordingMutation } from "../../../store/api/educator/EducatorRecordingApiSlice";
 
 const UpdateEducatorRecording = forwardRef(
   (
@@ -159,11 +159,10 @@ const UpdateEducatorRecording = forwardRef(
                 type="text"
                 placeholder="Enter title"
                 autoComplete="off"
-                className={`form-control input input-md w-full ${
-                  formik.errors.title && formik.touched.title
-                    ? "border border-danger"
-                    : ""
-                }`}
+                className={`form-control input input-md w-full ${formik.errors.title && formik.touched.title
+                  ? "border border-danger"
+                  : ""
+                  }`}
                 {...formik.getFieldProps("title")}
               />
               {formik.touched.title && formik.errors.title && (
@@ -184,11 +183,10 @@ const UpdateEducatorRecording = forwardRef(
                   const file = event.currentTarget.files[0];
                   formik.setFieldValue("thumbnail", file);
                 }}
-                className={`form-control input input-md w-full h-full p-3 ${
-                  formik.errors.thumbnail && formik.touched.thumbnail
-                    ? "border border-danger"
-                    : ""
-                }`}
+                className={`form-control input input-md w-full h-full p-3 ${formik.errors.thumbnail && formik.touched.thumbnail
+                  ? "border border-danger"
+                  : ""
+                  }`}
               />
 
               {/* Preview */}
