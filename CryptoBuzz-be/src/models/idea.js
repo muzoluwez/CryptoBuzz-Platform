@@ -65,7 +65,7 @@ const IdeaSchema = new mongoose.Schema(
     ],
     accessType: {
       type: String,
-      enum: ["PUBLIC", "LOGGED_IN", "UUID_ONLY", "PLAN_BASED"],
+      enum: ["PUBLIC", "LOGGED_IN", "UID_ONLY", "PLAN_BASED"],
       default: "PUBLIC",
       required: true
     },
