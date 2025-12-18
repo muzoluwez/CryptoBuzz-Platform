@@ -257,7 +257,6 @@ export const createLiveStreamOnTime = async (req, res) => {
       .populate("educator", "first_name last_name image")
       .populate("language", "name");
 
-
     res.status(201).json({
       success: true,
       data: populatedSchedule,
@@ -295,11 +294,7 @@ export const stopLiveStream = async (req, res) => {
     const call = streamClient.video.call("livestream", callId);
     await call.stopLive();
     await call.end();
-
-    res.status(200).json({
-      success: true,
-      message: "Live stream ended successfully"
-    });
+    return res.status(200).json(ApiResponse(200, {}, "Live stream ended successfully"));
   } catch (error) {
     res.status(500).send("Error stopping livestream");
   }
@@ -410,11 +405,7 @@ export const endAndCreate = async (req, res) => {
 
       await createLiveStreamForSchedule(schedule);
     }
-
-    res.status(200).json({
-      success: true,
-      message: "Ended and recreated successfully"
-    });
+    return res.status(200).json(ApiResponse(200, {}, "Ended and recreated successfully"));
   } catch (error) {
     res.status(500).send("Error processing livestream");
   }

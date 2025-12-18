@@ -8,7 +8,7 @@ const connectDB = async () => {
             throw new Error("MONGODB_URI is not defined in environment");
         }
 
-        const uri = `${mongoUri}/${DB_NAME}`;
+        const uri = `${mongoUri}`;
 
         const connectionInstance = await mongoose.connect(uri);
 
