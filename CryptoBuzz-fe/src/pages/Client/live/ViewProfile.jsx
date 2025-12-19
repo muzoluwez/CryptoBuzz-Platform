@@ -123,6 +123,9 @@ export default function ViewProfile() {
         }
     ];
 
+    const callId = 'livestream';
+
+
     return (
         <div className="container my-6">
             <div className="w-full bg-gradient-to-r from-[#a76100] via-[#a76100] to-[#a76100] p-6 rounded-2xl flex items-center justify-between shadow-lg mb-6">
@@ -209,6 +212,15 @@ export default function ViewProfile() {
                     </Card>
                 </div>
             </div>
+            {/* <div className="grid grid-cols-12  gap-y-6">
+                <div className="col-span-12 xl:col-span-12 space-y-8 mb-8">
+                    <ClientViewLiveSession
+                        bannerImage={response?.data?.educator?.bannerImage}
+                        callId={callId}
+                        educatorData={response?.data?.educator?.description}
+                    />
+                </div>
+            </div> */}
             <div className="grid grid-cols-3 gap-6">
                 <div className="col-span-12 lg:col-span-2 space-y-6">
                     <Card className="rounded-2xl p-6 shadow-sm">
