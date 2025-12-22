@@ -3,14 +3,13 @@ import { HomePage } from '@/pages/Client/home/page';
 import { IdeaPage } from '@/pages/Client/idea/page';
 import { LivePage } from '@/pages/Client/live/page';
 import { AcademyPage } from '@/pages/Client/academy/page';
-import { BlogPage } from '@/pages/Client/blog/page';
 import { JournalingPage } from '@/pages/Client/journaling/page';
 import { SocialPage } from '@/pages/Client/social/page';
 import { Navigate, Route, Routes } from 'react-router';
 import { Layout7 } from '@/components/layouts/layout-7';
 import { InsightPage } from '../pages/Client/insight/page';
 import EducatorsPage from '../pages/Client/live/EducatorsPage';
-import ViewProfile from '../pages/Client/live/ViewProfile';
+import ViewProfile from '../pages/Client/educator/ViewProfile';
 
 export function AppRoutingSetup() {
   return (
@@ -24,7 +23,6 @@ export function AppRoutingSetup() {
         <Route path="/client/viewprofile" element={<ViewProfile />} />
         <Route path="/client/academy" element={<AcademyPage />} />
         <Route path="/client/insight" element={<InsightPage />} />
-        <Route path="/client/blog" element={<BlogPage />} />
         <Route path="/client/journaling" element={<JournalingPage />} />
         <Route path="/client/social" element={<SocialPage />} />
       </Route>

@@ -17,6 +17,9 @@ import { combineReducers } from '@reduxjs/toolkit';
 import authReducer from './authSlice';
 import { clientAcademyCategoryApiSlice } from './client/clientAcademyCategoryApiSlice';
 import { clientCoursesApiSlice } from './client/clientCoursesApiSlice';
+import { clientTradeIdeaApiSlice } from './client/clientTradeIdeaApiSlice';
+import { clientTradeAnalysisApiSlice } from './client/clientTradeAnalysisApiSlice';
+import { clientCryptoApiSlice } from './client/clientCryptoApiSlice';
 
 // Persist configuration
 const persistConfig = {
@@ -31,6 +34,9 @@ const rootReducer = combineReducers({
     auth: authReducer,
     [clientAcademyCategoryApiSlice.reducerPath]: clientAcademyCategoryApiSlice.reducer,
     [clientCoursesApiSlice.reducerPath]: clientCoursesApiSlice.reducer,
+    [clientTradeIdeaApiSlice.reducerPath]: clientTradeIdeaApiSlice.reducer,
+    [clientTradeAnalysisApiSlice.reducerPath]: clientTradeAnalysisApiSlice.reducer,
+    [clientCryptoApiSlice.reducerPath]: clientCryptoApiSlice.reducer,
 });
 
 // Create persisted reducer
@@ -46,7 +52,10 @@ export const store = configureStore({
             },
         }).concat(
             clientAcademyCategoryApiSlice.middleware,
-            clientCoursesApiSlice.middleware
+            clientCoursesApiSlice.middleware,
+            clientTradeIdeaApiSlice.middleware,
+            clientTradeAnalysisApiSlice.middleware,
+            clientCryptoApiSlice.middleware,
         ),
 });
 
