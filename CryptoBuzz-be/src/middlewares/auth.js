@@ -2,7 +2,7 @@
 import jwt from "jsonwebtoken";
 import { ApiError } from "../utils/ApiError.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
-import { User } from "../models/user.js";
+import { UserCredential } from "../models/userCredential.js";
 
 export const verifyJWT = asyncHandler(async (req, res, next) => {
   try {
@@ -19,7 +19,7 @@ export const verifyJWT = asyncHandler(async (req, res, next) => {
       throw new ApiError(401, "Invalid or expired access token");
     }
 
-    const user = await User.findById(decoded?._id).select("-password ");
+    const user = await UserCredential.findById(decoded?._id).select("-password ");
 
     if (!user) {
       throw new ApiError(401, "User associated with token not found");
@@ -105,4 +105,4 @@ export const AdminAuth = asyncHandler(async (req, res, next) => {
   }
 });
 
-export default { CommonAuth, verifyJWT,AdminAuth };
+export default { CommonAuth, verifyJWT, AdminAuth };

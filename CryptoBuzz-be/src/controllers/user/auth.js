@@ -1,5 +1,6 @@
 import bcrypt from "bcryptjs";
 import { v4 as uuidv4 } from "uuid";
+import jwt from "jsonwebtoken";
 import UserCredential from "../../models/userCredential.js";
 import { ApiResponse } from "../../utils/ApiResponse.js";
 
@@ -58,11 +59,7 @@ export const signup = async (req, res) => {
 
 export const signIn = async (req, res) => {
   try {
-    const { email, password, uid } = req.body;
-
-    if (uid) {
-      // login uid method logic
-    }
+    const { email, password } = req.body;
 
     // 1️⃣ Basic validation
     if (!email || !password) {
@@ -77,21 +74,41 @@ export const signIn = async (req, res) => {
     if (!existingUser) {
       return res.status(400).json({
         success: false,
-        message: "User not exists with this email"
+        message: "User does not exist with this email"
       });
     }
 
-    const token = jwt.sign({ _id: existingUser._id, role: existingUser.role }, process.env.JWT_SECRET, {
-      expiresIn: "24h"
-    });
+    // 3️⃣ Check user status
+    if (existingUser.status === "false") {
+      return res.status(403).json({
+        success: false,
+        message: "Your account is inactive. Please contact support."
+      });
+    }
 
-    // 5️⃣ Remove password from response
+    // 4️⃣ Verify password
+    const isPasswordValid = await bcrypt.compare(password, existingUser.password);
+    if (!isPasswordValid) {
+      return res.status(401).json({
+        success: false,
+        message: "Invalid credentials"
+      });
+    }
+
+    // 5️⃣ Generate Token
+    const token = jwt.sign(
+      { _id: existingUser._id, role: "student" }, // Assuming role is student for UserCredential
+      process.env.JWT_SECRET,
+      { expiresIn: "30d" }
+    );
+
+    // 6️⃣ Prepare User Object
     const userObj = existingUser.toObject();
     delete userObj.password;
 
-    return res.status(200).json(ApiResponse(200, { userObj, token }, "Signup successful"));
+    return res.status(200).json(ApiResponse(200, { user: userObj, token }, "Login successful"));
   } catch (error) {
-    console.error("Signup Error:", error);
+    console.error("Login Error:", error);
     return res.status(500).json({
       success: false,
       message: "Something went wrong"

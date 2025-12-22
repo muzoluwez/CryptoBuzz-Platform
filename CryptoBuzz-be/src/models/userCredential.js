@@ -96,6 +96,7 @@ UserCredentialSchema.pre("countDocuments", function () {
   this.where({ isDeleted: false });
 });
 
-export const User = mongoose.model("userCredential", UserCredentialSchema);
+const UserCredential = mongoose.model("userCredential", UserCredentialSchema);
 
-export default User;
+export { UserCredential };
+export default UserCredential;

@@ -4,7 +4,7 @@ import http from "http";
 
 import connectDB from "./db/index.js";
 import { app } from "./app.js";
-import { seedAdmins } from "./seeder/seeder.js";
+import { seedAdmins, seedUsers } from "./seeder/seeder.js";
 
 const PORT = process.env.PORT || 8000;
 
@@ -45,6 +45,7 @@ const start = async () => {
 
     await connectDB();
     seedAdmins();
+    seedUsers();
 
     server.listen(PORT, () => {
       console.log(`⚙️  Server running on port ${PORT}`);

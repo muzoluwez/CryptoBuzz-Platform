@@ -1,7 +1,14 @@
 import express from "express";
-const router = express.Router();
-import AuthRoutes from "./auth.routes.js";
+import insightRoutes from "./insight.routes.js";
+import cryptoRoutes from "./crypto.routes.js";
+import socialRoutes from "./social.routes.js";
+import ideaRoutes from "./idea.routes.js"
 
-router.use("/auth", AuthRoutes);
+const router = express.Router();
+
+router.use("/idea", ideaRoutes)
+router.use("/insight", insightRoutes);
+router.use("/crypto", cryptoRoutes);
+router.use("/social", socialRoutes);
 
 export default router;
