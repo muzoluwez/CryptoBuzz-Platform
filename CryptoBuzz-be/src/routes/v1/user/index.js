@@ -3,9 +3,12 @@ import insightRoutes from "./insight.routes.js";
 import cryptoRoutes from "./crypto.routes.js";
 import socialRoutes from "./social.routes.js";
 import ideaRoutes from "./idea.routes.js"
+import authRoutes from "./auth.routes.js"
 
 const router = express.Router();
 
+
+router.use("/auth", authRoutes)
 router.use("/idea", ideaRoutes)
 router.use("/insight", insightRoutes);
 router.use("/crypto", cryptoRoutes);
