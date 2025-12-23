@@ -61,4 +61,5 @@ jobs:
         with:
           app-name: 'cryptoBuzz-backend'
           slot-name: 'Production'
-          package: CryptoBuzz-be
+          package: .
+        working-directory: CryptoBuzz-be
