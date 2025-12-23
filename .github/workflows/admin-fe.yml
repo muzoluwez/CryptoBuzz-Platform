@@ -29,7 +29,8 @@ jobs:
 
       - name: Install dependencies
         working-directory: CryptoBuzz-fe
-        run: npm install --force
+        run: npm install --force 
+             npm install express
 
       - name: Build project with ENV
         working-directory: CryptoBuzz-fe
