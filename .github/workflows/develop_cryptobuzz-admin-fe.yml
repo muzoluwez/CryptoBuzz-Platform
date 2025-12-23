@@ -26,12 +26,13 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: '22.x'
-          cache: 'npm'
 
       - name: Install dependencies
+        working-directory: CryptoBuzz-fe
         run: npm install
 
       - name: Build project with ENV
+        working-directory: CryptoBuzz-fe
         env:
           VITE_API_URL: ${{ secrets.VITE_API_URL }}
           VITE_ENV: ${{ secrets.VITE_ENV }}
@@ -42,7 +43,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: node-app
-          path: .
+          path: CryptoBuzz-admin
 
   deploy:
     runs-on: ubuntu-latest
@@ -70,3 +71,4 @@ jobs:
           app-name: cryptoBuzz-admin-fe
           slot-name: Production
           package: .
+
