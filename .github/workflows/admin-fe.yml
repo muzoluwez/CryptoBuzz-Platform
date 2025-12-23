@@ -28,12 +28,12 @@ jobs:
           node-version: '22.x'
 
       - name: Install dependencies
-        working-directory: CryptoBuzz-fe
+        working-directory: CryptoBuzz-admin
         run: npm install --force 
              npm install express
 
       - name: Build project with ENV
-        working-directory: CryptoBuzz-fe
+        working-directory: CryptoBuzz-admin
         env:
           VITE_API_URL: ${{ secrets.VITE_API_URL }}
           VITE_ENV: ${{ secrets.VITE_ENV }}
