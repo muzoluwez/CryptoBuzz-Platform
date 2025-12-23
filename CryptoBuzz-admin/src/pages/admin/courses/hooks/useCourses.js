@@ -12,7 +12,7 @@ import {
 import { mockCourses, mockFeaturedCourses } from "../mocks/coursesData";
 
 // Usar import.meta.env en lugar de process.env
-const API_URL = import.meta.env.VITE_API_URL || "";
+const API_URL = import.meta.env.VITE_APP_API_URL || "http://localhost:8000";
 
 export const useCourses = () => {
   const dispatch = useDispatch();
@@ -66,8 +66,8 @@ export const useCourses = () => {
       if (API_URL) {
         // Intenta hacer el fetch solo si hay una URL de API configurada
         const [coursesResponse, featuredResponse] = await Promise.all([
-          fetch(`${API_URL}/courses`),
-          fetch(`${API_URL}/courses/featured`),
+          fetch(`${API_URL}/api/v1/common/course`),
+          fetch(`${API_URL}/api/v1/common/course/featured`),
         ]);
 
         if (!coursesResponse.ok || !featuredResponse.ok) {
