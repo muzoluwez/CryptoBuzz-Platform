@@ -73,7 +73,7 @@ const EducatorCommunityFeed = () => {
                     <div className="md:col-span-12 lg:col-span-2 xl:col-span-1 space-y-4">
                         <div className="card rounded-lg shadow-md overflow-hidden">
                             <div className="relative">
-                                <img src="https://i.ibb.co/gLV2tfjF/forex-banner.png" alt="Cover" className="w-full h-20 object-cover" />
+                                <img src="/media/banners/CB-banner.png" alt="Cover" className="w-full h-20 object-cover" />
                                 <div className='relative'>
                                     <div className="absolute left-1/2 -translate-x-1/2 top-[-40px] h-[80px] w-[80px]">
                                         <div className="w-20 h-20 rounded-full border-4 border-white overflow-hidden">

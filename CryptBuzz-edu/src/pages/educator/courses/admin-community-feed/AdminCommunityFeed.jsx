@@ -102,7 +102,7 @@ const AdminCommunityFeed = () => {
               <div className="relative">
                 {/* Cover Image */}
                 <img
-                  src="https://i.ibb.co/gLV2tfjF/forex-banner.png"
+                  src="/media/banners/CB-banner.png"
                   alt="Cover"
                   className="w-full h-20 object-cover"
                 />

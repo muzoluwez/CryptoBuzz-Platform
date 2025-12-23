@@ -6,7 +6,7 @@ export const clientTradeAnalysisApiSlice = createApi({
     baseQuery: baseQueryWithReauth,
     endpoints: (builder) => ({
         getTradeAnalysis: builder.query({
-            query: () => "client/trade-analysis",
+            query: () => "/users/insights",
             providesTags: ["TradeAnalysis"],
         }),
     }),

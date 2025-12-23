@@ -20,6 +20,7 @@ import { clientCoursesApiSlice } from './client/clientCoursesApiSlice';
 import { clientTradeIdeaApiSlice } from './client/clientTradeIdeaApiSlice';
 import { clientTradeAnalysisApiSlice } from './client/clientTradeAnalysisApiSlice';
 import { clientCryptoApiSlice } from './client/clientCryptoApiSlice';
+import { clientAuthApiSlice } from './client/clientAuthApiSlice';
 
 // Persist configuration
 const persistConfig = {
@@ -32,6 +33,7 @@ const persistConfig = {
 // Combine reducers
 const rootReducer = combineReducers({
     auth: authReducer,
+    [clientAuthApiSlice.reducerPath]: clientAuthApiSlice.reducer,
     [clientAcademyCategoryApiSlice.reducerPath]: clientAcademyCategoryApiSlice.reducer,
     [clientCoursesApiSlice.reducerPath]: clientCoursesApiSlice.reducer,
     [clientTradeIdeaApiSlice.reducerPath]: clientTradeIdeaApiSlice.reducer,
@@ -51,6 +53,7 @@ export const store = configureStore({
                 ignoredActions: [FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER],
             },
         }).concat(
+            clientAuthApiSlice.middleware,
             clientAcademyCategoryApiSlice.middleware,
             clientCoursesApiSlice.middleware,
             clientTradeIdeaApiSlice.middleware,

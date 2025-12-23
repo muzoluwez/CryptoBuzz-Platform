@@ -6,7 +6,7 @@ export const clientCryptoApiSlice = createApi({
     baseQuery: baseQueryWithReauth,
     endpoints: (builder) => ({
         getCrypto: builder.query({
-            query: () => "client/crypto",
+            query: () => "/users/crypto",
             providesTags: ["Crypto"],
         }),
     }),

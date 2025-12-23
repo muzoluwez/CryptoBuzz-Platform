@@ -2,6 +2,7 @@ import bcrypt from "bcryptjs";
 import { v4 as uuidv4 } from "uuid";
 import UserCredential from "../../models/userCredential.js";
 import { ApiResponse } from "../../utils/ApiResponse.js";
+import jwt from "jsonwebtoken";
 
 export const signup = async (req, res) => {
     try {
