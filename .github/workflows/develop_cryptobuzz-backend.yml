@@ -33,7 +33,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: node-app
-          path: .
+          path: CryptoBuzz-be
 
   deploy:
     runs-on: ubuntu-latest
@@ -61,4 +61,4 @@ jobs:
         with:
           app-name: 'cryptoBuzz-backend'
           slot-name: 'Production'
-          package: .
+          package: CryptoBuzz-be
