@@ -7,12 +7,8 @@
   "type": "module",
   "main": "src/index.js",
   "scripts": {
-    "dev": "cross-env NODE_ENV=development nodemon -r dotenv/config src/index.js",
-    "dev:staging": "cross-env NODE_ENV=staging nodemon -r dotenv/config src/index.js",
-    "dev:production": "NODE_ENV=production nodemon -r dotenv/config src/index.js",
-    "start": "cross-env NODE_ENV=production node -r dotenv/config src/index.js",
-    "start:development": "cross-env NODE_ENV=development node -r dotenv/config src/index.js",
-    "start:staging": "cross-env NODE_ENV=staging node -r dotenv/config src/index.js",
+    "dev": "nodemon src/index.js",
+    "start": "node src/index.js",
     "lint": "prettier --check \"**/*.{js,json,md}\"",
     "format": "prettier --write \"**/*.{js,json,md}\"",
     "swagger": "node swagger.config.js"
