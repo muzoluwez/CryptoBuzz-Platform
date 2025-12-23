@@ -89,7 +89,7 @@ const Login = () => {
           <p className="text-gray-500">Let's Get Started CryptoBuzz</p>
         </div>
         {formik.status && <Alert variant="danger">{formik.status}</Alert>}
-        <Link
+        {/* <Link
           to="/auth/student/login"
           className="btn border-1 border-[#35353C] text-gray-300 dark:text-gray-800 flex justify-center grow items-center"
         >
@@ -102,13 +102,13 @@ const Login = () => {
             Or
           </span>
           <span className="border-t border-[#35353C] w-full"></span>
-        </div>
+        </div> */}
         <Link
           to="/auth/admin/login"
           className="btn border-1 border-[#35353C] text-gray-300 dark:text-gray-800 flex justify-center grow items-center"
         >
           {" "}
-          <CircleUser size={16} /> Admin/Educator Sign In
+          <CircleUser size={16} /> Educator Sign In
         </Link>
         <div className="flex items-center flex-col gap-3">
           <div className="text-center flex items-center gap-1 justify-center">

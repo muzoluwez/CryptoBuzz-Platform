@@ -2,6 +2,7 @@
 import jwt from "jsonwebtoken";
 import { ApiError } from "../utils/ApiError.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
+import { User } from "../models/user.js";
 import { UserCredential } from "../models/userCredential.js";
 
 export const verifyJWT = asyncHandler(async (req, res, next) => {
@@ -35,6 +36,7 @@ export const verifyJWT = asyncHandler(async (req, res, next) => {
 export const CommonAuth = asyncHandler(async (req, res, next) => {
   try {
     const token = req.headers.authorization?.split(" ")[1];
+    console.log("Token:", token);
 
     if (!token) {
       return res.status(401).json({ message: "No token provided" });

@@ -185,7 +185,6 @@ const AuthProvider = ({ children }) => {
     localStorage.clear();
   };
 
-  const API_KEY = import.meta.env.VITE_APP_CRM_API_KEY;
 
   const clientSignin = async (
     email,
