@@ -8,7 +8,7 @@ name: Build and deploy Vite app to Azure Web App - cryptoBuzz-educator (Staging)
 on:
   push:
     branches:
-      - staging
+      - develop
   workflow_dispatch:
 
 jobs:
@@ -51,7 +51,7 @@ jobs:
           tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_0A743F3603404696B587754BA075F752 }}
           subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_28B8DAC023274A68B488DCACC8E929EE }}
 
-      - name: Deploy to Azure Web App (Educator - Staging)
+      - name: Deploy to Azure Web App (Educator)
         uses: azure/webapps-deploy@v3
         with:
           app-name: cryptoBuzz-educator
