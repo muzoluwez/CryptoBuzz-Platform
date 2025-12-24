@@ -16,7 +16,6 @@ jobs:
       uses: actions/setup-node@v4
       with:
         node-version: '22.x'
-        cache: 'none'  # No cache without lock file
 
     - name: Install dependencies
       working-directory: ./CryptoBuzz-admin
