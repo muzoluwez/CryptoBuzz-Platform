@@ -1,18 +1,21 @@
 # Docs for the Azure Web Apps Deploy action:
 # https://github.com/Azure/webapps-deploy
 
-name: Build and deploy Node.js app to Azure Web App - cryptoBuzz-educator
+# Docs: https://github.com/Azure/webapps-deploy
+
+name: Build and deploy Vite app to Azure Web App - cryptoBuzz-educator (Staging)
 
 on:
   push:
     branches:
-      - develop
+      - staging
   workflow_dispatch:
 
 jobs:
-  build:
+  build-and-deploy:
     runs-on: ubuntu-latest
     permissions:
+      id-token: write
       contents: read
 
     steps:
@@ -24,48 +27,33 @@ jobs:
         with:
           node-version: '22.x'
 
-      - name: Install dependencies
-        working-directory: CryptBuzz-edu
-        run: npm install --force
-
-      - name: Build project with ENV
+      - name: Install dependencies and build (Educator)
         working-directory: CryptBuzz-edu
         env:
-          VITE_APP_API_URL: ${{ secrets.VITE_APP_API_URL }}
-          VITE_APP_URL: ${{ secrets.VITE_APP_URL }}
-          VITE_ENV: ${{ secrets.VITE_ENV }}
-          VITE_SOCKET_URL: ${{ secrets.VITE_SOCKET_URL }}
-        run: npm run build
+          VITE_API_URL: ${{ secrets.STAGING_VITE_API_URL }}
+          VITE_APP_API_URL: ${{ secrets.STAGING_VITE_APP_API_URL }}
+          VITE_APP_NAME: ${{ secrets.STAGING_VITE_APP_NAME }}
+          VITE_APP_VERSION: ${{ secrets.STAGING_VITE_APP_VERSION }}
+          GENERATE_SOURCEMAP: ${{ secrets.STAGING_GENERATE_SOURCEMAP }}
+          VITE_APP_CRM_API_KEY: ${{ secrets.STAGING_VITE_APP_CRM_API_KEY }}
+          VITE_APP_STREAM_API_KEY: ${{ secrets.STAGING_VITE_APP_STREAM_API_KEY }}
+        run: |
+          export NODE_OPTIONS="--max-old-space-size=4096"
+          npm ci
+          npm run build
+          cd dist
+          zip -r ../site.zip .
 
-      - name: Upload artifact for deployment
-        uses: actions/upload-artifact@v4
-        with:
-          name: educator-app
-          path: CryptBuzz-edu/dist
-
-  deploy:
-    runs-on: ubuntu-latest
-    needs: build
-    permissions:
-      id-token: write
-      contents: read
-
-    steps:
-      - name: Download artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: educator-app
-
-      - name: Azure Login
+      - name: Login to Azure
         uses: azure/login@v2
         with:
-          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_0CF7B85673A541B98EC1AE44D892B17F }}
-          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_E5BEEB2A5CA948E5B01EE3FAC4E76BF8 }}
-          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_50D1A4407B504963974AC99F6CA3659B }}
+          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_4905028732654A2392D9E4EA425A3F77 }}
+          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_0A743F3603404696B587754BA075F752 }}
+          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_28B8DAC023274A68B488DCACC8E929EE }}
 
-      - name: Deploy to Azure Web App
+      - name: Deploy to Azure Web App (Educator - Staging)
         uses: azure/webapps-deploy@v3
         with:
           app-name: cryptoBuzz-educator
-          slot-name: Production
-          package: .
+          slot-name: staging
+          package: CryptBuzz-edu/site.zip
