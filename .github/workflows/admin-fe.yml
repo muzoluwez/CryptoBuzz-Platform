@@ -11,24 +11,18 @@ jobs:
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
-      with:
-        fetch-depth: 0
 
-    - name: Set up Node.js
+    - name: Set up Node.js (NO CACHE)
       uses: actions/setup-node@v4
       with:
         node-version: '22.x'
-        cache: 'npm'  # Cache will use package-lock.json if exists
+        cache: 'none'  # No cache without lock file
 
-    - name: Install dependencies (with lock file)
+    - name: Install dependencies
       working-directory: ./CryptoBuzz-admin
       run: |
-        # Clean but preserve lock file
-        rm -rf node_modules
-        # Use npm ci for production-like install (faster + uses lock file)
-        npm ci
-        # Fallback if no lock file
-        npm install || npm install
+        rm -rf node_modules 2>/dev/null || true
+        npm install --force
 
     - name: Build project
       working-directory: ./CryptoBuzz-admin
@@ -41,7 +35,6 @@ jobs:
         npm run build
         echo "📁 Build output:"
         ls -la dist/
-        echo "📁 dist size:"
         du -sh dist/
 
     - name: Verify dist folder
@@ -49,17 +42,15 @@ jobs:
       run: |
         if [ ! -d "dist" ] || [ ! -f "dist/index.html" ]; then
           echo "❌ Build failed - dist/index.html missing!"
-          ls -la || true
           exit 1
         fi
-        echo "✅ Build successful!"
+        echo "✅ Build successful - dist ready!"
 
     - name: Upload artifact
       uses: actions/upload-artifact@v4
       with:
         name: cryptoBuzz-admin-dist
         path: ./CryptoBuzz-admin/dist
-        retention-days: 1
 
   deploy:
     runs-on: ubuntu-latest
@@ -70,9 +61,6 @@ jobs:
       with:
         name: cryptoBuzz-admin-dist
         path: ./dist
-
-    - name: List downloaded files
-      run: ls -la ./dist/
 
     - name: Azure Login
       uses: azure/login@v2
