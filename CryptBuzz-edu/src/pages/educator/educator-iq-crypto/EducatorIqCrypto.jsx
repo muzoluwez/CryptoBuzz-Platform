@@ -21,7 +21,7 @@ import {
   ToolbarPageTitle,
 } from "@/partials/toolbar";
 import { MenuIcon, MenuLink, MenuSub, MenuTitle } from "@/components";
-import { useLazyGetEducatorIqCryptoQuery } from "../../../store/api/educator/EducatorIqCryptoApiSlice";
+import { useLazyGetEducatorIqCryptoQuery } from "../../../store/api/educator/educatorIqCryptoApiSlice";
 import DeleteEducatorIqCrypto from "./DeleteEducatorIqCrypto";
 import CreateEducatorIqCrypto from "./CreateEducatorIqCrypto";
 import ViewEducatorIqCrypto from "./ViewEducatorIqCrypto";

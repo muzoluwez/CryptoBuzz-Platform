@@ -27,7 +27,7 @@ import DeleteEducatorTradeIdeas from "./DeleteEducatorTradeIdeas";
 import { MenuIcon, MenuLink, MenuSub, MenuTitle } from "@/components";
 import ViewEducatorTradeIdeas from "./ViewEducatorTradeIdeas";
 // import EducatorTradeCards from "./EducatorTradeCards";
-import { useFetchCategoriesQuery } from "../../../store/api/educator/EducatorAcademyCategoryApiSlice";
+import { useFetchCategoriesQuery } from "../../../store/api/educator/educatorAcademyCategoryApiSlice";
 import { useLazyGetIdeaQuery } from "../../../store/api/educator/educatorTradeIdeasApiSlice";
 
 const EducatorTradeIdeas = ({ title = "IQ Ideas" }) => {

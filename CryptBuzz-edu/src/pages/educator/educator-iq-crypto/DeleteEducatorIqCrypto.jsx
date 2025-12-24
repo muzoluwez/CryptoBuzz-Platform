@@ -3,7 +3,7 @@ import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import { toast } from "sonner";
 import { set } from "date-fns";
-import { useDeleteEducatorIqCryptoMutation } from "../../../store/api/educator/EducatorIqCryptoApiSlice";
+import { useDeleteEducatorIqCryptoMutation } from "../../../store/api/educator/educatorIqCryptoApiSlice";
 
 // Delete eductor trade idea
 

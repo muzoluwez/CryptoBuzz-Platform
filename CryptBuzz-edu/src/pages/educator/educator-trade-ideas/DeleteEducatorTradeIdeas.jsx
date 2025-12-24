@@ -2,7 +2,7 @@ import React, { forwardRef } from 'react';
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import { toast } from 'sonner';
-import { useDeleteIdeaMutation } from '../../../store/api/educator/EducatorTradeIdeasApiSlice';
+import { useDeleteIdeaMutation } from '../../../store/api/educator/educatorTradeIdeasApiSlice';
 
 // Delete eductor trade idea
 

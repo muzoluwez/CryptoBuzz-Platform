@@ -10,7 +10,7 @@ import {
 import { toast } from "sonner";
 import RichTextEditor from "../../../components/ui/rich-editor";
 import { Alert } from "../../../components/alert/Alert";
-import { useUpdateEducatorRecordingMutation } from "../../../store/api/educator/EducatorRecordingApiSlice";
+import { useUpdateEducatorRecordingMutation } from "../../../store/api/educator/educatorRecordingApiSlice";
 
 const UpdateEducatorRecording = forwardRef(
   (
