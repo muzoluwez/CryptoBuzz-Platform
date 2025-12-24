@@ -39,7 +39,7 @@ import { educatorRatingApiSlice } from "./api/educator/EducatorRatingApiSlice";
 import { educatorLanguageApiSlice } from "./api/educator/EducatorLanguageApiSlice";
 import { educatorLiveStreamApiSlice } from "./api/educator/EducatorLiveStreamApiSlice";
 import { educatorStreamScheduleApiSlice } from "./api/educator/EducatorStreamScheduleApiSlice";
-import { educatorProfileApiSlice } from "./api/educator/EducatorProfileApiSlice";
+import { educatorProfileApiSlice } from "./api/educator/educatorProfileApiSlice";
 import { educatorClientApiSlice } from "./api/educator/EducatorClientApiSlice";
 import { educatorRecordingApiSlice } from "./api/educator/EducatorRecordingApiSlice";
 
