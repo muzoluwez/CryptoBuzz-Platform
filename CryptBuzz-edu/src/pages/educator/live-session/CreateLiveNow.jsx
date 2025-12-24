@@ -24,7 +24,7 @@ import {
 import { useAuthContext } from "../../../auth/useAuthContext";
 import { useCreateLiveStreamMutation } from "../../../store/api/educator/educatorStreamScheduleApiSlice";
 import { useFetchCategoriesQuery } from "../../../store/api/educator/educatorAcademyCategoryApiSlice"
-import { useGetLanguagesQuery } from "../../../store/api/educator/EducatorLanguageApiSlice";
+import { useGetLanguagesQuery } from "../../../store/api/educator/educatorLanguageApiSlice";
 
 
 const CreateLiveStream = forwardRef(
