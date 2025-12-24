@@ -14,18 +14,18 @@ import studentLanagugeSlice from "./reducer/studentLanagugeSlice";
 import { adminTradeIdeasApiSlice } from "./api/admin/adminTradeIdeasApiSlice";
 import { adminLiveSessionApiSlice } from "./api/admin/adminLiveSessionApiSlice";
 import { adminEducatorsApiSlice } from "./api/admin/adminEducatorsApiSlice";
-import { adminProfileApiSlice } from "./api/admin/AdminProfileApiSlice";
-import { adminAcademyCategoryApiSlice } from "./api/admin/AdminAcademyCategoryApiSlice";
-import { adminStreamScheduleApiSlice } from "./api/admin/AdminStreamScheduleApiSlice";
-import { adminRecordingApiSlice } from "./api/admin/AdminRecordingApiSlice";
-import { adminTradeAnalysisApiSlice } from "./api/admin/AdminTradeAnalysisApiSlice";
+import { adminProfileApiSlice } from "./api/admin/adminProfileApiSlice";
+import { adminAcademyCategoryApiSlice } from "./api/admin/adminAcademyCategoryApiSlice";
+import { adminStreamScheduleApiSlice } from "./api/admin/adminStreamScheduleApiSlice";
+import { adminRecordingApiSlice } from "./api/admin/adminRecordingApiSlice";
+import { adminTradeAnalysisApiSlice } from "./api/admin/adminTradeAnalysisApiSlice";
 import { adminLanguagesApiSlice } from "./api/admin/adminLanguagesApiSlice";
 import { adminCoursesTypesApiSlice } from "./api/admin/adminCoursesTypesApiSlice";
-import { adminPackageApiSlice } from "./api/admin/AdminPackageApiSlice";
+import { adminPackageApiSlice } from "./api/admin/adminPackageApiSlice";
 import { superAdminApiSlice } from "./api/admin/superAdminApiSlice";
-import { adminTaskManagementApiSlice } from "./api/admin/AdminTaskManagementApiSlice";
-import { ratingApiSlice } from "./api/admin/AdminRatingApiSlice";
-import { adminCryptoAnalysisApiSlice } from "./api/admin/AdminCryptoAnalysisApiSlice";
+import { adminTaskManagementApiSlice } from "./api/admin/adminTaskManagementApiSlice";
+import { ratingApiSlice } from "./api/admin/adminRatingApiSlice";
+import { adminCryptoAnalysisApiSlice } from "./api/admin/adminCryptoAnalysisApiSlice";
 
 
 // ============================================================================
