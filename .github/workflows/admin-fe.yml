@@ -1,81 +1,82 @@
-name: Build and Deploy Vite App to Azure Web App - admin (fe)
+name: Build and Deploy CryptoBuzz Admin to Azure
 
 on:
   push:
-    branches:
-      - develop
+    branches: [ develop ]
   workflow_dispatch:
 
 jobs:
-  build-and-deploy:
+  build:
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      id-token: write
-
     steps:
-      # 1️⃣ Checkout repository
-      - name: Checkout code
-        uses: actions/checkout@v4
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0  # Full history for clean build
 
-      # 2️⃣ Setup Node.js
-      - name: Set up Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: '22.x'
+    - name: Set up Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '22.x'
+        cache: 'npm'  # Cache npm dependencies
 
-      # 3️⃣ Install dependencies and build Vite (ADMIN)
-      - name: Install dependencies and build (admin)
-        working-directory: CryptoBuzz-admin
-        env:
-          VITE_API_URL: ${{ secrets.VITE_API_URL }}
-          VITE_APP_API_URL: ${{ secrets.VITE_APP_API_URL }}
-          VITE_APP_NAME: ${{ secrets.VITE_APP_NAME }}
-          VITE_APP_VERSION: ${{ secrets.VITE_APP_VERSION }}
-          VITE_APP_CRM_API_KEY: ${{ secrets.VITE_APP_CRM_API_KEY }}
-          VITE_APP_STREAM_API_KEY: ${{ secrets.VITE_APP_STREAM_API_KEY }}
-        run: |
-          export NODE_OPTIONS="--max-old-space-size=4096"
-          npm ci
-          npm run build
+    - name: Clean install dependencies
+      working-directory: ./CryptoBuzz-admin
+      run: |
+        rm -rf node_modules package-lock.json
+        npm clean-install  # Clean install without cache issues
 
-          # Runtime folder (same as EDU)
-          mkdir runtime
-          cp -r dist runtime/dist
-          cp server.js runtime/
+    - name: Build project
+      working-directory: ./CryptoBuzz-admin
+      env:
+        VITE_APP_API_URL: ${{ secrets.VITE_APP_API_URL }}
+        VITE_APP_URL: ${{ secrets.VITE_APP_URL }}
+        VITE_ENV: ${{ secrets.VITE_ENV }}
+        VITE_SOCKET_URL: ${{ secrets.VITE_SOCKET_URL }}
+      run: |
+        npm run build
+        ls -la dist/  # Debug: Check dist folder exists
 
-          # Runtime package.json
-          echo '{
-            "name": "admin-app",
-            "version": "1.0.0",
-            "type": "module",
-            "main": "server.js",
-            "scripts": {
-              "start": "node server.js"
-            },
-            "dependencies": {
-              "express": "^4.21.2"
-            }
-          }' > runtime/package.json
+    - name: Verify dist folder
+      working-directory: ./CryptoBuzz-admin
+      run: |
+        if [ ! -d "dist" ]; then
+          echo "❌ dist folder not found!"
+          ls -la
+          exit 1
+        fi
+        echo "✅ dist folder found:"
+        du -sh dist/
 
-          cd runtime
-          npm install --production
-          zip -r ../site.zip *
+    - name: Upload artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: cryptoBuzz-admin-dist
+        path: ./CryptoBuzz-admin/dist
+        retention-days: 1
 
-      # 4️⃣ Azure Login (👉 SAME AS EDUCATOR)
-      - name: Azure Login
-        uses: azure/login@v2
-        with:
-          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_D7B082EC8D5B4C58A3CEB0BACD980CD6 }}
-          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_81FB42840013467ABD9191A7EEC26E9D }}
-          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_8FC9DD1EA42748F59340964CBE5CFBC2 }}
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+    - name: Download artifact
+      uses: actions/download-artifact@v4
+      with:
+        name: cryptoBuzz-admin-dist
+        path: ./dist
 
-      # 5️⃣ Deploy to Azure (ADMIN)
-      - name: Deploy to Azure Web App (Production)
-        uses: azure/webapps-deploy@v3
-        with:
-          app-name: 'cryptoBuzz-admin-fe'
-          slot-name: 'Production'
-          package: site.zip
+    - name: Azure Login
+      uses: azure/login@v2
+      with:
+        client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_D7B082EC8D5B4C58A3CEB0BACD980CD6 }}
+        tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_81FB42840013467ABD9191A7EEC26E9D }}
+        subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_8FC9DD1EA42748F59340964CBE5CFBC2 }}
 
-
+    - name: Deploy to Azure Static Web App
+      uses: azure/webapps-deploy@v3
+      with:
+        app-name: cryptoBuzz-admin-fe
+        slot-name: Production
+        package: .
+        # Static site deployment
+        enable-oryx-build: false
