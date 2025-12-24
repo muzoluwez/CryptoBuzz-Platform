@@ -47,9 +47,9 @@ jobs:
       - name: Login to Azure
         uses: azure/login@v2
         with:
-          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_4905028732654A2392D9E4EA425A3F77 }}
-          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_0A743F3603404696B587754BA075F752 }}
-          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_28B8DAC023274A68B488DCACC8E929EE }}
+          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_0CF7B85673A541B98EC1AE44D892B17F }}
+          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_E5BEEB2A5CA948E5B01EE3FAC4E76BF8 }}
+          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_50D1A4407B504963974AC99F6CA3659B }}
 
       - name: Deploy to Azure Web App (Educator)
         uses: azure/webapps-deploy@v3
