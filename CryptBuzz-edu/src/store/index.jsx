@@ -13,7 +13,7 @@ import studentLanagugeSlice from "./reducer/studentLanagugeSlice";
 // ============================================================================
 import { adminTradeIdeasApiSlice } from "./api/admin/adminTradeIdeasApiSlice";
 import { adminLiveSessionApiSlice } from "./api/admin/adminLiveSessionApiSlice";
-import { adminEducatorsApiSlice } from "./api/admin/AdminEducatorsApiSlice";
+import { adminEducatorsApiSlice } from "./api/admin/adminEducatorsApiSlice";
 import { adminProfileApiSlice } from "./api/admin/AdminProfileApiSlice";
 import { adminAcademyCategoryApiSlice } from "./api/admin/AdminAcademyCategoryApiSlice";
 import { adminStreamScheduleApiSlice } from "./api/admin/AdminStreamScheduleApiSlice";
