@@ -34,11 +34,11 @@ jobs:
 
       - name: Build project with ENV
         working-directory: CryptoBuzz-admin
-        env:
-          VITE_APP_API_URL: ${{ secrets.VITE_APP_API_URL }}
-          VITE_APP_URL: ${{ secrets.VITE_APP_URL }}
-          VITE_ENV: ${{ secrets.VITE_ENV }}
-          VITE_SOCKET_URL: ${{ secrets.VITE_SOCKET_URL }}
+        # env:
+        #   VITE_APP_API_URL: ${{ secrets.VITE_APP_API_URL }}
+        #   VITE_APP_URL: ${{ secrets.VITE_APP_URL }}
+        #   VITE_ENV: ${{ secrets.VITE_ENV }}
+        #   VITE_SOCKET_URL: ${{ secrets.VITE_SOCKET_URL }}
         run: npm run build
 
       - name: Upload artifact for deployment
