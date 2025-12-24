@@ -55,6 +55,7 @@ const CreatePostModal = ({ isOpen, onClose, editingPost = null }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [hasInitialized, setHasInitialized] = useState(false);
+  const [accessType, setAccessType] = useState("PUBLIC");
 
   const imageInputRef = useRef(null);
   const videoInputRef = useRef(null);
@@ -81,6 +82,7 @@ const CreatePostModal = ({ isOpen, onClose, editingPost = null }) => {
       setDocuments(editingPost.documents || []);
       setVisibility(editingPost.visibility || "public");
       setCategory(editingPost.category || "General Updates");
+      setAccessType(editingPost.access_type || "PUBLIC");
 
       // Set initialization flag after a short delay to prevent immediate closure
       setTimeout(() => {
@@ -131,6 +133,7 @@ const CreatePostModal = ({ isOpen, onClose, editingPost = null }) => {
     setDocuments([]);
     setVisibility("public");
     setCategory("General Updates");
+    setAccessType("PUBLIC");
     setIsSubmitting(false);
     setIsEditing(false);
     setHasInitialized(false);
@@ -283,6 +286,7 @@ const CreatePostModal = ({ isOpen, onClose, editingPost = null }) => {
         content: content.trim(),
         visibility,
         category,
+        accessType: accessType || "PUBLIC",
       };
 
       // Only include files in the API call if they've actually changed
@@ -472,6 +476,28 @@ const CreatePostModal = ({ isOpen, onClose, editingPost = null }) => {
                 {content.length}/2000
               </div>
             </div>
+
+              <div className="flex flex-col gap-2">
+                  <label className="font-medium text-gray-700">
+                    Access Type<span className="text-danger">*</span>
+                  </label>
+
+                  <div className="flex items-center gap-6">
+                    {["PUBLIC", "LOGGED_IN", "UID_ONLY"].map((type) => (
+                      <label key={type} className="flex items-center gap-2 cursor-pointer">
+                        <input
+                          type="radio"
+                          name="accessType"
+                          value={type}
+                          checked={accessType === type}
+                          onChange={() => setAccessType(type)}
+                          className="radio radio-primary"
+                        />
+                        <span className="text-sm">{type.replace("_", " ")}</span>
+                      </label>
+                    ))}
+                  </div>
+                </div>
 
             {/* Selected Files Preview */}
             {(images.length > 0 ||
