@@ -253,6 +253,21 @@ const LectureContent = ({
     return url;
   };
 
+  const getThumbnailSrc = (thumbnail) => {
+  if (!thumbnail) return "";
+
+  // case: new upload
+  if (thumbnail.preview) return thumbnail.preview;
+
+  // case: existing thumbnail URL from backend
+  if (typeof thumbnail === "string") return thumbnail;
+
+  // optional fallback
+  if (thumbnail.url) return thumbnail.url;
+
+  return "";
+};
+
   const handleFileUpload = (e) => {
     const file = e.target.files[0];
     if (file && file.type.startsWith("video/")) {
@@ -316,13 +331,13 @@ const LectureContent = ({
     dataToSend.append("preview", formData.preview);
     dataToSend.append("section", formData.section);
     dataToSend.append("content", formData.content);
-    if (videoFile) {
-      dataToSend.append(
-        "thumbnail",
-        formData.thumbnail?.file ? formData.thumbnail?.file : null
-      );
-      dataToSend.append("video", videoFile);
-    }
+if (formData.thumbnail?.file) {
+  dataToSend.append("thumbnail", formData.thumbnail.file);
+}
+
+if (videoFile) {
+  dataToSend.append("video", videoFile);
+}
 
     setIsLoading(true);
     setUploadProgress(0);
@@ -464,22 +479,15 @@ const LectureContent = ({
               </div>
 
               {/* Thumbnail Preview */}
-              {formData.thumbnail ||
-                formData.thumbnail?.preview ||
-                formData.thumbnail?.url ? (
-                <div className="mt-3">
-                  <img
-                    src={
-                      formData.thumbnail ||
-                      formData.thumbnail.preview ||
-                      formData.thumbnail.url || // fallback to existing thumbnail URL
-                      ""
-                    }
-                    alt="Thumbnail"
-                    className="w-48 h-28 rounded border border-success object-cover"
-                  />
-                </div>
-              ) : null}
+              {getThumbnailSrc(formData.thumbnail) && (
+                  <div className="mt-3">
+                    <img
+                      src={getThumbnailSrc(formData.thumbnail)}
+                      alt="Thumbnail"
+                      className="w-48 h-28 rounded border border-success object-cover"
+                    />
+                  </div>
+                )}
             </div>
 
             {/* <div className="space-y-2">
