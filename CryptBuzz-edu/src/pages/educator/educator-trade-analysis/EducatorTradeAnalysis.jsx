@@ -25,8 +25,8 @@ import CreateTradeAnalysis from "./CreateTradeAnalysis";
 import DeleteTradeAnalysis from "./DeleteTradeAnalysis";
 
 import ViewEducatorTradeAnalysis from "./ViewEducatorTradeAnalysis";
-import { useFetchCategoriesQuery } from "../../../store/api/educator/EducatorAcademyCategoryApiSlice";
-import { useLazyGetTradeAnalysisQuery } from "../../../store/api/educator/EducatorTradeAnalysisApiSlice";
+import { useFetchCategoriesQuery } from "../../../store/api/educator/educatorAcademyCategoryApiSlice";
+import { useLazyGetTradeAnalysisQuery } from "../../../store/api/educator/educatorTradeAnalysisApiSlice";
 
 
 const EducatorTradeAnalysis = ({ title = "IQ Insight" }) => {
