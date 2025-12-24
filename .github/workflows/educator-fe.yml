@@ -1,7 +1,7 @@
-# Docs for the Azure Web Apps Deploy action: https://github.com/Azure/webapps-deploy
-# More GitHub Actions for Azure: https://github.com/Azure/actions
+# Docs for the Azure Web Apps Deploy action:
+# https://github.com/Azure/webapps-deploy
 
-name: Build and deploy Frontend to Azure Web App - cryptoBuzz-educator
+name: Build and deploy Node.js app to Azure Web App - cryptoBuzz-educator
 
 on:
   push:
@@ -10,24 +10,23 @@ on:
   workflow_dispatch:
 
 jobs:
-  build-and-deploy:
+  build:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      id-token: write
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Setup Node.js
+      - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
           node-version: '22.x'
 
       - name: Install dependencies
         working-directory: CryptBuzz-edu
-        run: npm install
+        run: npm install --force
 
       - name: Build project with ENV
         working-directory: CryptBuzz-edu
@@ -37,6 +36,25 @@ jobs:
           VITE_ENV: ${{ secrets.VITE_ENV }}
           VITE_SOCKET_URL: ${{ secrets.VITE_SOCKET_URL }}
         run: npm run build
+
+      - name: Upload artifact for deployment
+        uses: actions/upload-artifact@v4
+        with:
+          name: educator-app
+          path: CryptBuzz-edu/dist
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build
+    permissions:
+      id-token: write
+      contents: read
+
+    steps:
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: educator-app
 
       - name: Azure Login
         uses: azure/login@v2
@@ -50,4 +68,4 @@ jobs:
         with:
           app-name: cryptoBuzz-educator
           slot-name: Production
-          package: CryptBuzz-edu/dist
+          package: .
