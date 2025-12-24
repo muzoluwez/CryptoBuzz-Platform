@@ -27,7 +27,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useGetLanguagesQuery } from "../../../store/api/educator/EducatorLanguageApiSlice";
+import { useGetLanguagesQuery } from "../../../store/api/educator/educatorLanguageApiSlice";
 
 const HeaderTopbar = () => {
   const STUDENT_ALLOWED_ROUTES = [

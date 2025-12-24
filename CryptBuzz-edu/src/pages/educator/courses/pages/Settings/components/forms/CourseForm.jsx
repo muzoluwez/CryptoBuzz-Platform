@@ -11,8 +11,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
-import { useGetLanguagesQuery } from "../../../../../../../store/api/educator/EducatorLanguageApiSlice";
-import { useFetchCategoriesQuery, useGetEducatorCoursesTypesQuery } from "../../../../../../../store/api/educator/EducatorAcademyCategoryApiSlice";
+import { useGetLanguagesQuery } from "../../../../../../../store/api/educator/educatorLanguageApiSlice";
+import { useFetchCategoriesQuery, useGetEducatorCoursesTypesQuery } from "../../../../../../../store/api/educator/educatorAcademyCategoryApiSlice";
 ;
 
 // Schema for course validation

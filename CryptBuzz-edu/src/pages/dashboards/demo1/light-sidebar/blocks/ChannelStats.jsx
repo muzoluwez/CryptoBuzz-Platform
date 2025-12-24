@@ -1,6 +1,6 @@
 import { Fragment, useEffect, useState } from 'react';
 import { toAbsoluteUrl } from '@/utils/Assets';
-import { useGetEducatorDashboardQuery } from '../../../../../store/api/educator/EducatorProfileApiSlice';
+import { useGetEducatorDashboardQuery } from '../../../../../store/api/educator/educatorProfileApiSlice';
 const ChannelStats = () => {
   const items = [{
     logo: 'total-educators.png',
