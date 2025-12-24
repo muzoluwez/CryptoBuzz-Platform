@@ -18,10 +18,10 @@ module.exports = {
         '300': '300% 300%',
       },
       backgroundImage: {
-        'blue-gradient': 'linear-gradient(11deg, #7f80ff, #5b4bff, #1e0066)',
+        'blue-gradient': 'linear-gradient(230deg, #878138, #ffb74b, #664e00)',
       },
       backgroundImage: {
-        'animated-gradient': 'linear-gradient(230deg, #383987, #5b4bff, #1e0066)',
+        'animated-gradient': 'linear-gradient(230deg, #878138, #ffb74b, #664e00)',
       },
       utilities: {
         '.bg-blue-gradient': {
