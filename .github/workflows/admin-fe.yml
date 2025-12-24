@@ -72,5 +72,5 @@ jobs:
         with:
           app-name: cryptoBuzz-admin-fe
           slot-name: Production
-          package: .
+          package: CryptoBuzz-admin/dist
 
