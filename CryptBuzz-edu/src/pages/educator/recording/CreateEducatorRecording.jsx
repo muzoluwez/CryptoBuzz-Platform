@@ -20,7 +20,7 @@ import { Alert } from "../../../components/alert/Alert";
 import { toast } from "sonner";
 import RichTextEditor from "../../../components/ui/rich-editor";
 import DateTimePicker from "../educator-stream-schedule/DateTimePicker";
-import { useUpdateEducatorRecordingMutation, useCreateEducatorRecordingMutation } from "../../../store/api/educator/EducatorRecordingApiSlice";
+import { useUpdateEducatorRecordingMutation, useCreateEducatorRecordingMutation } from "../../../store/api/educator/educatorRecordingApiSlice";
 import { useFetchCategoriesQuery } from "../../../store/api/educator/educatorAcademyCategoryApiSlice";
 
 const CreateEducatorRecording = forwardRef(
