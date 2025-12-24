@@ -31,16 +31,16 @@ import { adminCryptoAnalysisApiSlice } from "./api/admin/adminCryptoAnalysisApiS
 // ============================================================================
 // EDUCATOR API SLICES - Only educator-related API endpoints
 // ============================================================================
-import { educatorTradeIdeasApiSlice } from "./api/educator/EducatorTradeIdeasApiSlice";
-import { educatorAcademyCategoryApiSlice } from "./api/educator/EducatorAcademyCategoryApiSlice";
-import { educatorIqCryptoApiSlice } from "./api/educator/EducatorIqCryptoApiSlice";
-import { educatorTradeAnalysisApiSlice } from "./api/educator/EducatorTradeAnalysisApiSlice";
-import { educatorRatingApiSlice } from "./api/educator/EducatorRatingApiSlice";
-import { educatorLanguageApiSlice } from "./api/educator/EducatorLanguageApiSlice";
-import { educatorLiveStreamApiSlice } from "./api/educator/EducatorLiveStreamApiSlice";
-import { educatorStreamScheduleApiSlice } from "./api/educator/EducatorStreamScheduleApiSlice";
+import { educatorTradeIdeasApiSlice } from "./api/educator/educatorTradeIdeasApiSlice";
+import { educatorAcademyCategoryApiSlice } from "./api/educator/educatorAcademyCategoryApiSlice";
+import { educatorIqCryptoApiSlice } from "./api/educator/educatorIqCryptoApiSlice";
+import { educatorTradeAnalysisApiSlice } from "./api/educator/educatorTradeAnalysisApiSlice";
+import { educatorRatingApiSlice } from "./api/educator/educatorRatingApiSlice";
+import { educatorLanguageApiSlice } from "./api/educator/educatorLanguageApiSlice";
+import { educatorLiveStreamApiSlice } from "./api/educator/educatorLiveStreamApiSlice";
+import { educatorStreamScheduleApiSlice } from "./api/educator/educatorStreamScheduleApiSlice";
 import { educatorProfileApiSlice } from "./api/educator/educatorProfileApiSlice";
-import { educatorClientApiSlice } from "./api/educator/EducatorClientApiSlice";
+import { educatorClientApiSlice } from "./api/educator/educatorClientApiSlice";
 import { educatorRecordingApiSlice } from "./api/educator/EducatorRecordingApiSlice";
 
 
