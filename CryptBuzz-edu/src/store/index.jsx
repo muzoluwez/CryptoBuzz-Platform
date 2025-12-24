@@ -31,7 +31,7 @@ import { adminCryptoAnalysisApiSlice } from "./api/admin/adminCryptoAnalysisApiS
 // ============================================================================
 // EDUCATOR API SLICES - Only educator-related API endpoints
 // ============================================================================
-import { educatorTradeIdeasApiSlice } from "./api/educator/educatorTradeIdeasApiSlice";
+import { educatorTradeIdeasApiSlice } from "./api/educator/EducatorTradeIdeasApiSlice";
 import { educatorAcademyCategoryApiSlice } from "./api/educator/EducatorAcademyCategoryApiSlice";
 import { educatorIqCryptoApiSlice } from "./api/educator/EducatorIqCryptoApiSlice";
 import { educatorTradeAnalysisApiSlice } from "./api/educator/EducatorTradeAnalysisApiSlice";
