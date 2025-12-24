@@ -11,7 +11,7 @@ import studentLanagugeSlice from "./reducer/studentLanagugeSlice";
 // ============================================================================
 // ADMIN API SLICES - Only admin-related API endpoints
 // ============================================================================
-import { adminTradeIdeasApiSlice } from "./api/admin/AdminTradeIdeasApiSlice";
+import { adminTradeIdeasApiSlice } from "./api/admin/AdminTradeIdeasApiSlice.jsx";
 import { adminLiveSessionApiSlice } from "./api/admin/AdminLiveSessionApiSlice";
 import { adminEducatorsApiSlice } from "./api/admin/AdminEducatorsApiSlice";
 import { adminProfileApiSlice } from "./api/admin/AdminProfileApiSlice";
