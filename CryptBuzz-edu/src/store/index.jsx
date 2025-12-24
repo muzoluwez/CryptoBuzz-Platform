@@ -41,7 +41,7 @@ import { educatorLiveStreamApiSlice } from "./api/educator/educatorLiveStreamApi
 import { educatorStreamScheduleApiSlice } from "./api/educator/educatorStreamScheduleApiSlice";
 import { educatorProfileApiSlice } from "./api/educator/educatorProfileApiSlice";
 import { educatorClientApiSlice } from "./api/educator/educatorClientApiSlice";
-import { educatorRecordingApiSlice } from "./api/educator/EducatorRecordingApiSlice";
+import { educatorRecordingApiSlice } from "./api/educator/educatorRecordingApiSlice";
 
 
 // ============================================================================
