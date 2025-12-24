@@ -37,10 +37,10 @@ import { educatorIqCryptoApiSlice } from "./api/educator/EducatorIqCryptoApiSlic
 import { educatorTradeAnalysisApiSlice } from "./api/educator/EducatorTradeAnalysisApiSlice";
 import { educatorRatingApiSlice } from "./api/educator/EducatorRatingApiSlice";
 import { educatorLanguageApiSlice } from "./api/educator/EducatorLanguageApiSlice";
-import { educatorLiveStreamApiSlice } from "./api/educator/educatorLiveStreamApiSlice";
-import { educatorStreamScheduleApiSlice } from "./api/educator/educatorStreamScheduleApiSlice";
-import { educatorProfileApiSlice } from "./api/educator/educatorProfileApiSlice";
-import { educatorClientApiSlice } from "./api/educator/educatorClientApiSlice";
+import { educatorLiveStreamApiSlice } from "./api/educator/EducatorLiveStreamApiSlice";
+import { educatorStreamScheduleApiSlice } from "./api/educator/EducatorStreamScheduleApiSlice";
+import { educatorProfileApiSlice } from "./api/educator/EducatorProfileApiSlice";
+import { educatorClientApiSlice } from "./api/educator/EducatorClientApiSlice";
 import { educatorRecordingApiSlice } from "./api/educator/EducatorRecordingApiSlice";
 
 
