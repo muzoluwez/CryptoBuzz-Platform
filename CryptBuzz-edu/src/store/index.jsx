@@ -11,37 +11,37 @@ import studentLanagugeSlice from "./reducer/studentLanagugeSlice";
 // ============================================================================
 // ADMIN API SLICES - Only admin-related API endpoints
 // ============================================================================
-import { adminTradeIdeasApiSlice } from "./api/admin/adminTradeIdeasApiSlice";
-import { adminLiveSessionApiSlice } from "./api/admin/adminLiveSessionApiSlice";
-import { adminEducatorsApiSlice } from "./api/admin/adminEducatorsApiSlice";
-import { adminProfileApiSlice } from "./api/admin/adminProfileApiSlice";
-import { adminAcademyCategoryApiSlice } from "./api/admin/adminAcademyCategoryApiSlice";
-import { adminStreamScheduleApiSlice } from "./api/admin/adminStreamScheduleApiSlice";
-import { adminRecordingApiSlice } from "./api/admin/adminRecordingApiSlice";
-import { adminTradeAnalysisApiSlice } from "./api/admin/adminTradeAnalysisApiSlice";
-import { adminLanguagesApiSlice } from "./api/admin/adminLanguagesApiSlice";
-import { adminCoursesTypesApiSlice } from "./api/admin/adminCoursesTypesApiSlice";
-import { adminPackageApiSlice } from "./api/admin/adminPackageApiSlice";
-import { superAdminApiSlice } from "./api/admin/superAdminApiSlice";
-import { adminTaskManagementApiSlice } from "./api/admin/adminTaskManagementApiSlice";
-import { ratingApiSlice } from "./api/admin/adminRatingApiSlice";
-import { adminCryptoAnalysisApiSlice } from "./api/admin/adminCryptoAnalysisApiSlice";
+import { adminTradeIdeasApiSlice } from "./api/admin/adminTradeIdeasApiSlice.js";
+import { adminLiveSessionApiSlice } from "./api/admin/adminLiveSessionApiSlice.js";
+import { adminEducatorsApiSlice } from "./api/admin/adminEducatorsApiSlice.js";
+import { adminProfileApiSlice } from "./api/admin/adminProfileApiSlice.js";
+import { adminAcademyCategoryApiSlice } from "./api/admin/adminAcademyCategoryApiSlice.js";
+import { adminStreamScheduleApiSlice } from "./api/admin/adminStreamScheduleApiSlice.js";
+import { adminRecordingApiSlice } from "./api/admin/adminRecordingApiSlice.js";
+import { adminTradeAnalysisApiSlice } from "./api/admin/adminTradeAnalysisApiSlice.js";
+import { adminLanguagesApiSlice } from "./api/admin/adminLanguagesApiSlice.js";
+import { adminCoursesTypesApiSlice } from "./api/admin/adminCoursesTypesApiSlice.js";
+import { adminPackageApiSlice } from "./api/admin/adminPackageApiSlice.js";
+import { superAdminApiSlice } from "./api/admin/superAdminApiSlice.js";
+import { adminTaskManagementApiSlice } from "./api/admin/adminTaskManagementApiSlice.js";
+import { ratingApiSlice } from "./api/admin/adminRatingApiSlice.js";
+import { adminCryptoAnalysisApiSlice } from "./api/admin/adminCryptoAnalysisApiSlice.js";
 
 
 // ============================================================================
 // EDUCATOR API SLICES - Only educator-related API endpoints
 // ============================================================================
-import { educatorTradeIdeasApiSlice } from "./api/educator/educatorTradeIdeasApiSlice";
-import { educatorAcademyCategoryApiSlice } from "./api/educator/educatorAcademyCategoryApiSlice";
-import { educatorIqCryptoApiSlice } from "./api/educator/educatorIqCryptoApiSlice";
-import { educatorTradeAnalysisApiSlice } from "./api/educator/educatorTradeAnalysisApiSlice";
-import { educatorRatingApiSlice } from "./api/educator/educatorRatingApiSlice";
-import { educatorLanguageApiSlice } from "./api/educator/educatorLanguageApiSlice";
-import { educatorLiveStreamApiSlice } from "./api/educator/educatorLiveStreamApiSlice";
-import { educatorStreamScheduleApiSlice } from "./api/educator/educatorStreamScheduleApiSlice";
-import { educatorProfileApiSlice } from "./api/educator/educatorProfileApiSlice";
-import { educatorClientApiSlice } from "./api/educator/educatorClientApiSlice";
-import { educatorRecordingApiSlice } from "./api/educator/EducatorRecordingApiSlice";
+import { educatorTradeIdeasApiSlice } from "./api/educator/educatorTradeIdeasApiSlice.js";
+import { educatorAcademyCategoryApiSlice } from "./api/educator/educatorAcademyCategoryApiSlice.js";
+import { educatorIqCryptoApiSlice } from "./api/educator/educatorIqCryptoApiSlice.js";
+import { educatorTradeAnalysisApiSlice } from "./api/educator/educatorTradeAnalysisApiSlice.js";
+import { educatorRatingApiSlice } from "./api/educator/educatorRatingApiSlice.js";
+import { educatorLanguageApiSlice } from "./api/educator/educatorLanguageApiSlice.js";
+import { educatorLiveStreamApiSlice } from "./api/educator/educatorLiveStreamApiSlice.js";
+import { educatorStreamScheduleApiSlice } from "./api/educator/educatorStreamScheduleApiSlice.js";
+import { educatorProfileApiSlice } from "./api/educator/educatorProfileApiSlice.js";
+import { educatorClientApiSlice } from "./api/educator/educatorClientApiSlice.js";
+import { educatorRecordingApiSlice } from "./api/educator/EducatorRecordingApiSlice.js";
 
 
 // ============================================================================
