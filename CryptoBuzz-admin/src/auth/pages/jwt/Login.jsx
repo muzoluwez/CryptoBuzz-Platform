@@ -113,16 +113,16 @@ const Login = () => {
         <div className="flex items-center flex-col gap-3">
           <div className="text-center flex items-center gap-1 justify-center">
             <p className="text-2xs text-gray-300 dark:text-gray-800 mb-0">
-              IQONIC
+              CryptoBuzz
             </p>
-            <Link
+            {/* <Link
               to="/terms-of-service"
               className="text-2xs text-gray-700 underline"
             >
               {" "}
               Terms of Service{" "}
             </Link>{" "}
-            <p className="text-2xs text-gray-300 dark:text-gray-800 mb-0">&</p>
+            <p className="text-2xs text-gray-300 dark:text-gray-800 mb-0">&</p> */}
             <Link
               to="/privacy-policy"
               className="text-2xs text-gray-700 underline"

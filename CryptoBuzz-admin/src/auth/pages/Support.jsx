@@ -40,7 +40,7 @@ const Support = () => {
 
                 {/* Send Email Button */}
                 <a
-                    href="mailto:Support@iqonic.space?subject=Support%20Request&body=Hello%20Iqonic%20Support%20Team%2C%0A%0AI%20need%20assistance%20with%3A%0A%0A%5BPlease%20describe%20your%20issue%20here%5D%0A%0AThank%20you%21"
+                    href="mailto:Support@CryptoBuzz.space?subject=Support%20Request&body=Hello%20CryptoBuzz%20Support%20Team%2C%0A%0AI%20need%20assistance%20with%3A%0A%0A%5BPlease%20describe%20your%20issue%20here%5D%0A%0AThank%20you%21"
                     className="inline-flex w-full max-w-72 cursor-pointer items-center justify-center gap-2 rounded-xl border border-slate-600/50 bg-slate-700/90 px-8 py-4 text-base font-medium text-slate-200 no-underline backdrop-blur-lg transition-all duration-200 ease-in-out hover:border-slate-500/70 hover:bg-slate-600/90 active:scale-95"
                 >
                     {/* SVG Icon embedded directly */}
