@@ -39,7 +39,7 @@ jobs:
           VITE_APP_STREAM_API_KEY: ${{ secrets.STAGING_VITE_APP_STREAM_API_KEY }}
         run: |
           export NODE_OPTIONS="--max-old-space-size=4096"
-          npm ci
+          npm Install --force
           npm run build
           cd dist
           zip -r ../site.zip .
