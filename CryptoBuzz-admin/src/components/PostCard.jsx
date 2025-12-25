@@ -50,7 +50,7 @@ const PostCard = ({ post, onEdit, isOwnPost = false, refetch }) => {
   const makeClickableLinks = (text) =>
     text.replace(/(https?:\/\/[^\s]+|www\.[^\s]+)/g, (url) => {
       const clickableUrl = url.startsWith("http") ? url : `https://${url}`;
-      return `<a href="${clickableUrl}" target="_blank" rel="noopener noreferrer" className="text-blue-600 underline hover:text-blue-800">${url}</a>`;
+      return `<a href="${clickableUrl}" target="_blank" rel="noopener noreferrer" className="text-yellow-600 underline hover:text-blue-800">${url}</a>`;
     });
 
   // Prevent background scroll when modal is open
@@ -228,7 +228,7 @@ const PostCard = ({ post, onEdit, isOwnPost = false, refetch }) => {
                   href={doc.url || doc}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-blue-600 hover:text-blue-800 text-sm"
+                  className="text-yellow-600 hover:text-blue-800 text-sm"
                 >
                   View
                 </a>
@@ -247,8 +247,8 @@ const PostCard = ({ post, onEdit, isOwnPost = false, refetch }) => {
     makeClickableLinks(displayText) +
     (plainTextContent.length > 200
       ? isExpanded
-        ? ` <span id="toggleText" className="text-blue-600 hover:text-blue-800 cursor-pointer font-medium ml-1">Show less</span>`
-        : ` <span id="toggleText" className="text-blue-600 hover:text-blue-800 cursor-pointer font-medium">...more</span>`
+        ? ` <span id="toggleText" className="text-yellow-600 hover:text-blue-800 cursor-pointer font-medium ml-1">Show less</span>`
+        : ` <span id="toggleText" className="text-yellow-600 hover:text-blue-800 cursor-pointer font-medium">...more</span>`
       : "");
 
   return (
@@ -320,7 +320,7 @@ const PostCard = ({ post, onEdit, isOwnPost = false, refetch }) => {
                             ? (
                                 <>
                                     {post.content.substring(0, 200)}
-                                    <span className="text-blue-600 hover:text-blue-800 cursor-pointer font-medium" onClick={toggleContent}>
+                                    <span className="text-yellow-600 hover:text-blue-800 cursor-pointer font-medium" onClick={toggleContent}>
                                         ...more
                                     </span>
                                 </>
@@ -329,7 +329,7 @@ const PostCard = ({ post, onEdit, isOwnPost = false, refetch }) => {
                                 <>
                                     {post.content}
                                     {post.content.length > 200 && (
-                                        <span className="text-blue-600 hover:text-blue-800 cursor-pointer font-medium ml-1" onClick={toggleContent}>
+                                        <span className="text-yellow-600 hover:text-blue-800 cursor-pointer font-medium ml-1" onClick={toggleContent}>
                                             Show less
                                         </span>
                                     )}

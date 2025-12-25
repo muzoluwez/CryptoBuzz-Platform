@@ -23,7 +23,7 @@ const FallbackAvatar = ({ name, size = 64 }) => {
   return (
     <div
       style={{ width: size, height: size }}
-      className="rounded-full bg-blue-600 text-white flex items-center justify-center font-semibold text-lg"
+      className="rounded-full bg-yellow-600 text-white flex items-center justify-center font-semibold text-lg"
     >
       {initials || "NA"}
     </div>
@@ -155,7 +155,7 @@ export default function EducatorRating() {
 
         {isLoading && (
           <div className="py-4 flex justify-center">
-            <Loader2 className="w-6 h-6 animate-spin text-purple-600" />
+            <Loader2 className="w-6 h-6 animate-spin text-yellow-600" />
           </div>
         )}
 

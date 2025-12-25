@@ -176,7 +176,7 @@ export function IdeaPage() {
                           "bg-gray-200 text-gray-600"
                           }
                       ${tag.type === "status" &&
-                          "bg-purple-200 text-purple-600"
+                          "bg-purple-200 text-yellow-600"
                           }
                     `}
                       >
@@ -316,7 +316,7 @@ export function IdeaPage() {
                     ${tag.type === "sell" && "bg-red-200 text-red-600"}
                     ${tag.type === "buy" && "bg-green-200 text-green-600"}
                     ${tag.type === "pair" && "bg-gray-200 text-gray-600"}
-                    ${tag.type === "status" && "bg-purple-200 text-purple-600"}
+                    ${tag.type === "status" && "bg-purple-200 text-yellow-600"}
                   `}
                     >
                       {tag.label}
