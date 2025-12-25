@@ -12,8 +12,12 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useState } from "react";
+import { AccessGate } from "@/components/common/AccessGate";
+import { useAccessControl } from "@/hooks/use-access-control";
+import { Lock } from "lucide-react";
 
 export function InsightPage() {
+  const { checkAccess } = useAccessControl();
 
   // ------------------- INSIGHTS DATA -------------------
   const insights = [
@@ -27,6 +31,7 @@ export function InsightPage() {
       image: 'https://images.unsplash.com/photo-1518779578993-ec3579fee39f?q=80&w=1400&auto=format&fit=crop',
       avatar: '/media/avatars/1.png',
       category: 'Forex',
+      accessType: "PUBLIC",
     },
     {
       id: '2',
@@ -38,6 +43,7 @@ export function InsightPage() {
       image: 'https://images.unsplash.com/photo-1509475826633-fed577a2c71b?q=80&w=1400&auto=format&fit=crop',
       avatar: '/media/avatars/2.png',
       category: 'Forex',
+      accessType: "LOGIN_REQUIRED",
     },
     {
       id: '3',
@@ -49,6 +55,8 @@ export function InsightPage() {
       image: 'https://images.unsplash.com/photo-1549410195-79b2d5d8f5de?q=80&w=1400&auto=format&fit=crop',
       avatar: '/media/avatars/3.png',
       category: 'Crypto',
+      accessType: "PLAN_BASED",
+      allowedPlans: ["PRO", "MAX"],
     },
   ];
 
@@ -92,66 +100,75 @@ export function InsightPage() {
 
         {/* ------------------- GRID ------------------- */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredInsights.map((insight) => (
-            <Card key={insight.id} className="bg-card border border-border overflow-hidden">
+          {filteredInsights.map((insight) => {
+            const { hasAccess } = checkAccess(insight.accessType, insight.allowedPlans);
 
-              {/* image */}
-              <div className="w-full h-44 overflow-hidden">
-                <img
-                  src={insight.image}
-                  alt={insight.title}
-                  className="w-full h-full object-cover"
-                />
-              </div>
+            return (
+              <Card key={insight.id} className="bg-card border border-border overflow-hidden">
 
-              <CardContent className="p-4">
+                {/* image */}
+                <div className="w-full h-44 overflow-hidden relative">
+                  {!hasAccess && (
+                    <div className="absolute inset-0 bg-black/40 backdrop-blur-[2px] flex items-center justify-center z-10">
+                      <Lock className="w-8 h-8 text-white/80" />
+                    </div>
+                  )}
+                  <img
+                    src={insight.image}
+                    alt={insight.title}
+                    className="w-full h-full object-cover"
+                  />
+                </div>
 
-                {/* Author */}
-                <div className="flex items-center gap-3">
-                  <Avatar className="h-10 w-10">
-                    <AvatarImage src={insight.avatar} alt={insight.author} />
-                    <AvatarFallback>{insight.author[0]}</AvatarFallback>
-                  </Avatar>
+                <CardContent className="p-4">
 
-                  <div className="flex-1">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="text-sm font-medium truncate">{insight.author}</p>
-                        <p className="text-xs text-muted-foreground">{insight.date}</p>
+                  {/* Author */}
+                  <div className="flex items-center gap-3">
+                    <Avatar className="h-10 w-10">
+                      <AvatarImage src={insight.avatar} alt={insight.author} />
+                      <AvatarFallback>{insight.author[0]}</AvatarFallback>
+                    </Avatar>
+
+                    <div className="flex-1">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="text-sm font-medium truncate">{insight.author}</p>
+                          <p className="text-xs text-muted-foreground">{insight.date}</p>
+                        </div>
+                        <Badge>{insight.category}</Badge>
                       </div>
-                      <Badge>{insight.category}</Badge>
                     </div>
                   </div>
-                </div>
 
-                {/* Title */}
-                <h3 className="mt-4 text-lg font-bold text-primary">{insight.title}</h3>
+                  {/* Title */}
+                  <h3 className="mt-4 text-lg font-bold text-primary">{insight.title}</h3>
 
-                {/* Preview */}
-                <p className="mt-2 text-sm text-muted-foreground line-clamp-3">
-                  {insight.preview}
-                </p>
+                  {/* Preview */}
+                  <p className="mt-2 text-sm text-muted-foreground line-clamp-3">
+                    {hasAccess ? insight.preview : "This content is locked. Upgrade your plan or log in to view full insights."}
+                  </p>
 
-                {/* Button */}
-                <div className="mt-4">
-                  <Button
-                    onClick={() => setSelectedInsight(insight)}
-                    className="w-full bg-yellow-600 text-white hover:bg-yellow-700"
-                  >
-                    View Details
-                  </Button>
-                </div>
+                  {/* Button */}
+                  <div className="mt-4">
+                    <Button
+                      onClick={() => setSelectedInsight(insight)}
+                      className="w-full bg-yellow-600 text-white hover:bg-yellow-700"
+                    >
+                      {hasAccess ? "View Details" : "Unlock Insight"}
+                    </Button>
+                  </div>
 
-              </CardContent>
+                </CardContent>
 
-              <CardFooter className="p-4">
-                <div className="text-sm text-muted-foreground">
-                  Published • {insight.date.split(',')[0]}
-                </div>
-              </CardFooter>
+                <CardFooter className="p-4">
+                  <div className="text-sm text-muted-foreground">
+                    Published • {insight.date.split(',')[0]}
+                  </div>
+                </CardFooter>
 
-            </Card>
-          ))}
+              </Card>
+            )
+          })}
         </div>
 
       </div>
@@ -165,51 +182,57 @@ export function InsightPage() {
             </DialogTitle>
           </DialogHeader>
 
-          <div className="bg-card p-4 overflow-y-auto max-h-[72vh]">
-            {/* Image */}
-            <img
-              src={selectedInsight?.image}
-              className="w-full h-64 object-cover rounded-md"
-            />
+          {/* AccessGate protects the Detail View */}
+          <AccessGate
+            accessType={selectedInsight?.accessType}
+            allowedPlans={selectedInsight?.allowedPlans}
+          >
+            <div className="bg-card p-4 overflow-y-auto max-h-[72vh]">
+              {/* Image */}
+              <img
+                src={selectedInsight?.image}
+                className="w-full h-64 object-cover rounded-md"
+              />
 
-            <div className="mt-4 space-y-4">
-              <p className="text-sm text-muted-foreground">
-                {selectedInsight?.date} • {selectedInsight?.category}
-              </p>
+              <div className="mt-4 space-y-4">
+                <p className="text-sm text-muted-foreground">
+                  {selectedInsight?.date} • {selectedInsight?.category}
+                </p>
 
-              <h2 className="text-2xl font-bold">{selectedInsight?.title}</h2>
+                <h2 className="text-2xl font-bold">{selectedInsight?.title}</h2>
 
-              <p className="text-sm text-muted-foreground whitespace-pre-line">
-                {selectedInsight?.full}
-              </p>
+                <p className="text-sm text-muted-foreground whitespace-pre-line">
+                  {selectedInsight?.full}
+                </p>
 
-              {/* Author */}
-              <div className="flex items-center gap-4 pt-4 border-t">
-                <Avatar className="h-12 w-12">
-                  <AvatarImage src={selectedInsight?.avatar} />
-                </Avatar>
-                <div>
-                  <p className="text-sm font-semibold">{selectedInsight?.author}</p>
-                  <p className="text-xs text-muted-foreground">{selectedInsight?.category}</p>
+                {/* Author */}
+                <div className="flex items-center gap-4 pt-4 border-t">
+                  <Avatar className="h-12 w-12">
+                    <AvatarImage src={selectedInsight?.avatar} />
+                  </Avatar>
+                  <div>
+                    <p className="text-sm font-semibold">{selectedInsight?.author}</p>
+                    <p className="text-xs text-muted-foreground">{selectedInsight?.category}</p>
+                  </div>
+                </div>
+
+                {/* Buttons */}
+                <div className="flex gap-3 mt-4">
+                  <Button className="flex-1 bg-yellow-600 hover:bg-yellow-700 text-white">
+                    Save Insight
+                  </Button>
+
+                  <Button
+                    className="flex-1 bg-gray-200"
+                    onClick={() => setSelectedInsight(null)}
+                  >
+                    Close
+                  </Button>
                 </div>
               </div>
 
-              {/* Buttons */}
-              <div className="flex gap-3 mt-4">
-                <Button className="flex-1 bg-yellow-600 hover:bg-yellow-700 text-white">
-                  Save Insight
-                </Button>
-
-                <Button
-                  className="flex-1 bg-gray-200"
-                  onClick={() => setSelectedInsight(null)}
-                >
-                  Close
-                </Button>
-              </div>
             </div>
-
-          </div>
+          </AccessGate>
         </DialogContent>
       </Dialog>
     </>

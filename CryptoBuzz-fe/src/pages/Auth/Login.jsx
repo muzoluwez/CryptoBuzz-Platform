@@ -1,28 +1,19 @@
 import React, { useEffect, useState } from 'react';
 import { selectCurrentUser, setCredentials } from '@/store/authSlice';
 import { useLoginMutation } from '@/store/client/clientAuthApiSlice';
-import { CircleUser, Eye, Loader2, MoveLeft } from 'lucide-react';
+import { CircleUser, Eye, Loader2, MoveLeft, ArrowLeft, Eye, EyeOff } from 'lucide-react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 // import { KeenIcon } from "components";
 
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+import { useFormik } from 'formik';
+import * as Yup from 'yup';
 
 export function Login() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-
+  const [showPassword, setShowPassword] = useState(false);
   const [login, { isLoading }] = useLoginMutation();
 
   const dispatch = useDispatch();
@@ -39,29 +30,44 @@ export function Login() {
     }
   }, [user, navigate, from]);
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const formik = useFormik({
+    initialValues: {
+      email: '',
+      password: '',
+    },
+    validationSchema: Yup.object({
+      email: Yup.string()
+        .email('Invalid email address')
+        .required('Email is required'),
+      password: Yup.string().required('Password is required'),
+    }),
+    onSubmit: async (values) => {
+      try {
+        const response = await login({
+          email: values.email,
+          password: values.password,
+        }).unwrap();
 
-    try {
-      const response = await login({ email, password }).unwrap();
+        const { userObj, token } = response.data;
 
-      const { userObj, token } = response.data;
+        if (token) {
+          dispatch(setCredentials({ user: userObj, token }));
+          localStorage.setItem('token', token);
+          localStorage.setItem('user', JSON.stringify(userObj));
 
-      if (token) {
-        dispatch(setCredentials({ user: userObj, token }));
-        localStorage.setItem('token', token);
-        localStorage.setItem('user', JSON.stringify(userObj));
-
-        toast.success('Login successful');
-        navigate(from, { replace: true });
-      } else {
-        toast.error('Login successful but no token received');
+          toast.success('Login successful');
+          navigate(from, { replace: true });
+        } else {
+          toast.error('Login successful but no token received');
+        }
+      } catch (err) {
+        console.error('Login error:', err);
+        toast.error(
+          err?.data?.message || 'Unable to sign in. Please try again.'
+        );
       }
-    } catch (err) {
-      console.error('Login error:', err);
-      toast.error(err?.data?.message || 'Unable to sign in. Please try again.');
-    }
-  };
+    },
+  });
 
   return (
     // <div className="flex items-center justify-center min-h-screen min-w-full bg-gray-100 dark:bg-gray-900 px-4">

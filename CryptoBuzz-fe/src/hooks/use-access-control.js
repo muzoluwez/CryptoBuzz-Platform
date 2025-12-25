@@ -2,11 +2,6 @@
 import { useSelector } from 'react-redux';
 import { selectCurrentUser, selectIsAuthenticated } from '@/store/authSlice';
 
-/**
- * Hook to check if the current user has access to specific content.
- * 
- * @returns {Object} { canAccessContent, checkAccess }
- */
 export function useAccessControl() {
     const user = useSelector(selectCurrentUser);
     const isAuthenticated = useSelector(selectIsAuthenticated);

@@ -8,14 +8,14 @@ export const clientAuthApiSlice = createApi({
     endpoints: (builder) => ({
         login: builder.mutation({
             query: (credentials) => ({
-                url: '/api/v1/users/auth/signin',
+                url: '/users/auth/signin',
                 method: 'POST',
                 body: credentials,
             }),
         }),
         signup: builder.mutation({
             query: (userData) => ({
-                url: '/api/v1/users/auth/signup',
+                url: '/users/auth/signup',
                 method: 'POST',
                 body: userData,
             }),
