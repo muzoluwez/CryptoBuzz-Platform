@@ -1,16 +1,23 @@
 import React, { useEffect, useState } from 'react';
 import { selectCurrentUser, setCredentials } from '@/store/authSlice';
 import { useLoginMutation } from '@/store/client/clientAuthApiSlice';
-import { CircleUser, Eye, Loader2, MoveLeft, ArrowLeft,  EyeOff } from 'lucide-react';
+import { useFormik } from 'formik';
+import {
+  ArrowLeft,
+  CircleUser,
+  Eye,
+  EyeOff,
+  Loader2,
+  MoveLeft,
+} from 'lucide-react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 // import { KeenIcon } from "components";
 
 import { toast } from 'sonner';
+import * as Yup from 'yup';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { useFormik } from 'formik';
-import * as Yup from 'yup';
 
 export function Login() {
   const [showPassword, setShowPassword] = useState(false);
@@ -63,7 +70,7 @@ export function Login() {
       } catch (err) {
         console.error('Login error:', err);
         toast.error(
-          err?.data?.message || 'Unable to sign in. Please try again.'
+          err?.data?.message || 'Unable to sign in. Please try again.',
         );
       }
     },
@@ -142,21 +149,25 @@ export function Login() {
     //     </CardFooter>
     //   </Card>
     // </div>
-    
-    <div className='grid lg:grid-cols-1 grow branded-bg'>
-      <div className='flex justify-center items-center p-8 lg:p-10  z-10'>
-        <div className="login card max-w-[385px] border-none rounded-xl! w-full bg-[linear-gradient(180deg,#1F1E1F_0%,#121213_100%)]">
+
+    <div className="grid lg:grid-cols-1 grow branded-bg">
+      <div className="flex justify-center items-center p-8 lg:p-10  z-10">
+        <div className="login card max-w-[385px] border-none !rounded-xl w-full bg-[linear-gradient(180deg,#1F1E1F_0%,#121213_100%)]">
           <form className="card-body flex flex-col gap-5 p-7" noValidate>
             <div className="text-center mb-2.5">
               <div className="text-center">
                 <div className="flex justify-start mb-8">
-                  <Link className="py-1.5! px-2.5! text-sm gap-2 text-gray-300! dark:text-gray-600 hover:text-primary btn btn-rounded btn-sm btn-outline w-fit border-2 border-[#35353C]">
+                  <Link className="!py-1.5 !px-2.5 text-sm gap-2 !text-gray-300 dark:text-gray-600 hover:text-primary btn btn-rounded btn-sm btn-outline w-fit border-2 border-[#35353C]">
                     {/* <KeenIcon icon="black-left" /> */}
-                    <MoveLeft size={16}/>
+                    <MoveLeft size={16} />
                   </Link>
                 </div>
                 <div className="flex justify-center mb-8">
-                  <img src="/media/app/default-logo-dark.png" className="w-100 h-16 object-contain" alt="" />
+                  <img
+                    src="/media/app/default-logo-dark.png"
+                    className="w-100 h-16 object-contain"
+                    alt=""
+                  />
                   {/* <img src="/media/app/default-logo-dark.png" className="w-100 h-5 dark_mode" alt="" /> */}
                 </div>
                 <h3 className="text-xl font-medium text-gray-100 dark:text-gray-900 leading-none mb-3 text-center">
@@ -169,7 +180,7 @@ export function Login() {
 
             <div className="flex flex-col gap-1">
               {/* <label className="form-label text-gray-900">Email</label> */}
-              <label className="input  bg-transparent border-t-0 border-s-0 border-r-0 rounded-none border-b border-[#35353C] hover:border-[#35353C] text-xs text-gray-300! font-normal p-0">
+              <label className="input  bg-transparent border-t-0 border-s-0 border-r-0 rounded-none border-b-1 border-[#35353C] hover:border-[#35353C] text-xs !text-gray-300 font-normal p-0">
                 <input
                   placeholder="Email"
                   autoComplete="off"
@@ -186,9 +197,8 @@ export function Login() {
             <div className="flex flex-col gap-1">
               <div className="flex items-center justify-between gap-1">
                 {/* <label className="form-label text-gray-900">Password</label> */}
-
               </div>
-              <label className="input flex items-center justify-between  bg-transparent border-t-0 border-s-0 border-r-0 rounded-none border-b border-[#35353C] hover:border-[#35353C] text-xs text-gray-300! font-normal p-0">
+              <label className="input flex items-center justify-between  bg-transparent border-t-0 border-s-0 border-r-0 rounded-none border-b-1 border-[#35353C] hover:border-[#35353C] text-xs !text-gray-300 font-normal p-0">
                 <input
                   placeholder="Password"
                   // type={showPassword ? "text" : "password"}
@@ -232,7 +242,7 @@ export function Login() {
             <button
               type="submit"
               // onClick={formik.handleSubmit}
-              className="btn py-7 text-[18px]! rounded-2xl bg-[linear-gradient(90deg,#FFCD0B_0%,#FFCD0B_100%)] btn-primary flex justify-center grow text-dark"
+              className="btn py-7 !text-[18px] rounded-2xl bg-[linear-gradient(90deg,#FFCD0B_0%,#FFCD0B_100%)] btn-primary flex justify-center grow text-dark"
             // disabled={loading || formik.isSubmitting}
             >
               login

@@ -89,6 +89,17 @@ export function MegaMenu() {
             </Link>
           </NavigationMenuLink>
         </NavigationMenuItem>
+        <NavigationMenuItem>
+          <NavigationMenuLink asChild>
+            <Link
+              to="/client/crypto"
+              className={cn(linkClass)}
+              data-active={isActive('/client/crypto') || undefined}
+            >
+              Crypto
+            </Link>
+          </NavigationMenuLink>
+        </NavigationMenuItem>
 
         <NavigationMenuItem>
           <NavigationMenuLink asChild>

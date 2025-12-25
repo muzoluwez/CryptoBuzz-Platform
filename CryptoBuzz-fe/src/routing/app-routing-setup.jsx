@@ -3,7 +3,6 @@ import { HomePage } from '@/pages/Client/home/page';
 import { IdeaPage } from '@/pages/Client/idea/page';
 import { LivePage } from '@/pages/Client/live/page';
 import { AcademyPage } from '@/pages/Client/academy/page';
-import { JournalingPage } from '@/pages/Client/journaling/page';
 import { SocialPage } from '@/pages/Client/social/page';
 import { Navigate, Route, Routes } from 'react-router';
 import { Layout7 } from '@/components/layouts/layout-7';
@@ -13,6 +12,7 @@ import ViewProfile from '../pages/Client/educator/ViewProfile';
 import { Login } from '@/pages/Auth/Login';
 import { Signup } from '@/pages/Auth/Signup';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
+import { CryptoPage } from '../pages/Client/crypto/page';
 
 export function AppRoutingSetup() {
   return (
@@ -27,6 +27,7 @@ export function AppRoutingSetup() {
         <Route path="/client/home" element={<HomePage />} />
         <Route path="/client/academy" element={<AcademyPage />} />
         <Route path="/client/insight" element={<InsightPage />} />
+        <Route path="/client/crypto" element={<CryptoPage />} />
         <Route path="/client/live" element={<LivePage />} />
         <Route path="/client/educators" element={<EducatorsPage />} />
 
@@ -39,17 +40,14 @@ export function AppRoutingSetup() {
         <Route path="/client/idea" element={<IdeaPage />} />
         <Route path="/client/social" element={<SocialPage />} />
 
-        {/* Strictly Protected Examples */}
+        {/* Strictly Protected Examples
         <Route path="/client/viewprofile" element={
           <ProtectedRoute>
             <ViewProfile />
           </ProtectedRoute>
-        } />
-        <Route path="/client/journaling" element={
-          <ProtectedRoute>
-            <JournalingPage />
-          </ProtectedRoute>
-        } />
+        } /> */}
+
+        <Route path="/client/viewprofile/:id" element={<ViewProfile />} />
 
       </Route>
       <Route path="*" element={<Navigate to="/client/home" replace />} />
