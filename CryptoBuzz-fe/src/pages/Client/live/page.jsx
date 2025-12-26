@@ -434,7 +434,7 @@ export function LivePage() {
                   className={`grid grid-cols-8 border-t border-gray-200 dark:border-gray-700 ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}`}
                 >
                   {/* Educator Profile */}
-                  <div className="p-4 border-r border-gray-200 dark:border-gray-700 flex items-center justify-center">
+                  <div className="p-4 border-r border-gray-200 bg-white dark:bg-[#1f2227] dark:border-gray-700 flex items-center justify-center">
                     <div className="flex flex-col items-center">
                       {educator.avatar ? (
                         <img
@@ -473,7 +473,7 @@ export function LivePage() {
                     return (
                       <div
                         key={dayIndex}
-                        className="p-3 border-r border-gray-200 dark:border-gray-700 last:border-r-0 min-h-[120px]"
+                        className="p-3 border-r border-gray-200 bg-white dark:bg-[#1f2227] dark:border-gray-700 last:border-r-0 min-h-[120px]"
                       >
                         {daySessions.length > 0 ? (
                           daySessions.map((session, idx) => (
