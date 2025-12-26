@@ -43,14 +43,12 @@ export const getSchedules = asyncHandler(async (req, res) => {
     }
   }
 
-  console.log(query, "query");
   const schedules = await RecurrenceSchedule.find(query)
     .sort({ datetime: 1, createdAt: -1 })
     .populate("category", "_id name")
     .populate("educator", "_id first_name last_name image email role status")
     .lean();
 
-  console.log(schedules, "schedules");
   return res.status(200).json(ApiResponse(200, schedules, "Schedules fetched successfully"));
 });
 

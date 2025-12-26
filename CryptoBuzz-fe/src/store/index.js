@@ -16,6 +16,7 @@ import { clientAcademyCategoryApiSlice } from './client/clientAcademyCategoryApi
 import { clientAuthApiSlice } from './client/clientAuthApiSlice';
 import { clientCoursesApiSlice } from './client/clientCoursesApiSlice';
 import { clientCryptoApiSlice } from './client/clientCryptoApiSlice';
+import { clientEducatorApiSlice } from './client/clientEducatorApiSlice';
 import { clientIdeaApiSlice } from './client/clientIdeaApiSlice';
 import { clientScheduleApiSlice } from './client/clientScheduleApiSlice';
 import { clientSocialApiSlice } from './client/clientSocialApiSlice';
@@ -37,6 +38,7 @@ const rootReducer = combineReducers({
   [clientTradeAnalysisApiSlice.reducerPath]:
     clientTradeAnalysisApiSlice.reducer,
   [clientCryptoApiSlice.reducerPath]: clientCryptoApiSlice.reducer,
+  [clientEducatorApiSlice.reducerPath]: clientEducatorApiSlice.reducer,
   [clientIdeaApiSlice.reducerPath]: clientIdeaApiSlice.reducer,
   [clientSocialApiSlice.reducerPath]: clientSocialApiSlice.reducer,
   [clientScheduleApiSlice.reducerPath]: clientScheduleApiSlice.reducer,
@@ -57,6 +59,7 @@ export const store = configureStore({
       clientCoursesApiSlice.middleware,
       clientTradeAnalysisApiSlice.middleware,
       clientCryptoApiSlice.middleware,
+      clientEducatorApiSlice.middleware,
       clientIdeaApiSlice.middleware,
       clientSocialApiSlice.middleware,
       clientScheduleApiSlice.middleware,
