@@ -203,7 +203,7 @@ export const createIdea = async (req, res) => {
 
     await newIdea.save();
 
-    // await User.updateOne({ _id: educatorUser._id }, { $inc: { ideaCount: 1 } });
+    await UserModel.updateOne({ _id: educatorUser._id }, { $inc: { ideaCount: 1 } });
 
     // const filtredCategory = await CategoryModel.findById(category).select("name");
 

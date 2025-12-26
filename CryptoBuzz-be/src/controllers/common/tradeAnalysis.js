@@ -11,7 +11,7 @@ import * as Yup from "yup";
 
 import Category from "../../models/category.js";
 import mongoose from "mongoose";
-import User from "../../models/user.js";
+import UserModel from "../../models/user.js";
 import { ApiResponse, GetApiResponse } from "../../utils/ApiResponse.js";
 
 // Validation schema
@@ -116,7 +116,7 @@ export const createTradeAnalysis = async (req, res) => {
       photos: imageUrls
     });
 
-    await User.updateOne({ _id: educatorUser._id }, { $inc: { insightCount: 1 } });
+    await UserModel.updateOne({ _id: educatorUser._id }, { $inc: { insightCount: 1 } });
 
     // const foundCategory = await Category.findById(category).select("name");
 
@@ -195,7 +195,7 @@ export const deleteTradeAnalysis = async (req, res) => {
 
     if (trade.isDeleted) return res.status(400).json({ error: "Already deleted" });
 
-    await User.updateOne({ _id: req.user._id }, { $inc: { insightCount: -1 } });
+    await UserModel.updateOne({ _id: req.user._id }, { $inc: { insightCount: -1 } });
 
     trade.isDeleted = true;
     trade.deletedAt = new Date();
