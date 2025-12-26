@@ -33,7 +33,7 @@ const ShowMoreLess = ({
       {isLong && (
         <span
           onClick={() => setExpanded(!expanded)}
-          className="text-blue-600 cursor-pointer hover:underline font-medium"
+          className="text-yellow-600 cursor-pointer hover:underline font-medium"
         >
           {expanded ? showLessText : showMoreText}
         </span>
@@ -148,7 +148,7 @@ const ClientLiveSessionContent = ({
     if (!htmlOrText) return "";
     return htmlOrText.replace(/(https?:\/\/[^\s]+|www\.[^\s]+)/g, (url) => {
       const clickableUrl = url.startsWith("http") ? url : `https://${url}`;
-      return `<a href="${clickableUrl}" target="_blank" rel="noopener noreferrer" class="text-blue-600 underline hover:text-blue-800">${url}</a>`;
+      return `<a href="${clickableUrl}" target="_blank" rel="noopener noreferrer" class="text-yellow-600 underline hover:text-blue-800">${url}</a>`;
     });
   };
 

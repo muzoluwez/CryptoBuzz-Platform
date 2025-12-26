@@ -1,71 +1,73 @@
-import { configureStore } from '@reduxjs/toolkit';
+import { combineReducers, configureStore } from '@reduxjs/toolkit';
 import { setupListeners } from '@reduxjs/toolkit/query';
 import {
-    persistStore,
-    persistReducer,
-    FLUSH,
-    REHYDRATE,
-    PAUSE,
-    PERSIST,
-    PURGE,
-    REGISTER,
+  FLUSH,
+  PAUSE,
+  PERSIST,
+  persistReducer,
+  persistStore,
+  PURGE,
+  REGISTER,
+  REHYDRATE,
 } from 'redux-persist';
 import storage from 'redux-persist/lib/storage';
-import { combineReducers } from '@reduxjs/toolkit';
-
-// Import slices
 import authReducer from './authSlice';
 import { clientAcademyCategoryApiSlice } from './client/clientAcademyCategoryApiSlice';
-import { clientCoursesApiSlice } from './client/clientCoursesApiSlice';
-import { clientTradeIdeaApiSlice } from './client/clientTradeIdeaApiSlice';
-import { clientTradeAnalysisApiSlice } from './client/clientTradeAnalysisApiSlice';
-import { clientCryptoApiSlice } from './client/clientCryptoApiSlice';
 import { clientAuthApiSlice } from './client/clientAuthApiSlice';
+import { clientCoursesApiSlice } from './client/clientCoursesApiSlice';
+import { clientCryptoApiSlice } from './client/clientCryptoApiSlice';
+import { clientEducatorApiSlice } from './client/clientEducatorApiSlice';
+import { clientIdeaApiSlice } from './client/clientIdeaApiSlice';
+import { clientScheduleApiSlice } from './client/clientScheduleApiSlice';
+import { clientSocialApiSlice } from './client/clientSocialApiSlice';
+import { clientTradeAnalysisApiSlice } from './client/clientTradeAnalysisApiSlice';
 
-// Persist configuration
 const persistConfig = {
-    key: 'root',
-    version: 1,
-    storage,
-    whitelist: ['auth'], // Only persist auth slice
+  key: 'root',
+  version: 1,
+  storage,
+  whitelist: ['auth'],
 };
 
-// Combine reducers
 const rootReducer = combineReducers({
-    auth: authReducer,
-    [clientAuthApiSlice.reducerPath]: clientAuthApiSlice.reducer,
-    [clientAcademyCategoryApiSlice.reducerPath]: clientAcademyCategoryApiSlice.reducer,
-    [clientCoursesApiSlice.reducerPath]: clientCoursesApiSlice.reducer,
-    [clientTradeIdeaApiSlice.reducerPath]: clientTradeIdeaApiSlice.reducer,
-    [clientTradeAnalysisApiSlice.reducerPath]: clientTradeAnalysisApiSlice.reducer,
-    [clientCryptoApiSlice.reducerPath]: clientCryptoApiSlice.reducer,
+  auth: authReducer,
+  [clientAuthApiSlice.reducerPath]: clientAuthApiSlice.reducer,
+  [clientAcademyCategoryApiSlice.reducerPath]:
+    clientAcademyCategoryApiSlice.reducer,
+  [clientCoursesApiSlice.reducerPath]: clientCoursesApiSlice.reducer,
+  [clientTradeAnalysisApiSlice.reducerPath]:
+    clientTradeAnalysisApiSlice.reducer,
+  [clientCryptoApiSlice.reducerPath]: clientCryptoApiSlice.reducer,
+  [clientEducatorApiSlice.reducerPath]: clientEducatorApiSlice.reducer,
+  [clientIdeaApiSlice.reducerPath]: clientIdeaApiSlice.reducer,
+  [clientSocialApiSlice.reducerPath]: clientSocialApiSlice.reducer,
+  [clientScheduleApiSlice.reducerPath]: clientScheduleApiSlice.reducer,
 });
 
-// Create persisted reducer
 const persistedReducer = persistReducer(persistConfig, rootReducer);
 
-// Configure store
 export const store = configureStore({
-    reducer: persistedReducer,
-    middleware: (getDefaultMiddleware) =>
-        getDefaultMiddleware({
-            serializableCheck: {
-                ignoredActions: [FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER],
-            },
-        }).concat(
-            clientAuthApiSlice.middleware,
-            clientAcademyCategoryApiSlice.middleware,
-            clientCoursesApiSlice.middleware,
-            clientTradeIdeaApiSlice.middleware,
-            clientTradeAnalysisApiSlice.middleware,
-            clientCryptoApiSlice.middleware,
-        ),
+  reducer: persistedReducer,
+  middleware: (getDefaultMiddleware) =>
+    getDefaultMiddleware({
+      serializableCheck: {
+        ignoredActions: [FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER],
+      },
+    }).concat(
+      clientAuthApiSlice.middleware,
+      clientAcademyCategoryApiSlice.middleware,
+      clientCoursesApiSlice.middleware,
+      clientTradeAnalysisApiSlice.middleware,
+      clientCryptoApiSlice.middleware,
+      clientEducatorApiSlice.middleware,
+      clientIdeaApiSlice.middleware,
+      clientSocialApiSlice.middleware,
+      clientScheduleApiSlice.middleware,
+    ),
 });
 
-// Setup listeners for refetchOnFocus/refetchOnReconnect
 setupListeners(store.dispatch);
 
-// Create persistor
 export const persistor = persistStore(store);
 
 export default store;

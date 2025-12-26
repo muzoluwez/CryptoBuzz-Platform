@@ -113,7 +113,7 @@ export function ChatSheet({ trigger }) {
                 <div>
                   <Link
                     to="#"
-                    className="text-sm font-semibold text-mono hover:text-blue-600"
+                    className="text-sm font-semibold text-mono hover:text-yellow-600"
                   >
                     HR Team
                   </Link>

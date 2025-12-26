@@ -634,7 +634,7 @@ const CreatePostModal = ({ isOpen, onClose, editingPost = null }) => {
                   disabled={editingPost && editingPost.images?.length > 0}
                   className={`flex items-center gap-2 p-2 rounded-md transition-colors ${editingPost && editingPost.images?.length > 0
                     ? "text-gray-400 cursor-not-allowed"
-                    : "text-gray-600 hover:text-blue-600 hover:bg-blue-50"
+                    : "text-gray-600 hover:text-yellow-600 hover:bg-blue-50"
                     }`}
                 >
                   <Image size={20} />

@@ -46,6 +46,9 @@ export const clientAcademyCategoryApiSlice = createApi({
                 return `/users/course/first-start-training?${searchParams.toString()}`;
             },
         }),
+        getAcademyCategoryFetch: builder.query({
+            query: () => `/users/category/fetch`,
+        }),
     }),
 });
 
@@ -54,4 +57,5 @@ export const {
     useGetAcademySingleCategoryQuery,
     useGetAcademyCategoryByMainSectionQuery,
     useGetFirstStartTrainingSectionQuery,
+    useGetAcademyCategoryFetchQuery,
 } = clientAcademyCategoryApiSlice;

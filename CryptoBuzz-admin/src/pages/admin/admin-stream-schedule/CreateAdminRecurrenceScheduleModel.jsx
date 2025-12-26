@@ -680,7 +680,7 @@ const CreateAdminRecurrenceScheduleModel = forwardRef(
                                       );
                                     }}
                                     className={`px-2 py-1 rounded text-sm font-medium transition-colors duration-200 min-w-[30px] ${isSelected
-                                      ? "bg-blue-500 text-white hover:bg-blue-600"
+                                      ? "bg-blue-500 text-white hover:bg-yellow-600"
                                       : "bg-gray-100 text-gray-700 hover:bg-gray-200 border border-gray-300"
                                       }`}
                                   >

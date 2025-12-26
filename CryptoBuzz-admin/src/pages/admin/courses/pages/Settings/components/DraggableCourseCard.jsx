@@ -215,7 +215,7 @@ const DraggableCourseCard = ({
 
           {/* Course metadata with improved styling */}
           <div className="flex items-center gap-3 flex-wrap text-sm">
-            <div className="flex items-center gap-1.5 text-blue-600">
+            <div className="flex items-center gap-1.5 text-yellow-600">
               <Book className="w-4 h-4 text-primary shrink-0" />
               <span className="font-medium text-primary">
                 {category?.name || "Uncategorized"}

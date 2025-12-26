@@ -73,6 +73,10 @@ export const MENU_MEGA_MOBILE = [
     path: '/client/insight',
   },
   {
+    title: 'Crypto',
+    path: '/client/crypto',
+  },
+  {
     title: 'Ideas',
     path: '/client/idea',
   },

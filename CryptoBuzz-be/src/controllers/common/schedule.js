@@ -277,7 +277,12 @@ export const statusUpdate = async (req, res) => {
 // ======================= RECURRING HELPERS =======================
 
 function generateDatesFromRule(rule) {
+  if (!rule.startDate) {
+    throw new Error("startDate is required to generate recurrence dates");
+  }
+
   const start = new Date(rule.startDate);
+  if (isNaN(start)) throw new Error(`Invalid datetime: ${rule.startDate}`);
 
   const weekdayMap = {
     MO: RRule.MO,
@@ -289,20 +294,28 @@ function generateDatesFromRule(rule) {
     SU: RRule.SU
   };
 
+  const interval = Number(rule.interval) || 1;
   const options = {
     freq: RRule[rule.frequency],
-    interval: Number(rule.interval) || 1,
+    interval,
     dtstart: start
   };
 
-  if (rule.endType === "DATE" && rule.endDate) options.until = new Date(rule.endDate);
+  if (rule.endType === "DATE" && rule.endDate) {
+    options.until = new Date(rule.endDate);
+  } else if (rule.endType === "OCCURRENCES" && rule.occurrences) {
+    options.count = rule.occurrences;
+  }
 
-  if (rule.endType === "OCCURRENCES" && rule.occurrences) options.count = rule.occurrences;
+  if (rule.frequency === "WEEKLY") {
+    options.byweekday = rule.byWeekday?.map(d => weekdayMap[d]);
+  }
 
-  if (rule.frequency === "WEEKLY") options.byweekday = rule.byWeekday?.map(d => weekdayMap[d]);
+  const rrule = new RRule(options);
 
-  return new RRule(options).all().map(d => {
-    d.setHours(start.getHours(), start.getMinutes());
+  return rrule.all().map(d => {
+    d.setHours(start.getHours(), start.getMinutes(), 0, 0);
+
     return d;
   });
 }
@@ -324,12 +337,14 @@ export const createRecurringSessions = async (req, res) => {
     const startDate = new Date(body.datetime);
 
     let endDate = null;
-
     if (frequency !== "NONE") {
       if (recurrence.endType === "DATE") {
-        endDate = new Date(recurrence.endDateTime);
+        endDate = recurrence.endDateTime
+          ? new Date(recurrence.endDateTime)
+          : new Date(new Date(startDate).setMonth(startDate.getMonth() + 2));
+      } else if (recurrence.endType === "OCCURRENCES") {
       } else {
-        endDate = new Date(startDate.setMonth(startDate.getMonth() + 2));
+        endDate = new Date(new Date(startDate).setMonth(startDate.getMonth() + 2));
       }
     }
 
@@ -460,9 +475,11 @@ export const updateRecurringSessions = async (req, res) => {
 
     if (frequency !== "NONE") {
       if (recurrence.endType === "DATE") {
-        endDate = new Date(recurrence.endDateTime);
-      } else {
-        endDate = new Date(startDate.setMonth(startDate.getMonth() + 2));
+        endDate = recurrence.endDateTime
+          ? new Date(recurrence.endDateTime)
+          : new Date(new Date(startDate).setMonth(startDate.getMonth() + 2));
+      } else if (recurrence.endType !== "OCCURRENCES") {
+        endDate = new Date(new Date(startDate).setMonth(startDate.getMonth() + 2));
       }
     }
 

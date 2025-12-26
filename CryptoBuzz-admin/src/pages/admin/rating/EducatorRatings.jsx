@@ -11,7 +11,7 @@ const EducatorRatings = () => {
     category: "Forex",
     email: "john.smith@example.com",
     initials: "JS",
-    initialsColor: "bg-blue-600",
+    initialsColor: "bg-yellow-600",
     rating: 4.8,
     totalReviews: 45,
   };
@@ -54,7 +54,7 @@ const EducatorRatings = () => {
     <div className="p-4 md:p-8 lg:p-10">
 
       {/* Back Button */}
-      <button className="flex items-center gap-2 text-purple-600 font-medium hover:underline mb-6">
+      <button className="flex items-center gap-2 text-yellow-600 font-medium hover:underline mb-6">
         <ArrowLeft className="w-4 h-4" />
         Back to all educators
       </button>

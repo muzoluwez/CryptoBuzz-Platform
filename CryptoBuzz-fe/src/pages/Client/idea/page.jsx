@@ -17,6 +17,7 @@ import { CopyIcon, Eye, X } from "lucide-react";
 import { AccessGate } from '@/components/common/AccessGate';
 import { useAccessControl } from '@/hooks/use-access-control';
 import { useState } from "react";
+import { useGetIdeasQuery } from '@/store/client/clientIdeaApiSlice';
 
 
 
@@ -44,57 +45,56 @@ export function IdeaPage() {
   const [selectedCard, setSelectedCard] = useState(null);
   const { checkAccess } = useAccessControl();
 
-  const cards = [
-    {
-      image: "https://shorturl.at/OR9px",
-      avatar: "https://i.pravatar.cc/300",
-      trader: "Lorem Ipsum",
-      market: "Dolor Sit",
-      year: "2025",
-      entry: "4204",
-      invalidation: "4215.45",
-      exits: ["4193.07", "4185.48", "4178.26"],
-      tags: [
-        { label: "SELL", type: "sell" },
-        { label: "AMET CONSECTETUR", type: "pair" },
-        { label: "Pending", type: "status" },
-      ],
-      accessType: "PUBLIC"
-    },
-    {
-      image: "https://shorturl.at/B5dRG",
-      avatar: "https://i.pravatar.cc/300",
-      trader: "Adipiscing Elit",
-      market: "Sed Do",
-      year: "2025",
-      entry: "180.957",
-      invalidation: "180.484",
-      exits: ["181.169", "181.429", "181.991"],
-      tags: [
-        { label: "BUY", type: "buy" },
-        { label: "EIUSMOD TEMPOR", type: "pair" },
-        { label: "Pending", type: "status" },
-      ],
-      accessType: "LOGIN"
-    },
-    {
-      image: "https://shorturl.at/JMZK9",
-      avatar: "https://i.pravatar.cc/300",
-      trader: "Incididunt Ut",
-      market: "Labore Dolore",
-      year: "2025",
-      entry: "47805",
-      invalidation: "47950",
-      exits: ["47770", "47772", "47650"],
-      tags: [
-        { label: "SELL", type: "sell" },
-        { label: "MAGNA ALIQUA", type: "pair" },
-        { label: "Active", type: "status" },
-      ],
-      accessType: "PLAN_BASED",
-      allowedPlans: ["PRO", "PREMIUM"]
-    },
-  ];
+  // Fetch ideas from API
+  const { data, isLoading, error } = useGetIdeasQuery({
+    page: 1,
+    limit: 10,
+  });
+
+  // Transform API data to match component format
+  const cards = data?.data?.map((idea) => {
+    const educator = idea.educator || {};
+    const educatorName = educator.first_name && educator.last_name
+      ? `${educator.first_name} ${educator.last_name}`
+      : educator.first_name || educator.last_name || "Unknown Trader";
+    
+    const categoryName = idea.category?.name || "Unknown Market";
+    const year = idea.createdAt ? new Date(idea.createdAt).getFullYear().toString() : "2025";
+    
+    // Determine tag type based on idea type
+    const typeTag = idea.type
+      ? { label: idea.type.toUpperCase(), type: idea.type.toLowerCase() }
+      : null;
+    
+    const statusTag = idea.status
+      ? { label: idea.status, type: "status" }
+      : { label: "Pending", type: "status" };
+    
+    const categoryTag = idea.category?.name
+      ? { label: idea.category.name.toUpperCase(), type: "pair" }
+      : null;
+
+    const tags = [typeTag, categoryTag, statusTag].filter(Boolean);
+
+    return {
+      _id: idea._id,
+      image: idea.image_Url || idea.image || "https://via.placeholder.com/400x300",
+      avatar: educator.image || "https://i.pravatar.cc/300",
+      trader: educatorName,
+      market: categoryName,
+      year: year,
+      entry: idea.entry?.toString() || "0",
+      invalidation: idea.invalidation?.toString() || "0",
+      exits: Array.isArray(idea.exits) 
+        ? idea.exits.map(exit => exit?.toString() || "0")
+        : ["0"],
+      tags: tags,
+      accessType: idea.accessType || "PUBLIC",
+      allowedPlans: idea.allowedPlans || [],
+      uid: idea._id,
+      ...idea, // Include all other idea properties
+    };
+  }) || [];
 
   return (
     <>
@@ -105,8 +105,37 @@ export function IdeaPage() {
           <p className="text-xs text-gray-500 mt-1">Home / Ideas</p>
         </header>
 
+        {/* Loading State */}
+        {isLoading && (
+          <div className="flex items-center justify-center py-12">
+            <div className="text-center">
+              <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+              <p className="mt-4 text-gray-500">Loading ideas...</p>
+            </div>
+          </div>
+        )}
+
+        {/* Error State */}
+        {error && (
+          <div className="flex items-center justify-center py-12">
+            <div className="text-center">
+              <p className="text-red-500 text-lg font-semibold">Error loading ideas</p>
+              <p className="text-gray-500 mt-2">
+                {error?.data?.message || error?.error || "Something went wrong. Please try again later."}
+              </p>
+            </div>
+          </div>
+        )}
+
         {/* Responsive 3-Card Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        {!isLoading && !error && (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+
+          {cards.length === 0 && !isLoading && !error && (
+            <div className="col-span-full flex items-center justify-center py-12">
+              <p className="text-gray-500">No ideas available at the moment.</p>
+            </div>
+          )}
 
           {cards.map((c, i) => {
             const access = checkAccess({
@@ -117,7 +146,7 @@ export function IdeaPage() {
 
             return (
               <Card
-                key={i}
+                key={c._id || i}
                 className="rounded-2xl shadow-lg border border-gray-medium overflow-hidden animate-slideInUp"
                 style={{ animationDelay: `${i * 0.1}s` }}
               >
@@ -176,7 +205,7 @@ export function IdeaPage() {
                           "bg-gray-200 text-gray-600"
                           }
                       ${tag.type === "status" &&
-                          "bg-purple-200 text-purple-600"
+                          "bg-purple-200 text-yellow-600"
                           }
                     `}
                       >
@@ -226,7 +255,7 @@ export function IdeaPage() {
                 <CardFooter className="p-5 pt-0">
                   <button
                     onClick={() => setSelectedCard(c)}
-                    className="btn bg-primary text-black w-full !flex items-center justify-center gap-2 mt-4 hover:scale-up transition-all duration-300"
+                    className="btn bg-primary text-black w-full flex! items-center justify-center gap-2 mt-4 hover:scale-up transition-all duration-300"
                   >
                     {isLocked ? 'Unlock Content' : <><Eye size={18} /> View Details</>}
                   </button>
@@ -235,7 +264,8 @@ export function IdeaPage() {
             );
           })}
 
-        </div>
+          </div>
+        )}
       </div>
 
       {/* Image Viewer Modal */}
@@ -316,7 +346,7 @@ export function IdeaPage() {
                     ${tag.type === "sell" && "bg-red-200 text-red-600"}
                     ${tag.type === "buy" && "bg-green-200 text-green-600"}
                     ${tag.type === "pair" && "bg-gray-200 text-gray-600"}
-                    ${tag.type === "status" && "bg-purple-200 text-purple-600"}
+                    ${tag.type === "status" && "bg-purple-200 text-yellow-600"}
                   `}
                     >
                       {tag.label}

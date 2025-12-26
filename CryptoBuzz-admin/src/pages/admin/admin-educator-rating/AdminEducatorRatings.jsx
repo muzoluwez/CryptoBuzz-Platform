@@ -23,7 +23,7 @@ const FallbackAvatar = ({ name, size = 64 }) => {
   return (
     <div
       style={{ width: size, height: size }}
-      className="rounded-full bg-blue-600 text-white flex items-center justify-center font-semibold text-lg"
+      className="rounded-full bg-yellow-600 text-white flex items-center justify-center font-semibold text-lg"
     >
       {initials || "NA"}
     </div>
@@ -171,7 +171,7 @@ export default function AdminEducatorRatings() {
         </Toolbar>
         <button
           onClick={() => navigate(-1)}
-          className="flex items-center gap-2 text-purple-600 font-medium hover:underline mb-6 mt-2"
+          className="flex items-center gap-2 text-yellow-600 font-medium hover:underline mb-6 mt-2"
         >
           <ArrowLeft className="w-4 h-4" />
           Back to all educators
@@ -223,7 +223,7 @@ export default function AdminEducatorRatings() {
         {/* Initial load */}
         {isLoading && (
           <div className="py-4 flex justify-center">
-            <Loader2 className="w-6 h-6 animate-spin text-purple-600" />
+            <Loader2 className="w-6 h-6 animate-spin text-yellow-600" />
           </div>
         )}
 

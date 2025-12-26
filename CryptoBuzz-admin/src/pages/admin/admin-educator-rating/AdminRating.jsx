@@ -90,7 +90,7 @@ const AdminRating = () => {
                   className="w-10 h-10 rounded-full object-cover"
                 />
               ) : (
-                <div className="w-10 h-10 rounded-full bg-purple-600 text-white flex items-center justify-center font-semibold">
+                <div className="w-10 h-10 rounded-full bg-yellow-600 text-white flex items-center justify-center font-semibold">
                   {initials || "NA"}
                 </div>
               )}
@@ -200,7 +200,7 @@ const AdminRating = () => {
           const educatorId = row?.original?._id;
           return (
             <button
-              className="bg-purple-600 text-white px-4 py-2 text-sm rounded-lg hover:bg-purple-700 transition"
+              className="bg-yellow-600 text-white px-4 py-2 text-sm rounded-lg hover:bg-yellow-700 transition"
               onClick={() =>
                 navigate(`/admin/educator-rating/${educatorId}`, {
                   state: { educator: row.original },

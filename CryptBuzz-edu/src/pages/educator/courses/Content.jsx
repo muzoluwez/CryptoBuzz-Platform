@@ -111,7 +111,7 @@ const Content = () => {
                       <item.icon
                         className={`h-5 w-5 mr-2 ${
                           activePage === item.label.toLowerCase()
-                            ? "text-blue-600"
+                            ? "text-yellow-600"
                             : ""
                         }`}
                       />

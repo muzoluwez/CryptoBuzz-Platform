@@ -60,7 +60,7 @@ const EducatorViseRecording = ({ data, isLoading, isError, error }) => {
                                             <span
                                                 className={`inline-block badge badge-xs rounded-full font-medium ${recorder.role === 'admin'
                                                     ? 'bg-red-100 text-red-600'
-                                                    : 'bg-blue-100 text-blue-600'
+                                                    : 'bg-blue-100 text-yellow-600'
                                                     }`}
                                             >
                                                 {recorder.role}

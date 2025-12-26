@@ -204,7 +204,7 @@ const CreateTask = ({ isOpen, onClose, editingTask = null, refetch }) => {
             <button
               type="button"
               onClick={() => imageInputRef.current?.click()}
-              className="flex items-center gap-2 px-3 py-2 border rounded-md text-gray-700 hover:bg-blue-50 hover:text-blue-600 w-fit"
+              className="flex items-center gap-2 px-3 py-2 border rounded-md text-gray-700 hover:bg-blue-50 hover:text-yellow-600 w-fit"
             >
               <Image size={16} /> Add Images
             </button>

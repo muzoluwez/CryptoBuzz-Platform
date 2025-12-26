@@ -65,7 +65,7 @@ module.exports = {
               },
               primary: {
                 default: '#FFCD0B',
-                active: '#533ae3',
+                active: '#d9ae07',
                 light: '#FFFAE7',
                 clarity: 'rgb(157 ,152, 217 , 0.20)',
                 inverse: '#ffffff'
@@ -130,8 +130,8 @@ module.exports = {
               },
               primary: {
                 default: '#FFCD0B',
-                active: '#533ae3',
-                light: '#FFFAE7',
+                active: '#d9ae07',
+                light: '#2c2a22',
                 clarity: 'rgb(157 ,152 ,217 , 0.20)',
                 inverse: '#ffffff'
               },
@@ -191,7 +191,7 @@ module.exports = {
           light: {
             default: '0px 4px 12px 0px rgba(0, 0, 0, 0.09)',
             light: '0px 3px 4px 0px rgba(0, 0, 0, 0.03)',
-            primary: '0px 4px 12px 0px rgba(40, 132, 239, 0.35)',
+            primary: '0px 4px 12px 0px rgb(239 169 40 / 35%)',
             success: '0px 4px 12px 0px rgba(53, 189, 100, 0.35)',
             danger: '0px 4px 12px 0px rgba(241, 65, 108, 0.35)',
             info: '0px 4px 12px 0px rgba(114, 57, 234, 0.35)',
@@ -348,7 +348,7 @@ module.exports = {
         },
         'dark-imperial-blue': {
           DEFAULT: '#201946',
-          active: '#342B62',
+          active: 'rgb(98 80 43)',
           light: '#CFC7FF99',
           clarity: 'rgba(32, 25, 70, 0.20)',
           inverse: '#ffffff'

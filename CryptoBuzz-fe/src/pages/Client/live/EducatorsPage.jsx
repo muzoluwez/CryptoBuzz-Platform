@@ -1,7 +1,7 @@
-import React, { useState } from 'react'
-import { Card } from '../../../components/ui/card';
+import React, { useState } from 'react';
+import { Check, ChevronDown, Eye, Plus, Search } from 'lucide-react';
 import { useNavigate } from 'react-router';
-import { Search, Eye, Check, Plus, ChevronDown } from 'lucide-react';
+import { Card } from '../../../components/ui/card';
 
 const EducatorsPage = () => {
   const navigate = useNavigate();
@@ -19,12 +19,13 @@ const EducatorsPage = () => {
       subtitle: 'DOLOR SIT AMET',
       category: 'Crypto',
       specialty: 'Consectetur Adipiscing',
-      description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.',
+      description:
+        'Lorem ipsum dolor sit amet, consectetur adipiscing elit sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.',
       courses: 4,
       tradeIdeas: 17,
       insights: 5,
       gradient: 'from-yellow-600 to-yellow-900',
-      bgPattern: 'yellow'
+      bgPattern: 'yellow',
     },
     {
       id: 2,
@@ -33,12 +34,13 @@ const EducatorsPage = () => {
       subtitle: 'EIRMOD TEMPOR',
       category: 'Crypto',
       specialty: 'Invidunt Ut Labore',
-      description: 'Sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquam erat volutpat.',
+      description:
+        'Sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquam erat volutpat.',
       courses: 0,
       tradeIdeas: 5,
       insights: 4,
       gradient: 'from-yellow-600 to-yellow-900',
-      bgPattern: 'yellow'
+      bgPattern: 'yellow',
     },
     {
       id: 3,
@@ -47,12 +49,13 @@ const EducatorsPage = () => {
       subtitle: 'AD MINIM VENIAM',
       category: 'Forex',
       specialty: 'Quis Nostrud - Exerci',
-      description: 'Ut wisi enim ad minim veniam, quis nostrud exerci tation ullamcorper suscipit lobortis nisl ut aliquip ex ea commodo consequat.',
+      description:
+        'Ut wisi enim ad minim veniam, quis nostrud exerci tation ullamcorper suscipit lobortis nisl ut aliquip ex ea commodo consequat.',
       courses: 2,
       tradeIdeas: 17,
       insights: 86,
       gradient: 'from-blue-700 to-blue-950',
-      bgPattern: 'blue'
+      bgPattern: 'blue',
     },
     {
       id: 4,
@@ -61,12 +64,13 @@ const EducatorsPage = () => {
       subtitle: 'IRIURE DOLOR IN',
       category: 'Digital Marketing',
       specialty: 'Reprehenderit Voluptate',
-      description: 'Duis autem vel iriure dolor in reprehenderit in voluptate velit esse quam nihil molestie consequat vel illum dolore eu feugiat nulla.',
+      description:
+        'Duis autem vel iriure dolor in reprehenderit in voluptate velit esse quam nihil molestie consequat vel illum dolore eu feugiat nulla.',
       courses: 3,
       tradeIdeas: 12,
       insights: 24,
       gradient: 'from-green-600 to-green-900',
-      bgPattern: 'green'
+      bgPattern: 'green',
     },
     {
       id: 5,
@@ -75,12 +79,13 @@ const EducatorsPage = () => {
       subtitle: 'CUM SOLUTA NOBIS',
       category: 'Crypto',
       specialty: 'Est Legentis Ac',
-      description: 'Nam liber tempor cum soluta nobis est legentis ac tincidunt luctus delenit aute irure dolor in reprehenderit in voluptate.',
+      description:
+        'Nam liber tempor cum soluta nobis est legentis ac tincidunt luctus delenit aute irure dolor in reprehenderit in voluptate.',
       courses: 5,
       tradeIdeas: 23,
       insights: 15,
       gradient: 'from-purple-600 to-purple-900',
-      bgPattern: 'purple'
+      bgPattern: 'purple',
     },
     {
       id: 6,
@@ -89,31 +94,40 @@ const EducatorsPage = () => {
       subtitle: 'CLARITATEM INSITAM',
       category: 'Forex',
       specialty: 'Perspiciatis Unde',
-      description: 'Typi non habent claritatem insitam est usus legentis in iis qui facit eorum claritatem investiga tionum seacula quosdam.',
+      description:
+        'Typi non habent claritatem insitam est usus legentis in iis qui facit eorum claritatem investiga tionum seacula quosdam.',
       courses: 6,
       tradeIdeas: 31,
       insights: 42,
       gradient: 'from-blue-700 to-blue-950',
-      bgPattern: 'blue'
-    }
+      bgPattern: 'blue',
+    },
   ];
 
-  const categories = ['Select Category', 'Crypto', 'Forex', 'Digital Marketing'];
+  const categories = [
+    'Select Category',
+    'Crypto',
+    'Forex',
+    'Digital Marketing',
+  ];
 
   const handleFollow = (id) => {
     if (followingIds.includes(id)) {
-      setFollowingIds(followingIds.filter(fId => fId !== id));
+      setFollowingIds(followingIds.filter((fId) => fId !== id));
     } else {
       setFollowingIds([...followingIds, id]);
     }
   };
 
-  const filteredEducators = educators.filter(educator => {
-    const matchesTab = activeTab === 'All' ||
+  const filteredEducators = educators.filter((educator) => {
+    const matchesTab =
+      activeTab === 'All' ||
       (activeTab === 'Following' && followingIds.includes(educator.id));
-    const matchesCategory = selectedCategory === 'Select Category' ||
+    const matchesCategory =
+      selectedCategory === 'Select Category' ||
       educator.category === selectedCategory;
-    const matchesSearch = educator.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    const matchesSearch =
+      educator.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       educator.specialty.toLowerCase().includes(searchQuery.toLowerCase()) ||
       educator.description.toLowerCase().includes(searchQuery.toLowerCase());
 
@@ -127,7 +141,7 @@ const EducatorsPage = () => {
           <div className="flex gap-4">
             {/* Button 1 */}
             <button
-              onClick={() => navigate("/client/live")}
+              onClick={() => navigate('/client/live')}
               className="
             px-6 py-2 
              bg-gray-100 
@@ -148,7 +162,7 @@ const EducatorsPage = () => {
 
             {/* Button 2 */}
             <button
-              onClick={() => navigate("/client/educators")}
+              onClick={() => navigate('/client/educators')}
               className="
             px-6 py-2 
             bg-primary
@@ -163,7 +177,6 @@ const EducatorsPage = () => {
             >
               Educators
             </button>
-
           </div>
         </div>
       </Card>
@@ -174,19 +187,21 @@ const EducatorsPage = () => {
             {/* Tabs */}
             <button
               onClick={() => setActiveTab('All')}
-              className={`px-6 py-2 rounded-lg font-medium cursor-pointer transition-all ${activeTab === 'All'
-                ? 'bg-primary text-white shadow-lg'
-                : 'bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-200 hover:dark:bg-gray-700'
-                }`}
+              className={`px-6 py-2 rounded-lg font-medium cursor-pointer transition-all ${
+                activeTab === 'All'
+                  ? 'bg-primary text-white shadow-lg'
+                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-200 hover:dark:bg-gray-700'
+              }`}
             >
               All
             </button>
             <button
               onClick={() => setActiveTab('Following')}
-              className={`px-6 py-2 rounded-lg font-medium cursor-pointer transition-all ${activeTab === 'Following'
-                ? 'bg-primary text-white shadow-lg'
-                : 'bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-200 hover:dark:bg-gray-700'
-                }`}
+              className={`px-6 py-2 rounded-lg font-medium cursor-pointer transition-all ${
+                activeTab === 'Following'
+                  ? 'bg-primary text-white shadow-lg'
+                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-200 hover:dark:bg-gray-700'
+              }`}
             >
               Following
             </button>
@@ -198,7 +213,7 @@ const EducatorsPage = () => {
                 onChange={(e) => setSelectedCategory(e.target.value)}
                 className="appearance-none bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg px-4 py-2 pr-10 text-gray-700 dark:text-gray-200 font-medium cursor-pointer hover:border-gray-400 dark:hover:border-gray-600 transition-colors focus:outline-none w-48"
               >
-                {categories.map(category => (
+                {categories.map((category) => (
                   <option key={category} value={category}>
                     {category}
                   </option>
@@ -224,9 +239,14 @@ const EducatorsPage = () => {
         {/* Educators Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredEducators.map((educator) => (
-            <Card key={educator.id} className="rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow">
+            <Card
+              key={educator.id}
+              className="rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow"
+            >
               {/* Header Card */}
-              <div className={`relative h-64 bg-gradient-to-br ${educator.gradient} overflow-hidden`}>
+              <div
+                className={`relative h-64 bg-gradient-to-br ${educator.gradient} overflow-hidden`}
+              >
                 {/* Category Badge */}
                 <div className="absolute top-4 left-4 z-10">
                   <span className="bg-primary text-dark px-3 py-1 rounded-full text-sm font-medium">
@@ -235,10 +255,15 @@ const EducatorsPage = () => {
                 </div>
 
                 {/* Decorative Shape */}
-                <div className={`absolute -left-20 -top-20 w-64 h-64 ${educator.bgPattern === 'purple' ? 'bg-purple-500' :
-                  educator.bgPattern === 'blue' ? 'bg-blue-500' :
-                    'bg-primary'
-                  } opacity-30 rounded-full`}></div>
+                <div
+                  className={`absolute -left-20 -top-20 w-64 h-64 ${
+                    educator.bgPattern === 'purple'
+                      ? 'bg-purple-500'
+                      : educator.bgPattern === 'blue'
+                        ? 'bg-blue-500'
+                        : 'bg-primary'
+                  } opacity-30 rounded-full`}
+                ></div>
 
                 {/* Educator Info */}
                 <div className="absolute top-1/2 right-6 -translate-y-1/2 text-right">
@@ -268,16 +293,28 @@ const EducatorsPage = () => {
                 {/* Stats */}
                 <div className="grid grid-cols-3 gap-4 mb-6">
                   <div className="text-center">
-                    <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">{educator.courses}</p>
-                    <p className="text-xs text-gray-500 dark:text-gray-400">Courses</p>
+                    <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">
+                      {educator.courses}
+                    </p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">
+                      Courses
+                    </p>
                   </div>
                   <div className="text-center">
-                    <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">{educator.tradeIdeas}</p>
-                    <p className="text-xs text-gray-500 dark:text-gray-400">Trade Ideas</p>
+                    <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">
+                      {educator.tradeIdeas}
+                    </p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">
+                      Trade Ideas
+                    </p>
                   </div>
                   <div className="text-center">
-                    <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">{educator.insights}</p>
-                    <p className="text-xs text-gray-500 dark:text-gray-400">Insights</p>
+                    <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">
+                      {educator.insights}
+                    </p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">
+                      Insights
+                    </p>
                   </div>
                 </div>
 
@@ -285,10 +322,11 @@ const EducatorsPage = () => {
                 <div className="grid grid-cols-2 gap-3">
                   <button
                     onClick={() => handleFollow(educator.id)}
-                    className={`py-2 rounded-lg font-medium transition-all flex items-center justify-center gap-2 cursor-pointer ${followingIds.includes(educator.id)
-                      ? 'bg-yellow-600 text-white hover:bg-primary-dark'
-                      : 'bg-yellow-100 dark:bg-yellow-700 text-yellow-600 dark:text-yellow-200 hover:bg-yellow-200'
-                      }`}
+                    className={`py-2 rounded-lg font-medium transition-all flex items-center justify-center gap-2 cursor-pointer ${
+                      followingIds.includes(educator.id)
+                        ? 'bg-yellow-600 text-white hover:bg-primary-dark'
+                        : 'bg-yellow-100 dark:bg-yellow-700 text-yellow-600 dark:text-yellow-200 hover:bg-yellow-200'
+                    }`}
                   >
                     {followingIds.includes(educator.id) ? (
                       <>
@@ -302,7 +340,10 @@ const EducatorsPage = () => {
                       </>
                     )}
                   </button>
-                  <button onClick={() => navigate("/client/viewprofile")} className="py-2 bg-white dark:bg-gray-800 border-1 border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-200 rounded-lg font-medium hover:bg-gray-50 dark:hover:bg-gray-700 transition-all flex items-center justify-center gap-2 cursor-pointer">
+                  <button
+                    onClick={() => navigate('/client/viewprofile')}
+                    className="py-2 bg-white dark:bg-gray-800 border-1 border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-200 rounded-lg font-medium hover:bg-gray-50 dark:hover:bg-gray-700 transition-all flex items-center justify-center gap-2 cursor-pointer"
+                  >
                     <Eye className="w-4 h-4" />
                     View Profile
                   </button>
@@ -315,12 +356,14 @@ const EducatorsPage = () => {
         {/* No Results */}
         {filteredEducators.length === 0 && (
           <div className="text-center py-12">
-            <p className="text-gray-500 text-lg">No educators found matching your criteria.</p>
+            <p className="text-gray-500 text-lg">
+              No educators found matching your criteria.
+            </p>
           </div>
         )}
       </div>
     </>
-  )
-}
+  );
+};
 
 export default EducatorsPage;
