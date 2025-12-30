@@ -13,6 +13,7 @@ import { Login } from '@/pages/Auth/Login';
 import { Signup } from '@/pages/Auth/Signup';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { CryptoPage } from '../pages/Client/crypto/page';
+import { ProfilePage } from '@/pages/Client/profile/page';
 
 export function AppRoutingSetup() {
   return (
@@ -30,6 +31,7 @@ export function AppRoutingSetup() {
         <Route path="/client/crypto" element={<CryptoPage />} />
         <Route path="/client/live" element={<LivePage />} />
         <Route path="/client/educators" element={<EducatorsPage />} />
+        <Route path="/client/profile" element={<ProfilePage />} />
 
         {/* Protected Routes (Semi-protected via AccessGate, but route accessible) 
             or Strictly Protected? 
