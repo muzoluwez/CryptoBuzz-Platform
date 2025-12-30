@@ -74,15 +74,15 @@ const EducatorsPage = () => {
 
   // Transform API data to match component structure
   const educators = useMemo(() => {
-    return educatorsData.map((educator) => {
+    return educatorsData?.map((educator) => {
       const categoryName =
-        educator.categories?.[0]?.name || educator.category || 'General';
-      const categoryId = educator.categories?.[0]?._id || null;
-      const fullName = `${educator.first_name || ''} ${educator.last_name || ''}`.trim() || educator.title || 'Unknown';
+        educator?.categories?.[0]?.name || educator?.category || 'General';
+      const categoryId = educator?.categories?.[0]?._id || null;
+      const fullName = `${educator?.first_name || ''} ${educator?.last_name || ''}`.trim() || educator?.title || 'Unknown';
       
       return {
-        id: educator._id,
-        _id: educator._id,
+        id: educator?._id,
+        _id: educator?._id,
         first_name: educator.first_name,
         last_name: educator.last_name,
         name: fullName,
@@ -410,8 +410,8 @@ const EducatorsPage = () => {
                     </button>
                     <button
                       onClick={() =>
-                        navigate(`/client/view-profile/${educator._id || educator.id}`, {
-                          state: { educatorId: educator._id || educator.id },
+                        navigate(`/client/view-profile/${educator?._id || educator?.id}`, {
+                          state: { educatorId: educator?._id || educator?.id },
                         })
                       }
                       className="py-2.5 bg-gray-900 dark:bg-gray-800 text-white dark:text-gray-200 rounded-lg font-medium hover:bg-gray-800 dark:hover:bg-gray-700 transition-all flex items-center justify-center gap-2 cursor-pointer"

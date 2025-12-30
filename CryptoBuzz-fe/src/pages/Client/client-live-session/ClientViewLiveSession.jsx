@@ -95,13 +95,15 @@ const ClientViewLiveSession = ({ bannerImage, callId, educatorData }) => {
 
   // 4. Render logic with safe scheduleData access
   const isUpcoming = scheduleData?.data?.datetime
-    ? new Date(scheduleData.data.datetime) > new Date()
+    ? new Date(scheduleData?.data?.datetime) > new Date()
     : false;
 
   const fetchRecordings = async () => {
     try {
-      const response = await call.queryRecordings();
-      setRecordings(response.recordings);
+      if (call) {
+        const response = await call.queryRecordings();
+        setRecordings(response?.recordings || []);
+      }
     } catch (err) {
       console.error("Failed to fetch recordings:", err);
     }
@@ -120,7 +122,7 @@ const ClientViewLiveSession = ({ bannerImage, callId, educatorData }) => {
           <p className="text-center text-lg pt-10 px-2">
             The event will start on{" "}
             {scheduleData?.data?.datetime 
-              ? format(new Date(scheduleData.data.datetime), "MMM dd, yyyy, hh:mm a")
+              ? format(new Date(scheduleData?.data?.datetime), "MMM dd, yyyy, hh:mm a")
               : "a future date"}
           </p>
         </div>

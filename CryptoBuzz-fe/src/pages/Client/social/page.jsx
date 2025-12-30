@@ -1,43 +1,23 @@
 import { useMemo, useState } from 'react';
 import { useGetSocialsQuery } from '@/store/client/clientSocialApiSlice';
-import {
-  FilterIcon,
-  Forward,
-  MessageCircle,
-  Settings,
-  ThumbsUpIcon,
-} from 'lucide-react';
 import { Button } from 'react-aria-components';
 import { Link } from 'react-router';
 import { useAccessControl } from '@/hooks/use-access-control';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuLabel,
-  DropdownMenuRadioGroup,
-  DropdownMenuRadioItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuLabel, DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { AccessGate } from '@/components/common/AccessGate';
-import {
-  Toolbar,
-  ToolbarHeading,
-} from '@/components/layouts/layout-7/components/toolbar';
-import {
-  Card,
-  CardContent,
-  CardFooter,
-  CardHeader,
-  CardHeading,
-  CardTitle,
-  CardToolbar,
-} from '../../../components/ui/card';
+import ImageCarousel from '@/components/common/ImageCarousel';
+import ImageViewer from '@/components/common/ImageViewer';
+import ShowMoreLess from '@/components/common/ShowMoreLess';
+import { Toolbar, ToolbarHeading } from '@/components/layouts/layout-7/components/toolbar';
+import { Card, CardContent, CardFooter, CardHeader, CardHeading, CardTitle, CardToolbar } from '../../../components/ui/card';
+
 
 export function SocialPage() {
   const [sortValue, setSortValue] = useState('latest');
+  const [selectedImage, setSelectedImage] = useState(null);
+  const [selectedImages, setSelectedImages] = useState([]);
   const [filters, setFilters] = useState({
     images: false,
     videos: false,
@@ -80,50 +60,58 @@ export function SocialPage() {
   const posts = useMemo(() => {
     if (!data?.data) return [];
 
-    return data.data.map((post) => {
+
+    return data?.data?.map((post) => {
       // Get author information
-      const author = post.author || {};
+      const author = post?.author || {};
       const authorName =
-        author.first_name && author.last_name
-          ? `${author.first_name} ${author.last_name}`
-          : author.first_name || author.last_name || 'Unknown Author';
+        author?.first_name && author?.last_name
+          ? `${author?.first_name || ''} ${author?.last_name || ''}`.trim()
+          : author?.first_name || author?.last_name || 'Unknown Author';
 
       // Format date
-      const createdAt = post.createdAt ? new Date(post.createdAt) : new Date();
+      const createdAt = post?.createdAt ? new Date(post.createdAt) : new Date();
       const timeAgo = formatTimeAgo(createdAt);
 
-      // Get image from images array (first image) - use as is from backend
-      const image =
-        post.images && post.images.length > 0 && post.images[0]?.url
-          ? post.images[0].url
-          : null; // Don't use placeholder, show nothing if no image
+      // Get images array - extract URLs from image objects
+      const imageUrls = post?.images && Array.isArray(post.images) && post.images.length > 0
+        ? post.images.map(img => img?.url || img).filter(Boolean)
+        : [];
+      
+      // Get first image for backward compatibility
+      const image = imageUrls?.length > 0 ? imageUrls[0] : null;
+
+      // Get videos array - extract URLs from video objects
+      const videoUrls = post?.videos && Array.isArray(post.videos) && post.videos.length > 0
+        ? post.videos.map(video => video?.url || video).filter(Boolean)
+        : [];
 
       // Get avatar
-      const avatar = author.image || '/media/avatars/1.png';
+      const avatar = author?.image || '/media/avatars/1.png';
       const fallback =
         authorName
-          .split(' ')
-          .map((n) => n[0])
-          .join('')
-          .toUpperCase()
-          .slice(0, 2) || 'U';
+          ?.split(' ')
+          ?.map((n) => n?.[0])
+          ?.join('')
+          ?.toUpperCase()
+          ?.slice(0, 2) || 'U';
 
       // Calculate views from likes, comments, and shares
       const totalViews =
-        (post.likes?.length || 0) +
-        (post.comments?.length || 0) +
-        (post.shares?.length || 0);
+        (post?.likes?.length || 0) +
+        (post?.comments?.length || 0) +
+        (post?.shares?.length || 0);
       const views = totalViews > 0 ? formatViews(totalViews) : '0';
 
       // Make all posts PUBLIC (free access)
       const accessType = 'PUBLIC';
 
       // Get category for host name
-      const category = post.category || 'Event';
+      const category = post?.category || 'Event';
 
       return {
-        id: post._id,
-        _id: post._id,
+        id: post?._id,
+        _id: post?._id,
         author: {
           name: authorName,
           role: 'Educator', // Default role
@@ -131,24 +119,29 @@ export function SocialPage() {
           fallback: fallback,
         },
         time: timeAgo,
-        content: post.content || 'No content available.',
+        content: post?.content || 'No content available.',
         image: image,
-        images: post.images || [], // Keep all images
-        videos: post.videos || [], // Keep videos
+        images: imageUrls, // Array of image URLs (extracted from objects)
+        videos: videoUrls, // Array of video URLs (extracted from objects)
         host: {
           name: category,
           desc: 'Social Post',
         },
         views: views,
         accessType: accessType,
-        allowedPlans: post.allowedPlans || [],
+        allowedPlans: post?.allowedPlans || [],
         category: category,
-        hashtags: post.hashtags || [],
-        mentions: post.mentions || [],
-        likes: post.likes || [],
-        comments: post.comments || [],
-        shares: post.shares || [],
-        ...post, // Include all other properties
+        hashtags: post?.hashtags || [],
+        mentions: post?.mentions || [],
+        likes: post?.likes || [],
+        comments: post?.comments || [],
+        shares: post?.shares || [],
+        createdAt: post?.createdAt,
+        updatedAt: post?.updatedAt,
+        // Spread other properties but override images and videos with extracted URLs
+        ...post,
+        images: imageUrls, // Ensure images is the extracted URLs array
+        videos: videoUrls, // Ensure videos is the extracted URLs array
       };
     });
   }, [data]);
@@ -210,7 +203,7 @@ export function SocialPage() {
             </h1>
             <p className="text-xs text-gray-500 mt-1">Home / Social</p>
           </header>
-          <DropdownMenu>
+          {/* <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button className="btn !flex gap-2 bg-primary !text-dark cursor-pointer ">
                 Filter <FilterIcon className="w-5" />{' '}
@@ -229,7 +222,7 @@ export function SocialPage() {
                 </DropdownMenuRadioItem>
               </DropdownMenuRadioGroup>
             </DropdownMenuContent>
-          </DropdownMenu>
+          </DropdownMenu> */}
         </div>
         <div className="flex items-center justify-center min-h-[400px]">
           <div className="text-center">
@@ -250,7 +243,7 @@ export function SocialPage() {
             </h1>
             <p className="text-xs text-gray-500 mt-1">Home / Social</p>
           </header>
-          <DropdownMenu>
+          {/* <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button className="btn !flex gap-2 bg-primary !text-dark cursor-pointer ">
                 Filter <FilterIcon className="w-5" />{' '}
@@ -269,14 +262,14 @@ export function SocialPage() {
                 </DropdownMenuRadioItem>
               </DropdownMenuRadioGroup>
             </DropdownMenuContent>
-          </DropdownMenu>
+          </DropdownMenu> */}
         </div>
         <div>
-          {posts.map((post) => (
+          {posts?.map((post) => (
             <AccessGate
-              key={post.id}
-              accessType={post.accessType}
-              allowedPlans={post.allowedPlans}
+              key={post?.id || post?._id}
+              accessType={post?.accessType}
+              allowedPlans={post?.allowedPlans || []}
               fallback={
                 <Card className="max-w-full overflow-hidden rounded-xl shadow-md mb-5 opacity-75">
                   <CardHeader className="p-4 justify-between blur-[2px]">
@@ -309,28 +302,31 @@ export function SocialPage() {
                   <div className="flex items-start gap-3">
                     <Avatar className="h-10 w-10">
                       <AvatarImage
-                        src={post.author.avatar}
-                        alt={post.author.name}
+                        src={post?.author?.image}
+                        alt={post?.author?.name || 'Author'}
                       />
-                      <AvatarFallback>{post.author.fallback}</AvatarFallback>
+                      <AvatarFallback>
+                        {post?.author?.fallback || 'U'}
+                      </AvatarFallback>
                     </Avatar>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center justify-between gap-3">
                         <div className="min-w-0">
                           <div className="text-sm font-semibold truncate">
-                            {post.author.name}{' '}
+                            {`${post?.author?.first_name || ''} ${post?.author?.last_name || ''}`.trim() ||
+                              'Unknown Author'}{' '}
                             <span className="text-xs font-normal text-gray-400">
-                              • {post.author.role}
+                              • {post?.author?.role || 'Educator'}
                             </span>
                           </div>
                           <div className="text-xs text-gray-400 truncate">
-                            {post.time}
+                            {/* {post?.time || ''} */}
                           </div>
                         </div>
                       </div>
                     </div>
                   </div>
-                  <CardToolbar>
+                  {/* <CardToolbar>
                     <Button
                       mode="icon"
                       variant="outline"
@@ -339,42 +335,79 @@ export function SocialPage() {
                     >
                       <Settings />
                     </Button>
-                  </CardToolbar>
+                  </CardToolbar> */}
                 </CardHeader>
 
                 <CardContent className="p-4 pt-2">
                   <div className="mb-5">
-                    <p className="text-sm text-gray-600 dark:text-gray-300 mt-2 line-clamp-3">
-                      {post.content}{' '}
-                      <span className="text-blue-400">...more</span>
-                    </p>
+                    <div className="text-sm text-gray-600 dark:text-gray-300 mt-2">
+                      {post?.content ? (
+                        <ShowMoreLess text={post.content} limit={100} />
+                      ) : (
+                        <p className="line-clamp-3">No content available.</p>
+                      )}
+                    </div>
                   </div>
-                  {post.image && (
-                    <Link to="/client/viewprofile">
-                      <div className="rounded-xl overflow-hidden h-72 relative">
-                        <img
-                          src={post.image}
-                          alt={post.content || 'Social post'}
-                          className="w-full h-full object-cover"
+                  {/* Images */}
+                  {post?.images &&
+                    Array.isArray(post.images) &&
+                    post.images.length > 0 && (
+                      <div className="rounded-xl overflow-hidden h-72 relative mb-4">
+                        <ImageCarousel
+                          images={post.images}
+                          alt={post?.content || 'Social post'}
+                          height="h-72"
+                          showViewButton={true}
+                          className="rounded-xl"
                         />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent"></div>
-                        <div className="absolute left-4 bottom-4 text-white">
+                        {/* <Link
+                          to="/client/viewprofile"
+                          className="absolute inset-0 z-10"
+                          onClick={(e) => e?.stopPropagation()}
+                        /> */}
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent pointer-events-none" />
+                        <div className="absolute left-4 bottom-4 text-white z-20">
                           <div className="text-xs uppercase opacity-80 tracking-wider">
                             Hosted by
                           </div>
                           <div className="text-lg font-bold text-primary">
-                            {post.host.name}
+                            {post?.host?.name || post?.category || ''}
                           </div>
                           <div className="text-sm opacity-90">
-                            {post.host.desc}
+                            {post?.host?.desc || 'Social Post'}
                           </div>
                         </div>
                       </div>
-                    </Link>
-                  )}
+                    )}
+                  {/* Videos */}
+                  {post?.videos &&
+                    Array.isArray(post.videos) &&
+                    post.videos.length > 0 && (
+                      <div className="rounded-xl overflow-hidden space-y-4 mb-4">
+                        {post.videos.map((video, idx) => (
+                          <div
+                            key={idx}
+                            className="relative w-full h-72 rounded-xl overflow-hidden bg-black"
+                          >
+                            <video
+                              src={video}
+                              controls
+                              className="w-full h-full object-contain"
+                              onError={(e) => {
+                                if (e?.target) {
+                                  e.target.style.display = 'none';
+                                }
+                              }}
+                            >
+                              Your browser does not support the video tag.
+                            </video>
+                          </div>
+                        ))}
+                      </div>
+                    )}
                 </CardContent>
 
-                <CardFooter className="p-4 pt-2 flex items-center justify-between">
+                {/* <CardFooter className="p-4 pt-2 flex items-center justify-between">
                   <div className="flex items-center gap-3">
                     <Button
                       mode="icon"
@@ -404,12 +437,24 @@ export function SocialPage() {
                   <div className="text-xs text-gray-700">
                     {post.views} views
                   </div>
-                </CardFooter>
+                </CardFooter> */}
               </Card>
             </AccessGate>
           ))}
         </div>
       </div>
+
+      {/* Image Viewer Modal */}
+      <ImageViewer
+        image={selectedImage}
+        images={selectedImages?.length > 0 ? selectedImages : []}
+        isOpen={!!selectedImage}
+        onClose={() => {
+          setSelectedImage(null);
+          setSelectedImages([]);
+        }}
+        alt="Social post image"
+      />
     </>
   );
 }

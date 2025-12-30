@@ -1,4 +1,7 @@
 import { useMemo, useState } from 'react';
+import ImageViewer from '@/components/common/ImageViewer';
+import ImageSlider from '@/components/common/ImageSlider';
+import ImageCarousel from '@/components/common/ImageCarousel';
 import { useGetTradeAnalysisQuery } from '@/store/client/clientTradeAnalysisApiSlice';
 import { Lock } from 'lucide-react';
 import {
@@ -27,6 +30,7 @@ export function InsightPage() {
 
   // ------------------- STATE -------------------
   const [selectedInsight, setSelectedInsight] = useState(null);
+  const [selectedImage, setSelectedImage] = useState(null);
   const [activeTab, setActiveTab] = useState('All');
 
   // ------------------- API CALL -------------------
@@ -39,17 +43,17 @@ export function InsightPage() {
   const insights = useMemo(() => {
     if (!data?.data) return [];
 
-    return data.data.map((insight) => {
-      const createdBy = insight.createdBy || {};
+    return data?.data?.map((insight) => {
+      const createdBy = insight?.createdBy || {};
       const authorName =
-        createdBy.first_name && createdBy.last_name
-          ? `${createdBy.first_name} ${createdBy.last_name}`
-          : createdBy.first_name || createdBy.last_name || 'Unknown Author';
+        createdBy?.first_name && createdBy?.last_name
+          ? `${createdBy?.first_name || ''} ${createdBy?.last_name || ''}`.trim()
+          : createdBy?.first_name || createdBy?.last_name || 'Unknown Author';
 
-      const categoryName = insight.category?.name || 'Uncategorized';
+      const categoryName = insight?.category?.name || 'Uncategorized';
 
       // Format date
-      const date = insight.createdAt
+      const date = insight?.createdAt
         ? new Date(insight.createdAt).toLocaleString('en-US', {
             month: 'short',
             day: '2-digit',
@@ -68,17 +72,17 @@ export function InsightPage() {
           });
 
       // Get formatted plain text - converts HTML and \r\n to proper plain text
-      const plainTextDescription = insight.description
+      const plainTextDescription = insight?.description
         ? convertRtkEditorToFormattedPlainText(insight.description, true)
         : '';
 
       // Get display format with clickable links for full view
-      const fullDisplayHtml = insight.description
+      const fullDisplayHtml = insight?.description
         ? convertRtkEditorToDisplayFormat(insight.description, true, true)
         : '';
 
       // For preview: get single line version (no line breaks) and limit to 2 lines worth
-      const singleLineText = insight.description
+      const singleLineText = insight?.description
         ? convertRtkEditorToFormattedPlainText(insight.description, false)
         : '';
 
@@ -92,17 +96,17 @@ export function InsightPage() {
 
       // Get image from photos array or use placeholder
       const image =
-        insight.photos && insight.photos.length > 0
+        insight?.photos && insight.photos?.length > 0
           ? insight.photos[0]
           : 'https://images.unsplash.com/photo-1518779578993-ec3579fee39f?q=80&w=1400&auto=format&fit=crop';
 
       // Get avatar from createdBy
-      const avatar = createdBy.image || '/media/avatars/1.png';
+      const avatar = createdBy?.image || '/media/avatars/1.png';
 
       return {
-        id: insight._id,
-        _id: insight._id,
-        title: insight.title || 'Untitled Insight',
+        id: insight?._id,
+        _id: insight?._id,
+        title: insight?.title || 'Untitled Insight',
         author: authorName,
         date: date,
         preview: preview,
@@ -218,20 +222,28 @@ export function InsightPage() {
 
               return (
                 <Card
-                  key={insight._id || insight.id}
+                  key={insight?._id || insight?.id}
                   className="bg-card border border-border overflow-hidden"
                 >
                   {/* image */}
                   <div className="w-full h-44 overflow-hidden relative">
                     {!hasAccess && (
-                      <div className="absolute inset-0 bg-black/40 backdrop-blur-[2px] flex items-center justify-center z-10">
+                      <div className="absolute inset-0 bg-black/40 backdrop-blur-[2px] flex items-center justify-center z-30 pointer-events-none">
                         <Lock className="w-8 h-8 text-white/80" />
                       </div>
                     )}
-                    <img
-                      src={insight.image}
-                      alt={insight.title}
-                      className="w-full h-full object-cover"
+                    <ImageCarousel
+                      images={
+                        insight?.photos && Array.isArray(insight.photos) && insight.photos.length > 0
+                          ? insight.photos
+                          : insight?.image
+                          ? [insight.image]
+                          : []
+                      }
+                      alt={insight?.title || "Trade insight"}
+                      height="h-44"
+                      showViewButton={hasAccess}
+                      className={!hasAccess ? "blur-sm pointer-events-none" : ""}
                     />
                   </div>
 
@@ -240,36 +252,36 @@ export function InsightPage() {
                     <div className="flex items-center gap-3">
                       <Avatar className="h-10 w-10">
                         <AvatarImage
-                          src={insight.avatar}
-                          alt={insight.author}
+                          src={insight?.avatar}
+                          alt={insight?.author || "Author"}
                         />
-                        <AvatarFallback>{insight.author[0]}</AvatarFallback>
+                        <AvatarFallback>{insight?.author?.[0] || "A"}</AvatarFallback>
                       </Avatar>
 
                       <div className="flex-1">
                         <div className="flex items-center justify-between">
                           <div>
                             <p className="text-sm font-medium truncate">
-                              {insight.author}
+                              {insight?.author || "Unknown"}
                             </p>
                             <p className="text-xs text-muted-foreground">
-                              {insight.date}
+                              {insight?.date || ""}
                             </p>
                           </div>
-                          <Badge>{insight.category}</Badge>
+                          <Badge>{insight?.category || ""}</Badge>
                         </div>
                       </div>
                     </div>
 
                     {/* Title */}
                     <h3 className="mt-4 text-lg font-bold text-primary">
-                      {insight.title}
+                      {insight?.title || "Untitled"}
                     </h3>
 
                     {/* Preview - 2 lines max */}
                     <p className="mt-2 text-sm text-muted-foreground line-clamp-2">
                       {hasAccess
-                        ? insight.preview
+                        ? insight?.preview || ""
                         : 'This content is locked. Upgrade your plan or log in to view full insights.'}
                     </p>
 
@@ -286,7 +298,7 @@ export function InsightPage() {
 
                   <CardFooter className="p-4">
                     <div className="text-sm text-muted-foreground">
-                      Published • {insight.date.split(',')[0]}
+                      Published • {insight?.date?.split(',')?.[0] || ""}
                     </div>
                   </CardFooter>
                 </Card>
@@ -314,10 +326,20 @@ export function InsightPage() {
             allowedPlans={selectedInsight?.allowedPlans}
           >
             <div className="bg-card p-4 overflow-y-auto max-h-[72vh]">
-              {/* Image */}
-              <img
-                src={selectedInsight?.image}
-                className="w-full h-64 object-cover rounded-md"
+              {/* Image Slider */}
+              <ImageSlider
+                images={
+                  selectedInsight?.photos && Array.isArray(selectedInsight.photos) && selectedInsight.photos.length > 0
+                    ? selectedInsight.photos
+                    : selectedInsight?.image
+                    ? [selectedInsight.image]
+                    : []
+                }
+                description={selectedInsight?.fullDisplayHtml || selectedInsight?.full || ""}
+                descriptionLimit={95}
+                showDescription={false}
+                alt="Trade insight chart"
+                height="h-64"
               />
 
               <div className="mt-4 space-y-4">
@@ -355,7 +377,7 @@ export function InsightPage() {
                 </div>
 
                 {/* Buttons */}
-                <div className="flex gap-3 mt-4">
+                {/* <div className="flex gap-3 mt-4">
                   <Button className="flex-1 bg-yellow-600 hover:bg-yellow-700 text-white">
                     Save Insight
                   </Button>
@@ -366,12 +388,29 @@ export function InsightPage() {
                   >
                     Close
                   </Button>
-                </div>
+                </div> */}
               </div>
             </div>
           </AccessGate>
         </DialogContent>
       </Dialog>
+
+      {/* Image Viewer Modal */}
+      <ImageViewer
+        image={selectedImage}
+        images={
+          selectedInsight?.photos && Array.isArray(selectedInsight.photos) && selectedInsight.photos.length > 0
+            ? selectedInsight.photos
+            : selectedInsight?.image
+            ? [selectedInsight.image]
+            : selectedImage
+            ? [selectedImage]
+            : []
+        }
+        isOpen={!!selectedImage}
+        onClose={() => setSelectedImage(null)}
+        alt="Trade insight chart"
+      />
     </>
   );
 }

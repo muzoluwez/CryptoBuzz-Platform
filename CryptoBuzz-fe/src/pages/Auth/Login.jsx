@@ -55,7 +55,7 @@ export function Login() {
           password: values.password,
         }).unwrap();
 
-        const { userObj, token } = response.data;
+        const { userObj, token } = response?.data || {};
 
         if (token) {
           dispatch(setCredentials({ user: userObj, token }));

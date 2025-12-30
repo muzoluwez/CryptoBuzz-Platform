@@ -107,9 +107,9 @@ export const useInitChat = ({ userId, userToken, callId, userName }) => {
 
         // Check if user is already connected with the same user ID
         const isAlreadyConnected = 
-          client.userID === userId && 
-          client.wsConnection && 
-          client.wsConnection.isHealthy;
+          client?.userID === userId && 
+          client?.wsConnection && 
+          client?.wsConnection?.isHealthy;
 
         if (isAlreadyConnected) {
           // User is already connected, just set up the channel

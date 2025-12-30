@@ -18,6 +18,10 @@ import { AccessGate } from '@/components/common/AccessGate';
 import { useAccessControl } from '@/hooks/use-access-control';
 import { useState } from "react";
 import { useGetIdeasQuery } from '@/store/client/clientIdeaApiSlice';
+import ImageViewer from '@/components/common/ImageViewer';
+import ImageSlider from '@/components/common/ImageSlider';
+import ImageCarousel from '@/components/common/ImageCarousel';
+import { toast } from 'sonner';
 
 
 
@@ -45,6 +49,22 @@ export function IdeaPage() {
   const [selectedCard, setSelectedCard] = useState(null);
   const { checkAccess } = useAccessControl();
 
+  // Copy to clipboard function
+  const copyToClipboard = async (text, label) => {
+    if (!text || text === '****') {
+      toast.error('No value to copy');
+      return;
+    }
+
+    try {
+      await navigator.clipboard.writeText(text);
+      toast.success(`${label || 'Value'} copied to clipboard!`);
+    } catch (err) {
+      console.error('Failed to copy:', err);
+      toast.error('Failed to copy. Please try again.');
+    }
+  };
+
   // Fetch ideas from API
   const { data, isLoading, error } = useGetIdeasQuery({
     page: 1,
@@ -53,45 +73,53 @@ export function IdeaPage() {
 
   // Transform API data to match component format
   const cards = data?.data?.map((idea) => {
-    const educator = idea.educator || {};
-    const educatorName = educator.first_name && educator.last_name
-      ? `${educator.first_name} ${educator.last_name}`
-      : educator.first_name || educator.last_name || "Unknown Trader";
+    const educator = idea?.educator || {};
+    const educatorName = educator?.first_name && educator?.last_name
+      ? `${educator?.first_name || ''} ${educator?.last_name || ''}`.trim()
+      : educator?.first_name || educator?.last_name || "Unknown Trader";
     
-    const categoryName = idea.category?.name || "Unknown Market";
-    const year = idea.createdAt ? new Date(idea.createdAt).getFullYear().toString() : "2025";
+    const categoryName = idea?.category?.name || "Unknown Market";
+    const year = idea?.createdAt ? new Date(idea.createdAt).getFullYear().toString() : "2025";
     
     // Determine tag type based on idea type
-    const typeTag = idea.type
+    const typeTag = idea?.type
       ? { label: idea.type.toUpperCase(), type: idea.type.toLowerCase() }
       : null;
     
-    const statusTag = idea.status
+    const statusTag = idea?.status
       ? { label: idea.status, type: "status" }
       : { label: "Pending", type: "status" };
     
-    const categoryTag = idea.category?.name
+    const categoryTag = idea?.category?.name
       ? { label: idea.category.name.toUpperCase(), type: "pair" }
       : null;
 
     const tags = [typeTag, categoryTag, statusTag].filter(Boolean);
 
+    // Handle images - can be array or single string
+    const images = idea?.image 
+      ? (Array.isArray(idea.image) ? idea.image : [idea.image])
+      : idea?.image_Url 
+      ? [idea.image_Url] 
+      : ["https://via.placeholder.com/400x300"];
+
     return {
-      _id: idea._id,
-      image: idea.image_Url || idea.image || "https://via.placeholder.com/400x300",
-      avatar: educator.image || "https://i.pravatar.cc/300",
+      _id: idea?._id,
+      image: images, // Keep as array for ImageCarousel
+      image_Url: idea?.image_Url, // Keep for backward compatibility
+      avatar: educator?.image || "https://i.pravatar.cc/300",
       trader: educatorName,
       market: categoryName,
       year: year,
-      entry: idea.entry?.toString() || "0",
-      invalidation: idea.invalidation?.toString() || "0",
-      exits: Array.isArray(idea.exits) 
+      entry: idea?.entry?.toString() || "0",
+      invalidation: idea?.invalidation?.toString() || "0",
+      exits: Array.isArray(idea?.exits) 
         ? idea.exits.map(exit => exit?.toString() || "0")
         : ["0"],
       tags: tags,
-      accessType: idea.accessType || "PUBLIC",
-      allowedPlans: idea.allowedPlans || [],
-      uid: idea._id,
+      accessType: idea?.accessType || "PUBLIC",
+      allowedPlans: idea?.allowedPlans || [],
+      uid: idea?._id,
       ...idea, // Include all other idea properties
     };
   }) || [];
@@ -166,27 +194,30 @@ export function IdeaPage() {
                   </div>
                 </CardHeader>
 
-                {/* TOP CHART IMAGE */}
-                <div
-                  className="relative cursor-pointer group"
-                  onClick={() => setSelectedImage(c.image)}
-                >
-                  <img
-                    src={c.image}
-                    className={`w-full h-52 object-cover border-0 transition-all duration-300 ${isLocked ? 'blur-md' : 'group-hover:opacity-80'}`}
-                  />
-                  {!isLocked && (
-                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-all duration-300 flex items-center justify-center">
-                      <Eye className="w-8 h-8 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                    </div>
-                  )}
-                  {isLocked && (
-                    <div className="absolute inset-0 flex items-center justify-center bg-black/10">
-                      <div className="bg-black/60 p-2 rounded-full">
-                        <CopyIcon className="w-6 h-6 text-white" />
-                        {/* Using CopyIcon as generic lock/icon or maybe import Lock if available. Using provided CopyIcon for now to minimize errors, or just text */}
+                {/* TOP CHART IMAGE CAROUSEL */}
+                <div className="relative">
+                  {isLocked ? (
+                    <div className="relative">
+                      <ImageCarousel
+                        images={Array.isArray(c.image) ? c.image : [c.image || c.image_Url]}
+                        alt={c.name || "Trading idea"}
+                        height="h-52"
+                        showViewButton={false}
+                        className={isLocked ? "blur-md" : ""}
+                      />
+                      <div className="absolute inset-0 flex items-center justify-center bg-black/10 z-30 pointer-events-none">
+                        <div className="bg-black/60 p-2 rounded-full">
+                          <CopyIcon className="w-6 h-6 text-white" />
+                        </div>
                       </div>
                     </div>
+                  ) : (
+                    <ImageCarousel
+                      images={Array.isArray(c.image) ? c.image : [c.image || c.image_Url]}
+                      alt={c.name || "Trading idea"}
+                      height="h-52"
+                      showViewButton={true}
+                    />
                   )}
 
                   {/* TAGS */}
@@ -222,28 +253,37 @@ export function IdeaPage() {
                     <div className='flex items-center justify-between'>
                       <p>Entry</p>
                       <div className='flex items-center gap-2 justify-between min-w-20'  >
-                        <CopyIcon className='w-4' />
+                        <CopyIcon 
+                          className={`w-4 ${!isLocked && c?.entry ? 'cursor-pointer hover:text-primary transition-colors' : 'cursor-not-allowed opacity-50'}`}
+                          onClick={() => !isLocked && copyToClipboard(c?.entry, 'Entry price')}
+                        />
                         <p className={!isLocked ? 'text-green-500' : 'text-gray-400'}>
-                          {isLocked ? '****' : c.entry}
+                          {isLocked ? '****' : c?.entry || '0'}
                         </p>
                       </div>
                     </div>
                     <div className='flex items-center justify-between '>
                       <p>Invalidation</p>
                       <div className='flex items-center gap-2 justify-between min-w-20'>
-                        <CopyIcon className='w-4' />
+                        <CopyIcon 
+                          className={`w-4 ${!isLocked && c?.invalidation ? 'cursor-pointer hover:text-primary transition-colors' : 'cursor-not-allowed opacity-50'}`}
+                          onClick={() => !isLocked && copyToClipboard(c?.invalidation, 'Invalidation level')}
+                        />
                         <p className={!isLocked ? 'text-red-500' : 'text-gray-400'}>
-                          {isLocked ? '****' : c.invalidation}
+                          {isLocked ? '****' : c?.invalidation || '0'}
                         </p>
                       </div>
                     </div>
-                    {c.exits.map((exitVal, idx) => (
+                    {c?.exits?.map((exitVal, idx) => (
                       <div key={idx} className='flex items-center justify-between'>
                         <p>{`Exit ${idx + 1}`}</p>
                         <div className='flex items-center gap-2 justify-between min-w-20'>
-                          <CopyIcon className='w-4' />
+                          <CopyIcon 
+                            className={`w-4 ${!isLocked && exitVal ? 'cursor-pointer hover:text-primary transition-colors' : 'cursor-not-allowed opacity-50'}`}
+                            onClick={() => !isLocked && copyToClipboard(exitVal, `Exit target ${idx + 1}`)}
+                          />
                           <p className={!isLocked ? 'text-red-500' : 'text-gray-400'}>
-                            {isLocked ? '****' : exitVal}
+                            {isLocked ? '****' : exitVal || '0'}
                           </p>
                         </div>
                       </div>
@@ -269,32 +309,12 @@ export function IdeaPage() {
       </div>
 
       {/* Image Viewer Modal */}
-      {selectedImage && (
-        <div
-          className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center p-4 animate-fadeIn"
-          onClick={() => setSelectedImage(null)}
-        >
-          <div
-            className="relative max-w-5xl max-h-[90vh] w-full h-full flex items-center justify-center"
-            onClick={(e) => e.stopPropagation()}
-          >
-            {/* Close Button */}
-            <button
-              onClick={() => setSelectedImage(null)}
-              className="absolute top-4 right-4 p-2 bg-white/10 hover:bg-white/20 rounded-full transition-colors z-10"
-            >
-              <X className="w-6 h-6 text-white" />
-            </button>
-
-            {/* Image */}
-            <img
-              src={selectedImage}
-              alt="Full view"
-              className="w-full h-full object-contain rounded-lg animate-slideInUp"
-            />
-          </div>
-        </div>
-      )}
+      <ImageViewer
+        image={selectedImage}
+        isOpen={!!selectedImage}
+        onClose={() => setSelectedImage(null)}
+        alt="Trading signal chart"
+      />
 
       {/* Details Modal using UI Library */}
       <Dialog open={!!selectedCard} onOpenChange={(open) => !open && setSelectedCard(null)}>
@@ -327,13 +347,23 @@ export function IdeaPage() {
                   <p className=" font-medium">{selectedCard.year}</p>
                 </div>
 
-                {/* Chart Image */}
+                {/* Chart Image Slider */}
                 <div className="rounded-xl overflow-hidden">
-                  <img
-                    src={selectedCard.image}
+                  <ImageSlider
+                    images={
+                      Array.isArray(selectedCard.image)
+                        ? selectedCard.image
+                        : selectedCard.image_Url
+                        ? [selectedCard.image_Url]
+                        : selectedCard.image
+                        ? [selectedCard.image]
+                        : []
+                    }
+                    description={selectedCard.description || ""}
+                    descriptionLimit={95}
+                    showDescription={false}
                     alt="Trading chart"
-                    className="w-full h-64 object-cover cursor-pointer hover:opacity-80 transition-opacity"
-                    onClick={() => setSelectedImage(selectedCard.image)}
+                    height="h-64"
                   />
                 </div>
 
@@ -359,27 +389,36 @@ export function IdeaPage() {
                   <div className="flex items-center justify-between">
                     <span className="font-medium text-gray-700 dark:text-gray-300">Entry Price</span>
                     <div className="flex items-center gap-2">
-                      <span className="text-green-600 font-bold">{selectedCard.entry}</span>
-                      <CopyIcon className="w-4 h-4 cursor-pointer hover:text-primary transition-colors" />
+                      <span className="text-green-600 font-bold">{selectedCard?.entry || '0'}</span>
+                      <CopyIcon 
+                        className="w-4 h-4 cursor-pointer hover:text-primary transition-colors"
+                        onClick={() => copyToClipboard(selectedCard?.entry, 'Entry price')}
+                      />
                     </div>
                   </div>
 
                   <div className="flex items-center justify-between border-t border-gray-200 dark:border-gray-700 pt-3">
                     <span className="font-medium text-gray-700 dark:text-gray-300">Invalidation Level</span>
                     <div className="flex items-center gap-2">
-                      <span className="text-red-600 font-bold">{selectedCard.invalidation}</span>
-                      <CopyIcon className="w-4 h-4 cursor-pointer hover:text-primary transition-colors" />
+                      <span className="text-red-600 font-bold">{selectedCard?.invalidation || '0'}</span>
+                      <CopyIcon 
+                        className="w-4 h-4 cursor-pointer hover:text-primary transition-colors"
+                        onClick={() => copyToClipboard(selectedCard?.invalidation, 'Invalidation level')}
+                      />
                     </div>
                   </div>
 
                   <div className="border-t border-gray-200 dark:border-gray-700 pt-3 space-y-2">
                     <span className="block font-medium text-gray-700 dark:text-gray-300 mb-2">Exit Targets</span>
-                    {selectedCard.exits.map((exit, idx) => (
+                    {selectedCard?.exits?.map((exit, idx) => (
                       <div key={idx} className="flex items-center justify-between pl-4">
                         <span className="text-gray-600 dark:text-gray-400">Target {idx + 1}</span>
                         <div className="flex items-center gap-2">
-                          <span className="font-semibold">{exit}</span>
-                          <CopyIcon className="w-4 h-4 cursor-pointer hover:text-primary transition-colors" />
+                          <span className="font-semibold">{exit || '0'}</span>
+                          <CopyIcon 
+                            className="w-4 h-4 cursor-pointer hover:text-primary transition-colors"
+                            onClick={() => copyToClipboard(exit, `Exit target ${idx + 1}`)}
+                          />
                         </div>
                       </div>
                     ))}
@@ -388,12 +427,22 @@ export function IdeaPage() {
 
                 {/* Action Buttons */}
                 <div className="flex gap-3 pt-4">
-                  <button className="flex-1 btn bg-primary text-black hover:scale-up transition-all duration-300">
+                  <button 
+                    className="flex-1 btn bg-primary text-black hover:scale-up transition-all duration-300"
+                    onClick={() => {
+                      const allPrices = [
+                        `Entry: ${selectedCard?.entry || '0'}`,
+                        `Invalidation: ${selectedCard?.invalidation || '0'}`,
+                        ...(selectedCard?.exits?.map((exit, idx) => `Exit ${idx + 1}: ${exit || '0'}`) || [])
+                      ].join('\n');
+                      copyToClipboard(allPrices, 'All prices');
+                    }}
+                  >
                     Copy All Prices
                   </button>
-                  <button className="flex-1 btn bg-gray-200 text-gray-800 hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-200 transition-colors">
+                  {/* <button className="flex-1 btn bg-gray-200 text-gray-800 hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-200 transition-colors">
                     Share Signal
-                  </button>
+                  </button> */}
                 </div>
               </div>
             </AccessGate>
