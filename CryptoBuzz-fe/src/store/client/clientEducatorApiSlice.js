@@ -1,27 +1,26 @@
-import { createApi } from "@reduxjs/toolkit/query/react";
-import baseQueryWithReauth from "../apiSlice";
+import { createApi } from '@reduxjs/toolkit/query/react';
+import baseQueryWithReauth from '../apiSlice';
 
 export const clientEducatorApiSlice = createApi({
-    reducerPath: "clientEducator",
-    baseQuery: baseQueryWithReauth,
-    endpoints: (builder) => ({
-        getAllEducators: builder.query({
-            query: (params) => {
-                const searchParams = new URLSearchParams();
+  reducerPath: 'clientEducator',
+  baseQuery: baseQueryWithReauth,
+  endpoints: (builder) => ({
+    getAllEducators: builder.query({
+      query: (params) => {
+        const searchParams = new URLSearchParams();
 
-                if (params?.search) searchParams.append("search", params.search);
-                if (params?.category) searchParams.append("category", params.category);
-                if (params?.page) searchParams.append("page", params.page);
-                if (params?.limit) searchParams.append("limit", params.limit);
+        if (params?.search) searchParams.append('search', params.search);
+        if (params?.category) searchParams.append('category', params.category);
+        if (params?.page) searchParams.append('page', params.page);
+        if (params?.limit) searchParams.append('limit', params.limit);
 
-                const queryString = searchParams.toString();
-                return `/users/educator${queryString ? `?${queryString}` : ''}`;
-            },
-        }),
+        const queryString = searchParams.toString();
+        return `/users/educator${queryString ? `?${queryString}` : ''}`;
+      },
+      providesTags: ['Educators'],
     }),
+  }),
 });
 
-export const {
-    useGetAllEducatorsQuery,
-} = clientEducatorApiSlice;
-
+export const { useGetAllEducatorsQuery, useLazyGetAllEducatorsQuery } =
+  clientEducatorApiSlice;

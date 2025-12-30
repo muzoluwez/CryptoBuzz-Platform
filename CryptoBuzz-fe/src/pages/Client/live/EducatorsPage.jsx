@@ -1,115 +1,115 @@
-import React, { useState } from 'react';
-import { Check, ChevronDown, Eye, Plus, Search } from 'lucide-react';
+import React, { useCallback, useMemo, useState } from 'react';
+import { Check, Eye, Plus } from 'lucide-react';
 import { useNavigate } from 'react-router';
+import SearchInput from '../../../components/common/SearchInput';
+import { SelectWithClear } from '../../../components/common/SelectInput';
 import { Card } from '../../../components/ui/card';
+import { useGetAcademyCategoryFetchQuery } from '../../../store/client/clientAcademyCategoryApiSlice';
+import { useGetAllEducatorsQuery } from '../../../store/client/clientEducatorApiSlice';
+
 
 const EducatorsPage = () => {
   const navigate = useNavigate();
 
   const [activeTab, setActiveTab] = useState('All');
-  const [selectedCategory, setSelectedCategory] = useState('Select Category');
+  const [selectedCategoryId, setSelectedCategoryId] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
-  const [followingIds, setFollowingIds] = useState([1]);
+  const [followingIds, setFollowingIds] = useState([]);
 
-  const educators = [
-    {
-      id: 1,
-      name: 'Lorem Ipsum',
-      title: 'LOREM IPSUM',
-      subtitle: 'DOLOR SIT AMET',
-      category: 'Crypto',
-      specialty: 'Consectetur Adipiscing',
-      description:
-        'Lorem ipsum dolor sit amet, consectetur adipiscing elit sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.',
-      courses: 4,
-      tradeIdeas: 17,
-      insights: 5,
-      gradient: 'from-yellow-600 to-yellow-900',
-      bgPattern: 'yellow',
-    },
-    {
-      id: 2,
-      name: 'Sed Diam Nonumy',
-      title: 'SED DIAM NONUMY',
-      subtitle: 'EIRMOD TEMPOR',
-      category: 'Crypto',
-      specialty: 'Invidunt Ut Labore',
-      description:
-        'Sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquam erat volutpat.',
-      courses: 0,
-      tradeIdeas: 5,
-      insights: 4,
-      gradient: 'from-yellow-600 to-yellow-900',
-      bgPattern: 'yellow',
-    },
-    {
-      id: 3,
-      name: 'Ut Wisi Enim',
-      title: 'UT WISI ENIM',
-      subtitle: 'AD MINIM VENIAM',
-      category: 'Forex',
-      specialty: 'Quis Nostrud - Exerci',
-      description:
-        'Ut wisi enim ad minim veniam, quis nostrud exerci tation ullamcorper suscipit lobortis nisl ut aliquip ex ea commodo consequat.',
-      courses: 2,
-      tradeIdeas: 17,
-      insights: 86,
-      gradient: 'from-blue-700 to-blue-950',
-      bgPattern: 'blue',
-    },
-    {
-      id: 4,
-      name: 'Duis Autem Vel',
-      title: 'DUIS AUTEM VEL',
-      subtitle: 'IRIURE DOLOR IN',
-      category: 'Digital Marketing',
-      specialty: 'Reprehenderit Voluptate',
-      description:
-        'Duis autem vel iriure dolor in reprehenderit in voluptate velit esse quam nihil molestie consequat vel illum dolore eu feugiat nulla.',
-      courses: 3,
-      tradeIdeas: 12,
-      insights: 24,
-      gradient: 'from-green-600 to-green-900',
-      bgPattern: 'green',
-    },
-    {
-      id: 5,
-      name: 'Nam Liber Tempor',
-      title: 'NAM LIBER TEMPOR',
-      subtitle: 'CUM SOLUTA NOBIS',
-      category: 'Crypto',
-      specialty: 'Est Legentis Ac',
-      description:
-        'Nam liber tempor cum soluta nobis est legentis ac tincidunt luctus delenit aute irure dolor in reprehenderit in voluptate.',
-      courses: 5,
-      tradeIdeas: 23,
-      insights: 15,
-      gradient: 'from-purple-600 to-purple-900',
-      bgPattern: 'purple',
-    },
-    {
-      id: 6,
-      name: 'Typi Non Habent',
-      title: 'TYPI NON HABENT',
-      subtitle: 'CLARITATEM INSITAM',
-      category: 'Forex',
-      specialty: 'Perspiciatis Unde',
-      description:
-        'Typi non habent claritatem insitam est usus legentis in iis qui facit eorum claritatem investiga tionum seacula quosdam.',
-      courses: 6,
-      tradeIdeas: 31,
-      insights: 42,
-      gradient: 'from-blue-700 to-blue-950',
-      bgPattern: 'blue',
-    },
-  ];
+  // Fetch categories from API
+  const {
+    data: categoriesResponse,
+    isLoading: categoriesLoading,
+  } = useGetAcademyCategoryFetchQuery();
 
-  const categories = [
-    'Select Category',
-    'Crypto',
-    'Forex',
-    'Digital Marketing',
-  ];
+  // Extract categories data from response
+  const categories = useMemo(() => {
+    if (!categoriesResponse?.data) return [];
+    return categoriesResponse.data;
+  }, [categoriesResponse]);
+
+  // Build query parameters
+  const queryParams = useMemo(() => {
+    const params = {
+      page: 1,
+      limit: 100, // Get all educators for now
+    };
+
+    if (searchQuery.trim()) {
+      params.search = searchQuery.trim();
+    }
+
+    // Use category ID if available
+    if (selectedCategoryId) {
+      params.category = selectedCategoryId;
+    }
+
+    return params;
+  }, [searchQuery, selectedCategoryId]);
+
+  // Fetch educators from API
+  const {
+    data: educatorsResponse,
+    isLoading,
+    isError,
+    error,
+  } = useGetAllEducatorsQuery(queryParams);
+
+  // Extract educators data from response
+  const educatorsData = educatorsResponse?.data || [];
+  const pagination = educatorsResponse?.pagination || {};
+
+  // Helper function to get gradient based on category
+  const getGradient = (categoryName) => {
+    const gradients = {
+      crypto: 'from-yellow-600 to-yellow-900',
+      forex: 'from-blue-700 to-blue-950',
+      'digital marketing': 'from-green-600 to-green-900',
+      default: 'from-purple-600 to-purple-900',
+    };
+    return (
+      gradients[categoryName?.toLowerCase()] || gradients.default
+    );
+  };
+
+  // Transform API data to match component structure
+  const educators = useMemo(() => {
+    return educatorsData.map((educator) => {
+      const categoryName =
+        educator.categories?.[0]?.name || educator.category || 'General';
+      const categoryId = educator.categories?.[0]?._id || null;
+      const fullName = `${educator.first_name || ''} ${educator.last_name || ''}`.trim() || educator.title || 'Unknown';
+      
+      return {
+        id: educator._id,
+        _id: educator._id,
+        name: fullName,
+        title: educator.title || educator.first_name?.toUpperCase() || 'EDUCATOR',
+        bio: educator.bio || educator.description || '',
+        category: categoryName,
+        categoryId: categoryId,
+        specialty: educator.title || educator.educatorRole || categoryName,
+        description: educator.description || educator.bio || '',
+        courses: educator.courseCount || 0,
+        tradeIdeas: educator.tradeIdeas || 0, // This might not be in API response
+        insights: educator.insights || 0, // This might not be in API response
+        gradient: getGradient(categoryName),
+        bgPattern: categoryName.toLowerCase().split(' ')[0],
+        image: educator.image,
+        bannerImage: educator.bannerImage,
+      };
+    });
+  }, [educatorsData]);
+
+  // Handle category change from SelectInput
+  const handleCategoryChange = (categoryId, categoryOption) => {
+    setSelectedCategoryId(categoryId || null);
+  };
+
+  // Handle clear category
+  const handleClearCategory = () => {
+    setSelectedCategoryId(null);
+  };
 
   const handleFollow = (id) => {
     if (followingIds.includes(id)) {
@@ -119,20 +119,24 @@ const EducatorsPage = () => {
     }
   };
 
-  const filteredEducators = educators.filter((educator) => {
-    const matchesTab =
-      activeTab === 'All' ||
-      (activeTab === 'Following' && followingIds.includes(educator.id));
-    const matchesCategory =
-      selectedCategory === 'Select Category' ||
-      educator.category === selectedCategory;
-    const matchesSearch =
-      educator.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      educator.specialty.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      educator.description.toLowerCase().includes(searchQuery.toLowerCase());
+  // Filter educators based on active tab (client-side filtering for "Following" tab)
+  // Note: Search and category filtering is done via API query params
+  const filteredEducators = useMemo(() => {
+    return educators.filter((educator) => {
+      const matchesTab =
+        activeTab === 'All' ||
+        (activeTab === 'Following' && followingIds.includes(educator.id));
+      
+      // Additional client-side search for cases where API doesn't handle it
+      const matchesSearch =
+        !searchQuery.trim() ||
+        educator.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        educator.specialty.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        educator.description.toLowerCase().includes(searchQuery.toLowerCase());
 
-    return matchesTab && matchesCategory && matchesSearch;
-  });
+      return matchesTab && matchesSearch;
+    });
+  }, [educators, activeTab, followingIds, searchQuery]);
 
   return (
     <>
@@ -207,154 +211,167 @@ const EducatorsPage = () => {
             </button>
 
             {/* Category Dropdown */}
-            <div className="relative">
-              <select
-                value={selectedCategory}
-                onChange={(e) => setSelectedCategory(e.target.value)}
-                className="appearance-none bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg px-4 py-2 pr-10 text-gray-700 dark:text-gray-200 font-medium cursor-pointer hover:border-gray-400 dark:hover:border-gray-600 transition-colors focus:outline-none w-48"
-              >
-                {categories.map((category) => (
-                  <option key={category} value={category}>
-                    {category}
-                  </option>
-                ))}
-              </select>
-              <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500 pointer-events-none" />
+            <div className="w-48">
+              <SelectWithClear
+                options={categories}
+                value={selectedCategoryId}
+                onValueChange={handleCategoryChange}
+                onClear={handleClearCategory}
+                placeholder="Select Category"
+                valueKey="_id"
+                labelKey="name"
+                className=""
+                disabled={categoriesLoading}
+                size="md"
+              />
             </div>
           </div>
 
           {/* Search */}
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 dark:text-gray-500" />
-            <input
-              type="text"
-              placeholder="Search"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none w-80"
-            />
-          </div>
+          <SearchInput
+            value={searchQuery}
+            onValueChange={setSearchQuery}
+            onClear={() => {
+              setSearchQuery('');
+            }}
+            placeholder="Search"
+            width="w-80"
+            debounceDelay={300}
+          />
         </div>
+
+        {/* Loading State */}
+        {isLoading && (
+          <div className="text-center py-12">
+            <p className="text-gray-500 text-lg">Loading educators...</p>
+          </div>
+        )}
+
+        {/* Error State */}
+        {isError && (
+          <div className="text-center py-12">
+            <p className="text-red-500 text-lg">
+              Error loading educators:{' '}
+              {error?.data?.message || error?.message || 'Unknown error'}
+            </p>
+          </div>
+        )}
 
         {/* Educators Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredEducators.map((educator) => (
-            <Card
-              key={educator.id}
-              className="rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow"
-            >
-              {/* Header Card */}
-              <div
-                className={`relative h-64 bg-gradient-to-br ${educator.gradient} overflow-hidden`}
+        {!isLoading && !isError && (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {filteredEducators.map((educator) => (
+              <Card
+                key={educator.id}
+                className="rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow"
               >
-                {/* Category Badge */}
-                <div className="absolute top-4 left-4 z-10">
-                  <span className="bg-primary text-dark px-3 py-1 rounded-full text-sm font-medium">
-                    {educator.category}
-                  </span>
-                </div>
-
-                {/* Decorative Shape */}
                 <div
-                  className={`absolute -left-20 -top-20 w-64 h-64 ${
-                    educator.bgPattern === 'purple'
-                      ? 'bg-purple-500'
-                      : educator.bgPattern === 'blue'
-                        ? 'bg-blue-500'
-                        : 'bg-primary'
-                  } opacity-30 rounded-full`}
-                ></div>
+                  className={`relative h-64 bg-gradient-to-br ${educator.gradient} overflow-hidden`}
+                >
+                  {/* Category Badge */}
+                  <div className="absolute top-4 left-4 z-10">
+                    <span className="bg-primary text-dark px-3 py-1 rounded-full text-sm font-medium">
+                      {educator.category}
+                    </span>
+                  </div>
 
-                {/* Educator Info */}
-                <div className="absolute top-1/2 right-6 -translate-y-1/2 text-right">
-                  <h3 className="text-white text-2xl font-bold tracking-wider mb-1">
-                    {educator.title}
-                  </h3>
-                  <p className="text-white/80 text-sm tracking-wide">
-                    {educator.subtitle}
+                  {/* Profile Image Circle */}
+                  {educator.image && (
+                    <div className="absolute bottom-0 right-0">
+                      <img
+                        src={educator.image}
+                        alt={educator.name}
+                        className="w-24 h-24 rounded-full object-cover border-4 border-white dark:border-gray-800"
+                        onError={(e) => {
+                          e.target.style.display = 'none';
+                        }}
+                      />
+                    </div>
+                  )}
+                </div>
+
+                {/* Content */}
+                <div className="pt-6 px-6 pb-6">
+                  <h4 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-1">
+                    {educator.name}
+                  </h4>
+                  <p className="text-yellow-600 font-medium text-sm mb-3">
+                    {educator.specialty}
                   </p>
-                </div>
+                  <p className="text-gray-600 dark:text-gray-300 text-xs line-clamp-2 h-16">
+                    {educator.bio}
+                  </p>
 
-                {/* Profile Image Circle */}
-              </div>
-
-              {/* Content */}
-              <div className="pt-6 px-6 pb-6">
-                <h4 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-1">
-                  {educator.name}
-                </h4>
-                <p className="text-yellow-600 font-medium text-sm mb-3">
-                  {educator.specialty}
-                </p>
-                <p className="text-gray-600 dark:text-gray-300 text-xs line-clamp-2 h-16">
-                  {educator.description}
-                </p>
-
-                {/* Stats */}
-                <div className="grid grid-cols-3 gap-4 mb-6">
-                  <div className="text-center">
-                    <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">
-                      {educator.courses}
-                    </p>
-                    <p className="text-xs text-gray-500 dark:text-gray-400">
-                      Courses
-                    </p>
+                  {/* Stats */}
+                  <div className="grid grid-cols-3 gap-4 mb-6">
+                    <div className="text-center">
+                      <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">
+                        {educator.courses}
+                      </p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">
+                        Courses
+                      </p>
+                    </div>
+                    <div className="text-center">
+                      <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">
+                        {educator.tradeIdeas}
+                      </p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">
+                        Trade Ideas
+                      </p>
+                    </div>
+                    <div className="text-center">
+                      <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">
+                        {educator.insights}
+                      </p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">
+                        Insights
+                      </p>
+                    </div>
                   </div>
-                  <div className="text-center">
-                    <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">
-                      {educator.tradeIdeas}
-                    </p>
-                    <p className="text-xs text-gray-500 dark:text-gray-400">
-                      Trade Ideas
-                    </p>
-                  </div>
-                  <div className="text-center">
-                    <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">
-                      {educator.insights}
-                    </p>
-                    <p className="text-xs text-gray-500 dark:text-gray-400">
-                      Insights
-                    </p>
-                  </div>
-                </div>
 
-                {/* Action Buttons */}
-                <div className="grid grid-cols-2 gap-3">
-                  <button
-                    onClick={() => handleFollow(educator.id)}
-                    className={`py-2 rounded-lg font-medium transition-all flex items-center justify-center gap-2 cursor-pointer ${
-                      followingIds.includes(educator.id)
-                        ? 'bg-yellow-600 text-white hover:bg-primary-dark'
-                        : 'bg-yellow-100 dark:bg-yellow-700 text-yellow-600 dark:text-yellow-200 hover:bg-yellow-200'
-                    }`}
-                  >
-                    {followingIds.includes(educator.id) ? (
-                      <>
-                        <Check className="w-4 h-4" />
-                        Following
-                      </>
-                    ) : (
-                      <>
-                        <Plus className="w-4 h-4" />
-                        Follow
-                      </>
-                    )}
-                  </button>
-                  <button
-                    onClick={() => navigate('/client/viewprofile')}
-                    className="py-2 bg-white dark:bg-gray-800 border-1 border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-200 rounded-lg font-medium hover:bg-gray-50 dark:hover:bg-gray-700 transition-all flex items-center justify-center gap-2 cursor-pointer"
-                  >
-                    <Eye className="w-4 h-4" />
-                    View Profile
-                  </button>
+                  {/* Action Buttons */}
+                  <div className="grid grid-cols-2 gap-3">
+                    <button
+                      onClick={() => handleFollow(educator.id)}
+                      className={`py-2 rounded-lg font-medium transition-all flex items-center justify-center gap-2 cursor-pointer ${
+                        followingIds.includes(educator.id)
+                          ? 'bg-yellow-600 text-white hover:bg-primary-dark'
+                          : 'bg-yellow-100 dark:bg-yellow-700 text-yellow-600 dark:text-yellow-200 hover:bg-yellow-200'
+                      }`}
+                    >
+                      {followingIds.includes(educator.id) ? (
+                        <>
+                          <Check className="w-4 h-4" />
+                          Following
+                        </>
+                      ) : (
+                        <>
+                          <Plus className="w-4 h-4" />
+                          Follow
+                        </>
+                      )}
+                    </button>
+                    <button
+                      onClick={() =>
+                        navigate(`/client/viewprofile`, {
+                          state: { educatorId: educator._id || educator.id },
+                        })
+                      }
+                      className="py-2 bg-white dark:bg-gray-800 border-1 border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-200 rounded-lg font-medium hover:bg-gray-50 dark:hover:bg-gray-700 transition-all flex items-center justify-center gap-2 cursor-pointer"
+                    >
+                      <Eye className="w-4 h-4" />
+                      View Profile
+                    </button>
+                  </div>
                 </div>
-              </div>
-            </Card>
-          ))}
-        </div>
+              </Card>
+            ))}
+          </div>
+        )}
 
         {/* No Results */}
-        {filteredEducators.length === 0 && (
+        {!isLoading && !isError && filteredEducators.length === 0 && (
           <div className="text-center py-12">
             <p className="text-gray-500 text-lg">
               No educators found matching your criteria.
