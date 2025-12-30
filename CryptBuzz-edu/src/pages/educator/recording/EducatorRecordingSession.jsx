@@ -228,7 +228,7 @@ const EducatorRecordingSession = () => {
 
         <Toolbar>
           <ToolbarHeading>
-            <ToolbarPageTitle text="Recorded Academy" />
+            <ToolbarPageTitle text="Recorded Courses" />
           </ToolbarHeading>
           <ToolbarActions>
             <div className="text-end pb-4">

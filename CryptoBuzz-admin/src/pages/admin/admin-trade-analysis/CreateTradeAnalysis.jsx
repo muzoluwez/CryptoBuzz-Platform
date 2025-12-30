@@ -90,11 +90,11 @@ const CreateTradeAnalysis = forwardRef(
             }).unwrap();
 
             refetch();
-            toast.success("IQ Insight updated successfully!");
+            toast.success("Trade Analysis updated successfully!");
           } else {
             await createTradeAnalysis(formData).unwrap();
             refetch();
-            toast.success("IQ Insight created successfully!");
+            toast.success("Trade Analysis created successfully!");
           }
           formik.resetForm();
           handleCloseCreate();
@@ -166,7 +166,7 @@ const CreateTradeAnalysis = forwardRef(
           <DialogContent className="p-5 max-w-[600px]" ref={ref}>
             <DialogHeader className="pb-5 pt-0 px-0">
               <DialogTitle>
-                {selectedRow?._id ? "Update IQ Insight" : " Create IQ Insight"}
+                {selectedRow?._id ? "Update Trade Analysis" : " Create Trade Analysis"}
               </DialogTitle>
             </DialogHeader>
             <div className="grid gap-5 px-0 pb-5">

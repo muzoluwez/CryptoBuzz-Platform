@@ -13,7 +13,7 @@ CryptoBuzz Admin is the command center for the CryptoBuzz educational platform. 
 *   **📊 Interactive Dashboard**: Real-time visualization of platform statistics, user growth, and earnings.
 *   **👥 User Management**: Comprehensive CRUD operations for students, educators, and admins.
 *   **🎓 Educator Platform**: Tools for educators to manage courses, live sessions, and recordings.
-*   **📱 Community Feed (IQ Social)**: A full-featured social feed for admins to post updates, images, and videos, mimicking the educator experience.
+*   **📱 Community Feed (Social Buzz)**: A full-featured social feed for admins to post updates, images, and videos, mimicking the educator experience.
 *   **🔐 Secure Authentication**: Robust JWT-based authentication system with auto-logout and seamless redirection.
 *   **🌍 Internationalization**: Multi-language support using `react-intl`.
 *   **🎨 Dynamic Theming**: Light/Dark mode support powered by Tailwind CSS and custom settings.
@@ -113,7 +113,7 @@ src/
 ├── i18n/            # Internationalization setup
 ├── layouts/         # Page layouts (Sidebar, Header)
 ├── pages/           # Application views/routes
-│   ├── admin/       # Admin-specific pages (IQ Social, Recordings)
+│   ├── admin/       # Admin-specific pages (Social Buzz, Recordings)
 │   ├── dashboards/  # Dashboard widgets and stats
 │   └── public-profile/
 ├── partials/        # Layout fragments (Dropdowns, Menus)

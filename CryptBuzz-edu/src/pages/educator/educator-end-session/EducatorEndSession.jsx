@@ -231,7 +231,7 @@ const EducatorEndSession = ({ title = "Ended Live Sessions" }) => {
         totalCount: response.pagination?.totalRecords || 0,
       };
     } catch (error) {
-      console.error("Error fetching IQ Ideas:", error);
+      console.error("Error fetching Trade Ideas:", error);
       return { data: [], totalCount: 0 };
     }
   };

@@ -38,7 +38,7 @@ import {
 } from "@/components/ui/select";
 import { useGetEducatorAcademyCategoryQuery } from "../../../store/api/admin/adminAcademyCategoryApiSlice";
 
-const AdminTradeIdeas = ({ title = "IQ Ideas" }) => {
+const AdminTradeIdeas = ({ title = "Trade Ideas" }) => {
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [selectedRow, setSelectedRow] = useState({});
@@ -374,7 +374,7 @@ const AdminTradeIdeas = ({ title = "IQ Ideas" }) => {
         totalCount: response.pagination?.totalRecords || 0,
       };
     } catch (error) {
-      // console.error("Error fetching IQ ideas:", error);
+      // console.error("Error fetching Trade Ideas:", error);
       return { data: [], totalCount: 0 };
     }
   };
@@ -414,7 +414,7 @@ const AdminTradeIdeas = ({ title = "IQ Ideas" }) => {
         <>
           <Toolbar>
             <ToolbarHeading>
-              <ToolbarPageTitle text="IQ Ideas" />
+              <ToolbarPageTitle text="Trade Ideas" />
               <ToolbarDescription>
                 Generate, analyze, and execute profitable trading opportunities
                 with smart insights, market trends, and data-driven strategies
@@ -469,7 +469,7 @@ const AdminTradeIdeas = ({ title = "IQ Ideas" }) => {
               </div> */}
               <div className="text-end ">
                 <button className="btn btn-primary" onClick={handleClickOpen}>
-                  Create IQ Idea
+                  Create Trade Ideas
                 </button>
               </div>
             </ToolbarActions>

@@ -455,7 +455,7 @@ const LiveSession = ({ title = "Live Session" }) => {
         totalCount: response.pagination?.totalRecords || 0,
       };
     } catch (error) {
-      console.error("Error fetching IQ Ideas:", error);
+      console.error("Error fetching Trade Ideas:", error);
       return { data: [], totalCount: 0 };
     }
   };
@@ -486,7 +486,7 @@ const LiveSession = ({ title = "Live Session" }) => {
         <ToolbarHeading>
           <ToolbarPageTitle text="Live Session" />
           <ToolbarDescription>
-            Track and analyze past IQ Academy with key insights and performance
+            Track and analyze past Courses with key insights and performance
             data.
           </ToolbarDescription>
         </ToolbarHeading>

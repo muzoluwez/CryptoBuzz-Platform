@@ -13,7 +13,7 @@ const DeleteTradeAnalysis = forwardRef(({ isDeleteOpen, handleDeleteClose, selec
         try {
             await DeleteTradeAnalysis(selectedRow?._id).unwrap();
             refetch();
-            toast.success("IQ Insight deleted successfully!");
+            toast.success("Trade Analysis deleted successfully!");
             setSelectedRow(null);
             handleDeleteClose();
 

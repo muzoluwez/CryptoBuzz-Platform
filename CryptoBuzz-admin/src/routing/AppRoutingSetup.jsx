@@ -99,7 +99,7 @@ const routes = {
     // Profile - Admin user profile and settings
     { path: "/admin/profile", element: <AdminProfile /> },
 
-    // Academy Category - Manage course categories
+    // Courses Category - Manage course categories
     { path: "/admin/academy-category", element: <AdminAcademyCategory /> },
 
     // Stream Schedule - View and manage streaming schedules
@@ -114,7 +114,7 @@ const routes = {
     // General Settings - Platform-wide configuration
     { path: "admin/general-setting", element: <GeneralSetting /> },
 
-    // IQ Social - Manage community feed and social interactions
+    // Social Buzz - Manage community feed and social interactions
     { path: "/admin/iq-social", element: <IqSocial /> },
 
     // KPIs - View educator performance metrics
@@ -144,7 +144,7 @@ const routes = {
       element: <AdminEducatorRatings />,
     },
 
-    // IQ Crypto - Cryptocurrency analysis and insights
+    // Crypto Project - Cryptocurrency analysis and insights
     { path: "/admin/iq-crypto", element: <AdminIqCrypto /> },
   ],
 };

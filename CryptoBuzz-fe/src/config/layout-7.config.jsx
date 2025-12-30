@@ -52,7 +52,7 @@ export const MENU_MEGA_MOBILE = [
     path: "/",
   },
   {
-    title: "Academy",
+    title: "Courses",
     path: "/client/academy",
   },
   {

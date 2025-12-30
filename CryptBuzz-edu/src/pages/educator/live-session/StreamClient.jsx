@@ -139,7 +139,7 @@ const StreamClient = ({
               <div className="flex flex-col gap-4">
                 <div className="grid grid-cols-12 gap-5 items-center">
                   <label className="col-span-3 text-sm text-gray-900 font-semibold line-clamp-2">
-                    IQ Academy ID
+                    Courses ID
                   </label>
                   <div className="col-span-9 ">
                     <DefaultTooltip

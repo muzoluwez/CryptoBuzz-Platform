@@ -26,7 +26,7 @@ import DeleteEducatorIqCrypto from "./DeleteEducatorIqCrypto";
 import CreateEducatorIqCrypto from "./CreateEducatorIqCrypto";
 import ViewEducatorIqCrypto from "./ViewEducatorIqCrypto";
 
-const EducatorIqCrypto = ({ title = "IQ Crypto Projects" }) => {
+const EducatorIqCrypto = ({ title = "Crypto Projects" }) => {
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [selectedRow, setSelectedRow] = useState({});
@@ -251,7 +251,7 @@ const EducatorIqCrypto = ({ title = "IQ Crypto Projects" }) => {
         totalCount: response.pagination?.totalRecords || 0,
       };
     } catch (error) {
-      // console.error("Error fetching IQ Crypto :", error);
+      // console.error("Error fetching Crypto Project :", error);
       return { data: [], totalCount: 0 };
     }
   };
@@ -267,7 +267,7 @@ const EducatorIqCrypto = ({ title = "IQ Crypto Projects" }) => {
       <>
         <Toolbar>
           <ToolbarHeading>
-            <ToolbarPageTitle text="IQ Crypto Projects" />
+            <ToolbarPageTitle text="Crypto Projects" />
             <ToolbarDescription>
               Generate, analyze, and execute profitable trading opportunities
               with smart insights, market trends, and data-driven strategies
@@ -276,7 +276,7 @@ const EducatorIqCrypto = ({ title = "IQ Crypto Projects" }) => {
           <ToolbarActions>
             <div className="text-end ">
               <button className="btn btn-primary" onClick={handleClickOpen}>
-                Create IQ Crypto
+                Create Crypto Project
               </button>
             </div>
           </ToolbarActions>

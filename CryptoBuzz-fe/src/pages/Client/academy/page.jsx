@@ -18,8 +18,8 @@ function CryptoUI({ activeTab, setActiveTab, toggle, open, introLessons, section
     <>
       <div className="container my-6">
 
-        <h1 className="text-2xl font-bold">Academy</h1>
-        <p className="text-sm text-gray-500">Home / Academy / Crypto</p>
+        <h1 className="text-2xl font-bold">Courses</h1>
+        <p className="text-sm text-gray-500">Home / Courses / Crypto</p>
 
         <Card className="mt-5 p-4 rounded-xl shadow-sm">
           <div className="flex gap-3">
@@ -222,8 +222,8 @@ function TradingUI({ activeTab, setActiveTab, toggle, open, introLessons, sectio
     <>
       <div className="container my-6">
 
-        <h1 className="text-2xl font-bold">Academy</h1>
-        <p className="text-sm text-gray-500">Home / Academy / Crypto</p>
+        <h1 className="text-2xl font-bold">Courses</h1>
+        <p className="text-sm text-gray-500">Home / Courses / Crypto</p>
 
         <Card className="mt-5 p-4 rounded-xl shadow-sm">
           <div className="flex gap-3">
@@ -426,8 +426,8 @@ function DigitalMarketingUI({ activeTab, setActiveTab, toggle, open, introLesson
     <>
       <div className="container my-6">
 
-        <h1 className="text-2xl font-bold">Academy</h1>
-        <p className="text-sm text-gray-500">Home / Academy / Crypto</p>
+        <h1 className="text-2xl font-bold">Courses</h1>
+        <p className="text-sm text-gray-500">Home / Courses / Crypto</p>
 
         <Card className="mt-5 p-4 rounded-xl shadow-sm">
           <div className="flex gap-3">

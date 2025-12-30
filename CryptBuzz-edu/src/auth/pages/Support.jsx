@@ -20,7 +20,7 @@ const Support = () => {
                 <div className="mb-6 sm:mb-8">
                     <img
                         src={logo}
-                        alt="Iqonic Logo"
+                        alt="CryptoBuzz Logo"
                         className="mx-auto h-auto max-h-[50px] w-auto max-w-[120px] object-contain brightness-110 sm:max-h-[60px] sm:max-w-[150px] md:max-h-[80px] md:max-w-[200px]"
                     />
                 </div>

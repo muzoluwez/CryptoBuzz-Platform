@@ -133,7 +133,7 @@ const UpdateLiveSession = ({ selectedRow }) => {
           <div className="flex flex-col gap-1">
             <div className="flex flex-col gap-1">
               <label className="form-label text-gray-900 gap-1">
-                Academy Category<span className="text-danger">*</span>
+                Courses Category<span className="text-danger">*</span>
               </label>
               <Select
                 value={formik.values.category}

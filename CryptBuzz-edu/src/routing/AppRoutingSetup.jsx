@@ -95,7 +95,7 @@ const routes = {
     // Profile - Educator user profile and settings
     { path: "/educator/profile", element: <EducatorProfile /> },
 
-    // IQ Social - Manage community feed and social interactions
+    // Social Buzz - Manage community feed and social interactions
 
     { path: "/educator/iq-social", element: <EducatorCommunityFeed /> },
 
@@ -105,7 +105,7 @@ const routes = {
 
 
 
-    //IQ Live 
+    //Live Stream 
     { path: "/educator/stream-schedule", element: <EducatorStreamSchedule /> },
     {
       path: "/educator/ended-schedule",

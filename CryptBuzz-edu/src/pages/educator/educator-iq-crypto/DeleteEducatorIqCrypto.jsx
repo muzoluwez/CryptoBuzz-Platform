@@ -19,7 +19,7 @@ const DeleteEducatorIqCrypto = forwardRef(
       try {
         await DeleteEducatorIqCrypto(selectedRow?._id).unwrap();
         refetch();
-        toast.success("IQ Crypto deleted successfully!");
+        toast.success("Crypto Project deleted successfully!");
 
         setSelectedRow({});
         handleDeleteClose();

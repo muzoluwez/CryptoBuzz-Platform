@@ -20,7 +20,7 @@ export const getEducatorsRatings = async (req, res) => {
 
     const matchQuery = {
       role: "educator",
-      email: { $ne: "corporate@iqonic.vip" },
+      email: { $ne: "corporate@CryptoBuzz.vip" },
       status: "true",
       isDeleted: false,
       ...searchFilter,

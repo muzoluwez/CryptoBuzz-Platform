@@ -7,8 +7,8 @@ export default function ViewProfile() {
         {
             id: 1,
             title: 'BTC accelerator al trading',
-            image: 'crypto-academy',
-            category: 'CRYPTO ACADEMY'
+            image: 'crypto-Courses',
+            category: 'CRYPTO COURSES'
         },
         {
             id: 2,
@@ -231,19 +231,19 @@ export default function ViewProfile() {
                         <div className="grid grid-col-12 sm:grid-cols-2 gap-4">
                             {courses.map((course) => (
                                 <div key={course.id} className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden hover:shadow-lg transition-shadow">
-                                    <div className={`h-32 relative ${course.image === 'crypto-academy'
+                                    <div className={`h-32 relative ${course.image === 'crypto-courses'
                                         ? 'bg-gradient-to-br from-yellow-400 to-yellow-600'
                                         : 'bg-gradient-to-br from-blue-500 to-blue-700'
                                         }`}>
                                         <div className="absolute left-0 top-0 bottom-0 w-1/2 overflow-hidden">
-                                            <div className={`absolute left-0 top-1/2 -translate-y-1/2 w-32 h-32 rounded-full opacity-40 -translate-x-1/2 ${course.image === 'crypto-academy' ? 'bg-yellow-300' : 'bg-blue-400'
+                                            <div className={`absolute left-0 top-1/2 -translate-y-1/2 w-32 h-32 rounded-full opacity-40 -translate-x-1/2 ${course.image === 'crypto-Courses' ? 'bg-yellow-300' : 'bg-blue-400'
                                                 }`}></div>
                                         </div>
                                         <div className="absolute inset-0 flex items-center justify-center">
                                             <div className="text-center text-white">
                                                 <p className="text-xs tracking-wider mb-1 font-semibold">{course.category}</p>
                                                 <p className="text-2xl font-bold">
-                                                    {course.image === 'crypto-academy' ? 'ITALIAN' : 'ACCELERATORS'}
+                                                    {course.image === 'crypto-Courses' ? 'ITALIAN' : 'ACCELERATORS'}
                                                 </p>
                                             </div>
                                         </div>

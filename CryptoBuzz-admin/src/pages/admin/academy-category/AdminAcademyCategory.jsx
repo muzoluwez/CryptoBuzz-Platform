@@ -13,7 +13,7 @@ import DeleteAdminAcademyCategory from './DeleteAdminAcademyCategory';
 import { useLazyGetAdminAcademyCategoryQuery, useUpdateAdminAcademyCategoryMutation } from '../../../store/api/admin/adminAcademyCategoryApiSlice';
 import { Switch } from '../../../components/ui/switch';
 
-const AdminAcademyCategory = ({ title = "Academy Category" }) => {
+const AdminAcademyCategory = ({ title = "Courses Category" }) => {
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [selectedRow, setSelectedRow] = useState({});
@@ -254,14 +254,14 @@ const AdminAcademyCategory = ({ title = "Academy Category" }) => {
     <div className='container-fluid p-0 mt-5'>
       <Toolbar>
         <ToolbarHeading>
-          <ToolbarPageTitle text="Academy Category" />
+          <ToolbarPageTitle text="Courses Category" />
           <ToolbarDescription>
-            Learn, Master, and Apply Trading Skills with Expert-Led IQ Vault, Practical Strategies, and Real-World Market Insights.          </ToolbarDescription>
+            Learn, Master, and Apply Trading Skills with Expert-Led Courses, Practical Strategies, and Real-World Market Insights.          </ToolbarDescription>
         </ToolbarHeading>
         <ToolbarActions>
           <div className="text-end pb-4">
             <button className='btn btn-primary' onClick={handleClickOpen}>
-              Create Academy Category
+              Create Courses Category
             </button>
           </div>
         </ToolbarActions>

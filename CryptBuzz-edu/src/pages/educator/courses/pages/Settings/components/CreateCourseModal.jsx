@@ -137,7 +137,7 @@ const CreateCourseModal = forwardRef(
         <DialogContent className="p-5 max-w-[1200px]" ref={ref}>
           <DialogHeader>
             <DialogTitle>
-              {initialData ? "Edit IQ Vault" : "Create New IQ Vault"}
+              {initialData ? "Edit Courses" : "Create New Courses"}
             </DialogTitle>
           </DialogHeader>
           <CourseForm

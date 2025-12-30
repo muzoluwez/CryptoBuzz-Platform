@@ -13,7 +13,7 @@ const DeleteAdminStreamSchedule = forwardRef(({ isDeleteOpen, handleDeleteClose,
         try {
             await deleteEducatorStreamSchedule(selectedRow?._id).unwrap();
             refetch();
-            toast.success("IQ Academy Schedule deleted successfully!");
+            toast.success("Courses Schedule deleted successfully!");
             handleDeleteClose();
         } catch (error) {
             toast.error(err?.data?.message || "An error occurred");

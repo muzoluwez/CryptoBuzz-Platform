@@ -81,11 +81,11 @@ const CreateTradeAnalysis = forwardRef(
           if (selectedRow?._id) {
             let a = await updateTradeAnalysis({ id: selectedRow?._id, formData }).unwrap();
 
-            toast.success("IQ Insight updated successfully!");
+            toast.success("Trade Analysis updated successfully!");
           } else {
             await createTradeAnalysis(formData).unwrap();
 
-            toast.success("IQ Insight created successfully!");
+            toast.success("Trade Analysis created successfully!");
           }
           formik.resetForm();
           setSelectedRow({});
@@ -177,7 +177,7 @@ const CreateTradeAnalysis = forwardRef(
           <DialogContent className="p-5 max-w-[600px]" ref={ref}>
             <DialogHeader>
               <DialogTitle>
-                {selectedRow?._id ? "Create IQ Insight" : "Create IQ Insight"}
+                {selectedRow?._id ? "Create Trade Analysis" : "Create Trade Analysis"}
               </DialogTitle>
             </DialogHeader>
             <div className="grid gap-5 px-0 py-5">

@@ -92,7 +92,7 @@ export const getCategories = async (req, res) => {
 
 export const fetchCategories = async (req, res) => {
   try {
-    const categories = await Category.find({ type: "IQ Academy", status: true })
+    const categories = await Category.find({ type: "Courses", status: true })
       .select("_id name")
       .sort({ createdAt: -1 });
 

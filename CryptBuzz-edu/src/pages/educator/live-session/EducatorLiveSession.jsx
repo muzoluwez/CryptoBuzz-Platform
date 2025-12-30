@@ -410,7 +410,7 @@ const EducatorLiveSession = ({ title = "Live Session" }) => {
         <ToolbarHeading>
           <ToolbarPageTitle text="Live Session" />
           <ToolbarDescription>
-            Track and analyze past IQ Academy with key insights and performance
+            Track and analyze past Courses with key insights and performance
             data.
           </ToolbarDescription>
         </ToolbarHeading>

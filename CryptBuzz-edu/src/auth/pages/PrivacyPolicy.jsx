@@ -92,7 +92,7 @@ const PrivacyPolicy = () => {
                             <h2 className="text-xl sm:text-xl font-semibold text-gray-900 dark:text-white mb-3">
                                 7. Contact Us
                             </h2>
-                            <p>Email: <a href="mailto:support@iqonic.space" className="text-primary hover:underline">support@cryptobuzz.space</a></p>
+                            <p>Email: <a href="mailto:support@CryptoBuzz.space" className="text-primary hover:underline">support@cryptobuzz.space</a></p>
                         </div>
                     </div>
                 </div>

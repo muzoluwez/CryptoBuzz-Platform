@@ -111,11 +111,11 @@ const CreateEducator = forwardRef(
               id: selectedRow?._id,
             }).unwrap();
             refetch();
-            toast.success("Academy category updated successfully!");
+            toast.success("Courses category updated successfully!");
           } else {
             await createAdminAcademyCategory(payloadData).unwrap();
             refetch();
-            toast.success("Academy category created successfully!");
+            toast.success("Courses category created successfully!");
           }
           formik.resetForm();
           handleCloseCreate();
@@ -164,8 +164,8 @@ const CreateEducator = forwardRef(
           <DialogHeader className="pb-5 pt-0 px-0">
             <DialogTitle>
               {selectedRow?._id
-                ? "Update Academy Category"
-                : "Create Academy Category"}
+                ? "Update Courses Category"
+                : "Create Courses Category"}
             </DialogTitle>
           </DialogHeader>
           <div className="grid gap-5 px-0 pb-5">

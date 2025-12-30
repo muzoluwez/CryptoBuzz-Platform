@@ -219,7 +219,7 @@ const Languages = ({ title = "Languages" }) => {
           <ToolbarPageTitle text="Languages" />
           <ToolbarDescription>
             <ToolbarDescription>
-              Manage platform languages used in IQ Vault and academies for multilingual support.
+              Manage platform languages used in Courses and academies for multilingual support.
             </ToolbarDescription>
           </ToolbarDescription>
         </ToolbarHeading>

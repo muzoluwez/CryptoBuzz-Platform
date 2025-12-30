@@ -47,10 +47,10 @@ const SettingsSection = () => {
       )
         .unwrap()
         .then((response) => {
-          // console.log("IQ Vault fetched successfully:", response);
+          // console.log("Courses fetched successfully:", response);
         })
         .catch((error) => {
-          // console.error("Error fetching IQ Vault:", error);
+          // console.error("Error fetching Courses:", error);
         });
     } else {
       // console.log("No auth token available");
@@ -95,9 +95,9 @@ const SettingsSection = () => {
     if (error) {
       return (
         <ErrorMessages
-          heading={"No IQ Vault Yet"}
+          heading={"No Courses Yet"}
           message={
-            "You haven’t created any IQ Vault yet. Let’s get your first one set up and ready to go."
+            "You haven’t created any Courses yet. Let’s get your first one set up and ready to go."
           }
           onRetry={() =>
             dispatch(
@@ -139,7 +139,7 @@ const SettingsSection = () => {
                   className="flex items-center text-gray-500 hover:text-gray-700"
                 >
                   <ChevronLeft className="w-5 h-5 mr-2" />
-                  Back to IQ Vault
+                  Back to Courses
                 </button>
               )}
             </div>
@@ -147,7 +147,7 @@ const SettingsSection = () => {
               <span className="text-sm text-gray-500">
                 {selectedCourseId
                   ? courses.find((c) => c._id === selectedCourseId)?.title
-                  : "All IQ Vault"}
+                  : "All Courses"}
               </span>
             </div>
           </div>

@@ -1291,7 +1291,7 @@ export const ADMIN_MENU = [
     path: "/ideas",
   },
   {
-    title: "IQ Vault",
+    title: "Courses",
     icon: "book-open",
     path: "/courses",
   },
@@ -1336,13 +1336,13 @@ export const sideMenus = {
       path: "/",
     },
     {
-      title: "Academy",
+      title: "Courses",
       icon: <BookOpen />,
       path: "/admin/courses",
     },
 
     {
-      title: "IQ Live",
+      title: "Live Stream",
       icon: <CalendarClock />,
       // path: "/admin/stream-schedule",
       children: [
@@ -1375,17 +1375,17 @@ export const sideMenus = {
       path: "/admin/stream-recording",
     },
     {
-      title: "IQ Insight",
+      title: "Trade Analysis ",
       icon: <ChartCandlestick />,
       path: "/admin/trade-analysis",
     },
     {
-      title: "IQ Crypto Projects",
+      title: "Crypto Projects",
       icon: <BadgeCent />,
       path: "/admin/iq-crypto",
     },
     {
-      title: "IQ Ideas",
+      title: "Trade Ideas",
       icon: <Lightbulb />,
       path: "/admin/ideas",
     },
@@ -1413,7 +1413,7 @@ export const sideMenus = {
     //   path: '/admin/video-library'
     // },
     // {
-    //   title: 'Academy Category',
+    //   title: 'Courses Category',
     //   icon: <Layers />,
     //   path: '/admin/academy-category'
     // },
@@ -1434,7 +1434,7 @@ export const sideMenus = {
     },
 
     {
-      title: "IQ Social",
+      title: "Social Buzz",
       icon: <MessageCircleMore />,
       path: "/admin/iq-social",
     },

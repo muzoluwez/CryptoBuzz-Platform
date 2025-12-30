@@ -218,8 +218,8 @@ export const createIdea = async (req, res) => {
 
     // await notifyFollowersOfEducator(
     //   educatorUser._id,
-    //   "New IQ Idea Published 🚀",
-    //   `Check out the latest IQ idea on ${filtredCategory.name} - ${name}`,
+    //   "New Trade Ideas Published 🚀",
+    //   `Check out the latest Trade Ideas on ${filtredCategory.name} - ${name}`,
     //   {
     //     id: newIdea._id.toString(),
     //     category: filtredCategory.name,

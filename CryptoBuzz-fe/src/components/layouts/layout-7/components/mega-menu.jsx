@@ -56,7 +56,7 @@ export function MegaMenu() {
               className={cn(linkClass)}
               data-active={isActive('/client/academy') || undefined}
             >
-              Academy
+              Courses
             </Link>
           </NavigationMenuLink>
         </NavigationMenuItem>

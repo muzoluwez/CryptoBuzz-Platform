@@ -125,7 +125,7 @@ export const createTradeAnalysis = async (req, res) => {
 
     // await notifyFollowersOfEducator(
     //   educatorUser._id,
-    //   "New IQ Insight Published 📊",
+    //   "New Trade Analysis Published 📊",
     //   `Detailed analysis on ${foundCategory.name} is live - ${title}`,
     //   {
     //     id: newTrade._id.toString(),

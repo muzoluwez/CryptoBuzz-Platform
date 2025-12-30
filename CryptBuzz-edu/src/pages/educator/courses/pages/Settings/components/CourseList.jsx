@@ -127,7 +127,7 @@ const CourseList = ({ onCourseSelect }) => {
         ) : (
           <div className="col-span-full">
             <div className="flex items-center justify-center h-full">
-              <p className="text-gray-500">No IQ Vault found</p>
+              <p className="text-gray-500">No Courses found</p>
             </div>
           </div>
         )}
@@ -144,10 +144,10 @@ const CourseList = ({ onCourseSelect }) => {
           <div className="flex flex-col items-center justify-center h-full">
             <Plus className="w-12 h-12 text-gray-400 mb-4" />
             <h3 className="text-lg font-semibold text-gray-700">
-              Create New IQ Vault
+              Create New Course
             </h3>
             <p className="text-sm text-gray-500 mt-2">
-              Start building your IQ Vault
+              Start building your Course
             </p>
           </div>
         </div>

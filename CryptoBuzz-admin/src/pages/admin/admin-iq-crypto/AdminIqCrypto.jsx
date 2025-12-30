@@ -26,7 +26,7 @@ import DeleteAdminIqCrypto from "./DeleteAdminIqCrypto";
 import CreateAdminIqCrypto from "./CreateAdminIqCrypto";
 import ViewAdminIqCrypto from "./ViewAdminIqCrypto";
 
-const AdminIqCrypto = ({ title = "IQ Crypto Projects" }) => {
+const AdminIqCrypto = ({ title = "Crypto Projects" }) => {
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [selectedRow, setSelectedRow] = useState({});
@@ -251,7 +251,7 @@ const AdminIqCrypto = ({ title = "IQ Crypto Projects" }) => {
         totalCount: response.pagination?.totalRecords || 0,
       };
     } catch (error) {
-      // console.error("Error fetching IQ Crypto :", error);
+      // console.error("Error fetching Crypto Project :", error);
       return { data: [], totalCount: 0 };
     }
   };
@@ -267,7 +267,7 @@ const AdminIqCrypto = ({ title = "IQ Crypto Projects" }) => {
       <>
         <Toolbar>
           <ToolbarHeading>
-            <ToolbarPageTitle text="IQ Crypto Projects" />
+            <ToolbarPageTitle text="Crypto Projects" />
             <ToolbarDescription>
               Generate, analyze, and execute profitable trading opportunities
               with smart insights, market trends, and data-driven strategies
@@ -276,7 +276,7 @@ const AdminIqCrypto = ({ title = "IQ Crypto Projects" }) => {
           <ToolbarActions>
             <div className="text-end ">
               <button className="btn btn-primary" onClick={handleClickOpen}>
-                Create IQ Crypto
+                Create Crypto Project
               </button>
             </div>
           </ToolbarActions>

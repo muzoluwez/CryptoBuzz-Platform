@@ -226,12 +226,12 @@ const CreateTradeIdeas = forwardRef(
         <DialogContent className="p-5 max-w-[1200px]" ref={ref}>
           <DialogHeader>
             <DialogTitle>
-              {selectedRow?._id ? "Update IQ Idea" : "Create IQ Idea"}
+              {selectedRow?._id ? "Update Trade Ideas" : "Create Trade Ideas"}
             </DialogTitle>
             <DialogDescription>
               {selectedRow?._id
-                ? "Update the IQ idea details below."
-                : "Fill in the details to create a new IQ idea."}
+                ? "Update the Trade Ideas details below."
+                : "Fill in the details to create a new Trade Ideas."}
             </DialogDescription>
           </DialogHeader>
           <div className="grid gap-5 px-0 py-5">

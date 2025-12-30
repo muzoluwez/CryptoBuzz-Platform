@@ -6,7 +6,7 @@ import AdminAcademyCategory from '../academy-category/AdminAcademyCategory';
 const GeneralSetting = () => {
   const [activeTab, setActiveTab] = useState("Language");
 
-  const tabs = ["Language", "IQ Vault Type", "Academy Category"];
+  const tabs = ["Language", "Courses Type", "Courses Category"];
 
   return (
     <div className="container-fluid pb-5">
@@ -29,8 +29,8 @@ const GeneralSetting = () => {
 
         {/* Tab Content */}
         {activeTab === "Language" && <Languages />}
-        {activeTab === "IQ Vault Type" && <CoursesTypes />}
-        {activeTab === "Academy Category" && <AdminAcademyCategory />}
+        {activeTab === "Courses Type" && <CoursesTypes />}
+        {activeTab === "Courses Category" && <AdminAcademyCategory />}
       </div>
     </div>
   );

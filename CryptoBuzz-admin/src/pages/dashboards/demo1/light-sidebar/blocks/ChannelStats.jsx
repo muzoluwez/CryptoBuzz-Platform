@@ -24,7 +24,7 @@ const ChannelStats = () => {
     logo: 'live.png',
     logoDark: 'live-dark.png',
     info: '2.5k',
-    desc: 'Total IQ Academy Schedule',
+    desc: 'Total Courses Schedule',
     path: ''
   }];
 

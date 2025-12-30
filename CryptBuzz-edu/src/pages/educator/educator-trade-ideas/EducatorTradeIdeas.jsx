@@ -30,7 +30,7 @@ import ViewEducatorTradeIdeas from "./ViewEducatorTradeIdeas";
 import { useFetchCategoriesQuery } from "../../../store/api/educator/educatorAcademyCategoryApiSlice";
 import { useLazyGetIdeaQuery } from "../../../store/api/educator/educatorTradeIdeasApiSlice";
 
-const EducatorTradeIdeas = ({ title = "IQ Ideas" }) => {
+const EducatorTradeIdeas = ({ title = "Trade Ideas" }) => {
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [selectedRow, setSelectedRow] = useState({});
@@ -367,7 +367,7 @@ const EducatorTradeIdeas = ({ title = "IQ Ideas" }) => {
         totalCount: response.pagination?.totalRecords || 0,
       };
     } catch (error) {
-      console.error("Error fetching IQ Ideas:", error);
+      console.error("Error fetching Trade Ideas:", error);
       return { data: [], totalCount: 0 };
     }
   };
@@ -409,7 +409,7 @@ const EducatorTradeIdeas = ({ title = "IQ Ideas" }) => {
         <>
           <Toolbar>
             <ToolbarHeading>
-              <ToolbarPageTitle text="IQ Ideas" />
+              <ToolbarPageTitle text="Trade Ideas" />
               <ToolbarDescription>
                 Generate, analyze, and execute profitable trading opportunities
                 with smart insights, market trends, and data-driven strategies
@@ -464,7 +464,7 @@ const EducatorTradeIdeas = ({ title = "IQ Ideas" }) => {
               </div> */}
               <div className="text-end">
                 <button className="btn btn-primary" onClick={handleClickOpen}>
-                  Create IQ Idea
+                  Create Trade Ideas
                 </button>
               </div>
             </ToolbarActions>

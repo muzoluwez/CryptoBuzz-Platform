@@ -10,7 +10,7 @@ import {
 import AdminCommunityFeed from '../admin-community-feed/AdminCommunityFeed';
 
 /**
- * IQ Social Page
+ * Social Buzz Page
  * 
  * Admin view of the social/community feed where educators and users interact.
  * This page displays posts, interactions, and community activities.
@@ -20,7 +20,7 @@ const IqSocial = () => {
         <div className="container-fluid pb-5">
             <Toolbar>
                 <ToolbarHeading>
-                    <ToolbarPageTitle text="IQ Social" />
+                    <ToolbarPageTitle text="Social Buzz" />
                     <ToolbarDescription>
                         View and manage community posts, interactions, and social activities from educators and users.
                     </ToolbarDescription>

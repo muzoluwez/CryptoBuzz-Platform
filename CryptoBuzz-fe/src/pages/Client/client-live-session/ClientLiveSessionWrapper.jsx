@@ -99,14 +99,14 @@ const ClientLiveSessionContent = ({
     const statusConfig = {
       ended: {
         title: "Stream Ended",
-        description: "The IQ Academy has concluded.",
+        description: "The Courses has concluded.",
       },
       "not-started": {
         title: "Stream Not Started",
         description: "The host has not begun the stream yet.",
       },
       upcoming: {
-        title: "IQ Academy is Upcoming",
+        title: "Courses is Upcoming",
         description: `The event will start on ${
           custom?.datetime
             ? new Date(custom.datetime).toLocaleString()

@@ -19,7 +19,7 @@ const DeleteAdminIqCrypto = forwardRef(
       try {
         await DeleteCryptoAnalysis(selectedRow?._id).unwrap();
         refetch();
-        toast.success("IQ Crypto deleted successfully!");
+        toast.success("Crypto Project deleted successfully!");
 
         setSelectedRow({});
         handleDeleteClose();

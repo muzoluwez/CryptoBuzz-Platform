@@ -399,7 +399,7 @@ const AdminStreamSchedule = ({ title = "Live Schedule" }) => {
             totalCount: response.pagination?.totalRecords || 0,
           };
         } catch (error) {
-          // console.error("Error fetching IQ Ideas:", error);
+          // console.error("Error fetching Trade Ideas:", error);
           return { data: [], totalCount: 0 };
         }
       },
@@ -440,7 +440,7 @@ const AdminStreamSchedule = ({ title = "Live Schedule" }) => {
         <ToolbarHeading>
           <ToolbarPageTitle text="Live Schedule" />
           <ToolbarDescription>
-            Track and analyze past IQ Academy with key insights and performance
+            Track and analyze past Courses with key insights and performance
             data.
           </ToolbarDescription>
         </ToolbarHeading>
