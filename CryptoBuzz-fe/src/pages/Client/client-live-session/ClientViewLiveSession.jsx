@@ -6,10 +6,10 @@ import {
   useGetClientLiveScheduleQuery,
   useGetClientTokenMutation,
 } from "../../../store/api/client/clientLiveSessionApiSlice";
-import { useAuthContext } from "../../../auth/useAuthContext";
+import { useAuthContext } from "../../../context/AuthContext";
 import { EventProvider } from "./chat-room/context/EventContext";
 import ClientLiveSessionWrapper from "./ClientLiveSessionWrapper";
-import StreamWrapper from "../../admin/live-session/StreamWrapper";
+import StreamWrapper from "./StreamWrapper";
 import { format } from "date-fns";
 
 const apiKey = import.meta.env.VITE_APP_STREAM_API_KEY;
@@ -20,8 +20,8 @@ const ClientViewLiveSession = ({ bannerImage, callId, educatorData }) => {
   const [call, setCall] = useState(null);
   const isInitializing = useRef(false); // Track initialization attempts
   // const { callId } = useParams();
-  const { auth } = useAuthContext();
-  const userId = auth?.user?._id ?? null;
+  const { user } = useAuthContext();  
+  const userId = user?._id;
 
   const [recordings, setRecordings] = useState([]);
 

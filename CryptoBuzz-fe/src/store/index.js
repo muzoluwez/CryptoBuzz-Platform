@@ -18,6 +18,7 @@ import { clientCoursesApiSlice } from './client/clientCoursesApiSlice';
 import { clientCryptoApiSlice } from './client/clientCryptoApiSlice';
 import { clientEducatorApiSlice } from './client/clientEducatorApiSlice';
 import { clientIdeaApiSlice } from './client/clientIdeaApiSlice';
+import { clientRatingApiSlice } from './client/clientRatingApiSlice';
 import { clientScheduleApiSlice } from './client/clientScheduleApiSlice';
 import { clientSocialApiSlice } from './client/clientSocialApiSlice';
 import { clientTradeAnalysisApiSlice } from './client/clientTradeAnalysisApiSlice';
@@ -40,6 +41,7 @@ const rootReducer = combineReducers({
   [clientCryptoApiSlice.reducerPath]: clientCryptoApiSlice.reducer,
   [clientEducatorApiSlice.reducerPath]: clientEducatorApiSlice.reducer,
   [clientIdeaApiSlice.reducerPath]: clientIdeaApiSlice.reducer,
+  [clientRatingApiSlice.reducerPath]: clientRatingApiSlice.reducer,
   [clientSocialApiSlice.reducerPath]: clientSocialApiSlice.reducer,
   [clientScheduleApiSlice.reducerPath]: clientScheduleApiSlice.reducer,
 });
@@ -61,6 +63,7 @@ export const store = configureStore({
       clientCryptoApiSlice.middleware,
       clientEducatorApiSlice.middleware,
       clientIdeaApiSlice.middleware,
+      clientRatingApiSlice.middleware,
       clientSocialApiSlice.middleware,
       clientScheduleApiSlice.middleware,
     ),

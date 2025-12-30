@@ -46,11 +46,11 @@ export const ChatHeader = ({ dmUnread, eventUnread, globalUnread, qaUnread }) =>
         <>
             {!isFullScreen && <div className='bg-[#1A1446] px-4 py-3 chat-components-header border border-b-0'>
                 <div className='chat-components-header-top flex gap-3 items-center'>
-                    <button onClick={() => setIsFullScreen((prev) => !prev)} class="flex btn btn-xs btn-icon btn-primary btn-outline md:flex btn btn-xs btn-icon btn-primary btn-outline ">
+                    <button onClick={() => setIsFullScreen((prev) => !prev)} className="flex btn btn-xs btn-icon btn-primary btn-outline md:flex btn btn-xs btn-icon btn-primary btn-outline ">
                         <ArrowBigRight size={18} />
                     </button>
-                    <h3 class="text-white font-semibold text-sm pb-0">ChatBox</h3>
-                    {/* <button class="btn btn-xs btn-primary btn-outline">
+                    <h3 className="text-white font-semibold text-sm pb-0">ChatBox</h3>
+                    {/* <button className="btn btn-xs btn-primary btn-outline">
                     <UserRound size={16}/>
                         12354
                     </button> */}

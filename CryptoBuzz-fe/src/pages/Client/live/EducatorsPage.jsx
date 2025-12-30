@@ -83,16 +83,19 @@ const EducatorsPage = () => {
       return {
         id: educator._id,
         _id: educator._id,
+        first_name: educator.first_name,
+        last_name: educator.last_name,
         name: fullName,
         title: educator.title || educator.first_name?.toUpperCase() || 'EDUCATOR',
-        bio: educator.bio || educator.description || '',
+        bio: educator.bio || '',
         category: categoryName,
         categoryId: categoryId,
         specialty: educator.title || educator.educatorRole || categoryName,
+        educatorRole: educator.educatorRole,
         description: educator.description || educator.bio || '',
         courses: educator.courseCount || 0,
-        tradeIdeas: educator.tradeIdeas || 0, // This might not be in API response
-        insights: educator.insights || 0, // This might not be in API response
+        tradeIdeas: educator.ideaCount || 0,
+        insights: educator.insightCount || 0,
         gradient: getGradient(categoryName),
         bgPattern: categoryName.toLowerCase().split(' ')[0],
         image: educator.image,
@@ -222,7 +225,7 @@ const EducatorsPage = () => {
                 labelKey="name"
                 className=""
                 disabled={categoriesLoading}
-                size="md"
+                size="lg"
               />
             </div>
           </div>
@@ -263,68 +266,121 @@ const EducatorsPage = () => {
             {filteredEducators.map((educator) => (
               <Card
                 key={educator.id}
-                className="rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow"
+                className="rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow bg-white dark:bg-gray-900"
               >
-                <div
-                  className={`relative h-64 bg-gradient-to-br ${educator.gradient} overflow-hidden`}
-                >
-                  {/* Category Badge */}
+                {/* Header Section with Banner Image */}
+                <div className="relative h-48 overflow-hidden">
+                  {/* Banner Image Background */}
+                  {educator.bannerImage ? (
+                    <img
+                      src={educator.bannerImage}
+                      alt={educator.name}
+                      className="w-full h-full object-cover"
+                      onError={(e) => {
+                        e.target.src = '';
+                        e.target.style.display = 'none';
+                      }}
+                    />
+                  ) : (
+                    <div className={`w-full h-full bg-gradient-to-br ${educator.gradient}`} />
+                  )}
+
+                  {/* Category Badge - Top Left */}
                   <div className="absolute top-4 left-4 z-10">
                     <span className="bg-primary text-dark px-3 py-1 rounded-full text-sm font-medium">
                       {educator.category}
                     </span>
                   </div>
 
-                  {/* Profile Image Circle */}
-                  {educator.image && (
-                    <div className="absolute bottom-0 right-0">
+                  {/* Large Headshot - Top Right */}
+                  {/* {educator.image && (
+                    <div className="absolute top-4 right-4 z-10">
                       <img
                         src={educator.image}
                         alt={educator.name}
-                        className="w-24 h-24 rounded-full object-cover border-4 border-white dark:border-gray-800"
+                        className="w-20 h-20 rounded-full object-cover border-4 border-white dark:border-gray-800 shadow-lg"
                         onError={(e) => {
                           e.target.style.display = 'none';
                         }}
                       />
                     </div>
-                  )}
+                  )} */}
+
+                  {/* Name Overlay - Right Side */}
+                  {/* <div className="absolute bottom-4 right-4 z-10 text-right">
+                    <h3 className="text-white text-2xl font-bold leading-tight">
+                      {educator.first_name?.toUpperCase() || ''}
+                      <br />
+                      <span className="font-extrabold">
+                        {educator.last_name?.toUpperCase() || ''}
+                      </span>
+                    </h3>
+                    <p className="text-white/80 text-xs mt-1 tracking-wider">
+                      {educator.category?.toUpperCase() || 'EDUCATOR'}
+                    </p>
+                  </div> */}
                 </div>
 
-                {/* Content */}
-                <div className="pt-6 px-6 pb-6">
-                  <h4 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-1">
+                {/* Profile Information Section */}
+                <div className="px-6 pt-4 pb-6 relative">
+                  {/* Circular Profile Picture with Checkmark */}
+                  {educator.image && (
+                    <div className="relative -mt-12 mb-4">
+                      <div className="relative inline-block">
+                        <img
+                          src={educator.image}
+                          alt={educator.name}
+                          className="w-20 h-20 rounded-full object-cover border-4 border-white dark:border-gray-900 shadow-lg"
+                          onError={(e) => {
+                            e.target.style.display = 'none';
+                          }}
+                        />
+                        {/* Verified Checkmark */}
+                        <div className="absolute bottom-0 right-0 bg-primary rounded-full p-1 border-2 border-white dark:border-gray-900">
+                          <Check className="w-3 h-3 text-white" />
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Full Name */}
+                  <h4 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-1">
                     {educator.name}
                   </h4>
-                  <p className="text-yellow-600 font-medium text-sm mb-3">
-                    {educator.specialty}
-                  </p>
-                  <p className="text-gray-600 dark:text-gray-300 text-xs line-clamp-2 h-16">
-                    {educator.bio}
+
+                  {/* Specialty/Role */}
+                  <p className="text-primary font-medium text-sm mb-3">
+                    {educator.specialty || educator.educatorRole || educator.category}
                   </p>
 
-                  {/* Stats */}
-                  <div className="grid grid-cols-3 gap-4 mb-6">
-                    <div className="text-center">
+                  {/* Description/Bio */}
+                  <p className="text-gray-600 dark:text-gray-300 text-sm mb-6 line-clamp-3">
+                    {educator.bio || educator.description?.replace(/<[^>]*>/g, '') || 'No description available'}
+                  </p>
+
+                  {/* Stats - Horizontal Layout */}
+                  <div className="flex justify-between items-center mb-6 pb-6 border-b border-gray-200 dark:border-gray-700">
+                    <div className="text-center flex-1">
                       <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">
-                        {educator.courses}
+                        {educator.courses || 0}
                       </p>
-                      <p className="text-xs text-gray-500 dark:text-gray-400">
+                      <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                         Courses
                       </p>
                     </div>
-                    <div className="text-center">
+                    <div className="text-center flex-1 border-l border-r border-gray-200 dark:border-gray-700">
                       <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">
-                        {educator.tradeIdeas}
+                        {educator.tradeIdeas || 0}
                       </p>
-                      <p className="text-xs text-gray-500 dark:text-gray-400">
+                      <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                         Trade Ideas
                       </p>
                     </div>
-                    <div className="text-center">
+                    <div className="text-center flex-1">
                       <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">
-                        {educator.insights}
+                        {educator.insights || 0}
                       </p>
-                      <p className="text-xs text-gray-500 dark:text-gray-400">
+                      <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                         Insights
                       </p>
                     </div>
@@ -334,10 +390,10 @@ const EducatorsPage = () => {
                   <div className="grid grid-cols-2 gap-3">
                     <button
                       onClick={() => handleFollow(educator.id)}
-                      className={`py-2 rounded-lg font-medium transition-all flex items-center justify-center gap-2 cursor-pointer ${
+                      className={`py-2.5 rounded-lg font-medium transition-all flex items-center justify-center gap-2 cursor-pointer ${
                         followingIds.includes(educator.id)
-                          ? 'bg-yellow-600 text-white hover:bg-primary-dark'
-                          : 'bg-yellow-100 dark:bg-yellow-700 text-yellow-600 dark:text-yellow-200 hover:bg-yellow-200'
+                          ? 'bg-primary text-white hover:bg-primary-dark'
+                          : 'bg-primary/10 text-primary hover:bg-primary/20'
                       }`}
                     >
                       {followingIds.includes(educator.id) ? (
@@ -354,11 +410,11 @@ const EducatorsPage = () => {
                     </button>
                     <button
                       onClick={() =>
-                        navigate(`/client/viewprofile`, {
+                        navigate(`/client/view-profile/${educator._id || educator.id}`, {
                           state: { educatorId: educator._id || educator.id },
                         })
                       }
-                      className="py-2 bg-white dark:bg-gray-800 border-1 border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-200 rounded-lg font-medium hover:bg-gray-50 dark:hover:bg-gray-700 transition-all flex items-center justify-center gap-2 cursor-pointer"
+                      className="py-2.5 bg-gray-900 dark:bg-gray-800 text-white dark:text-gray-200 rounded-lg font-medium hover:bg-gray-800 dark:hover:bg-gray-700 transition-all flex items-center justify-center gap-2 cursor-pointer"
                     >
                       <Eye className="w-4 h-4" />
                       View Profile

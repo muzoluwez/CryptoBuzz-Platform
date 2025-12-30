@@ -18,7 +18,7 @@ export function convertRtkEditorToHtmlWithLinks(html) {
       (match, attributes, text) => {
         const hrefMatch = attributes.match(/href=["']([^"']+)["']/i);
         const href = hrefMatch ? hrefMatch[1] : text.trim();
-        return `<a href="${href}" target="_blank" rel="noopener noreferrer" class="text-primary hover:underline cursor-pointer">${text}</a>`;
+        return `<a href="${href}" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline cursor-pointer">${text}</a>`;
       }
     );
   }
@@ -267,7 +267,7 @@ export function convertPlainTextWithClickableLinks(text, preserveLineBreaks = tr
     
     // All validations passed - it's a real URL
     const href = match.startsWith('www.') ? 'https://' + match : match;
-    return `<a href="${href}" target="_blank" rel="noopener noreferrer" class="text-primary hover:underline cursor-pointer">${match}</a>`;
+    return `<a href="${href}" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline cursor-pointer">${match}</a>`;
   });
 
   // Restore line breaks - convert markers back to <br> tags

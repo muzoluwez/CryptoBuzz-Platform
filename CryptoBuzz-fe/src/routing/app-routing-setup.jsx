@@ -56,7 +56,7 @@ export function AppRoutingSetup() {
         <Route path="/client/profile" element={<ProfilePage />} />
         <Route path="/client/idea" element={<IdeaPage />} />
         <Route path="/client/social" element={<SocialPage />} />
-        <Route path="/client/viewprofile/:id" element={<ViewProfile />} />
+        <Route path="/client/view-profile/:id" element={<ViewProfile />} />
       </Route>
 
       {/* ================= FALLBACK ================= */}

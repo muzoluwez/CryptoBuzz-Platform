@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { StreamChat } from "stream-chat";
 import { useCheckList } from "./useCheckList";
 import { getRandomTitle } from "../chat/utils";
@@ -15,6 +15,7 @@ export const useInitChat = ({ userId, userToken, callId, userName }) => {
   const [eventUnread, setEventUnread] = useState(false);
   const [globalUnread, setGlobalUnread] = useState(false);
   const [qaUnread, setQaUnread] = useState(false);
+  const isInitializing = useRef(false);
 
   const { chatType, eventName } = useEventContext();
   useCheckList({ chatClient, targetOrigin });
@@ -86,9 +87,13 @@ export const useInitChat = ({ userId, userToken, callId, userName }) => {
 
   useEffect(() => {
     const initChat = async () => {
+      if (isInitializing.current) return; // Prevent concurrent initializations
+      isInitializing.current = true;
+
       try {
-        if (!apiKey || !userId || !userToken) {
-          console.error("Missing API key, User ID, or Token.");
+        if (!apiKey || !userId || !userToken || !callId) {
+          console.error("Missing API key, User ID, Token, or Call ID.");
+          isInitializing.current = false;
           return;
         }
 
@@ -96,27 +101,41 @@ export const useInitChat = ({ userId, userToken, callId, userName }) => {
 
         if (!client) {
           console.error("Failed to initialize StreamChat client.");
+          isInitializing.current = false;
           return;
         }
 
-        if (client.wsConnection && client.wsConnection.isHealthy) {
+        // Check if user is already connected with the same user ID
+        const isAlreadyConnected = 
+          client.userID === userId && 
+          client.wsConnection && 
+          client.wsConnection.isHealthy;
+
+        if (isAlreadyConnected) {
+          // User is already connected, just set up the channel
           setChatClient(client);
-          // return;
+          
+          const globalChannel = client.channel("livestream", callId, {
+            name: "Global",
+          });
+          
+          await globalChannel.watch({ watchers: { limit: 100 } });
+          setCurrentChannel(globalChannel);
+          isInitializing.current = false;
+          return;
         }
 
+        // Connect user only if not already connected
         await client.connectUser(
           {
             id: userId,
             name: userName,
             image: `https://getstream.io/random_svg/?name=${userName}`,
-            // title: userId === 'daddy' ? 'Admin' : getRandomTitle(),
           },
           userToken
         );
 
-        // 🔥 Create a unique chat per Courses
-        const uniqueChannelId = `livestream-${eventName || "default"}`; // Unique per event
-
+        // Create a unique chat per call
         const globalChannel = client.channel("livestream", callId, {
           name: "Global",
         });
@@ -131,15 +150,18 @@ export const useInitChat = ({ userId, userToken, callId, userName }) => {
         setCurrentChannel(globalChannel);
       } catch (error) {
         console.error("Error initializing chat:", error);
+      } finally {
+        isInitializing.current = false;
       }
     };
 
-    if (!chatClient) {
+    if (!chatClient && !isInitializing.current) {
       initChat();
-    } else {
+    } else if (chatClient && callId) {
+      // Only switch channel if chat client exists and callId is available
       switchChannel(chatType, eventName);
     }
-  }, [chatType, eventName, userToken, apiKey, userId]);
+  }, [chatType, eventName, userToken, apiKey, userId, callId, userName]);
 
   useEffect(() => {
     return () => {

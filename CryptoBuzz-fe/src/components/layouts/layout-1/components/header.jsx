@@ -29,16 +29,42 @@ import { UserDropdownMenu } from '@/components/layouts/layout-1/shared/topbar/us
 import { MegaMenu } from './mega-menu';
 import { MegaMenuMobile } from './mega-menu-mobile';
 import { SidebarMenu } from './sidebar-menu';
+import { useAuthContext } from '@/context/AuthContext';
 
 export function Header() {
   const [isSidebarSheetOpen, setIsSidebarSheetOpen] = useState(false);
   const [isMegaMenuSheetOpen, setIsMegaMenuSheetOpen] = useState(false);
+  const { user, isAuthenticated, token } = useAuthContext();
 
   const { pathname } = useLocation();
   const mobileMode = useIsMobile();
 
   const scrollPosition = useScrollPosition();
   const headerSticky = scrollPosition > 0;
+
+  // More robust check: user must exist AND token must exist AND isAuthenticated must be true
+  const isUserLoggedIn = isAuthenticated && user && token;
+
+  // Get user image with default fallback
+  const userImage = user?.image || toAbsoluteUrl('/media/avatars/300-2.png');
+
+  // Get user initials for fallback
+  const getUserInitials = () => {
+    if (user?.first_name && user?.last_name) {
+      return `${user.first_name[0]}${user.last_name[0]}`.toUpperCase();
+    }
+    if (user?.name) {
+      const names = user.name.split(' ');
+      if (names.length >= 2) {
+        return `${names[0][0]}${names[1][0]}`.toUpperCase();
+      }
+      return user.name[0].toUpperCase();
+    }
+    if (user?.email) {
+      return user.email[0].toUpperCase();
+    }
+    return 'U';
+  };
 
   // Close sheet when route changes
   useEffect(() => {
@@ -130,54 +156,80 @@ export function Header() {
               }
             />
           )}
-          <NotificationsSheet
-            trigger={
-              <Button
-                variant="ghost"
-                mode="icon"
-                shape="circle"
-                className="size-9 hover:bg-primary/10 hover:[&_svg]:text-primary"
-              >
-                <Bell className="size-4.5!" />
-              </Button>
-            }
-          />
-
-          <ChatSheet
-            trigger={
-              <Button
-                variant="ghost"
-                mode="icon"
-                shape="circle"
-                className="size-9 hover:bg-primary/10 hover:[&_svg]:text-primary"
-              >
-                <MessageCircleMore className="size-4.5!" />
-              </Button>
-            }
-          />
-
-          <AppsDropdownMenu
-            trigger={
-              <Button
-                variant="ghost"
-                mode="icon"
-                shape="circle"
-                className="size-9 hover:bg-primary/10 hover:[&_svg]:text-primary"
-              >
-                <LayoutGrid className="size-4.5!" />
-              </Button>
-            }
-          />
-
-          <UserDropdownMenu
-            trigger={
-              <img
-                className="size-9 rounded-full border-2 border-green-500 shrink-0 cursor-pointer"
-                src={toAbsoluteUrl('/media/avatars/300-2.png')}
-                alt="User Avatar"
+          {isUserLoggedIn && (
+            <>
+              <NotificationsSheet
+                trigger={
+                  <Button
+                    variant="ghost"
+                    mode="icon"
+                    shape="circle"
+                    className="size-9 hover:bg-primary/10 hover:[&_svg]:text-primary"
+                  >
+                    <Bell className="size-4.5!" />
+                  </Button>
+                }
               />
-            }
-          />
+
+              <ChatSheet
+                trigger={
+                  <Button
+                    variant="ghost"
+                    mode="icon"
+                    shape="circle"
+                    className="size-9 hover:bg-primary/10 hover:[&_svg]:text-primary"
+                  >
+                    <MessageCircleMore className="size-4.5!" />
+                  </Button>
+                }
+              />
+            </>
+          )}
+
+          {isUserLoggedIn && (
+            <AppsDropdownMenu
+              trigger={
+                <Button
+                  variant="ghost"
+                  mode="icon"
+                  shape="circle"
+                  className="size-9 hover:bg-primary/10 hover:[&_svg]:text-primary"
+                >
+                  <LayoutGrid className="size-4.5!" />
+                </Button>
+              }
+            />
+          )}
+
+          {isUserLoggedIn ? (
+            <UserDropdownMenu
+              trigger={
+                userImage && userImage !== toAbsoluteUrl('/media/avatars/300-2.png') ? (
+                  <img
+                    className="size-9 rounded-full border-2 border-green-500 shrink-0 cursor-pointer object-cover"
+                    src={userImage}
+                    alt="User Avatar"
+                    onError={(e) => {
+                      // Fallback to default image if user image fails to load
+                      e.target.src = toAbsoluteUrl('/media/avatars/300-2.png');
+                    }}
+                  />
+                ) : (
+                  <div className="size-9 rounded-full border-2 border-green-500 shrink-0 cursor-pointer bg-gradient-to-br from-yellow-400 to-yellow-600 flex items-center justify-center text-white font-semibold text-sm">
+                    {getUserInitials()}
+                  </div>
+                )
+              }
+            />
+          ) : (
+            <Button
+              variant="primary"
+              size="md"
+              asChild
+            >
+              <Link to="/login">Login</Link>
+            </Button>
+          )}
         </div>
       </div>
     </header>

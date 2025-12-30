@@ -1,8 +1,15 @@
 import React, { useState } from 'react';
 import { Play, Calendar } from 'lucide-react';
 import { Card } from '../../../components/ui/card';
+import { Button } from '../../../components/ui/button';
+import EducatorLiveStreamView from './EducatorLiveStreamView';
+import RatingModal from './RatingModel';
+import { useParams } from 'react-router';
 
 export default function ViewProfile() {
+    const { id: educatorId } = useParams();
+    const [isRatingModalOpen, setIsRatingModalOpen] = useState(false);
+
     const courses = [
         {
             id: 1,
@@ -141,15 +148,12 @@ export default function ViewProfile() {
                 </div>
 
                 {/* MIDDLE — Volume Control */}
-                <div className="hidden md:flex items-center gap-3 bg-white/10 backdrop-blur-md border border-white/20 px-4 py-2 rounded-lg">
+                {/* <div className="hidden md:flex items-center gap-3 bg-white/10 backdrop-blur-md border border-white/20 px-4 py-2 rounded-lg">
 
-                    {/* Volume Icon */}
                     <span className="text-white text-lg">🔊</span>
 
-                    {/* Minus */}
                     <button className="text-white text-xl font-bold hover:text-blue-300">−</button>
 
-                    {/* Slider */}
                     <input
                         type="range"
                         min="0"
@@ -158,9 +162,8 @@ export default function ViewProfile() {
                         className="w-32 accent-yellow-400"
                     />
 
-                    {/* Plus */}
                     <button className="text-white text-xl font-bold hover:text-blue-300">＋</button>
-                </div>
+                </div> */}
 
                 {/* RIGHT SECTION — Buttons */}
                 <div className="flex flex-col items-end gap-3">
@@ -178,50 +181,26 @@ export default function ViewProfile() {
                     </div>
 
                     {/* Rate Me Button */}
-                    <button className="px-5 py-2 bg-[#ffcd0b] text-dark rounded-lg text-sm flex items-center gap-2 shadow-md">
+                    <Button 
+                        onClick={() => setIsRatingModalOpen(true)}
+                        variant="primary"
+                        size="md"
+                        className="px-5 py-2 bg-[#ffcd0b] text-dark rounded-lg text-sm flex items-center gap-2 shadow-md hover:bg-yellow-500 transition-colors"
+                    >
                         ⭐ Rate Me
-                    </button>
+                    </Button>
 
                 </div>
             </div>
+            {/* Live Stream Section */}
+            <div className="grid grid-cols-12 gap-y-6 mb-8">
+                <div className="col-span-12 xl:col-span-12 space-y-8">
+                    <EducatorLiveStreamView />
+                </div>
+            </div>
+
             <div className="grid grid-cols-3 gap-6">
                 {/* Main Content Area */}
-                <div className="col-span-12 lg:col-span-2 lg:mb-6">
-                    {/* Hero Banner */}
-                    <div className="relative bg-gradient-to-br from-yellow-600 via-yellow-700 to-yellow-900 rounded-2xl overflow-hidden h-[400px]">
-                        <div className="absolute right-8 top-1/2 -translate-y-1/2 text-right">
-                            <h3 className="text-4xl font-bold text-white mb-2">FILIPE<br />FORNER</h3>
-                            <p className="text-white/70 text-sm tracking-wider">CRYPTO EDUCATOR</p>
-                        </div>
-                        <div className="absolute bottom-4 left-4 text-white/60 text-xs tracking-wider">ICONIC</div>
-                        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 text-white/60 text-xs">CRYPTO LIVE SESSION</div>
-                        <div className="absolute bottom-4 right-4 flex items-center gap-2">
-                            <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse"></div>
-                            <span className="text-white/60 text-xs">Offline</span>
-                        </div>
-                    </div>
-
-                    {/* Courses Section */}
-                </div>
-                <div className="col-span-12 lg:col-span-1 mb-6">
-                    <Card className="rounded-2xl p-6 shadow-sm h-full">
-                        <h3 className="text-gray-900 dark:text-gray-200 text-lg font-bold mb-4">About Me</h3>
-                        <div className="bg-gradient-to-br from-blue-50 to-yellow-50 rounded-lg p-4 text-gray-700 text-sm border border-gray-200">
-                            <p>Professional crypto trader and educator specializing in BTC analysis and trading strategies.</p>
-                        </div>
-                    </Card>
-                </div>
-            </div>
-            {/* <div className="grid grid-cols-12  gap-y-6">
-                <div className="col-span-12 xl:col-span-12 space-y-8 mb-8">
-                    <ClientViewLiveSession
-                        bannerImage={response?.data?.educator?.bannerImage}
-                        callId={callId}
-                        educatorData={response?.data?.educator?.description}
-                    />
-                </div>
-            </div> */}
-            <div className="grid grid-cols-3 gap-6">
                 <div className="col-span-12 lg:col-span-2 space-y-6">
                     <Card className="rounded-2xl p-6 shadow-sm">
                         <div className="flex items-center justify-between mb-4">
@@ -374,6 +353,12 @@ export default function ViewProfile() {
                 <div className="col-span-12 lg:col-span-1 mb-6">
                     <div className="space-y-6">
                         {/* About Me */}
+                        {/* <Card className="rounded-2xl p-6 shadow-sm h-full">
+                            <h3 className="text-gray-900 dark:text-gray-200 text-lg font-bold mb-4">About Me</h3>
+                            <div className="bg-white dark:bg-gray-900 rounded-lg p-4 text-gray-700 text-sm border border-gray-200">
+                                <p>Professional crypto trader and educator specializing in BTC analysis and trading strategies.</p>
+                            </div>
+                        </Card> */}
                         {/* Live Feed */}
                         <Card className="rounded-2xl p-6 shadow-sm">
                             <h3 className="text-gray-900 dark:text-white text-lg font-bold mb-4">Live Feed</h3>
@@ -416,6 +401,13 @@ export default function ViewProfile() {
                     </div>
                 </div>
             </div>
+
+            {/* Rating Modal */}
+            <RatingModal
+                isOpen={isRatingModalOpen}
+                onClose={() => setIsRatingModalOpen(false)}
+                educatorId={educatorId}
+            />
         </div>
     );
 }

@@ -13,7 +13,7 @@ import {
   Users,
 } from 'lucide-react';
 import { useTheme } from 'next-themes';
-import { Link } from 'react-router';
+import { Link, useNavigate } from 'react-router';
 import { toAbsoluteUrl } from '@/lib/helpers';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -30,6 +30,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Switch } from '@/components/ui/switch';
+import { useAuthContext } from '@/context/AuthContext';
 
 const I18N_LANGUAGES = [
   {
@@ -61,9 +62,46 @@ const I18N_LANGUAGES = [
 export function UserDropdownMenu({ trigger }) {
   const currenLanguage = I18N_LANGUAGES[0];
   const { theme, setTheme } = useTheme();
+  const { user, logout } = useAuthContext();
+  const navigate = useNavigate();
 
   const handleThemeToggle = (checked) => {
     setTheme(checked ? 'dark' : 'light');
+  };
+
+  const handleLogout = () => {
+    logout();
+    navigate('/login');
+  };
+
+  // Get user data with fallbacks
+  const userName = user?.name || 
+    (user?.first_name && user?.last_name 
+      ? `${user.first_name} ${user.last_name}` 
+      : user?.first_name || user?.email?.split('@')[0] || 'User');
+  
+  const userEmail = user?.email || '';
+  
+  // Get user image with default fallback
+  const userImage = user?.image || 
+    toAbsoluteUrl('/media/avatars/300-2.png');
+
+  // Get user initials for fallback
+  const getUserInitials = () => {
+    if (user?.first_name && user?.last_name) {
+      return `${user.first_name[0]}${user.last_name[0]}`.toUpperCase();
+    }
+    if (user?.name) {
+      const names = user.name.split(' ');
+      if (names.length >= 2) {
+        return `${names[0][0]}${names[1][0]}`.toUpperCase();
+      }
+      return user.name[0].toUpperCase();
+    }
+    if (user?.email) {
+      return user.email[0].toUpperCase();
+    }
+    return 'U';
   };
 
   return (
@@ -73,30 +111,44 @@ export function UserDropdownMenu({ trigger }) {
         {/* Header */}
         <div className="flex items-center justify-between p-3">
           <div className="flex items-center gap-2">
-            <img
-              className="size-9 rounded-full border-2 border-green-500"
-              src={toAbsoluteUrl('/media/avatars/300-2.png')}
-              alt="User avatar"
-            />
+            {userImage && userImage !== toAbsoluteUrl('/media/avatars/300-2.png') ? (
+              <img
+                className="size-9 rounded-full border-2 border-green-500 object-cover"
+                src={userImage}
+                alt="User avatar"
+                onError={(e) => {
+                  // Fallback to default image if user image fails to load
+                  e.target.src = toAbsoluteUrl('/media/avatars/300-2.png');
+                }}
+              />
+            ) : (
+              <div className="size-9 rounded-full border-2 border-green-500 bg-gradient-to-br from-yellow-400 to-yellow-600 flex items-center justify-center text-white font-semibold text-sm">
+                {getUserInitials()}
+              </div>
+            )}
 
             <div className="flex flex-col">
               <Link
-                to="#"
+                to="/client/profile"
                 className="text-sm text-mono hover:text-primary font-semibold"
               >
-                Sean
+                {userName}
               </Link>
-              <a
-                href={`mailto:sean@kt.com`}
-                className="text-xs text-muted-foreground hover:text-primary"
-              >
-                sean@kt.com
-              </a>
+              {userEmail && (
+                <a
+                  href={`mailto:${userEmail}`}
+                  className="text-xs text-muted-foreground hover:text-primary"
+                >
+                  {userEmail}
+                </a>
+              )}
             </div>
           </div>
-          <Badge variant="primary" appearance="light" size="sm">
-            Pro
-          </Badge>
+          {user?.subscription?.plan && user.subscription.plan !== 'FREE' && (
+            <Badge variant="primary" appearance="light" size="sm">
+              {user.subscription.plan === 'PRO' ? 'Pro' : user.subscription.plan}
+            </Badge>
+          )}
         </div>
 
         <DropdownMenuSeparator />
@@ -229,7 +281,12 @@ export function UserDropdownMenu({ trigger }) {
           </div>
         </DropdownMenuItem>
         <div className="p-2 mt-1">
-          <Button variant="outline" size="sm" className="w-full">
+          <Button 
+            variant="outline" 
+            size="sm" 
+            className="w-full"
+            onClick={handleLogout}
+          >
             Logout
           </Button>
         </div>

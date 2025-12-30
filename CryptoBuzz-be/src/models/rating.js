@@ -6,36 +6,36 @@ const RatingSchema = new mongoose.Schema(
       type: Number,
       required: true,
       min: 1,
-      max: 5,
+      max: 5
     },
 
     comment: {
       type: String,
       trim: true,
-      default: null,
+      default: null
     },
 
     user: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "user",
-      required: true,
+      ref: "userCredential",
+      required: true
     },
 
     educator: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "user",
-      required: true,
+      required: true
     },
 
     isDeleted: {
       type: Boolean,
-      default: false,
+      default: false
     },
 
     deletedAt: {
       type: Date,
-      default: null,
-    },
+      default: null
+    }
   },
   { timestamps: true }
 );

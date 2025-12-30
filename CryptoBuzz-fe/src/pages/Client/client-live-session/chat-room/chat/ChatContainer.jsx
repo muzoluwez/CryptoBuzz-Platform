@@ -1,17 +1,17 @@
 import React, { useEffect, useState } from "react";
+import { useLocation, useParams } from "react-router";
 import { Channel as StreamChannel } from "stream-chat";
 import { Channel, Chat } from "stream-chat-react";
+import { useAuthContext } from "../../../../../context/AuthContext";
 import { useEventContext } from "../context/EventContext";
 import { useInitChat } from "../hooks/useInitChat";
-import { MessageUI } from "./MessageUI";
-import { GiphyPreview } from "./GiphyPreview";
 import { ChannelInner } from "./ChannelInner";
-import { useGetClientTokenMutation } from "../../../../../store/api/client/clientLiveSessionApiSlice";
-import { useLocation, useParams } from "react-router";
-import { useAuthContext } from "../../../../../auth/useAuthContext";
-import { MessageInputUI } from "./MessageInput";
-import { ChatHeader } from "./ChatHeader";
+import { ChatHeader } from './ChatHeader';
 import { ChatSidebar } from "./ChatSidebar";
+import { GiphyPreview } from "./GiphyPreview";
+import { MessageInputUI } from "./MessageInput";
+import { MessageUI } from "./MessageUI";
+
 
 const   ChatContainer = ({ sessionToken, callId }) => {
   const {
@@ -35,11 +35,11 @@ const   ChatContainer = ({ sessionToken, callId }) => {
   // const { address: rtmp_url, token: rtmp_stream_key } = sessionData;
   // const token = rtmp_stream_key;
   const [call, setCall] = useState(null);
-  const { auth } = useAuthContext();
-  const userId = auth?.user?._id;
-  const userName = auth?.user?.name
-    ? auth?.user?.name
-    : auth?.user?.first_name + " " + auth?.user?.last_name;
+  const { user } = useAuthContext();
+  const userId = user?._id;
+  const userName = user?.name
+    ? user?.name
+    : user?.first_name + " " + user?.last_name;
 
   const {
     chatClient,

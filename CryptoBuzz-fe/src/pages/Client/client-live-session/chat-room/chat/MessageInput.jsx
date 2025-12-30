@@ -8,6 +8,7 @@ import { useEventContext } from "../context/EventContext";
 import { useGiphyContext } from "../context/GiphyContext";
 import { Send } from "lucide-react";
 import EmojiPicker from "emoji-picker-react";
+import { Button } from "@/components/ui/button";
 
 export const MessageInputUI = () => {
   const {
@@ -179,11 +180,14 @@ export const MessageInputUI = () => {
       )}
 
       {/* SEND BUTTON */}
-      <button
+      <Button
         className={`btn btn-sm input-ui-send-button ${text ? "text" : ""} ${cooldownRemaining ? "cooldown" : ""
           }`}
         disabled={!text}
         onClick={handleSend}
+        variant="primary"
+        size="sm"
+        mode="icon"
         style={{
           marginTop: 12,
           alignSelf: "flex-end",
@@ -215,7 +219,7 @@ export const MessageInputUI = () => {
         ) : (
           <Send size={20} />
         )}
-      </button>
+      </Button>
     </div >
   );
 };
