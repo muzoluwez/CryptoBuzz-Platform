@@ -104,7 +104,7 @@ const Login = () => {
           <span className="border-t border-[#35353C] w-full"></span>
         </div> */}
         <Link
-          to="/auth/admin/login"
+          to="/auth/educator/login"
           className="btn border-1 border-[#35353C] text-gray-300 dark:text-gray-800 flex justify-center grow items-center"
         >
           {" "}
