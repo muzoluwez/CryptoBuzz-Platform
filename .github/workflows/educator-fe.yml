@@ -1,0 +1,56 @@
+name: Build and deploy Educator Server to Azure Web App
+
+on:
+  push:
+    branches:
+      - develop
+  workflow_dispatch:
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+
+    steps:
+      # 1️⃣ Checkout code
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # 2️⃣ Setup Node
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: "20.x"
+
+      # 3️⃣ Install dependencies
+      - name: Install dependencies
+        working-directory: CryptBuzz-edu
+        run: npm install
+
+      # 4️⃣ Build frontend (Vite)
+      - name: Build frontend
+        working-directory: CryptBuzz-edu
+        env:
+          VITE_APP_API_URL: ${{ secrets.VITE_APP_API_URL }}
+          VITE_APP_URL: ${{ secrets.VITE_APP_URL }}
+          VITE_ENV: ${{ secrets.VITE_ENV }}
+          VITE_SOCKET_URL: ${{ secrets.VITE_SOCKET_URL }}
+        run: npm run build
+
+      # 5️⃣ Azure Login
+      - name: Azure Login
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_0CF7B85673A541B98EC1AE44D892B17F }}
+          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_E5BEEB2A5CA948E5B01EE3FAC4E76BF8 }}
+          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_50D1A4407B504963974AC99F6CA3659B }}
+
+      # 6️⃣ Deploy FULL server folder (NOT dist only)
+      - name: Deploy to Azure Web App
+        uses: azure/webapps-deploy@v3
+        with:
+          app-name: cryptoBuzz-educator
+          slot-name: Production
+          package: CryptBuzz-edu
