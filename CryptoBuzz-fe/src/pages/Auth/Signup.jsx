@@ -1,171 +1,188 @@
-
 import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate, Link } from 'react-router-dom';
 import { setCredentials, selectCurrentUser } from '@/store/authSlice';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 
 import { useSignupMutation, useLoginMutation } from '@/store/client/clientAuthApiSlice';
 
 export function Signup() {
-    const [formData, setFormData] = useState({
-        name: '',
-        email: '',
-        password: '',
-        confirmPassword: ''
-    });
+  const [formData, setFormData] = useState({
+    firstName: '',
+    lastName: '',
+    email: '',
+    password: '',
+    confirmPassword: ''
+  });
 
-    const [signup, { isLoading: isSignupLoading }] = useSignupMutation();
-    const [login, { isLoading: isLoginLoading }] = useLoginMutation();
-    const isLoading = isSignupLoading || isLoginLoading;
+  const [signup, { isLoading: isSignupLoading }] = useSignupMutation();
+  const [login, { isLoading: isLoginLoading }] = useLoginMutation();
+  const isLoading = isSignupLoading || isLoginLoading;
 
-    const dispatch = useDispatch();
-    const navigate = useNavigate();
-    const user = useSelector(selectCurrentUser);
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const user = useSelector(selectCurrentUser);
 
-    // Redirect if already logged in
-    useEffect(() => {
-        if (user) {
-            navigate('/client/home', { replace: true });
-        }
-    }, [user, navigate]);
+  useEffect(() => {
+    if (user) navigate('/client/home', { replace: true });
+  }, [user, navigate]);
 
-    const handleChange = (e) => {
-        const { name, value } = e.target;
-        setFormData(prev => ({ ...prev, [name]: value }));
-    };
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+  };
 
-    const handleSubmit = async (e) => {
-        e.preventDefault();
+  const handleSubmit = async (e) => {
+    e.preventDefault();
 
-        if (formData.password !== formData.confirmPassword) {
-            toast.error("Passwords do not match");
-            return;
-        }
+    if (formData.password !== formData.confirmPassword) {
+      toast.error('Passwords do not match');
+      return;
+    }
 
-        try {
-            // 1. Signup
-            // RTK Query throws on error by default if using unwrap(), so try-catch handles it.
-            await signup({
-                name: formData.name,
-                email: formData.email,
-                password: formData.password,
-                // Assuming backend can handle single name or we split it here.
-                // Keeping split logic as per previous implementation to be safe.
-                first_name: formData.name.split(' ')[0],
-                last_name: formData.name.split(' ').slice(1).join(' ') || ''
-            }).unwrap();
+    try {
+      await signup({
+        name: `${formData.firstName} ${formData.lastName}`.trim(),
+        email: formData.email,
+        password: formData.password,
+        first_name: formData.firstName,
+        last_name: formData.lastName
+      }).unwrap();
 
-            toast.success('Account created successfully');
+      const loginResponse = await login({
+        email: formData.email,
+        password: formData.password
+      }).unwrap();
 
-            // 2. Auto-Login
-            const loginResponse = await login({ email: formData.email, password: formData.password }).unwrap();
-            const { userObj, token } = loginResponse.data;
+      const { userObj, token } = loginResponse.data;
 
-            if (token) {
-                dispatch(setCredentials({ user: userObj, token }));
-                localStorage.setItem('token', token);
-                localStorage.setItem('user', JSON.stringify(userObj));
-                navigate('/client/home', { replace: true });
-            }
+      dispatch(setCredentials({ user: userObj, token }));
+      localStorage.setItem('token', token);
+      localStorage.setItem('user', JSON.stringify(userObj));
 
-        } catch (err) {
-            console.error('Signup/Login error:', err);
-            toast.error(err?.data?.message || 'Unable to sign up. Please try again.');
+      navigate('/client/home', { replace: true });
+    } catch (err) {
+      toast.error(err?.data?.message || 'Unable to sign up');
+    }
+  };
 
-            // If error occurred during auto-login (after successful signup), redirect to login
-            // Distinguishing error source is tricky without distinct try-catch blocks or checking step.
-            // But typically if signup fails, we stay here. If login fails, user is signed up but needs to login manually.
-            // Ideally handled better, but this is a reasonable fallback.
-        }
-    };
+  return (
+    <>
+      <style>
+        {`
+          /* Fix browser autofill styling for dark theme */
+          input:-webkit-autofill,
+          input:-webkit-autofill:hover,
+          input:-webkit-autofill:focus,
+          input:-webkit-autofill:active {
+            -webkit-box-shadow: 0 0 0 30px transparent inset !important;
+            -webkit-text-fill-color: rgb(243, 244, 246) !important;
+            box-shadow: 0 0 0 30px transparent inset !important;
+            transition: background-color 5000s ease-in-out 0s;
+            caret-color: rgb(243, 244, 246);
+          }
+        `}
+      </style>
+      <div className="login card max-w-[385px] border-none w-full bg-[linear-gradient(180deg,#1F1E1F_0%,#121213_100%)]">
+        <form className="card-body flex flex-col gap-4 p-6" onSubmit={handleSubmit}>
 
-    return (
-        <div className="flex items-center justify-center min-h-screen bg-gray-100 dark:bg-gray-900 px-4">
-            <Card className="w-full max-w-md">
-                <CardHeader className="space-y-1">
-                    <CardTitle className="text-2xl font-bold text-center">Create an Account</CardTitle>
-                    <CardDescription className="text-center">
-                        Enter your email below to create your account
-                    </CardDescription>
-                </CardHeader>
-                <CardContent>
-                    <form onSubmit={handleSubmit} className="space-y-4">
-                        <div className="space-y-2">
-                            <Label htmlFor="name">Full Name</Label>
-                            <Input
-                                id="name"
-                                name="name"
-                                placeholder="John Doe"
-                                value={formData.name}
-                                onChange={handleChange}
-                                required
-                                disabled={isLoading}
-                            />
-                        </div>
-                        <div className="space-y-2">
-                            <Label htmlFor="email">Email</Label>
-                            <Input
-                                id="email"
-                                name="email"
-                                type="email"
-                                placeholder="m@example.com"
-                                value={formData.email}
-                                onChange={handleChange}
-                                required
-                                disabled={isLoading}
-                            />
-                        </div>
-                        <div className="space-y-2">
-                            <Label htmlFor="password">Password</Label>
-                            <Input
-                                id="password"
-                                name="password"
-                                type="password"
-                                value={formData.password}
-                                onChange={handleChange}
-                                required
-                                disabled={isLoading}
-                            />
-                        </div>
-                        <div className="space-y-2">
-                            <Label htmlFor="confirmPassword">Confirm Password</Label>
-                            <Input
-                                id="confirmPassword"
-                                name="confirmPassword"
-                                type="password"
-                                value={formData.confirmPassword}
-                                onChange={handleChange}
-                                required
-                                disabled={isLoading}
-                            />
-                        </div>
-                        <Button type="submit" className="w-full" disabled={isLoading}>
-                            {isLoading ? (
-                                <>
-                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                    Creating Account...
-                                </>
-                            ) : (
-                                'Sign Up'
-                            )}
-                        </Button>
-                    </form>
-                </CardContent>
-                <CardFooter className="flex justify-center">
-                    <p className="text-sm text-gray-500">
-                        Already have an account?{' '}
-                        <Link to="/login" className="text-primary font-medium hover:underline">
-                            Sign in
-                        </Link>
-                    </p>
-                </CardFooter>
-            </Card>
+        <h3 className="text-xl font-medium text-gray-100 text-center">
+          Create an Account
+        </h3>
+
+        <div className="space-y-3">
+
+          <div>
+            <label className="text-gray-400 text-sm">First Name</label>
+            <input
+              name="firstName"
+              type="text"
+              value={formData.firstName}
+              onChange={handleChange}
+              disabled={isLoading}
+              autoComplete="given-name"
+              className="w-full bg-transparent border-b border-[#35353C] text-gray-100 outline-none py-1.5"
+              placeholder=""
+              required
+            />
+          </div>
+
+          <div>
+            <label className="text-gray-400 text-sm">Last Name</label>
+            <input
+              name="lastName"
+              type="text"
+              value={formData.lastName}
+              onChange={handleChange}
+              disabled={isLoading}
+              autoComplete="family-name"
+              className="w-full bg-transparent border-b border-[#35353C] text-gray-100 outline-none py-1.5"
+              placeholder=""
+              required
+            />
+          </div>
+
+          <div>
+            <label className="text-gray-400 text-sm">Email</label>
+            <input
+              type="email"
+              name="email"
+              value={formData.email}
+              onChange={handleChange}
+              disabled={isLoading}
+              autoComplete="email"
+              className="w-full bg-transparent border-b border-[#35353C] text-gray-100 outline-none py-1.5"
+              required
+            />
+          </div>
+
+          <div>
+            <label className="text-gray-400 text-sm">Password</label>
+            <input
+              type="password"
+              name="password"
+              value={formData.password}
+              onChange={handleChange}
+              disabled={isLoading}
+              autoComplete="new-password"
+              className="w-full bg-transparent border-b border-[#35353C] text-gray-100 outline-none py-1.5"
+              required
+            />
+          </div>
+
+          <div>
+            <label className="text-gray-400 text-sm">Confirm Password</label>
+            <input
+              type="password"
+              name="confirmPassword"
+              value={formData.confirmPassword}
+              onChange={handleChange}
+              disabled={isLoading}
+              autoComplete="new-password"
+              className="w-full bg-transparent border-b border-[#35353C] text-gray-100 outline-none py-1.5"
+              required
+            />
+          </div>
         </div>
-    );
+
+        <button
+          type="submit"
+          disabled={isLoading}
+          className="mt-3 h-11 rounded-md bg-[linear-gradient(90deg,#FFCD0B_0%,#FFCD0B_100%)] text-black font-medium"
+        >
+          {isLoading ? 'Creating Account...' : 'Sign Up'}
+        </button>
+
+        <p className="text-sm text-gray-400 text-center">
+          Already have an account?{' '}
+          <Link to="/login" className="text-yellow-400 hover:underline">
+            Sign in
+          </Link>
+        </p>
+
+        </form>
+      </div>
+    </>
+  );
 }
