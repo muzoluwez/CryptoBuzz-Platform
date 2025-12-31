@@ -21,7 +21,7 @@ import ImageViewer from "@/components/common/ImageViewer";
 import ImageSlider from "@/components/common/ImageSlider";
 import ImageCarousel from "@/components/common/ImageCarousel";
 
-export function CryptoPage() {
+export default function CryptoPage() {
   const { checkAccess } = useAccessControl();
 
   // ------------------- STATE -------------------

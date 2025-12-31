@@ -9,7 +9,7 @@ import * as Yup from 'yup';
 
 import { useSignupMutation, useLoginMutation } from '@/store/client/clientAuthApiSlice';
 
-export function Signup() {
+export default function Signup() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   

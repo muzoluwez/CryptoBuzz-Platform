@@ -957,7 +957,7 @@ function DigitalMarketingUI({ activeTab, setActiveTab, toggle, open, introLesson
 }
 
 
-export function AcademyPage() {
+export default function AcademyPage() {
   const [activeTab, setActiveTab] = useState("Crypto");
   const [open, setOpen] = useState("Intro Series");
 

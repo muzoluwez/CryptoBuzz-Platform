@@ -19,7 +19,7 @@ import * as Yup from 'yup';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 
-export function Login() {
+export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
   const [login, { isLoading }] = useLoginMutation();
 
@@ -77,16 +77,21 @@ export function Login() {
   });
 
   return (
-   
-
     <div className="grid lg:grid-cols-1 grow branded-bg">
       <div className="flex justify-center items-center p-8 lg:p-10  z-10">
         <div className="login card max-w-[385px] border-none !rounded-xl w-full bg-[linear-gradient(180deg,#1F1E1F_0%,#121213_100%)]">
-          <form className="card-body flex flex-col gap-5 p-7" onSubmit={formik.handleSubmit} noValidate>
+          <form
+            className="card-body flex flex-col gap-5 p-7"
+            onSubmit={formik.handleSubmit}
+            noValidate
+          >
             <div className="text-center mb-2.5">
               <div className="text-center">
                 <div className="flex justify-start mb-8">
-                  <Link to="/client/home" className="!py-1.5 !px-2.5 text-sm gap-2 !text-gray-300 dark:text-gray-600 hover:text-primary btn btn-rounded btn-sm btn-outline w-fit border-2 border-[#35353C]">
+                  <Link
+                    to="/client/home"
+                    className="!py-1.5 !px-2.5 text-sm gap-2 !text-gray-300 dark:text-gray-600 hover:text-primary btn btn-rounded btn-sm btn-outline w-fit border-2 border-[#35353C]"
+                  >
                     {/* <KeenIcon icon="black-left" /> */}
                     <MoveLeft size={16} />
                   </Link>
@@ -113,7 +118,9 @@ export function Login() {
                   autoComplete="email"
                   {...formik.getFieldProps('email')}
                   className={`text-gray-100 dark:text-white form-control focus-visible:outline-none border-0 mb-2 text-lg ${
-                    formik.touched.email && formik.errors.email ? 'border-red-500' : ''
+                    formik.touched.email && formik.errors.email
+                      ? 'border-red-500'
+                      : ''
                   }`}
                 />
               </label>
@@ -132,7 +139,9 @@ export function Login() {
                   autoComplete="current-password"
                   {...formik.getFieldProps('password')}
                   className={`text-gray-100 dark:text-white form-control focus-visible:outline-none border-0 mb-2 text-lg flex-1 ${
-                    formik.touched.password && formik.errors.password ? 'border-red-500' : ''
+                    formik.touched.password && formik.errors.password
+                      ? 'border-red-500'
+                      : ''
                   }`}
                 />
                 <button

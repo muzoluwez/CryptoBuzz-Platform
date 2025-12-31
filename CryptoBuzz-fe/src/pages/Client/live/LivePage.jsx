@@ -5,7 +5,7 @@ import { Card } from '../../../components/ui/card';
 import { useGetScheduleQuery } from '../../../store/client/clientScheduleApiSlice';
 
 
-export function LivePage() {
+export default function LivePage() {
   const [activeCategory, setActiveCategory] = useState(null);
   const [activeCategoryId, setActiveCategoryId] = useState(null);
   const [activeWeek, setActiveWeek] = useState('Current Week');

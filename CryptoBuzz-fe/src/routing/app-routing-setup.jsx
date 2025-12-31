@@ -1,26 +1,23 @@
+// auth pages
+import Login from '@/pages/Auth/Login';
+import Signup from '@/pages/Auth/Signup';
+import AcademyPage from '@/pages/Client/academy/AcademyPage';
+import CryptoPage from '@/pages/Client/crypto/CryptoPage';
+import ViewProfile from '@/pages/Client/educator/ViewProfilePage';
+import HomePage from '@/pages/Client/home/HomePage';
+import IdeaPage from '@/pages/Client/idea/IdeaPage';
+import InsightPage from '@/pages/Client/insight/InsightPage';
+import EducatorsPage from '@/pages/Client/live/EducatorsPage';
+import LivePage from '@/pages/Client/live/LivePage';
+import ProfilePage from '@/pages/Client/profile/ProfilePage';
+import SocialPage from '@/pages/Client/social/SocialPage';
+// IMPORT THE NEW LAYOUT
+import AuthBrandedLayout from '@/pages/layout-7/AuthBrandedLayout';
+// client pages
+import Layout7Page from '@/pages/layout-7/page';
 import { Navigate, Route, Routes } from 'react-router';
 import { Layout7 } from '@/components/layouts/layout-7';
 
-// client pages
-import { Layout7Page } from '@/pages/layout-7/page';
-import { HomePage } from '@/pages/Client/home/page';
-import { IdeaPage } from '@/pages/Client/idea/page';
-import { LivePage } from '@/pages/Client/live/page';
-import { AcademyPage } from '@/pages/Client/academy/page';
-import { SocialPage } from '@/pages/Client/social/page';
-import { InsightPage } from '@/pages/Client/insight/page';
-import { CryptoPage } from '@/pages/Client/crypto/page';
-import EducatorsPage from '@/pages/Client/live/EducatorsPage';
-import ViewProfile from '@/pages/Client/educator/ViewProfile';
-
-// auth pages
-import { Login } from '@/pages/Auth/Login';
-import { Signup } from '@/pages/Auth/Signup';
-
-// IMPORT THE NEW LAYOUT 
-import AuthBrandedLayout from "@/pages/layout-7/AuthBrandedLayout";
-import { ProfilePage } from '@/pages/Client/profile/page';
-  
 export function AppRoutingSetup() {
   return (
     <Routes>

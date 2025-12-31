@@ -17,7 +17,7 @@ const DummyImage = ({ src, alt = "", className = "" }) => (
   <img src={src} alt={alt} className={`w-full h-full object-cover ${className}`} />
 );
 
-export function HomePage() {
+export default function HomePage() {
   return (
     <>
       {/* <Toolbar>

@@ -44,7 +44,7 @@ function Row({ label, value, green, red }) {
   );
 }
 
-export function IdeaPage() {
+export default function IdeaPage() {
   const [selectedImage, setSelectedImage] = useState(null);
   const [selectedCard, setSelectedCard] = useState(null);
   const { checkAccess } = useAccessControl();

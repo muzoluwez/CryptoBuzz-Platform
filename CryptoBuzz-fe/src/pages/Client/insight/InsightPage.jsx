@@ -25,7 +25,7 @@ import {
   ToolbarHeading,
 } from '@/components/layouts/layout-7/components/toolbar';
 
-export function InsightPage() {
+export default function InsightPage() {
   const { checkAccess } = useAccessControl();
 
   // ------------------- STATE -------------------

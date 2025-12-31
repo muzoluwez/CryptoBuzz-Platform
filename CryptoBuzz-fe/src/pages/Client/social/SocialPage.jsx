@@ -14,7 +14,7 @@ import { Toolbar, ToolbarHeading } from '@/components/layouts/layout-7/component
 import { Card, CardContent, CardFooter, CardHeader, CardHeading, CardTitle, CardToolbar } from '../../../components/ui/card';
 
 
-export function SocialPage() {
+export default function SocialPage() {
   const [sortValue, setSortValue] = useState('latest');
   const [selectedImage, setSelectedImage] = useState(null);
   const [selectedImages, setSelectedImages] = useState([]);
