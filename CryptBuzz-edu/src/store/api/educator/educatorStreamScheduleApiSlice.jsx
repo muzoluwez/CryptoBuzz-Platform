@@ -49,7 +49,7 @@ export const educatorStreamScheduleApiSlice = createApi({
 
         createLiveStream: builder.mutation({
             query: (formData) => ({
-                url: "/common/live-stream/create",
+                url: "/common/schedule/",
                 method: "POST",
                 body: formData,
             }),

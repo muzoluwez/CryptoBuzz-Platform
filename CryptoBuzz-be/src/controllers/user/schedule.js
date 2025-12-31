@@ -4,6 +4,7 @@ import { asyncHandler } from "../../utils/asyncHandler.js";
 import { ApiError } from "../../utils/ApiError.js";
 import { ApiResponse } from "../../utils/ApiResponse.js";
 import { streamClient } from "../../utils/constants.js";
+import { User } from "../../models/user.js";
 import mongoose from "mongoose";
 
 export const getSchedules = asyncHandler(async (req, res) => {
@@ -54,7 +55,6 @@ export const getSchedules = asyncHandler(async (req, res) => {
   return res.status(200).json(ApiResponse(200, schedules, "Schedules fetched successfully"));
 });
 
-
 export const getToken = asyncHandler(async (req, res) => {
   const { userId } = req.body;
   if (!userId) {
@@ -66,13 +66,9 @@ export const getToken = asyncHandler(async (req, res) => {
   }
 
   try {
-    const token = streamClient.generateUserToken(
-      { user_id: userId },
-      process.env.JWT_SECRET,
-      {
-        expiresIn: "1y",
-      }
-    );
+    const token = streamClient.generateUserToken({ user_id: userId }, process.env.JWT_SECRET, {
+      expiresIn: "1y"
+    });
     return res.status(200).json(ApiResponse(200, { token }, "Token generated successfully"));
   } catch (error) {
     console.error("Error generating token:", error);
@@ -91,11 +87,11 @@ export const getActiveLiveStreamByEducator = asyncHandler(async (req, res) => {
     throw new ApiError(400, "Invalid educator ID format");
   }
 
-  const User = (await import("../../models/user.js")).default;
-  
+  // Check for active live stream where isLive is true
   const activeLiveStream = await LiveStream.findOne({
     educator: new mongoose.Types.ObjectId(educatorId),
-    status: "active",
+    isLive: true,
+    status: { $in: ["active", "pending"] } // Can be active or pending but isLive must be true
   })
     .populate("educator", "_id first_name last_name image email bannerImage description")
     .populate("schedule", "_id title description image tags")
@@ -114,7 +110,33 @@ export const getActiveLiveStreamByEducator = asyncHandler(async (req, res) => {
     return res.status(200).json(ApiResponse(200, { educator, isLive: false }, "Educator info fetched successfully"));
   }
 
-  return res.status(200).json(ApiResponse(200, { ...activeLiveStream, isLive: true }, "Active live stream fetched successfully"));
+  return res
+    .status(200)
+    .json(ApiResponse(200, { ...activeLiveStream, isLive: true }, "Active live stream fetched successfully"));
 });
 
-export default { getSchedules, getToken, getActiveLiveStreamByEducator };
+export const getAllActiveLiveStreams = asyncHandler(async (req, res) => {
+  try {
+    // Find all active live streams where isLive is true and status is active
+    const activeLiveStreams = await LiveStream.find({
+      isLive: true,
+      status: "active",
+      isDeleted: false,
+    })
+      .populate("educator", "_id first_name last_name image email bannerImage description")
+      .populate("schedule", "_id title description image tags")
+      .sort({ createdAt: -1 })
+      .lean();
+
+    if (!activeLiveStreams || activeLiveStreams.length === 0) {
+      return res.status(200).json(ApiResponse(200, [], "No active live streams found"));
+    }
+
+    return res.status(200).json(ApiResponse(200, activeLiveStreams, "Active live streams fetched successfully"));
+  } catch (error) {
+    console.error("Error fetching active live streams:", error);
+    throw new ApiError(500, "Error fetching active live streams");
+  }
+});
+
+export default { getSchedules, getToken, getActiveLiveStreamByEducator, getAllActiveLiveStreams };

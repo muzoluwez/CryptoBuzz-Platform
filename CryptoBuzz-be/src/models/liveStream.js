@@ -28,6 +28,11 @@ const LiveStreamSchema = new mongoose.Schema(
       default: "pending",
     },
 
+    isLive: {
+      type: Boolean,
+      default: false,
+    },
+
     educator: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "user",

@@ -130,10 +130,10 @@ export const startCall = async (req, res) => {
 
     if (!Id || !callId) return res.status(400).send("Both Id and callId are required");
 
-    // Only 1 session can be active
+    // Only 1 session can be active with isLive true
     const activeSession = await LiveStreamModel.findOne({
       educator: user._id,
-      status: "active"
+      isLive: true
     });
 
     if (activeSession) {
@@ -145,7 +145,7 @@ export const startCall = async (req, res) => {
 
     const updatedSchedule = await LiveStreamModel.findOneAndUpdate(
       { _id: Id, callId },
-      { status: "active" },
+      { status: "active", isLive: false }, // Don't set isLive true here, it will be set when Go Live is clicked
       { new: true }
     );
 
@@ -283,6 +283,8 @@ export const stopLiveStream = async (req, res) => {
 
     if (!findLiveStream) return res.status(404).json({ message: "Live session not found" });
 
+    // Set isLive to false and status to ended
+    findLiveStream.isLive = false;
     findLiveStream.status = "ended";
     await findLiveStream.save();
 
@@ -309,10 +311,23 @@ export const updateLiveStreamStatus = async (req, res) => {
 
   try {
     const schedule = await Schedule.findOne({ callId });
+    const liveStream = await LiveStreamModel.findOne({ callId });
 
     if (schedule) {
       schedule.status = status;
       await schedule.save();
+    }
+
+    // Update isLive based on status
+    if (liveStream) {
+      if (status === "active") {
+        liveStream.isLive = true;
+        liveStream.status = "active";
+      } else if (status === "pending") {
+        liveStream.isLive = false;
+        liveStream.status = "pending";
+      }
+      await liveStream.save();
     }
 
     res.status(200).json({
@@ -337,6 +352,8 @@ export const changeLiveStreamStatus = async (req, res) => {
 
     if (!stream) return res.status(404).json({ message: "Not found" });
 
+    // Set isLive to false and status to ended
+    stream.isLive = false;
     stream.status = "ended";
     await stream.save();
 
@@ -376,6 +393,8 @@ export const endAndCreate = async (req, res) => {
 
     if (!findLiveStream) return res.status(400).json({ message: "Invalid callId" });
 
+    // Set isLive to false and status to ended
+    findLiveStream.isLive = false;
     findLiveStream.status = "ended";
     await findLiveStream.save();
 

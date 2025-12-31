@@ -33,6 +33,10 @@ export const clientScheduleApiSlice = createApi({
       query: (educatorId) => `/users/schedule/educator/${educatorId}/active-live`,
       providesTags: ['Schedule'],
     }),
+    getAllActiveLiveStreams: builder.query({
+      query: () => `/users/schedule/active-live-streams`,
+      providesTags: ['Schedule'],
+    }),
   }),
 });
 
@@ -41,4 +45,5 @@ export const {
   useLazyGetScheduleQuery,
   useGetTokenMutation,
   useGetActiveLiveStreamByEducatorQuery,
+  useGetAllActiveLiveStreamsQuery,
 } = clientScheduleApiSlice;

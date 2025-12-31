@@ -59,8 +59,8 @@ export const listSchedule = async (req, res) => {
       query.category = category;
     }
 
-    if (educator && educator == "educator" && mongoose.Types.ObjectId.isValid(educator)) {
-      query.educator = educator;
+    if (educator && educator.role == "educator" && mongoose.Types.ObjectId.isValid(educator._id)) {
+      query.educator = educator._id;
     }
 
     const totalCount = await Schedule.countDocuments(query);
@@ -124,7 +124,7 @@ export const createSchedule = async (req, res) => {
       });
     }
 
-    await scheduleValidationSchema.validate(body, { abortEarly: false });
+    // await scheduleValidationSchema.validate(body, { abortEarly: false });
 
     const scheduleData = {
       ...body,

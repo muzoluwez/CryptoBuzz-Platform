@@ -1,9 +1,11 @@
 import React, { useState, useMemo } from 'react';
-import { Play, Calendar, Loader2 } from 'lucide-react';
+import { Play, Calendar, Loader2, Share2 } from 'lucide-react';
+import { toast } from 'sonner';
 import { Card } from '../../../components/ui/card';
 import { Button } from '../../../components/ui/button';
 import EducatorLiveStreamView from './EducatorLiveStreamView';
 import RatingModal from './RatingModel';
+import VideoPlayerModal from './VideoPlayerModal';
 import { useParams } from 'react-router';
 import { useGetEducatorDetailsQuery } from '../../../store/client/clientEducatorApiSlice';
 import { formatDistanceToNow } from 'date-fns';
@@ -11,6 +13,8 @@ import { formatDistanceToNow } from 'date-fns';
 export default function ViewProfile() {
     const { id: educatorId } = useParams();
     const [isRatingModalOpen, setIsRatingModalOpen] = useState(false);
+    const [selectedRecording, setSelectedRecording] = useState(null);
+    const [isVideoModalOpen, setIsVideoModalOpen] = useState(false);
 
     // Fetch educator details
     const { data, isLoading, isError, error } = useGetEducatorDetailsQuery(educatorId, {
@@ -83,6 +87,20 @@ export default function ViewProfile() {
         }
         return educator?.name || educator?.email?.split('@')?.[0] || 'Educator';
     }, [educator]);
+
+    // Handle share functionality
+    const handleShare = () => {
+        const currentUrl = window.location.href;
+        navigator.clipboard
+            .writeText(currentUrl)
+            .then(() => {
+                toast.success('Profile link copied to clipboard!');
+            })
+            .catch((err) => {
+                console.error('Failed to copy URL:', err);
+                toast.error('Failed to copy link. Please try again.');
+            });
+    };
 
     // Loading state
     if (isLoading) {
@@ -159,13 +177,17 @@ export default function ViewProfile() {
 
                     <div className="flex gap-3">
                         {/* Sound Button */}
-                        <button className="px-4 py-2 bg-[#ffcd0b] text-dark rounded-lg text-sm flex items-center gap-1 shadow-md">
+                        {/* <button className="px-4 py-2 bg-[#ffcd0b] text-dark rounded-lg text-sm flex items-center gap-1 shadow-md">
                             🔊
-                        </button>
+                        </button> */}
 
                         {/* Share Button */}
-                        <button className="px-4 py-2 bg-[#ffcd0b] text-dark rounded-lg text-sm flex items-center gap-2 shadow-md">
-                            <span>🔗</span> Share
+                        <button 
+                            onClick={handleShare}
+                            className="px-4 py-2 bg-[#ffcd0b] text-dark rounded-lg text-sm flex items-center gap-2 shadow-md hover:bg-yellow-500 transition-colors"
+                        >
+                            <Share2 size={16} />
+                            Share
                         </button>
                     </div>
 
@@ -436,7 +458,16 @@ export default function ViewProfile() {
                 <div className="grid grid-col-12 sm:grid-cols-3 gap-4">
                     {recordings.length > 0 ? (
                         recordings.slice(0, 3).map((recording) => (
-                            <div key={recording?._id || recording?.id} className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden hover:shadow-lg transition-shadow">
+                            <div 
+                                key={recording?._id || recording?.id} 
+                                className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden hover:shadow-lg transition-shadow cursor-pointer"
+                                onClick={() => {
+                                    if (recording?.videoUrl) {
+                                        setSelectedRecording(recording);
+                                        setIsVideoModalOpen(true);
+                                    }
+                                }}
+                            >
                                 <div className="h-40 bg-gradient-to-br from-yellow-600 via-yellow-700 to-yellow-900 relative">
                                     {recording?.thumbnail && (
                                         <img
@@ -446,7 +477,7 @@ export default function ViewProfile() {
                                         />
                                     )}
                                     <div className="absolute inset-0 flex items-center justify-center bg-black/30">
-                                        <div className="w-16 h-16 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-white/30 transition-colors cursor-pointer">
+                                        <div className="w-16 h-16 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-white/30 transition-colors">
                                             <Play className="w-8 h-8 text-white fill-white ml-1" />
                                         </div>
                                     </div>
@@ -475,6 +506,14 @@ export default function ViewProfile() {
                 isOpen={isRatingModalOpen}
                 onClose={() => setIsRatingModalOpen(false)}
                 educatorId={educatorId}
+            />
+
+            {/* Video Player Modal */}
+            <VideoPlayerModal
+                open={isVideoModalOpen}
+                onOpenChange={setIsVideoModalOpen}
+                videoUrl={selectedRecording?.videoUrl}
+                data={selectedRecording}
             />
         </div>
     );
