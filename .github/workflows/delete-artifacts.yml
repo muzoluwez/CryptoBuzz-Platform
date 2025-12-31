@@ -2,7 +2,7 @@ name: Delete Old Artifacts
 
 on:
   schedule:
-    - cron: "0 0 * * *" 
+    - cron: "0 0 * * *"   # Daily at 12 AM UTC
   workflow_dispatch:
 
 permissions:
@@ -14,6 +14,42 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Delete all artifacts
-        uses: c-hive/gha-remove-artifacts@v1
+        uses: actions/github-script@v7
         with:
-          age: '0'
+          script: |
+            const { owner, repo } = context.repo;
+
+            const artifacts = await github.rest.actions.listArtifactsForRepo({
+              owner,
+              repo,
+              per_page: 100
+            });
+
+            for (const artifact of artifacts.data.artifacts) {
+              await github.rest.actions.deleteArtifact({
+                owner,
+                repo,
+                artifact_id: artifact.id
+              });
+              console.log(`Deleted artifact: ${artifact.name}`);
+            }
+
+# name: Delete Old Artifacts
+
+# on:
+#   schedule:
+#     - cron: "0 0 * * *" 
+#   workflow_dispatch:
+
+# permissions:
+#   actions: write
+#   contents: read
+
+# jobs:
+#   cleanup:
+#     runs-on: ubuntu-latest
+#     steps:
+#       - name: Delete all artifacts
+#         uses: c-hive/gha-remove-artifacts@v1
+#         with:
+#           age: '0'
