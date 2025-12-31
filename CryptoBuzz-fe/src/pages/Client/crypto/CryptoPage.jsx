@@ -10,7 +10,6 @@ import {
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useState, useMemo } from "react";
 import { AccessGate } from "@/components/common/AccessGate";
 import { useAccessControl } from "@/hooks/use-access-control";
@@ -18,8 +17,8 @@ import { Lock } from "lucide-react";
 import { useGetCryptosQuery } from "@/store/client/clientCryptoApiSlice";
 import { convertRtkEditorToFormattedPlainText, convertRtkEditorToDisplayFormat } from "@/lib/rtkEditorUtils";
 import ImageViewer from "@/components/common/ImageViewer";
-import ImageSlider from "@/components/common/ImageSlider";
 import ImageCarousel from "@/components/common/ImageCarousel";
+import ViewCryptoModel from "@/components/models/ViewCryptoModel";
 
 export default function CryptoPage() {
   const { checkAccess } = useAccessControl();
@@ -281,82 +280,11 @@ export default function CryptoPage() {
       </div>
 
       {/* ------------------- MODAL ------------------- */}
-      <Dialog open={!!selectedCrypto} onOpenChange={(open) => !open && setSelectedCrypto(null)}>
-        <DialogContent className="max-w-xl w-full max-h-[85vh] p-0">
-          <DialogHeader className="p-4 border-b bg-background">
-            <DialogTitle className="text-lg font-bold">
-              {selectedCrypto?.title}
-            </DialogTitle>
-          </DialogHeader>
-
-          {/* AccessGate protects the Detail View */}
-          <AccessGate
-            accessType={selectedCrypto?.accessType}
-            allowedPlans={selectedCrypto?.allowedPlans}
-          >
-            <div className="bg-card p-4 overflow-y-auto max-h-[72vh]">
-              {/* Image Slider */}
-              <ImageSlider
-                images={
-                  selectedCrypto?.photos && Array.isArray(selectedCrypto.photos) && selectedCrypto.photos.length > 0
-                    ? selectedCrypto.photos
-                    : selectedCrypto?.image
-                    ? [selectedCrypto.image]
-                    : []
-                }
-                description={selectedCrypto?.fullDisplayHtml || selectedCrypto?.full || ""}
-                descriptionLimit={95}
-                showDescription={false}
-                alt="Crypto analysis chart"
-                height="h-64"
-              />
-
-              <div className="mt-4 space-y-4">
-                <p className="text-sm text-muted-foreground">
-                  {selectedCrypto?.date} • {selectedCrypto?.category}
-                </p>
-
-                <h2 className="text-2xl font-bold">{selectedCrypto?.title}</h2>
-
-                {/* Full description with clickable links and line breaks preserved */}
-                <div 
-                  className="text-sm text-muted-foreground leading-relaxed"
-                  style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}
-                  dangerouslySetInnerHTML={{ 
-                    __html: selectedCrypto?.fullDisplayHtml || selectedCrypto?.full || "No content available." 
-                  }}
-                />
-
-                {/* Author */}
-                <div className="flex items-center gap-4 pt-4 border-t">
-                  <Avatar className="h-12 w-12">
-                    <AvatarImage src={selectedCrypto?.avatar} />
-                  </Avatar>
-                  <div>
-                    <p className="text-sm font-semibold">{selectedCrypto?.author}</p>
-                    <p className="text-xs text-muted-foreground">{selectedCrypto?.category}</p>
-                  </div>
-                </div>
-
-                {/* Buttons */}
-                {/* <div className="flex gap-3 mt-4">
-                  <Button className="flex-1 bg-yellow-600 hover:bg-yellow-700 text-white">
-                    Save Analysis
-                  </Button>
-
-                  <Button
-                    className="flex-1 bg-gray-200"
-                    onClick={() => setSelectedCrypto(null)}
-                  >
-                    Close
-                  </Button>
-                </div> */}
-              </div>
-
-            </div>
-          </AccessGate>
-        </DialogContent>
-      </Dialog>
+      <ViewCryptoModel
+        crypto={selectedCrypto}
+        isOpen={!!selectedCrypto}
+        onClose={() => setSelectedCrypto(null)}
+      />
 
       {/* Image Viewer Modal */}
       <ImageViewer

@@ -1,6 +1,5 @@
 import { useMemo, useState } from 'react';
 import ImageViewer from '@/components/common/ImageViewer';
-import ImageSlider from '@/components/common/ImageSlider';
 import ImageCarousel from '@/components/common/ImageCarousel';
 import { useGetTradeAnalysisQuery } from '@/store/client/clientTradeAnalysisApiSlice';
 import { Lock } from 'lucide-react';
@@ -13,13 +12,8 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
 import { AccessGate } from '@/components/common/AccessGate';
+import ViewInsightModel from '@/components/models/ViewInsightModel';
 import {
   Toolbar,
   ToolbarHeading,
@@ -309,91 +303,11 @@ export default function InsightPage() {
       </div>
 
       {/* ------------------- MODAL ------------------- */}
-      <Dialog
-        open={!!selectedInsight}
-        onOpenChange={(open) => !open && setSelectedInsight(null)}
-      >
-        <DialogContent className="max-w-xl w-full max-h-[85vh] p-0">
-          <DialogHeader className="p-4 border-b bg-background">
-            <DialogTitle className="text-lg font-bold">
-              {selectedInsight?.title}
-            </DialogTitle>
-          </DialogHeader>
-
-          {/* AccessGate protects the Detail View */}
-          <AccessGate
-            accessType={selectedInsight?.accessType}
-            allowedPlans={selectedInsight?.allowedPlans}
-          >
-            <div className="bg-card p-4 overflow-y-auto max-h-[72vh]">
-              {/* Image Slider */}
-              <ImageSlider
-                images={
-                  selectedInsight?.photos && Array.isArray(selectedInsight.photos) && selectedInsight.photos.length > 0
-                    ? selectedInsight.photos
-                    : selectedInsight?.image
-                    ? [selectedInsight.image]
-                    : []
-                }
-                description={selectedInsight?.fullDisplayHtml || selectedInsight?.full || ""}
-                descriptionLimit={95}
-                showDescription={false}
-                alt="Trade insight chart"
-                height="h-64"
-              />
-
-              <div className="mt-4 space-y-4">
-                <p className="text-sm text-muted-foreground">
-                  {selectedInsight?.date} • {selectedInsight?.category}
-                </p>
-
-                <h2 className="text-2xl font-bold">{selectedInsight?.title}</h2>
-
-                {/* Full description with clickable links and line breaks preserved */}
-                <div
-                  className="text-sm text-muted-foreground leading-relaxed"
-                  style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}
-                  dangerouslySetInnerHTML={{
-                    __html:
-                      selectedInsight?.fullDisplayHtml ||
-                      selectedInsight?.full ||
-                      'No content available.',
-                  }}
-                />
-
-                {/* Author */}
-                <div className="flex items-center gap-4 pt-4 border-t">
-                  <Avatar className="h-12 w-12">
-                    <AvatarImage src={selectedInsight?.avatar} />
-                  </Avatar>
-                  <div>
-                    <p className="text-sm font-semibold">
-                      {selectedInsight?.author}
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                      {selectedInsight?.category}
-                    </p>
-                  </div>
-                </div>
-
-                {/* Buttons */}
-                {/* <div className="flex gap-3 mt-4">
-                  <Button className="flex-1 bg-yellow-600 hover:bg-yellow-700 text-white">
-                    Save Insight
-                  </Button>
-
-                  <Button
-                    className="flex-1 bg-gray-200"
-                    onClick={() => setSelectedInsight(null)}
-                  >
-                    Close
-                  </Button>
-                </div> */}
-              </div>
-            </div>
-          </AccessGate>
-        </DialogContent>
-      </Dialog>
+      <ViewInsightModel
+        insight={selectedInsight}
+        isOpen={!!selectedInsight}
+        onClose={() => setSelectedInsight(null)}
+      />
 
       {/* Image Viewer Modal */}
       <ImageViewer
