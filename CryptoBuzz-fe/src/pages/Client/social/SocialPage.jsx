@@ -138,10 +138,8 @@ export default function SocialPage() {
         shares: post?.shares || [],
         createdAt: post?.createdAt,
         updatedAt: post?.updatedAt,
-        // Spread other properties but override images and videos with extracted URLs
-        ...post,
-        images: imageUrls, // Ensure images is the extracted URLs array
-        videos: videoUrls, // Ensure videos is the extracted URLs array
+        // Spread other properties but exclude images and videos to avoid duplicates
+        ...(({ images, videos, ...rest }) => rest)(post || {}),
       };
     });
   }, [data]);
