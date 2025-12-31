@@ -12,7 +12,7 @@ import { useSignupMutation, useLoginMutation } from '@/store/client/clientAuthAp
 export default function Signup() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  
+
   const [signup, { isLoading: isSignupLoading }] = useSignupMutation();
   const [login, { isLoading: isLoginLoading }] = useLoginMutation();
   const isLoading = isSignupLoading || isLoginLoading;
@@ -103,159 +103,161 @@ export default function Signup() {
           }
         `}
       </style>
-      <div className="login card max-w-[385px] border-none w-full bg-[linear-gradient(180deg,#1F1E1F_0%,#121213_100%)]">
+      <div className="login card max-w-[385px] border-none w-full bg-[linear-gradient(180deg,#1F1E1F_0%,#121213_100%)] !rounded-2xl">
         <form className="card-body flex flex-col gap-4 p-6" onSubmit={formik.handleSubmit} noValidate>
-
-        <h3 className="text-xl font-medium text-gray-100 text-center">
-          Create an Account
-        </h3>
-
-        <div className="space-y-3">
-          <div>
-            <label className="text-gray-400 text-sm">First Name</label>
-            <input
-              name="firstName"
-              type="text"
-              {...formik.getFieldProps('firstName')}
-              disabled={isLoading}
-              autoComplete="given-name"
-              className={`w-full bg-transparent border-b border-[#35353C] text-gray-100 outline-none py-1.5 ${
-                formik.touched.firstName && formik.errors.firstName ? 'border-red-500' : ''
-              }`}
-              placeholder=""
+          <div className="flex justify-center mb-8">
+            <img
+              src="/media/app/default-logo-dark.png"
+              className="w-100 h-16 object-contain"
+              alt=""
             />
-            {formik.touched.firstName && formik.errors.firstName && (
-              <span className="text-red-400 text-xs mt-1 block">
-                {formik.errors.firstName}
-              </span>
-            )}
+            {/* <img src="/media/app/default-logo-dark.png" className="w-100 h-5 dark_mode" alt="" /> */}
           </div>
+          <h3 className="text-xl font-medium text-gray-100 text-center">
+            Create an Account
+          </h3>
 
-          <div>
-            <label className="text-gray-400 text-sm">Last Name</label>
-            <input
-              name="lastName"
-              type="text"
-              {...formik.getFieldProps('lastName')}
-              disabled={isLoading}
-              autoComplete="family-name"
-              className={`w-full bg-transparent border-b border-[#35353C] text-gray-100 outline-none py-1.5 ${
-                formik.touched.lastName && formik.errors.lastName ? 'border-red-500' : ''
-              }`}
-              placeholder=""
-            />
-            {formik.touched.lastName && formik.errors.lastName && (
-              <span className="text-red-400 text-xs mt-1 block">
-                {formik.errors.lastName}
-              </span>
-            )}
-          </div>
-
-          <div>
-            <label className="text-gray-400 text-sm">Email</label>
-            <input
-              type="email"
-              name="email"
-              {...formik.getFieldProps('email')}
-              disabled={isLoading}
-              autoComplete="email"
-              className={`w-full bg-transparent border-b border-[#35353C] text-gray-100 outline-none py-1.5 ${
-                formik.touched.email && formik.errors.email ? 'border-red-500' : ''
-              }`}
-            />
-            {formik.touched.email && formik.errors.email && (
-              <span className="text-red-400 text-xs mt-1 block">
-                {formik.errors.email}
-              </span>
-            )}
-          </div>
-
-          <div>
-            <label className="text-gray-400 text-sm">Password</label>
-            <div className="relative">
+          <div className="space-y-3">
+            <div>
+              <label className="text-gray-400 text-sm">First Name</label>
               <input
-                type={showPassword ? 'text' : 'password'}
-                name="password"
-                {...formik.getFieldProps('password')}
+                name="firstName"
+                type="text"
+                {...formik.getFieldProps('firstName')}
                 disabled={isLoading}
-                autoComplete="new-password"
-                className={`w-full bg-transparent border-b border-[#35353C] text-gray-100 outline-none py-1.5 pr-8 ${
-                  formik.touched.password && formik.errors.password ? 'border-red-500' : ''
-                }`}
+                autoComplete="given-name"
+                className={`w-full bg-transparent border-b border-[#35353C] text-gray-100 outline-none py-1.5 ${formik.touched.firstName && formik.errors.firstName ? 'border-red-500' : ''
+                  }`}
+                placeholder=""
               />
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-0 top-1/2 -translate-y-1/2 p-1"
-              >
-                {showPassword ? (
-                  <EyeOff size={16} className="text-gray-400" />
-                ) : (
-                  <Eye size={16} className="text-gray-400" />
-                )}
-              </button>
+              {formik.touched.firstName && formik.errors.firstName && (
+                <span className="text-red-400 text-xs mt-1 block">
+                  {formik.errors.firstName}
+                </span>
+              )}
             </div>
-            {formik.touched.password && formik.errors.password && (
-              <span className="text-red-400 text-xs mt-1 block">
-                {formik.errors.password}
-              </span>
-            )}
-          </div>
 
-          <div>
-            <label className="text-gray-400 text-sm">Confirm Password</label>
-            <div className="relative">
+            <div>
+              <label className="text-gray-400 text-sm">Last Name</label>
               <input
-                type={showConfirmPassword ? 'text' : 'password'}
-                name="confirmPassword"
-                {...formik.getFieldProps('confirmPassword')}
+                name="lastName"
+                type="text"
+                {...formik.getFieldProps('lastName')}
                 disabled={isLoading}
-                autoComplete="new-password"
-                className={`w-full bg-transparent border-b border-[#35353C] text-gray-100 outline-none py-1.5 pr-8 ${
-                  formik.touched.confirmPassword && formik.errors.confirmPassword ? 'border-red-500' : ''
-                }`}
+                autoComplete="family-name"
+                className={`w-full bg-transparent border-b border-[#35353C] text-gray-100 outline-none py-1.5 ${formik.touched.lastName && formik.errors.lastName ? 'border-red-500' : ''
+                  }`}
+                placeholder=""
               />
-              <button
-                type="button"
-                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                className="absolute right-0 top-1/2 -translate-y-1/2 p-1"
-              >
-                {showConfirmPassword ? (
-                  <EyeOff size={16} className="text-gray-400" />
-                ) : (
-                  <Eye size={16} className="text-gray-400" />
-                )}
-              </button>
+              {formik.touched.lastName && formik.errors.lastName && (
+                <span className="text-red-400 text-xs mt-1 block">
+                  {formik.errors.lastName}
+                </span>
+              )}
             </div>
-            {formik.touched.confirmPassword && formik.errors.confirmPassword && (
-              <span className="text-red-400 text-xs mt-1 block">
-                {formik.errors.confirmPassword}
-              </span>
-            )}
+
+            <div>
+              <label className="text-gray-400 text-sm">Email</label>
+              <input
+                type="email"
+                name="email"
+                {...formik.getFieldProps('email')}
+                disabled={isLoading}
+                autoComplete="email"
+                className={`w-full bg-transparent border-b border-[#35353C] text-gray-100 outline-none py-1.5 ${formik.touched.email && formik.errors.email ? 'border-red-500' : ''
+                  }`}
+              />
+              {formik.touched.email && formik.errors.email && (
+                <span className="text-red-400 text-xs mt-1 block">
+                  {formik.errors.email}
+                </span>
+              )}
+            </div>
+
+            <div>
+              <label className="text-gray-400 text-sm">Password</label>
+              <div className="relative">
+                <input
+                  type={showPassword ? 'text' : 'password'}
+                  name="password"
+                  {...formik.getFieldProps('password')}
+                  disabled={isLoading}
+                  autoComplete="new-password"
+                  className={`w-full bg-transparent border-b border-[#35353C] text-gray-100 outline-none py-1.5 pr-8 ${formik.touched.password && formik.errors.password ? 'border-red-500' : ''
+                    }`}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-0 top-1/2 -translate-y-1/2 p-1"
+                >
+                  {showPassword ? (
+                    <EyeOff size={16} className="text-gray-400" />
+                  ) : (
+                    <Eye size={16} className="text-gray-400" />
+                  )}
+                </button>
+              </div>
+              {formik.touched.password && formik.errors.password && (
+                <span className="text-red-400 text-xs mt-1 block">
+                  {formik.errors.password}
+                </span>
+              )}
+            </div>
+
+            <div>
+              <label className="text-gray-400 text-sm">Confirm Password</label>
+              <div className="relative">
+                <input
+                  type={showConfirmPassword ? 'text' : 'password'}
+                  name="confirmPassword"
+                  {...formik.getFieldProps('confirmPassword')}
+                  disabled={isLoading}
+                  autoComplete="new-password"
+                  className={`w-full bg-transparent border-b border-[#35353C] text-gray-100 outline-none py-1.5 pr-8 ${formik.touched.confirmPassword && formik.errors.confirmPassword ? 'border-red-500' : ''
+                    }`}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  className="absolute right-0 top-1/2 -translate-y-1/2 p-1"
+                >
+                  {showConfirmPassword ? (
+                    <EyeOff size={16} className="text-gray-400" />
+                  ) : (
+                    <Eye size={16} className="text-gray-400" />
+                  )}
+                </button>
+              </div>
+              {formik.touched.confirmPassword && formik.errors.confirmPassword && (
+                <span className="text-red-400 text-xs mt-1 block">
+                  {formik.errors.confirmPassword}
+                </span>
+              )}
+            </div>
           </div>
-        </div>
 
-        <button
-          type="submit"
-          disabled={isLoading || formik.isSubmitting}
-          className="mt-3 h-11 rounded-md bg-[linear-gradient(90deg,#FFCD0B_0%,#FFCD0B_100%)] text-black font-medium disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-        >
-          {isLoading || formik.isSubmitting ? (
-            <>
-              <Loader2 className="w-4 h-4 animate-spin" />
-              <span>Creating Account...</span>
-            </>
-          ) : (
-            'Sign Up'
-          )}
-        </button>
+          <button
+            type="submit"
+            disabled={isLoading || formik.isSubmitting}
+            className="mt-3 h-11 rounded-md bg-[linear-gradient(90deg,#FFCD0B_0%,#FFCD0B_100%)] text-black font-medium disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+          >
+            {isLoading || formik.isSubmitting ? (
+              <>
+                <Loader2 className="w-4 h-4 animate-spin" />
+                <span>Creating Account...</span>
+              </>
+            ) : (
+              'Sign Up'
+            )}
+          </button>
 
-        <p className="text-sm text-gray-400 text-center">
-          Already have an account?{' '}
-          <Link to="/login" className="text-yellow-400 hover:underline">
-            Sign in
-          </Link>
-        </p>
+          <p className="text-sm text-gray-400 text-center">
+            Already have an account?{' '}
+            <Link to="/login" className="text-yellow-400 hover:underline">
+              Sign in
+            </Link>
+          </p>
 
         </form>
       </div>

@@ -31,12 +31,12 @@ export default function ViewProfile() {
 
     // Filter to ensure correct categories are displayed in the right sections
     // Live Feed should show only "General Updates"
-    const generalUpdates = liveFeed.filter(post => 
+    const generalUpdates = liveFeed.filter(post =>
         post.category === 'General Updates' || !post.category
     );
-    
+
     // Analysis Updates should show only "Analysis Updates"
-    const analysisUpdatesFiltered = analysisUpdates.filter(post => 
+    const analysisUpdatesFiltered = analysisUpdates.filter(post =>
         post.category === 'Analysis Updates'
     );
 
@@ -170,7 +170,7 @@ export default function ViewProfile() {
                     </div>
 
                     {/* Rate Me Button */}
-                    <Button 
+                    <Button
                         onClick={() => setIsRatingModalOpen(true)}
                         variant="primary"
                         size="md"
@@ -334,48 +334,6 @@ export default function ViewProfile() {
                         </div>
                     </Card>
 
-                    {/* Recordings Section */}
-                    <Card className="rounded-2xl p-6 shadow-sm">
-                        <div className="flex items-center justify-between mb-4">
-                            <h3 className="text-gray-900 dark:text-gray-200 text-xl font-bold">Recordings</h3>
-                            <button className="text-primary text-sm hover:text-yellow-500 font-medium cursor-pointer">View All →</button>
-                        </div>
-                        <div className="grid grid-col-12 sm:grid-cols-3 gap-4">
-                            {recordings.length > 0 ? (
-                                recordings.slice(0, 3).map((recording) => (
-                                    <div key={recording?._id || recording?.id} className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden hover:shadow-lg transition-shadow">
-                                        <div className="h-40 bg-gradient-to-br from-yellow-600 via-yellow-700 to-yellow-900 relative">
-                                            {recording?.thumbnail && (
-                                                <img
-                                                    src={recording?.thumbnail}
-                                                    alt={recording?.call_title || 'Recording'}
-                                                    className="w-full h-full object-cover absolute inset-0"
-                                                />
-                                            )}
-                                            <div className="absolute inset-0 flex items-center justify-center bg-black/30">
-                                                <div className="w-16 h-16 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-white/30 transition-colors cursor-pointer">
-                                                    <Play className="w-8 h-8 text-white fill-white ml-1" />
-                                                </div>
-                                            </div>
-                                            <div className="absolute bottom-3 right-3 text-right">
-                                                <p className="text-white text-sm font-bold">{educator?.first_name?.toUpperCase() || ''}</p>
-                                                <p className="text-white text-sm font-bold">{educator?.last_name?.toUpperCase() || ''}</p>
-                                            </div>
-                                        </div>
-                                        <div className="p-4">
-                                            <p className="text-sm font-medium text-gray-900 mb-2 dark:text-white">{recording?.call_title || 'Recording'}</p>
-                                            <div className="flex items-center gap-2 text-xs text-gray-600 dark:text-gray-300">
-                                                <Calendar className="w-4 h-4" />
-                                                {formatRecordingDate(recording?.start_time || recording?.createdAt)}
-                                            </div>
-                                        </div>
-                                    </div>
-                                ))
-                            ) : (
-                                <p className="text-gray-500 dark:text-gray-400 col-span-3">No recordings available</p>
-                            )}
-                        </div>
-                    </Card>
                 </div>
                 {/* Right Sidebar */}
                 <div className="col-span-12 lg:col-span-1 mb-6">
@@ -391,36 +349,38 @@ export default function ViewProfile() {
                         <Card className="rounded-2xl p-6 shadow-sm">
                             <h3 className="text-gray-900 dark:text-white text-lg font-bold mb-4">Live Feed</h3>
                             <div className="space-y-4">
-                                {generalUpdates.length > 0 ? (
-                                    generalUpdates.map((feed) => {
-                                        const author = feed?.author || {};
-                                        const authorName = author?.first_name && author?.last_name
-                                            ? `${author?.first_name || ''} ${author?.last_name || ''}`.trim()
-                                            : author?.name || 'User';
-                                        return (
-                                            <div key={feed?._id || feed?.id} className="flex gap-3 pb-4 border-b border-gray-100 dark:border-gray-700 last:border-b-0 last:pb-0">
-                                                {author?.image ? (
-                                                    <img
-                                                        src={author.image}
-                                                        alt={authorName}
-                                                        className="w-10 h-10 rounded-full object-cover flex-shrink-0"
-                                                    />
-                                                ) : (
-                                                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-yellow-400 to-yellow-600 flex items-center justify-center text-white text-sm font-bold flex-shrink-0">
-                                                        {getUserInitials(author)}
+                                <div className='h-[300px] overflow-y-auto'>
+                                    {generalUpdates.length > 0 ? (
+                                        generalUpdates.map((feed) => {
+                                            const author = feed?.author || {};
+                                            const authorName = author?.first_name && author?.last_name
+                                                ? `${author?.first_name || ''} ${author?.last_name || ''}`.trim()
+                                                : author?.name || 'User';
+                                            return (
+                                                <div key={feed?._id || feed?.id} className="flex gap-3 pb-4 border-b border-gray-100 dark:border-gray-700 last:border-b-0 last:pb-0">
+                                                    {author?.image ? (
+                                                        <img
+                                                            src={author.image}
+                                                            alt={authorName}
+                                                            className="w-10 h-10 rounded-full object-cover flex-shrink-0"
+                                                        />
+                                                    ) : (
+                                                        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-yellow-400 to-yellow-600 flex items-center justify-center text-white text-sm font-bold flex-shrink-0">
+                                                            {getUserInitials(author)}
+                                                        </div>
+                                                    )}
+                                                    <div className="flex-1">
+                                                        <p className="text-gray-900 text-sm font-semibold dark:text-white">{authorName}</p>
+                                                        <p className="text-gray-500 text-xs mb-1 dark:text-gray-400">{formatDate(feed?.createdAt)}</p>
+                                                        <p className="text-gray-700 text-sm dark:text-gray-400">{feed?.content || ''}</p>
                                                     </div>
-                                                )}
-                                                <div className="flex-1">
-                                                    <p className="text-gray-900 text-sm font-semibold dark:text-white">{authorName}</p>
-                                                    <p className="text-gray-500 text-xs mb-1 dark:text-gray-400">{formatDate(feed?.createdAt)}</p>
-                                                    <p className="text-gray-700 text-sm dark:text-gray-400">{feed?.content || ''}</p>
                                                 </div>
-                                            </div>
-                                        );
-                                    })
-                                ) : (
-                                    <p className="text-gray-500 dark:text-gray-400 text-sm">No live feed available</p>
-                                )}
+                                            );
+                                        })
+                                    ) : (
+                                        <p className="text-gray-500 dark:text-gray-400 text-sm">No live feed available</p>
+                                    )}
+                                </div>
                             </div>
                         </Card>
 
@@ -428,43 +388,87 @@ export default function ViewProfile() {
                         <Card className="rounded-2xl p-6 shadow-sm">
                             <h3 className="text-gray-900 dark:text-white text-lg font-bold mb-4">Analysis Updates</h3>
                             <div className="space-y-4">
-                                {analysisUpdatesFiltered.length > 0 ? (
-                                    analysisUpdatesFiltered.map((update) => {
-                                        const author = update?.author || {};
-                                        const authorName = author?.first_name && author?.last_name
-                                            ? `${author?.first_name || ''} ${author?.last_name || ''}`.trim()
-                                            : author?.name || 'User';
-                                        return (
-                                            <div key={update?._id || update?.id} className="flex gap-3 pb-4 border-b border-gray-100 dark:border-gray-700 last:border-b-0 last:pb-0">
-                                                {author?.image ? (
-                                                    <img
-                                                        src={author.image}
-                                                        alt={authorName}
-                                                        className="w-10 h-10 rounded-full object-cover flex-shrink-0"
-                                                    />
-                                                ) : (
-                                                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-yellow-500 to-yellow-700 flex items-center justify-center text-white text-sm font-bold flex-shrink-0">
-                                                        {getUserInitials(author)}
-                                                    </div>
-                                                )}
-                                                <div className="flex-1">
-                                                    <p className="text-gray-900 text-sm font-semibold dark:text-white">{authorName}</p>
-                                                    <p className="text-gray-500 text-xs mb-1 dark:text-gray-400">{formatDate(update?.createdAt)}</p>
-                                                    {update?.content && (
-                                                        <p className="text-gray-700 text-sm dark:text-gray-400">{update?.content || ''}</p>
+                                <div className='h-[300px] overflow-y-auto'>
+                                    {analysisUpdatesFiltered.length > 0 ? (
+                                        analysisUpdatesFiltered.map((update) => {
+                                            const author = update?.author || {};
+                                            const authorName = author?.first_name && author?.last_name
+                                                ? `${author?.first_name || ''} ${author?.last_name || ''}`.trim()
+                                                : author?.name || 'User';
+                                            return (
+                                                <div key={update?._id || update?.id} className="flex gap-3 pb-4 border-b border-gray-100 dark:border-gray-700 last:border-b-0 last:pb-0">
+                                                    {author?.image ? (
+                                                        <img
+                                                            src={author.image}
+                                                            alt={authorName}
+                                                            className="w-10 h-10 rounded-full object-cover flex-shrink-0"
+                                                        />
+                                                    ) : (
+                                                        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-yellow-500 to-yellow-700 flex items-center justify-center text-white text-sm font-bold flex-shrink-0">
+                                                            {getUserInitials(author)}
+                                                        </div>
                                                     )}
+                                                    <div className="flex-1">
+                                                        <p className="text-gray-900 text-sm font-semibold dark:text-white">{authorName}</p>
+                                                        <p className="text-gray-500 text-xs mb-1 dark:text-gray-400">{formatDate(update?.createdAt)}</p>
+                                                        {update?.content && (
+                                                            <p className="text-gray-700 text-sm dark:text-gray-400">{update?.content || ''}</p>
+                                                        )}
+                                                    </div>
                                                 </div>
-                                            </div>
-                                        );
-                                    })
-                                ) : (
-                                    <p className="text-gray-500 dark:text-gray-400 text-sm">No analysis updates available</p>
-                                )}
+                                            );
+                                        })
+                                    ) : (
+                                        <p className="text-gray-500 dark:text-gray-400 text-sm">No analysis updates available</p>
+                                    )}
+                                </div>
                             </div>
                         </Card>
                     </div>
                 </div>
             </div>
+            {/* Recordings Section */}
+            <Card className="rounded-2xl p-6 shadow-sm">
+                <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-gray-900 dark:text-gray-200 text-xl font-bold">Recordings</h3>
+                    <button className="text-primary text-sm hover:text-yellow-500 font-medium cursor-pointer">View All →</button>
+                </div>
+                <div className="grid grid-col-12 sm:grid-cols-3 gap-4">
+                    {recordings.length > 0 ? (
+                        recordings.slice(0, 3).map((recording) => (
+                            <div key={recording?._id || recording?.id} className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden hover:shadow-lg transition-shadow">
+                                <div className="h-40 bg-gradient-to-br from-yellow-600 via-yellow-700 to-yellow-900 relative">
+                                    {recording?.thumbnail && (
+                                        <img
+                                            src={recording?.thumbnail}
+                                            alt={recording?.call_title || 'Recording'}
+                                            className="w-full h-full object-cover absolute inset-0"
+                                        />
+                                    )}
+                                    <div className="absolute inset-0 flex items-center justify-center bg-black/30">
+                                        <div className="w-16 h-16 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-white/30 transition-colors cursor-pointer">
+                                            <Play className="w-8 h-8 text-white fill-white ml-1" />
+                                        </div>
+                                    </div>
+                                    <div className="absolute bottom-3 right-3 text-right">
+                                        <p className="text-white text-sm font-bold">{educator?.first_name?.toUpperCase() || ''}</p>
+                                        <p className="text-white text-sm font-bold">{educator?.last_name?.toUpperCase() || ''}</p>
+                                    </div>
+                                </div>
+                                <div className="p-4">
+                                    <p className="text-sm font-medium text-gray-900 mb-2 dark:text-white">{recording?.call_title || 'Recording'}</p>
+                                    <div className="flex items-center gap-2 text-xs text-gray-600 dark:text-gray-300">
+                                        <Calendar className="w-4 h-4" />
+                                        {formatRecordingDate(recording?.start_time || recording?.createdAt)}
+                                    </div>
+                                </div>
+                            </div>
+                        ))
+                    ) : (
+                        <p className="text-gray-500 dark:text-gray-400 col-span-3">No recordings available</p>
+                    )}
+                </div>
+            </Card>
 
             {/* Rating Modal */}
             <RatingModal
