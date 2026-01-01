@@ -1,8 +1,8 @@
 import api from "./axiosConfig";
 
-export const login = async (email, password) => {
+export const login = async (email, password, role = "admin") => {
   try {
-    const response = await api.post("/common/auth/signin", { email, password });
+    const response = await api.post("/common/auth/signin", { email, password, role });
     return response.data;
   } catch (error) {
     throw error;
