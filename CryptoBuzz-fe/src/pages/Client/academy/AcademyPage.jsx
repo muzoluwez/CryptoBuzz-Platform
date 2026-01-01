@@ -693,6 +693,17 @@ export default function AcademyPage() {
     setOpen(open === section ? null : section);
   };
 
+  // Auto-open intro series and first section when course loads
+  useEffect(() => {
+    if (currentCourse?.length > 0) {
+      // Open the first section (Intro Series)
+      const firstCourse = currentCourse?.[0];
+      if (firstCourse?.title) {
+        setOpen(firstCourse.title); // Auto-open intro series
+      }
+    }
+  }, [currentCourse]);
+
   // When user clicks a category: set active tab and reset course selection so vault shows category courses
   const handleCategoryClick = (categoryId) => {
     // Reset selection state
