@@ -7,6 +7,8 @@ import { Card } from '../../../components/ui/card';
 import { useGetAcademyCategoryFetchQuery } from '../../../store/client/clientAcademyCategoryApiSlice';
 import { useGetAllEducatorsQuery } from '../../../store/client/clientEducatorApiSlice';
 import useDocumentTitle from '../../../hooks/use-document-title';
+import { useAuthContext } from '@/context/AuthContext';
+import { LoginRequired } from '@/components/common/access-states/LoginRequired';
 
 
 const EducatorsPage = () => {
@@ -17,6 +19,7 @@ const EducatorsPage = () => {
   const [selectedCategoryId, setSelectedCategoryId] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [followingIds, setFollowingIds] = useState([]);
+  const [showLoginRequired, setShowLoginRequired] = useState(false);
 
   // Fetch categories from API
   const {
@@ -116,7 +119,14 @@ const EducatorsPage = () => {
     setSelectedCategoryId(null);
   };
 
+  const { isAuthenticated } = useAuthContext();
+
   const handleFollow = (id) => {
+    if (!isAuthenticated) {
+      setShowLoginRequired(true);
+      return;
+    }
+
     if (followingIds.includes(id)) {
       setFollowingIds(followingIds.filter((fId) => fId !== id));
     } else {
@@ -437,6 +447,27 @@ const EducatorsPage = () => {
           </div>
         )}
       </div>
+
+      {/* Login Required Modal */}
+      {showLoginRequired && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white dark:bg-gray-800 rounded-lg max-w-md w-full p-6 relative">
+            <button
+              onClick={() => setShowLoginRequired(false)}
+              className="absolute top-4 right-4 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 text-xl font-bold w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+              aria-label="Close"
+            >
+              ×
+            </button>
+            <LoginRequired
+              onLogin={() => {
+                setShowLoginRequired(false);
+                navigate('/login');
+              }}
+            />
+          </div>
+        </div>
+      )}
     </>
   );
 };

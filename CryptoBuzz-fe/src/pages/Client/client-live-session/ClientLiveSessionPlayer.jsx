@@ -1,11 +1,9 @@
-import {
-  LivestreamPlayer,
-  StreamCall,
-  StreamVideo,
-} from "@stream-io/video-react-sdk";
-import React, { useEffect, useState, useRef, useCallback } from "react";
-import { useLayout } from "../../../components/layouts/layout-1/components/context";
+import React, { useCallback, useEffect, useRef, useState } from "react";
+import { LivestreamPlayer, StreamCall, StreamVideo } from "@stream-io/video-react-sdk";
 import { Button } from "@/components/ui/button";
+import { useLayout } from "../../../components/layouts/layout-1/components/context";
+import { useGrantAccess } from '@/context/GrantAccessContext';
+
 
 /** ✅ Get real media elements (Stream SDK fallback) */
 const getStreamMediaElements = () =>
@@ -186,7 +184,7 @@ const ClientLiveSessionPlayer = ({ callId, client, call }) => {
     return () => unlockBodyScroll();
   }, [unlockBodyScroll]);
 
-  const { isMuted, volume } = useLayout();
+  const { isMuted, volume } = useGrantAccess();
 
   /** ✅ Sync volume with media elements */
   useEffect(() => {
