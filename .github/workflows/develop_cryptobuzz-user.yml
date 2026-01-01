@@ -1,4 +1,4 @@
-name: Build and deploy Node.js app to Azure Web App - cryptobuzz-user
+name: CryptoBuzz-fe CI/CD not make any change on this
 
 on:
   push:
