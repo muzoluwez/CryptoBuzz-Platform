@@ -366,7 +366,7 @@ export default function SocialPage() {
                           onClick={(e) => e?.stopPropagation()}
                         /> */}
                         <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent pointer-events-none" />
-                        <div className="absolute left-4 bottom-4 text-white z-20">
+                        {/* <div className="absolute left-4 bottom-4 text-white z-20">
                           <div className="text-xs uppercase opacity-80 tracking-wider">
                             Hosted by
                           </div>
@@ -376,7 +376,7 @@ export default function SocialPage() {
                           <div className="text-sm opacity-90">
                             {post?.host?.desc || 'Social Post'}
                           </div>
-                        </div>
+                        </div> */}
                       </div>
                     )}
                   {/* Videos */}
