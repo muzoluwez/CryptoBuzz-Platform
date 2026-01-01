@@ -204,8 +204,8 @@ export default function ViewProfile() {
                 </div>
             </div>
             {/* Live Stream Section */}
-            <div className="grid grid-cols-12 gap-y-6 mb-8">
-                <div className="col-span-12 xl:col-span-12 space-y-8">
+            <div className="grid grid-cols-12 gap-y-8 md:gap-x-8">
+                <div className="col-span-12 xl:col-span-12 space-y-8 mb-8">
                     <EducatorLiveStreamView />
                 </div>
             </div>
@@ -450,7 +450,7 @@ export default function ViewProfile() {
                 </div>
             </div>
             {/* Recordings Section */}
-            <Card className="rounded-2xl p-6 shadow-sm">
+            <Card className="rounded-2xl p-6 shadow-sm mt-8">
                 <div className="flex items-center justify-between mb-4">
                     <h3 className="text-gray-900 dark:text-gray-200 text-xl font-bold">Recordings</h3>
                     <button className="text-primary text-sm hover:text-yellow-500 font-medium cursor-pointer">View All →</button>

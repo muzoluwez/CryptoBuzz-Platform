@@ -152,9 +152,9 @@ const ClientLiveSessionContent = ({
   const safeHtml = makeClickableLinks(educatorData || "");
 
   return (
-    <div className="grid grid-cols-12 gap-y-8 md:gap-x-8 chatbox_chat">
+    <div className="grid grid-cols-12 gap-6 chatbox_chat">
       <div
-        className={`${isFullScreen ? (isMdUp ? "col-span-10 xl:col-span-11" : "col-span-12 md:col-span-7 xl:col-span-10") : isMdUp ? "col-span-12 md:col-span-7 xl:col-span-8" : "col-span-12 md:col-span-7 xl:col-span-11"} space-y-8`}
+        className={`${isFullScreen ? (isMdUp ? "col-span-10 xl:col-span-11" : "col-span-12 md:col-span-7 xl:col-span-10") : isMdUp ? "col-span-12 lg:col-span-8" : "col-span-12 md:col-span-7 xl:col-span-11"} space-y-8`}
       >
         <div className={`transition-all duration-300 ease-in-out h-full`}>
           <div className="grid gap-5 h-full">
@@ -176,7 +176,7 @@ const ClientLiveSessionContent = ({
       </div>
 
       <div
-        className={`${isFullScreen ? (isMdUp ? "col-span-2 xl:col-span-1" : "col-span-12 md:col-span-5 xl:col-span-2") : isMdUp ? "col-span-12 md:col-span-5 xl:col-span-4" : "col-span-12 md:col-span-5 xl:col-span-1"} space-y-8`}
+        className={`${isFullScreen ? (isMdUp ? "col-span-2 xl:col-span-1" : "col-span-12 md:col-span-5 xl:col-span-2") : isMdUp ? "col-span-12 lg:col-span-4" : "col-span-12 md:col-span-5 xl:col-span-1"} space-y-8`}
       >
         <div className={`transition-all duration-300 ease-in-out h-full`}>
           {token && callId && status === "live" && (

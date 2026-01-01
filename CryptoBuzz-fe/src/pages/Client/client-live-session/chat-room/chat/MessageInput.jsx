@@ -95,12 +95,12 @@ export const MessageInputUI = () => {
     >
       {/* INPUT CONTAINER */}
       <div
-        className={`input-ui-input  dark:bg-gray-900 bg-gray-200 ${giphyState ? 'giphy' : ''}`}
+        className={`input-ui-input  dark:bg-gray-800 text-gray-800 dark:text-gray-200 bg-gray-200 ${giphyState ? 'giphy' : ''}`}
         style={{
           display: 'flex',
           alignItems: 'center',
           width: '100%',
-          borderRadius: '8px',
+          borderRadius: '0 0 8px 8px',
           padding: '6px 10px',
           boxSizing: 'border-box',
         }}
@@ -189,7 +189,7 @@ export const MessageInputUI = () => {
         style={{
           marginTop: 12,
           alignSelf: 'flex-end',
-          background: '#4f46e5',
+          background: '#7c4902',
           color: '#fff',
           borderRadius: '6px',
           padding: '6px 14px',

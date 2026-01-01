@@ -137,7 +137,7 @@ function CryptoUI({ activeTab, setActiveTab, toggle, open, introLessons, section
               <button
                 key={tab}
                 onClick={() => setActiveTab(tab)}
-                className={`px-4 py-2 text-sm font-medium cursor-pointer ${activeTab === tab ? "bg-[#FFF9E2] text-primary rounded-lg" : "text-gray-600"
+                className={`px-4 py-2 text-sm font-medium cursor-pointer ${activeTab === tab ? "bg-[#FFF9E2] dark:bg-[#fff9e224] text-primary rounded-lg" : "text-gray-600"
                   }`}
               >
                 {tab}
@@ -150,7 +150,7 @@ function CryptoUI({ activeTab, setActiveTab, toggle, open, introLessons, section
           <div className="lg:col-span-2">
             {/* Protected Main Video Area */}
             {isVideoPlaying && selectedVideo && mainVideoAccess.hasAccess ? (
-              <div className="aspect-video w-full border border-gray-200 rounded-lg overflow-hidden shadow-lg bg-black">
+              <div className="aspect-video w-full border border-gray-200 rounded-lg overflow-hidden shadow-lg bg-black ">
                 <iframe
                   src={getEmbedUrl(selectedVideo.url)}
                   className="w-full h-full rounded-lg"
@@ -434,7 +434,7 @@ function TradingUI({ activeTab, setActiveTab, toggle, open, introLessons, sectio
               <button
                 key={tab}
                 onClick={() => setActiveTab(tab)}
-                className={`px-4 py-2 text-sm font-medium cursor-pointer ${activeTab === tab ? "bg-[#FFF9E2] text-primary rounded-lg" : "text-gray-600"
+                className={`px-4 py-2 text-sm font-medium cursor-pointer ${activeTab === tab ? "bg-[#FFF9E2] dark:bg-[#fff9e224] text-primary rounded-lg" : "text-gray-600"
                   }`}
               >
                 {tab}
@@ -446,7 +446,7 @@ function TradingUI({ activeTab, setActiveTab, toggle, open, introLessons, sectio
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-5">
           <div className="lg:col-span-2">
             {isVideoPlaying && selectedVideo && mainVideoAccess.hasAccess ? (
-              <div className="aspect-video w-full border border-gray-200 rounded-lg overflow-hidden shadow-lg bg-black">
+              <div className="aspect-video w-full border border-gray-200 rounded-lg overflow-hidden shadow-lg bg-black ">
                 <iframe
                   src={getEmbedUrl(selectedVideo.url)}
                   className="w-full h-full rounded-lg"
@@ -730,7 +730,7 @@ function DigitalMarketingUI({ activeTab, setActiveTab, toggle, open, introLesson
               <button
                 key={tab}
                 onClick={() => setActiveTab(tab)}
-                className={`px-4 py-2 text-sm font-medium cursor-pointer ${activeTab === tab ? "bg-[#FFF9E2] text-primary rounded-lg" : "text-gray-600"
+                className={`px-4 py-2 text-sm font-medium cursor-pointer ${activeTab === tab ? "bg-[#FFF9E2] dark:bg-[#fff9e224] text-primary rounded-lg" : "text-gray-600"
                   }`}
               >
                 {tab}
@@ -742,7 +742,7 @@ function DigitalMarketingUI({ activeTab, setActiveTab, toggle, open, introLesson
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-5">
           <div className="lg:col-span-2">
             {isVideoPlaying && selectedVideo && mainVideoAccess.hasAccess ? (
-              <div className="aspect-video w-full border border-gray-200 rounded-lg overflow-hidden shadow-lg bg-black">
+              <div className="aspect-video w-full border border-gray-200 rounded-lg overflow-hidden shadow-lg bg-black ">
                 <iframe
                   src={getEmbedUrl(selectedVideo.url)}
                   className="w-full h-full rounded-lg"

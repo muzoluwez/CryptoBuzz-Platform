@@ -166,7 +166,7 @@ export default function Login() {
             <button
               type="submit"
               disabled={isLoading || formik.isSubmitting}
-              className="btn py-7 !text-[18px] rounded-2xl bg-[linear-gradient(90deg,#FFCD0B_0%,#FFCD0B_100%)] btn-primary flex justify-center items-center gap-2 grow text-dark disabled:opacity-50 disabled:cursor-not-allowed"
+              className="btn py-7 !text-[18px] rounded-2xl bg-[linear-gradient(90deg,#FFCD0B_0%,#FFCD0B_100%)] btn-primary !flex !justify-center !items-center gap-2 grow text-dark disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isLoading || formik.isSubmitting ? (
                 <>
