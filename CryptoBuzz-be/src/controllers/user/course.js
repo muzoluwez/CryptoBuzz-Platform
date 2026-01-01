@@ -26,14 +26,14 @@ function sortCategories(data) {
 
 export const CourseBasedOnSection = async (req, res) => {
   try {
-    const user = req.user.plan;
+    // const user = req.user.plan;
 
-    if (!user) {
-      return res.status(400).json({ success: false, message: "plan is required to show the api" });
-    }
+    // if (!user) {
+    //   return res.status(400).json({ success: false, message: "plan is required to show the api" });
+    // }
 
-    const ids = user.allowedCategories;
-    const objectIds = ids.map(id => new mongoose.Types.ObjectId(id));
+    // const ids = user.allowedCategories;
+    // const objectIds = ids.map(id => new mongoose.Types.ObjectId(id));
 
     const { mainSection, categoryId, language, id } = req.query;
 
@@ -49,7 +49,7 @@ export const CourseBasedOnSection = async (req, res) => {
     // Fetch all courses for AllCourse data
     const coursesData = await Course.find(query).sort({ createdAt: 1 }).populate("category", "_id name").lean();
     const categoriesData = await Category.find({
-      _id: { $in: objectIds },
+      // _id: { $in: objectIds },
       status: true
     })
       .select("_id name")
