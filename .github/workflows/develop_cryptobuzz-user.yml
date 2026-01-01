@@ -1,4 +1,7 @@
-name: Build and deploy Node.js app to Azure Web App - cryptobuzz-user
+# Docs for the Azure Web Apps Deploy action: https://github.com/Azure/webapps-deploy
+# More GitHub Actions for Azure: https://github.com/Azure/actions
+
+name: CryptoBuzz-fe CI/CD 
 
 on:
   push:
@@ -9,6 +12,8 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read #This is required for actions/checkout
 
     steps:
       - uses: actions/checkout@v4
@@ -16,87 +21,37 @@ jobs:
       - name: Set up Node.js version
         uses: actions/setup-node@v3
         with:
-          node-version: '20.x'
+          node-version: '22.x'
 
-      - name: Enable Corepack
-        run: corepack enable
-
-      - name: Prepare pnpm
-        run: corepack prepare pnpm@9 --activate
-
-      - name: Install dependencies
-        working-directory: CryptoBuzz-fe
-        run: pnpm install
-
-      - name: Build for production
-        working-directory: CryptoBuzz-fe
-        env:
-          VITE_APP_API_URL: ${{ secrets.VITE_APP_API_URL || 'https://cryptobuzz-backend.azurewebsites.net' }}
-          VITE_APP_URL: ${{ secrets.VITE_APP_URL || 'https://cryptobuzz-user.azurewebsites.net' }}
-          VITE_ENV: ${{ secrets.VITE_ENV || 'production' }}
-        run: pnpm run build
-
-      - name: Prepare deployment package
+      - name: npm install, build, and test
         working-directory: CryptoBuzz-fe
         run: |
-          # Verify dist folder exists
-          if [ ! -d "dist" ]; then
-            echo "Error: dist folder not found after build"
-            exit 1
-          fi
-          # Create deployment directory
-          mkdir -p deploy
-          # Copy built files
-          cp -r dist/* deploy/
-          # Copy server files
-          cp server.js deploy/
-          # Create web.config to prevent Azure from running npm build
-          echo '<?xml version="1.0" encoding="utf-8"?>
-          <configuration>
-            <system.webServer>
-              <handlers>
-                <add name="iisnode" path="server.js" verb="*" modules="iisnode"/>
-              </handlers>
-              <rewrite>
-                <rules>
-                  <rule name="NodeInspector" patternSyntax="ECMAScript" stopProcessing="true">
-                    <match url="^server.js\/debug[\/]?" />
-                  </rule>
-                  <rule name="StaticContent">
-                    <action type="Rewrite" url="public{REQUEST_URI}"/>
-                  </rule>
-                  <rule name="DynamicContent">
-                    <conditions>
-                      <add input="{REQUEST_FILENAME}" matchType="IsFile" negate="True"/>
-                    </conditions>
-                    <action type="Rewrite" url="server.js"/>
-                  </rule>
-                </rules>
-              </rewrite>
-            </system.webServer>
-          </configuration>' > deploy/web.config
-          # Create minimal package.json for production
-          echo '{"name":"cryptobuzz-fe","type":"module","scripts":{"start":"node server.js"},"dependencies":{"express":"^5.2.1"}}' > deploy/package.json
-          # Install production dependencies in deploy folder
-          cd deploy && npm install --production
+          npm install --legacy-peer-deps
+          npm install --legacy-peer-deps express
+
+      - name: npm build
+        working-directory: CryptoBuzz-fe
+        run: |
+          npm run build
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
         with:
           name: node-app
-          path: CryptoBuzz-fe/deploy
+          path: CryptoBuzz-fe
 
   deploy:
     runs-on: ubuntu-latest
     needs: build
-
+    
     steps:
       - name: Download artifact from build job
         uses: actions/download-artifact@v4
         with:
           name: node-app
-
+      
       - name: 'Deploy to Azure Web App'
+        id: deploy-to-webapp
         uses: azure/webapps-deploy@v3
         with:
           app-name: 'cryptobuzz-user'
