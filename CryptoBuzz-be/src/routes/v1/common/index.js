@@ -13,6 +13,7 @@ import RecordingRoute from "./recording.routes.js";
 import CryptoAnalysisRoute from "./cryptoAnalysis.routes.js";
 import StreamRoute from "./stream.routes.js";
 import healthcheckRoute from "./healthcheck.routes.js";
+import ratingRoute from "./rating.routes.js";
 
 router.use("/auth", AuthRoute);
 router.use("/dashboard", DashboardRoute);
@@ -26,6 +27,7 @@ router.use("/recording", RecordingRoute);
 router.use("/crypto-analysis", CryptoAnalysisRoute);
 router.use("/stream", StreamRoute);
 router.use("/healthCheck", healthcheckRoute);
+router.use("/rating", ratingRoute);
 
 export default router;
 
