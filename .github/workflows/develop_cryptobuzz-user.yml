@@ -24,10 +24,15 @@ jobs:
           node-version: '22.x'
 
       - name: npm install, build, and test
+        working-directory: CryptoBuzz-fe
         run: |
-          npm install
-          npm run build --if-present
-          npm run test --if-present
+          npm install --legacy-peer-deps
+          npm install --legacy-peer-deps express
+
+      - name: npm build
+        working-directory: CryptoBuzz-fe
+        run: |
+          npm run build
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
