@@ -82,16 +82,6 @@ function CourseUI({
   academyCourseLoading = false,
   academyCourseFetching = false
 }) {
-
-  // console.log("CourseUI Rendered with lecture:", lecture, "and currentCourse:", currentCourse);
-  // console.log("introLessons:", introLessons, "sections:", sections);
-  // console.log("activeLectureId:", activeLectureId);
-  // console.log("activeTab:", activeTab, "open:", open);
-  // console.log("categories:", categories);
-  // console.log("courses:", courses);
-  // console.log("hideVault:", hideVault);
-  // console.log("data:", data);
-  // Video player state - sync with parent lecture state
   const [selectedVideo, setSelectedVideo] = useState(null);
   const [isVideoPlaying, setIsVideoPlaying] = useState(false);
   
@@ -507,7 +497,6 @@ export default function AcademyPage() {
   // URL parameter handling
   const { search } = useLocation();
   const params = new URLSearchParams(search);
-  console.log("URL Params:", Object.fromEntries(params.entries()));
   const mainSection = params.get("mainSection");
   const language = params.get("language");
   const categoryName = params.get("categoryId");
@@ -533,9 +522,6 @@ export default function AcademyPage() {
       refetchOnReconnect: true,
     },
   );
-
-  console.log(academyCourseData , "academyCourseData");
-  console.log("selectedCourseId:", selectedCourseId, "activeTab:", activeTab);
 
   // Extract data from API response
   const data = academyCourseData;
@@ -882,9 +868,6 @@ export default function AcademyPage() {
       </div>
     );
   }
-  console.log("Rendering AcademyPage with UI Type:", uiType);
-  console.log("Current Course:", currentCourse);
-  console.log('Active Tab:', activeTab);
 
   return (
     <>
