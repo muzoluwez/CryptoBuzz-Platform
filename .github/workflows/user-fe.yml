@@ -18,7 +18,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # 1️⃣ Checkout code
+      # 1️⃣ Checkout repo
       - name: Checkout code
         uses: actions/checkout@v4
 
@@ -28,21 +28,23 @@ jobs:
         with:
           node-version: '22.x'
 
-      # 3️⃣ Install dependencies
+      # 3️⃣ Install dependencies (✅ CORRECT FOLDER)
       - name: Install dependencies
+        working-directory: CryptoBuzz-fe
         run: npm install
 
-      # 4️⃣ Build frontend (NO ENV here – Azure will inject)
+      # 4️⃣ Build frontend
       - name: Build frontend
+        working-directory: CryptoBuzz-fe
         run: npm run build
 
-      # 5️⃣ Upload ONLY dist artifact (1 day retention)
+      # 5️⃣ Upload ONLY dist (artifact optimized)
       - name: Upload frontend artifact
         uses: actions/upload-artifact@v4
         with:
           name: user-fe-dist
-          path: dist
-          retention-days: 1   # 🔥 cost saver
+          path: CryptoBuzz-fe/dist
+          retention-days: 1
 
   deploy:
     runs-on: ubuntu-latest
@@ -56,7 +58,7 @@ jobs:
           name: user-fe-dist
           path: .
 
-      # 7️⃣ Azure Login (OIDC)
+      # 7️⃣ Azure Login
       - name: Login to Azure
         uses: azure/login@v2
         with:
@@ -64,7 +66,7 @@ jobs:
           tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_E24630D5FA4E4A189A9D22AB3E0B42A6 }}
           subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_C80CFB42B05F48C4B884C6DC8B763C4D }}
 
-      # 8️⃣ Deploy to Azure Web App
+      # 8️⃣ Deploy to Azure
       - name: Deploy to Azure Web App
         uses: azure/webapps-deploy@v3
         with:
