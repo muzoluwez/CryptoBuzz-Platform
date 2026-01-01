@@ -18,7 +18,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # 1️⃣ Checkout repo
+      # 1️⃣ Checkout repository
       - name: Checkout code
         uses: actions/checkout@v4
 
@@ -28,23 +28,23 @@ jobs:
         with:
           node-version: '22.x'
 
-      # 3️⃣ Install dependencies (✅ CORRECT FOLDER)
+      # 3️⃣ Install dependencies (🔥 FIX: legacy-peer-deps)
       - name: Install dependencies
         working-directory: CryptoBuzz-fe
-        run: npm install
+        run: npm install --legacy-peer-deps
 
-      # 4️⃣ Build frontend
+      # 4️⃣ Build frontend (Azure ENV runtime use karega)
       - name: Build frontend
         working-directory: CryptoBuzz-fe
         run: npm run build
 
-      # 5️⃣ Upload ONLY dist (artifact optimized)
+      # 5️⃣ Upload ONLY dist artifact (cost optimized)
       - name: Upload frontend artifact
         uses: actions/upload-artifact@v4
         with:
           name: user-fe-dist
           path: CryptoBuzz-fe/dist
-          retention-days: 1
+          retention-days: 1   # 🔥 bill kam
 
   deploy:
     runs-on: ubuntu-latest
@@ -58,7 +58,7 @@ jobs:
           name: user-fe-dist
           path: .
 
-      # 7️⃣ Azure Login
+      # 7️⃣ Azure Login (OIDC)
       - name: Login to Azure
         uses: azure/login@v2
         with:
@@ -66,7 +66,7 @@ jobs:
           tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_E24630D5FA4E4A189A9D22AB3E0B42A6 }}
           subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_C80CFB42B05F48C4B884C6DC8B763C4D }}
 
-      # 8️⃣ Deploy to Azure
+      # 8️⃣ Deploy to Azure Web App
       - name: Deploy to Azure Web App
         uses: azure/webapps-deploy@v3
         with:
