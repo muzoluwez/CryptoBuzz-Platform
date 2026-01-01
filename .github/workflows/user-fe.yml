@@ -56,7 +56,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: user-fe-dist
-          path: .
+          # path: .
 
       # 7️⃣ Azure Login (OIDC)
       - name: Login to Azure
