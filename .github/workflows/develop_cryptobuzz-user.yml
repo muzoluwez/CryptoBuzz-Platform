@@ -24,13 +24,13 @@ jobs:
           node-version: '22.x'
 
       - name: npm install, build, and test
-        working-directory: CryptoBuzz-fe
+        working-directory: Cryptobuzz-fe
         run: |
           npm install --legacy-peer-deps
           npm install --legacy-peer-deps express
 
       - name: npm build
-        working-directory: CryptoBuzz-fe
+        working-directory: Cryptobuzz-fe
         run: |
           npm run build
 
@@ -38,7 +38,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: node-app
-          path: CryptoBuzz-fe
+          path: .
 
   deploy:
     runs-on: ubuntu-latest
@@ -58,4 +58,3 @@ jobs:
           slot-name: 'Production'
           package: .
           publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_27CC9091CBFE48A08595BF8C5F279372 }}
-
