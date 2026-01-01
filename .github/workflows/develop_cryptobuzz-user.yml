@@ -1,4 +1,4 @@
-name: Build and Deploy CryptoBuzz Frontend
+name: Build and deploy Node.js app to Azure Web App - cryptobuzz-user
 
 on:
   push:
@@ -7,54 +7,75 @@ on:
   workflow_dispatch:
 
 jobs:
-  build_and_deploy:
+  build:
     runs-on: ubuntu-latest
-    name: Build and Deploy Static Web App
 
     steps:
-      # 1️⃣ Checkout repository
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      # 2️⃣ Setup Node.js (LTS)
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - name: Set up Node.js version
+        uses: actions/setup-node@v3
         with:
-          node-version: 20
+          node-version: '20.x'
 
-      # 3️⃣ Enable Corepack (THIS IS CRITICAL)
       - name: Enable Corepack
         run: corepack enable
 
-      # 4️⃣ Activate pnpm
       - name: Prepare pnpm
         run: corepack prepare pnpm@9 --activate
 
-      # 5️⃣ Verify pnpm (safety check)
-      - name: Verify pnpm
-        run: pnpm --version
-
-      # 6️⃣ Install dependencies
       - name: Install dependencies
         working-directory: CryptoBuzz-fe
-        run: pnpm install --frozen-lockfile
+        run: pnpm install
 
-      # 7️⃣ Build Vite app
-      - name: Build app
+      - name: Build for production
         working-directory: CryptoBuzz-fe
         env:
-          VITE_APP_API_URL: ${{ secrets.VITE_APP_API_URL }}
-          VITE_APP_URL: ${{ secrets.VITE_APP_URL }}
-          VITE_ENV: ${{ secrets.VITE_ENV }}
+          VITE_APP_API_URL: ${{ secrets.VITE_APP_API_URL || 'https://cryptobuzz-backend.azurewebsites.net' }}
+          VITE_APP_URL: ${{ secrets.VITE_APP_URL || 'https://cryptobuzz-user.azurewebsites.net' }}
+          VITE_ENV: ${{ secrets.VITE_ENV || 'production' }}
         run: pnpm run build
 
-      # 8️⃣ Deploy to Azure Static Web Apps
-      - name: Deploy to Azure Static Web Apps
-        uses: Azure/static-web-apps-deploy@v1
+      - name: Prepare deployment package
+        working-directory: CryptoBuzz-fe
+        run: |
+          # Verify dist folder exists
+          if [ ! -d "dist" ]; then
+            echo "Error: dist folder not found after build"
+            exit 1
+          fi
+          # Create deployment directory
+          mkdir -p deploy
+          # Copy built files
+          cp -r dist/* deploy/
+          # Copy server files
+          cp server.js deploy/
+          cp package.json deploy/
+          # Create minimal package.json for production
+          echo '{"name":"cryptobuzz-fe","type":"module","scripts":{"start":"node server.js"},"dependencies":{"express":"^5.2.1"}}' > deploy/package.json
+          # Install production dependencies in deploy folder
+          cd deploy && npm install --production
+
+      - name: Upload artifact for deployment job
+        uses: actions/upload-artifact@v4
         with:
-          azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN }}
-          repo_token: ${{ secrets.GITHUB_TOKEN }}
-          action: upload
-          app_location: "CryptoBuzz-fe"
-          output_location: "dist"
-          skip_app_build: true
+          name: node-app
+          path: CryptoBuzz-fe/deploy
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build
+
+    steps:
+      - name: Download artifact from build job
+        uses: actions/download-artifact@v4
+        with:
+          name: node-app
+
+      - name: 'Deploy to Azure Web App'
+        uses: azure/webapps-deploy@v3
+        with:
+          app-name: 'cryptobuzz-user'
+          slot-name: 'Production'
+          package: .
+          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_27CC9091CBFE48A08595BF8C5F279372 }}
