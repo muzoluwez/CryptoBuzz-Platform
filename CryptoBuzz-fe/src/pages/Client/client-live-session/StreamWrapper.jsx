@@ -46,7 +46,7 @@ const ShowMoreLess = ({
 const StreamWrapper = ({ call, children, bannerImage, educatorData }) => {
   const safeHtml = makeClickableLinks(educatorData || "");
   
-  if (!call)
+  if (!call )
     return (
       <div className="">
         <div className="grid grid-cols-12 gap-6">

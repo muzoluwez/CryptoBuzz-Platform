@@ -4,6 +4,6 @@ import Auth from "../../../middlewares/auth.js";
 
 const router = express.Router();
 
-router.get("/get",Auth.verifyJWT, CourseBasedOnSection);
+router.get("/get", CourseBasedOnSection);
 
 export default router;

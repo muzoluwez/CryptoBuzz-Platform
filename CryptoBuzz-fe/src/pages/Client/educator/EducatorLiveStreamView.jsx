@@ -31,8 +31,11 @@ const EducatorLiveStreamView = () => {
     refetch: refetchLiveStream,
   } = useGetActiveLiveStreamByEducatorQuery(educatorId, {
     skip: !educatorId,
-    pollingInterval: 30000, // Poll every 30 seconds to check if educator goes live
+    pollingInterval: 20000, // Poll every 30 seconds to check if educator goes live
   });
+
+
+  console.log("liveStreamData", liveStreamData);
 
   const [getToken] = useGetTokenMutation();
 
@@ -46,40 +49,73 @@ const EducatorLiveStreamView = () => {
   const bannerImage = educator?.bannerImage || activeLiveStream?.schedule?.image;
   const educatorData = educator?.description || activeLiveStream?.schedule?.description;
 
+  // Cleanup when stream stops (isLive becomes false)
+  useEffect(() => {
+    if (!isLive && (client || call || token)) {
+      const cleanup = async () => {
+        try {
+          if (call) {
+            // Don't need to leave call since we never joined as participant
+            setCall(null);
+          }
+          if (client) {
+            try {
+              await client?.disconnectUser();
+            } catch (disconnectError) {
+              console.warn("Error disconnecting client during cleanup:", disconnectError);
+            }
+            setClient(null);
+          }
+          setToken(null);
+          isInitializing.current = false;
+        } catch (error) {
+          console.warn("Cleanup error when stream stopped:", error);
+        }
+      };
+      cleanup();
+    }
+  }, [isLive, client, call, token]);
+
   // Fetch token when we have an active live stream
   useEffect(() => {
     const fetchToken = async () => {
-      if (!userId || !callId || token) return;
+      if (!userId || !callId || token || !isLive) return;
 
       try {
         const response = await getToken({ userId }).unwrap();
-        setToken(response.data?.token || response.token);
+        setToken(response?.data?.token || response?.token);
       } catch (err) {
         console.error("Token fetch failed:", err);
       }
     };
 
-    if (activeLiveStream && callId) {
+    if (isLive && activeLiveStream && callId) {
       fetchToken();
     }
-  }, [userId, callId, activeLiveStream, getToken, token]);
+  }, [userId, callId, activeLiveStream, getToken, token, isLive]);
 
   // Initialize Stream client when token and callId are available
   useEffect(() => {
     const initClient = async () => {
-      if (!token || !callId || client || isInitializing.current) return;
+      if (!token || !callId || client || isInitializing.current || !isLive) return;
       isInitializing.current = true;
 
       let newClient;
       try {
+        if (!apiKey || !userId || !token || !callId) {
+          throw new Error("Missing required parameters for Stream initialization");
+        }
         newClient = new StreamVideoClient({ apiKey });
-        await newClient.connectUser({ id: userId }, token);
-        const newCall = newClient.call("livestream", callId);
+        await newClient?.connectUser({ id: userId }, token);
+        const newCall = newClient?.call("livestream", callId);
         
         // For viewers, just get the call (don't create or join as backstage)
         // Viewers can watch without joining as participants
         try {
-          await newCall.get();
+          if (!newCall) {
+            throw new Error("Failed to create call instance");
+          }
+          await newCall?.get();
         } catch (getError) {
           // If call doesn't exist, log error but don't try to create it
           // Only the educator/host should create calls
@@ -89,20 +125,28 @@ const EducatorLiveStreamView = () => {
         
         // Don't call join() for viewers - they can watch without joining
         // The StreamCall component will handle viewing automatically
-        setClient(newClient);
-        setCall(newCall);
+        if (newClient && newCall) {
+          setClient(newClient);
+          setCall(newCall);
+        }
       } catch (err) {
         console.error("Stream init failed:", err);
-        if (newClient) await newClient.disconnectUser();
+        if (newClient) {
+          try {
+            await newClient?.disconnectUser();
+          } catch (disconnectError) {
+            console.warn("Error disconnecting client:", disconnectError);
+          }
+        }
       } finally {
         isInitializing.current = false;
       }
     };
 
-    if (activeLiveStream && callId && token && userId) {
+    if (isLive && activeLiveStream && callId && token && userId) {
       initClient();
     }
-  }, [token, callId, userId, activeLiveStream, client]);
+  }, [token, callId, userId, activeLiveStream, client, isLive]);
 
   // Cleanup on unmount or when dependencies change
   useEffect(() => {
@@ -113,7 +157,11 @@ const EducatorLiveStreamView = () => {
           // The StreamCall component handles its own cleanup
           // Just disconnect the client
           if (client) {
-            await client.disconnectUser();
+            try {
+              await client?.disconnectUser();
+            } catch (disconnectError) {
+              console.warn("Error disconnecting client:", disconnectError);
+            }
           }
         } catch (error) {
           // Silently handle cleanup errors
@@ -155,7 +203,11 @@ const EducatorLiveStreamView = () => {
   }
 
   // No active live stream - show banner image and About section
-  if (!isLive || !callId) {
+  // This should be shown when:
+  // 1. isLive is false (educator hasn't clicked Go Live or has stopped the stream)
+  // 2. callId is missing
+  // 3. Stream is not fully initialized yet
+  if (!isLive || !callId || !activeLiveStream) {
     return (
       <StreamWrapper
         call={null}
@@ -165,7 +217,9 @@ const EducatorLiveStreamView = () => {
     );
   }
 
-  // Active live stream - show live stream component (no About section)
+  // Active live stream - show live stream component with chat (no About section)
+  // Only show when stream is live AND all required components are ready
+  console.log("Rendering live stream view", { isLive, activeLiveStream, callId, token, client, call });
   if (isLive && activeLiveStream && callId && token && client && call) {
     return (
       <EventProvider>
@@ -182,6 +236,7 @@ const EducatorLiveStreamView = () => {
               callId={callId}
               token={token}
               educatorData={null}
+              isLive={isLive}
             />
           </StreamTheme>
         </StreamWrapper>
