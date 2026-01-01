@@ -2,8 +2,9 @@ import React, { useEffect, useState } from 'react';
 import { ChevronDown, Play } from 'lucide-react';
 import { useLocation } from 'react-router';
 import { Card, CardContent } from '../../../components/ui/card';
-import { useGetAcademyCategoryByMainSectionQuery } from '../../../store/client/clientAcademyCategoryApiSlice';
 import useDocumentTitle from '../../../hooks/use-document-title';
+import { convertRtkEditorToFormattedPlainText } from '../../../lib/rtkEditorUtils';
+import { useGetAcademyCategoryByMainSectionQuery } from '../../../store/client/clientAcademyCategoryApiSlice';
 
 
 // Helper function to convert video URLs to embeddable formats
@@ -77,8 +78,19 @@ function CourseUI({
   data,
   hideVault = false,
   onCourseClick,
-  onBackToVault
+  onBackToVault,
+  academyCourseLoading = false,
+  academyCourseFetching = false
 }) {
+
+  // console.log("CourseUI Rendered with lecture:", lecture, "and currentCourse:", currentCourse);
+  // console.log("introLessons:", introLessons, "sections:", sections);
+  // console.log("activeLectureId:", activeLectureId);
+  // console.log("activeTab:", activeTab, "open:", open);
+  // console.log("categories:", categories);
+  // console.log("courses:", courses);
+  // console.log("hideVault:", hideVault);
+  // console.log("data:", data);
   // Video player state - sync with parent lecture state
   const [selectedVideo, setSelectedVideo] = useState(null);
   const [isVideoPlaying, setIsVideoPlaying] = useState(false);
@@ -248,11 +260,17 @@ function CourseUI({
                 </div>
 
                 <p className="text-gray-600 dark:text-gray-400 mt-4 leading-relaxed">
-                  {lecture?.description || selectedVideo 
-                    ? (currentCourse?.flatMap(c => c?.lectures || [])?.find(l => l?._id === selectedVideo?.id)?.description ||
-                       "Watch and learn from this comprehensive lesson designed to enhance your trading skills and knowledge.")
-                    : "Select a lesson from the sidebar to start learning."
-                  }
+                  {(() => {
+                    const lectureDesc = lecture?.description || selectedVideo
+                      ? currentCourse?.flatMap(c => c?.lectures || [])?.find(l => l?._id === selectedVideo?.id)?.description
+                      : null;
+
+                    if (lectureDesc) return convertRtkEditorToFormattedPlainText(lectureDesc, true);
+
+                    if (selectedVideo) return "Watch and learn from this comprehensive lesson designed to enhance your trading skills and knowledge.";
+
+                    return "Select a lesson from the sidebar to start learning.";
+                  })()}
                 </p>
               </>
             )}
@@ -403,16 +421,24 @@ function CourseUI({
           <div className="mt-12">
             <div className="flex items-center justify-between flex-wrap gap-4 mb-6">
               <h3 className="text-2xl font-bold text-gray-900 dark:text-gray-200">Recommended Courses</h3>
-              <div className="flex gap-4">
+              {/* <div className="flex gap-4">
                 <button className="text-sm text-gray-600 hover:text-gray-900 dark:hover:text-white cursor-pointer flex items-center gap-1">
                   Experience <ChevronDown className="w-4 h-4" />
                 </button>
                 <button className="text-sm text-gray-600 hover:text-gray-900 dark:hover:text-white cursor-pointer flex items-center gap-1">
                   Style <ChevronDown className="w-4 h-4" />
                 </button>
-              </div>
+              </div> */}
             </div>
 
+            { (academyCourseLoading || academyCourseFetching) ? (
+              <div className="mt-6">
+                <Card className="rounded-lg p-6 shadow-md text-center">
+                  <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
+                  <p className="mt-4 text-gray-500">Loading courses...</p>
+                </Card>
+              </div>
+            ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {courses.map((course) => {
                 return (
@@ -434,7 +460,7 @@ function CourseUI({
                         />
                         <div className="absolute left-4 bottom-4 text-white z-10">
                           <h4 className="text-2xl font-bold">{course?.title}</h4>
-                          <p className="text-md mt-3 text-gray-200">{course?.description}</p>
+                          <p className="text-md mt-3 text-gray-200">{course?.description ? convertRtkEditorToFormattedPlainText(course.description, true) : ''}</p>
                           <button className="text-yellow-600 hover:text-yellow-700 text-sm font-medium cursor-pointer">
                             {course?.link || "Show more"}
                           </button>
@@ -446,6 +472,7 @@ function CourseUI({
                 )
               })}
             </div>
+            )}
           </div>
         )}
 
@@ -469,7 +496,7 @@ function CourseUI({
 export default function AcademyPage() {
     useDocumentTitle('Courses');
   const [activeTab, setActiveTab] = useState('');
-  const [open, setOpen] = useState('Intro Series');
+  const [open, setOpen] = useState('');
   const [currentCourse, setCurrentCourse] = useState([]);
   const [activeLectureId, setActiveLectureId] = useState(null);
   const [lecture, setLecture] = useState(null);
@@ -480,27 +507,32 @@ export default function AcademyPage() {
   // URL parameter handling
   const { search } = useLocation();
   const params = new URLSearchParams(search);
+  console.log("URL Params:", Object.fromEntries(params.entries()));
   const mainSection = params.get("mainSection");
   const language = params.get("language");
   const categoryName = params.get("categoryId");
   const courseId = params.get("courseId");
 
   // API call with category and id parameters - refetches when activeTab or selectedCourseId changes
-  const { 
-    data: academyCourseData, 
-    isLoading: academyCourseLoading, 
+  const {
+    data: academyCourseData,
+    isLoading: academyCourseLoading,
+    isFetching: academyCourseFetching,
     isError,
-    refetch 
-  } = useGetAcademyCategoryByMainSectionQuery({
-    mainSection: mainSection ? mainSection : "Academy",
-    language: language ? language : "English ",
-    category: categoryName ? categoryName : (activeTab || undefined),
-    id: courseId ? courseId : (selectedCourseId || undefined),
-  }, {
-    refetchOnMountOrArgChange: true,
-    refetchOnFocus: true,
-    refetchOnReconnect: true,
-  })
+    refetch,
+  } = useGetAcademyCategoryByMainSectionQuery(
+    {
+      mainSection: mainSection ? mainSection : 'Academy',
+      language: language ? language : 'English ',
+      category: activeTab ? activeTab : activeTab || undefined,
+      id: courseId ? courseId : selectedCourseId || undefined,
+    },
+    {
+      refetchOnMountOrArgChange: true,
+      refetchOnFocus: true,
+      refetchOnReconnect: true,
+    },
+  );
 
   console.log(academyCourseData , "academyCourseData");
   console.log("selectedCourseId:", selectedCourseId, "activeTab:", activeTab);
@@ -661,6 +693,25 @@ export default function AcademyPage() {
     setOpen(open === section ? null : section);
   };
 
+  // When user clicks a category: set active tab and reset course selection so vault shows category courses
+  const handleCategoryClick = (categoryId) => {
+    // Reset selection state
+    setSelectedCourseId(null);
+    setHideVault(false);
+    setCurrentCourse([]);
+    setLecture(null);
+    setActiveLectureId(null);
+
+    // Update active tab. If same category clicked again, force a refetch so API is called with the current mainSection/language/category
+    setActiveTab((prev) => {
+      if (prev === categoryId) {
+        refetch();
+        return prev;
+      }
+      return categoryId;
+    });
+  };
+
   // Transform API data to match UI component expectations
   const transformIntroLessons = (courseData) => {
     if (!courseData || courseData?.length === 0) return [];
@@ -730,12 +781,14 @@ export default function AcademyPage() {
       : (data?.AllCourse && data?.AllCourse?.length > 0) 
         ? data.AllCourse 
         : [];
-    
-    // Only update if we have new courses and recommendedCourses is empty, or if we're on initial load
-    if (newCourses.length > 0 && (recommendedCourses.length === 0 || !activeTab)) {
+
+    // Always update recommended courses when API returns new course lists (initial load or category selection)
+    if (newCourses.length > 0) {
       setRecommendedCourses(newCourses);
+    } else {
+      setRecommendedCourses([]);
     }
-  }, [data?.upcomingCourse, data?.AllCourse]);
+  }, [data?.upcomingCourse, data?.AllCourse, activeTab]);
 
   // Get recommended courses - use stored courses or current data
   const courses = recommendedCourses.length > 0 
@@ -818,12 +871,15 @@ export default function AcademyPage() {
       </div>
     );
   }
+  console.log("Rendering AcademyPage with UI Type:", uiType);
+  console.log("Current Course:", currentCourse);
+  console.log('Active Tab:', activeTab);
 
   return (
     <>
       <CourseUI
         activeTab={activeTab}
-        setActiveTab={setActiveTab}
+        setActiveTab={handleCategoryClick}
         toggle={toggle}
         open={open}
         introLessons={introLessons}
@@ -835,11 +891,15 @@ export default function AcademyPage() {
         lecture={lecture}
         data={data}
         hideVault={hideVault}
+        academyCourseLoading={academyCourseLoading}
+        academyCourseFetching={academyCourseFetching}
         onCourseClick={handleCourseClick}
         onBackToVault={handleBackToVault}
         onLectureSelect={(lectureId) => {
           const lectureData = currentCourse?.flatMap((c) => c?.lectures || []);
-          const selectedLecture = lectureData?.find((l) => l?._id === lectureId);
+          const selectedLecture = lectureData?.find(
+            (l) => l?._id === lectureId,
+          );
           if (selectedLecture) {
             setLecture(selectedLecture);
             setActiveLectureId(lectureId);
