@@ -16,26 +16,30 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # 2️⃣ Setup Node.js (LTS & stable)
+      # 2️⃣ Setup Node.js (LTS)
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: "pnpm"
 
-      # 3️⃣ Setup pnpm
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v3
-        with:
-          version: 9
-          run_install: false
+      # 3️⃣ Enable Corepack (THIS IS CRITICAL)
+      - name: Enable Corepack
+        run: corepack enable
 
-      # 4️⃣ Install dependencies
+      # 4️⃣ Activate pnpm
+      - name: Prepare pnpm
+        run: corepack prepare pnpm@9 --activate
+
+      # 5️⃣ Verify pnpm (safety check)
+      - name: Verify pnpm
+        run: pnpm --version
+
+      # 6️⃣ Install dependencies
       - name: Install dependencies
         working-directory: CryptoBuzz-fe
         run: pnpm install --frozen-lockfile
 
-      # 5️⃣ Build Vite app
+      # 7️⃣ Build Vite app
       - name: Build app
         working-directory: CryptoBuzz-fe
         env:
@@ -44,7 +48,7 @@ jobs:
           VITE_ENV: ${{ secrets.VITE_ENV }}
         run: pnpm run build
 
-      # 6️⃣ Deploy to Azure Static Web Apps
+      # 8️⃣ Deploy to Azure Static Web Apps
       - name: Deploy to Azure Static Web Apps
         uses: Azure/static-web-apps-deploy@v1
         with:
