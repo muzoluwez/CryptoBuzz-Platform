@@ -50,7 +50,6 @@ jobs:
           cp -r dist/* deploy/
           # Copy server files
           cp server.js deploy/
-          cp package.json deploy/
           # Create minimal package.json for production
           echo '{"name":"cryptobuzz-fe","type":"module","scripts":{"start":"node server.js"},"dependencies":{"express":"^5.2.1"}}' > deploy/package.json
           # Install production dependencies in deploy folder
