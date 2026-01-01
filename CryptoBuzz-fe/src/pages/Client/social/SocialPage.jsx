@@ -12,9 +12,11 @@ import ImageViewer from '@/components/common/ImageViewer';
 import ShowMoreLess from '@/components/common/ShowMoreLess';
 import { Toolbar, ToolbarHeading } from '@/components/layouts/layout-7/components/toolbar';
 import { Card, CardContent, CardFooter, CardHeader, CardHeading, CardTitle, CardToolbar } from '../../../components/ui/card';
+import useDocumentTitle from '../../../hooks/use-document-title';
 
 
 export default function SocialPage() {
+  useDocumentTitle('Social');
   const [sortValue, setSortValue] = useState('latest');
   const [selectedImage, setSelectedImage] = useState(null);
   const [selectedImages, setSelectedImages] = useState([]);
@@ -153,7 +155,7 @@ export default function SocialPage() {
             <h1 className="text-2xl font-semibold text-black dark:text-white">
               Social
             </h1>
-            <p className="text-xs text-gray-500 mt-1">Home / Social</p>
+            <p className="text-xs text-gray-500 mt-1">Latest community posts</p>
           </header>
         </div>
         <div className="flex items-center justify-center min-h-[400px]">
@@ -175,7 +177,7 @@ export default function SocialPage() {
             <h1 className="text-2xl font-semibold text-black dark:text-white">
               Social
             </h1>
-            <p className="text-xs text-gray-500 mt-1">Home / Social</p>
+            <p className="text-xs text-gray-500 mt-1">Latest community posts</p>
           </header>
         </div>
         <div className="flex items-center justify-center min-h-[400px]">
@@ -199,7 +201,7 @@ export default function SocialPage() {
             <h1 className="text-2xl font-semibold text-black dark:text-white">
               Social
             </h1>
-            <p className="text-xs text-gray-500 mt-1">Home / Social</p>
+            <p className="text-xs text-gray-500 mt-1">Latest community posts</p>
           </header>
           {/* <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -239,7 +241,7 @@ export default function SocialPage() {
             <h1 className="text-2xl font-semibold text-black dark:text-white">
               Social
             </h1>
-            <p className="text-xs text-gray-500 mt-1">Home / Social</p>
+            <p className="text-xs text-gray-500 mt-1">Latest community posts</p>
           </header>
           {/* <DropdownMenu>
             <DropdownMenuTrigger asChild>

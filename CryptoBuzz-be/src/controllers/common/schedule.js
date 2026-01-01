@@ -59,7 +59,7 @@ export const listSchedule = async (req, res) => {
       query.category = category;
     }
 
-    if (educator && educator.role == "educator" && mongoose.Types.ObjectId.isValid(educator._id)) {
+    if (educator && educator.role == "educator" ) {
       query.educator = educator._id;
     }
 

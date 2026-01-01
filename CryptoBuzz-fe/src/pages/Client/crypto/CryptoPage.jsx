@@ -19,8 +19,11 @@ import { convertRtkEditorToFormattedPlainText, convertRtkEditorToDisplayFormat }
 import ImageViewer from "@/components/common/ImageViewer";
 import ImageCarousel from "@/components/common/ImageCarousel";
 import ViewCryptoModel from "@/components/models/ViewCryptoModel";
+import useDocumentTitle from '../../../hooks/use-document-title';
 
 export default function CryptoPage() {
+  useDocumentTitle('Crypto Analysis');
+  
   const { checkAccess } = useAccessControl();
 
   // ------------------- STATE -------------------

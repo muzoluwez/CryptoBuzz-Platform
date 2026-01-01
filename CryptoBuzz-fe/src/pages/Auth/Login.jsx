@@ -18,8 +18,10 @@ import { toast } from 'sonner';
 import * as Yup from 'yup';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import useDocumentTitle from '../../hooks/use-document-title';
 
 export default function Login() {
+  useDocumentTitle('Login');
   const [showPassword, setShowPassword] = useState(false);
   const [login, { isLoading }] = useLoginMutation();
 

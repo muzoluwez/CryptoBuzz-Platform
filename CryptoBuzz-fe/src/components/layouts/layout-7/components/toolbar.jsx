@@ -1,23 +1,28 @@
-import { Fragment } from 'react';
+import { Fragment, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { MENU_MEGA } from '@/config/layout-7.config';
 import { cn } from '@/lib/utils';
 import { useMenu } from '@/hooks/use-menu';
 
+
 function Toolbar({ children }) {
   return (
     <div className="container">
-      <div className="border-t border-border"></div>
+      {/* <div className="border-t border-border"></div> */}
       <div className="flex items-center justify-between flex-wrap gap-2 la:gap-5 my-5">
         {children}
       </div>
-      <div className="border-b border-border mb-5 lg:mb-7.5"></div>
+      {/* <div className="border-b border-border mb-5 lg:mb-7.5"></div> */}
     </div>
   );
 }
 
 function ToolbarActions({ children }) {
-  return <div className="flex items-center flex-wrap gap-2.5">{children}</div>;
+  return (
+    <div className="flex items-center gap-2 text-sm font-normal text-gray-700">
+      {children}
+    </div>
+  );
 }
 
 function ToolbarBreadcrumbs() {
@@ -66,14 +71,27 @@ function ToolbarBreadcrumbs() {
   );
 }
 
-function ToolbarHeading({ title = '' }) {
+
+
+function ToolbarHeading({ title = '', description = '' }) {
   const { pathname } = useLocation();
   const { getCurrentItem } = useMenu(pathname);
   const item = getCurrentItem(MENU_MEGA);
 
+  // Update document title so browser tab shows the page name instead of URL
+  useEffect(() => {
+    const pageTitle = title || item?.title || 'CryptoBuzz';
+    document.title = `${pageTitle} - CryptoBuzz`;
+  }, [title, item?.title]);
+
   return (
     <div className="flex flex-col gap-1">
-      <h1 className="font-medium text-lg text-mono">{title || item?.title}</h1>
+      <h1 className="text-2xl font-semibold text-black dark:text-white">
+        {title || item?.title}
+      </h1>
+      {description && (
+        <p className="text-sm text-gray-500 mt-1">{description}</p>
+      )}
       <ToolbarBreadcrumbs />
     </div>
   );

@@ -8,8 +8,10 @@ import { useFormik } from 'formik';
 import * as Yup from 'yup';
 
 import { useSignupMutation, useLoginMutation } from '@/store/client/clientAuthApiSlice';
+import useDocumentTitle from '../../hooks/use-document-title';
 
 export default function Signup() {
+  useDocumentTitle('Sign Up');
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 

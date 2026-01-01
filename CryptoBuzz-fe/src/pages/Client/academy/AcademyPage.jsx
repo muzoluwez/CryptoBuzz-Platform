@@ -3,6 +3,7 @@ import { ChevronDown, Play } from 'lucide-react';
 import { useLocation } from 'react-router';
 import { Card, CardContent } from '../../../components/ui/card';
 import { useGetAcademyCategoryByMainSectionQuery } from '../../../store/client/clientAcademyCategoryApiSlice';
+import useDocumentTitle from '../../../hooks/use-document-title';
 
 
 // Helper function to convert video URLs to embeddable formats
@@ -466,6 +467,7 @@ function CourseUI({
 
 
 export default function AcademyPage() {
+    useDocumentTitle('Courses');
   const [activeTab, setActiveTab] = useState('');
   const [open, setOpen] = useState('Intro Series');
   const [currentCourse, setCurrentCourse] = useState([]);

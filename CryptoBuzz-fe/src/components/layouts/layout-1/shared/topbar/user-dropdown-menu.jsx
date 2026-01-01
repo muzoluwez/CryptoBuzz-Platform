@@ -161,7 +161,7 @@ export function UserDropdownMenu({ trigger }) {
           </Link>
         </DropdownMenuItem> */}
         <DropdownMenuItem asChild>
-          <Link to="/client/profile" className="flex items-center gap-2">
+          <Link to="#" className="flex items-center gap-2">
             <UserCircle />
             My Profile
           </Link>

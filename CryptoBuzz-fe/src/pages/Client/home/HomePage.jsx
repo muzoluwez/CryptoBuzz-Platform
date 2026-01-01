@@ -7,6 +7,7 @@ import { Toolbar, ToolbarHeading } from '@/components/layouts/layout-7/component
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardHeading, CardTitle, CardToolbar } from '../../../components/ui/card';
 import { LoginRequired } from '@/components/common/access-states/LoginRequired';
 import { useAuthContext } from '@/context/AuthContext';
+import useDocumentTitle from '../../../hooks/use-document-title';
 
 
 const DummyImage = ({ src, alt = "", className = "" }) => (
@@ -43,6 +44,7 @@ const getShortContent = (content) => {
 };
 
 export default function HomePage() {
+  useDocumentTitle('Home');
   const navigate = useNavigate();
   const { isAuthenticated } = useAuthContext();
   const [socialType, setSocialType] = useState('social');

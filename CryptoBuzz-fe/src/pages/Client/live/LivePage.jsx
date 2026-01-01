@@ -3,9 +3,11 @@ import { useGetAcademyCategoryFetchQuery } from '@/store/client/clientAcademyCat
 import { useNavigate } from 'react-router';
 import { Card } from '../../../components/ui/card';
 import { useGetScheduleQuery } from '../../../store/client/clientScheduleApiSlice';
+import useDocumentTitle from '../../../hooks/use-document-title';
 
 
 export default function LivePage() {
+  useDocumentTitle('Live Sessions');
   const [activeCategory, setActiveCategory] = useState(null);
   const [activeCategoryId, setActiveCategoryId] = useState(null);
   const [activeWeek, setActiveWeek] = useState('Current Week');

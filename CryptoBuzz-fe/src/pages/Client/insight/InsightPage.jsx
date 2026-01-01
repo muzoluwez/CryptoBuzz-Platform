@@ -18,8 +18,10 @@ import {
   Toolbar,
   ToolbarHeading,
 } from '@/components/layouts/layout-7/components/toolbar';
+import useDocumentTitle from '../../../hooks/use-document-title';
 
 export default function InsightPage() {
+  useDocumentTitle('Insights');
   const { checkAccess } = useAccessControl();
 
   // ------------------- STATE -------------------

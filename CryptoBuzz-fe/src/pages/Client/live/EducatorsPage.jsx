@@ -6,9 +6,11 @@ import { SelectWithClear } from '../../../components/common/SelectInput';
 import { Card } from '../../../components/ui/card';
 import { useGetAcademyCategoryFetchQuery } from '../../../store/client/clientAcademyCategoryApiSlice';
 import { useGetAllEducatorsQuery } from '../../../store/client/clientEducatorApiSlice';
+import useDocumentTitle from '../../../hooks/use-document-title';
 
 
 const EducatorsPage = () => {
+  useDocumentTitle('Educators');
   const navigate = useNavigate();
 
   const [activeTab, setActiveTab] = useState('All');

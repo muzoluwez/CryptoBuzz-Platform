@@ -18,8 +18,10 @@ import {
     convertRtkEditorToDisplayFormat,
     convertRtkEditorToFormattedPlainText,
 } from '../../../lib/rtkEditorUtils';
+import useDocumentTitle from '../../../hooks/use-document-title';
 
 export default function ViewProfile() {
+    useDocumentTitle('Educator Profile');
     const { id: educatorId } = useParams();
     const navigate = useNavigate();
     const { isAuthenticated } = useAuthContext();
