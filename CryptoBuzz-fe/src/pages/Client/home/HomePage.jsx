@@ -5,6 +5,8 @@ import { Activity, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Toolbar, ToolbarHeading } from '@/components/layouts/layout-7/components/toolbar';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardHeading, CardTitle, CardToolbar } from '../../../components/ui/card';
+import { LoginRequired } from '@/components/common/access-states/LoginRequired';
+import { useAuthContext } from '@/context/AuthContext';
 
 
 const DummyImage = ({ src, alt = "", className = "" }) => (
@@ -42,10 +44,12 @@ const getShortContent = (content) => {
 
 export default function HomePage() {
   const navigate = useNavigate();
+  const { isAuthenticated } = useAuthContext();
   const [socialType, setSocialType] = useState('social');
   const [currentLiveIndex, setCurrentLiveIndex] = useState(0);
   const [touchStart, setTouchStart] = useState(null);
   const [touchEnd, setTouchEnd] = useState(null);
+  const [showLoginRequired, setShowLoginRequired] = useState(false);
 
   // Fetch active live streams
   const { data: liveStreamsData, isLoading: isLiveStreamsLoading, isError: isLiveStreamsError } = useGetAllActiveLiveStreamsQuery(undefined, {
@@ -367,11 +371,15 @@ export default function HomePage() {
                         </Link>
                       </div>
                       <button
-                        onClick={() =>
-                          navigate(
-                            `/client/view-profile/${currentLiveStream.educator?._id}`,
-                          )
-                        }
+                        onClick={() => {
+                          if (!isAuthenticated) {
+                            setShowLoginRequired(true);
+                          } else {
+                            navigate(
+                              `/client/view-profile/${currentLiveStream.educator?._id}`,
+                            );
+                          }
+                        }}
                         className="btn bg-white text-black mt-2 hover:bg-gray-100 transition-colors"
                       >
                         Watch Now
@@ -702,6 +710,27 @@ export default function HomePage() {
           </section>
         </main>
       </div>
+
+      {/* Login Required Modal/Dialog */}
+      {showLoginRequired && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white dark:bg-gray-800 rounded-lg max-w-md w-full p-6 relative">
+            <button
+              onClick={() => setShowLoginRequired(false)}
+              className="absolute top-4 right-4 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 text-xl font-bold w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+              aria-label="Close"
+            >
+              ×
+            </button>
+            <LoginRequired
+              onLogin={() => {
+                setShowLoginRequired(false);
+                navigate('/login');
+              }}
+            />
+          </div>
+        </div>
+      )}
     </>
   );
 }

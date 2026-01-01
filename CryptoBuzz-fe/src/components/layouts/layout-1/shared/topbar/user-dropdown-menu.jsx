@@ -71,7 +71,7 @@ export function UserDropdownMenu({ trigger }) {
 
   const handleLogout = () => {
     logout();
-    navigate('/login');
+    navigate('/client/home');
   };
 
   // Get user data with fallbacks
