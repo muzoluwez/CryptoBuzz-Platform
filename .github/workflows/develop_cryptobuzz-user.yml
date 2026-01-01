@@ -1,4 +1,4 @@
-# CI / CD Script
+# CI / CD Script 
 name: Build and Deploy CryptoBuzz Frontend
 
 on:
