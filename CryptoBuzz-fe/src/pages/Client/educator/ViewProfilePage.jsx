@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { Play, Calendar, Loader2, Share2 } from 'lucide-react';
+import { Play, Calendar, Loader2, Share2, Lock } from 'lucide-react';
 import { toast } from 'sonner';
 import { Card } from '../../../components/ui/card';
 import { Button } from '../../../components/ui/button';
@@ -9,12 +9,17 @@ import VideoPlayerModal from './VideoPlayerModal';
 import { useParams } from 'react-router';
 import { useGetEducatorDetailsQuery } from '../../../store/client/clientEducatorApiSlice';
 import { formatDistanceToNow } from 'date-fns';
+import { useAuthContext } from '../../../context/AuthContext';
+import { useNavigate } from 'react-router-dom';
 
 export default function ViewProfile() {
     const { id: educatorId } = useParams();
+    const navigate = useNavigate();
+    const { isAuthenticated } = useAuthContext();
     const [isRatingModalOpen, setIsRatingModalOpen] = useState(false);
     const [selectedRecording, setSelectedRecording] = useState(null);
     const [isVideoModalOpen, setIsVideoModalOpen] = useState(false);
+    const [showHoverMessage, setShowHoverMessage] = useState(false);
 
     // Fetch educator details
     const { data, isLoading, isError, error } = useGetEducatorDetailsQuery(educatorId, {
@@ -206,7 +211,32 @@ export default function ViewProfile() {
             {/* Live Stream Section */}
             <div className="grid grid-cols-12 gap-y-8 md:gap-x-8">
                 <div className="col-span-12 xl:col-span-12 space-y-8 mb-8">
-                    <EducatorLiveStreamView />
+                    {isAuthenticated ? (
+                        <EducatorLiveStreamView />
+                    ) : (
+                        <div 
+                            className="relative"
+                            onMouseEnter={() => setShowHoverMessage(true)}
+                            onMouseLeave={() => setShowHoverMessage(false)}
+                            onClick={() => navigate('/login')}
+                        >
+                            {/* Banner Image and About Section */}
+                            <EducatorLiveStreamView />
+                            
+                            {/* Hover Overlay with Message */}
+                            {showHoverMessage && (
+                                <div className="absolute inset-0 bg-black/70 flex items-center justify-center z-10 rounded-xl cursor-pointer transition-opacity">
+                                    <div className="text-center text-white p-6">
+                                        <Lock className="w-12 h-12 mx-auto mb-4" />
+                                        <h3 className="text-xl font-semibold mb-2">Login Required</h3>
+                                        <p className="text-sm opacity-90">
+                                            Please login to watch live streaming
+                                        </p>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    )}
                 </div>
             </div>
 

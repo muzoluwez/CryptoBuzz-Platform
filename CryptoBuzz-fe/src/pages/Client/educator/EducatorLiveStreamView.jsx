@@ -15,7 +15,7 @@ const apiKey = import.meta.env.VITE_APP_STREAM_API_KEY;
 
 const EducatorLiveStreamView = () => {
   const { id: educatorId } = useParams();
-  const { user } = useAuthContext();
+  const { user, isAuthenticated } = useAuthContext();
   const userId = user?._id ?? null;
 
   const [client, setClient] = useState(null);
@@ -76,10 +76,10 @@ const EducatorLiveStreamView = () => {
     }
   }, [isLive, client, call, token]);
 
-  // Fetch token when we have an active live stream
+  // Fetch token when we have an active live stream (only if authenticated)
   useEffect(() => {
     const fetchToken = async () => {
-      if (!userId || !callId || token || !isLive) return;
+      if (!isAuthenticated || !userId || !callId || token || !isLive) return;
 
       try {
         const response = await getToken({ userId }).unwrap();
@@ -89,15 +89,15 @@ const EducatorLiveStreamView = () => {
       }
     };
 
-    if (isLive && activeLiveStream && callId) {
+    if (isAuthenticated && isLive && activeLiveStream && callId) {
       fetchToken();
     }
-  }, [userId, callId, activeLiveStream, getToken, token, isLive]);
+  }, [isAuthenticated, userId, callId, activeLiveStream, getToken, token, isLive]);
 
-  // Initialize Stream client when token and callId are available
+  // Initialize Stream client when token and callId are available (only if authenticated)
   useEffect(() => {
     const initClient = async () => {
-      if (!token || !callId || client || isInitializing.current || !isLive) return;
+      if (!isAuthenticated || !token || !callId || client || isInitializing.current || !isLive) return;
       isInitializing.current = true;
 
       let newClient;
@@ -143,10 +143,10 @@ const EducatorLiveStreamView = () => {
       }
     };
 
-    if (isLive && activeLiveStream && callId && token && userId) {
+    if (isAuthenticated && isLive && activeLiveStream && callId && token && userId) {
       initClient();
     }
-  }, [token, callId, userId, activeLiveStream, client, isLive]);
+  }, [isAuthenticated, token, callId, userId, activeLiveStream, client, isLive]);
 
   // Cleanup on unmount or when dependencies change
   useEffect(() => {
@@ -202,6 +202,17 @@ const EducatorLiveStreamView = () => {
     );
   }
 
+  // If user is not authenticated, only show banner image and About section (no live stream)
+  if (!isAuthenticated) {
+    return (
+      <StreamWrapper
+        call={null}
+        bannerImage={bannerImage}
+        educatorData={educatorData}
+      />
+    );
+  }
+
   // No active live stream - show banner image and About section
   // This should be shown when:
   // 1. isLive is false (educator hasn't clicked Go Live or has stopped the stream)
@@ -218,9 +229,9 @@ const EducatorLiveStreamView = () => {
   }
 
   // Active live stream - show live stream component with chat (no About section)
-  // Only show when stream is live AND all required components are ready
+  // Only show when stream is live AND all required components are ready AND user is authenticated
   console.log("Rendering live stream view", { isLive, activeLiveStream, callId, token, client, call });
-  if (isLive && activeLiveStream && callId && token && client && call) {
+  if (isLive && activeLiveStream && callId && token && client && call && isAuthenticated) {
     return (
       <EventProvider>
         <StreamWrapper
