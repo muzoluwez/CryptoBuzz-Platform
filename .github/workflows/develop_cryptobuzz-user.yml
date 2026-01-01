@@ -1,7 +1,4 @@
-# Docs for the Azure Web Apps Deploy action: https://github.com/Azure/webapps-deploy
-# More GitHub Actions for Azure: https://github.com/Azure/actions
-
-name: Build and deploy Node.js app to Azure Web App - cryptobuzz-user
+name: Build and Deploy CryptoBuzz Frontend
 
 on:
   push:
@@ -10,51 +7,50 @@ on:
   workflow_dispatch:
 
 jobs:
-  build:
+  build_and_deploy:
     runs-on: ubuntu-latest
-    permissions:
-      contents: read #This is required for actions/checkout
+    name: Build and Deploy Static Web App
 
     steps:
-      - uses: actions/checkout@v4
+      # 1️⃣ Checkout repository
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-      - name: Set up Node.js version
-        uses: actions/setup-node@v3
+      # 2️⃣ Setup Node.js (LTS & stable)
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
         with:
-          node-version: '22.x'
+          node-version: 20
+          cache: "pnpm"
 
-      - name: npm install, build, and test
+      # 3️⃣ Setup pnpm
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v3
+        with:
+          version: 9
+          run_install: false
+
+      # 4️⃣ Install dependencies
+      - name: Install dependencies
         working-directory: CryptoBuzz-fe
-        run: |
-          npm install --legacy-peer-deps
-          npm install --legacy-peer-deps express
+        run: pnpm install --frozen-lockfile
 
-      - name: npm build
+      # 5️⃣ Build Vite app
+      - name: Build app
         working-directory: CryptoBuzz-fe
-        run: |
-          npm run build
+        env:
+          VITE_APP_API_URL: ${{ secrets.VITE_APP_API_URL }}
+          VITE_APP_URL: ${{ secrets.VITE_APP_URL }}
+          VITE_ENV: ${{ secrets.VITE_ENV }}
+        run: pnpm run build
 
-      - name: Upload artifact for deployment job
-        uses: actions/upload-artifact@v4
+      # 6️⃣ Deploy to Azure Static Web Apps
+      - name: Deploy to Azure Static Web Apps
+        uses: Azure/static-web-apps-deploy@v1
         with:
-          name: node-app
-          path: .
-
-  deploy:
-    runs-on: ubuntu-latest
-    needs: build
-    
-    steps:
-      - name: Download artifact from build job
-        uses: actions/download-artifact@v4
-        with:
-          name: node-app
-      
-      - name: 'Deploy to Azure Web App'
-        id: deploy-to-webapp
-        uses: azure/webapps-deploy@v3
-        with:
-          app-name: 'cryptobuzz-user'
-          slot-name: 'Production'
-          package: .
-          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_27CC9091CBFE48A08595BF8C5F279372 }}
+          azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN }}
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          action: upload
+          app_location: "CryptoBuzz-fe"
+          output_location: "dist"
+          skip_app_build: true
