@@ -35,8 +35,6 @@ const EducatorLiveStreamView = () => {
   });
 
 
-  console.log("liveStreamData", liveStreamData);
-
   const [getToken] = useGetTokenMutation();
 
   const liveStreamResponse = liveStreamData?.data;
@@ -230,7 +228,7 @@ const EducatorLiveStreamView = () => {
 
   // Active live stream - show live stream component with chat (no About section)
   // Only show when stream is live AND all required components are ready AND user is authenticated
-  console.log("Rendering live stream view", { isLive, activeLiveStream, callId, token, client, call });
+  // console.log("Rendering live stream view", { isLive, activeLiveStream, callId, token, client, call });
   if (isLive && activeLiveStream && callId && token && client && call && isAuthenticated) {
     return (
       <EventProvider>
