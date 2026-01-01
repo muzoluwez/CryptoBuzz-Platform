@@ -50,6 +50,31 @@ jobs:
           cp -r dist/* deploy/
           # Copy server files
           cp server.js deploy/
+          # Create web.config to prevent Azure from running npm build
+          echo '<?xml version="1.0" encoding="utf-8"?>
+          <configuration>
+            <system.webServer>
+              <handlers>
+                <add name="iisnode" path="server.js" verb="*" modules="iisnode"/>
+              </handlers>
+              <rewrite>
+                <rules>
+                  <rule name="NodeInspector" patternSyntax="ECMAScript" stopProcessing="true">
+                    <match url="^server.js\/debug[\/]?" />
+                  </rule>
+                  <rule name="StaticContent">
+                    <action type="Rewrite" url="public{REQUEST_URI}"/>
+                  </rule>
+                  <rule name="DynamicContent">
+                    <conditions>
+                      <add input="{REQUEST_FILENAME}" matchType="IsFile" negate="True"/>
+                    </conditions>
+                    <action type="Rewrite" url="server.js"/>
+                  </rule>
+                </rules>
+              </rewrite>
+            </system.webServer>
+          </configuration>' > deploy/web.config
           # Create minimal package.json for production
           echo '{"name":"cryptobuzz-fe","type":"module","scripts":{"start":"node server.js"},"dependencies":{"express":"^5.2.1"}}' > deploy/package.json
           # Install production dependencies in deploy folder
