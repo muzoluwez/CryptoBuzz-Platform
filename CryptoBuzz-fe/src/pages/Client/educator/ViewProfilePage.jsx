@@ -6,11 +6,18 @@ import { Button } from '../../../components/ui/button';
 import EducatorLiveStreamView from './EducatorLiveStreamView';
 import RatingModal from './RatingModel';
 import VideoPlayerModal from './VideoPlayerModal';
+import ViewIdeaModel from '../../../components/models/ViewIdeaModel';
+import ViewInsightModel from '../../../components/models/ViewInsightModel';
+import ViewCryptoModel from '../../../components/models/ViewCryptoModel';
 import { useParams } from 'react-router';
 import { useGetEducatorDetailsQuery } from '../../../store/client/clientEducatorApiSlice';
 import { formatDistanceToNow } from 'date-fns';
 import { useAuthContext } from '../../../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import {
+    convertRtkEditorToDisplayFormat,
+    convertRtkEditorToFormattedPlainText,
+} from '../../../lib/rtkEditorUtils';
 
 export default function ViewProfile() {
     const { id: educatorId } = useParams();
@@ -20,6 +27,12 @@ export default function ViewProfile() {
     const [selectedRecording, setSelectedRecording] = useState(null);
     const [isVideoModalOpen, setIsVideoModalOpen] = useState(false);
     const [showHoverMessage, setShowHoverMessage] = useState(false);
+    const [isIdeaModalOpen, setIsIdeaModalOpen] = useState(false);
+    const [selectedIdea, setSelectedIdea] = useState(null);
+    const [isInsightModalOpen, setIsInsightModalOpen] = useState(false);
+    const [selectedInsight, setSelectedInsight] = useState(null);
+    const [isCryptoModalOpen, setIsCryptoModalOpen] = useState(false);
+    const [selectedCrypto, setSelectedCrypto] = useState(null);
 
     // Fetch educator details
     const { data, isLoading, isError, error } = useGetEducatorDetailsQuery(educatorId, {
@@ -92,6 +105,54 @@ export default function ViewProfile() {
         }
         return educator?.name || educator?.email?.split('@')?.[0] || 'Educator';
     }, [educator]);
+
+    // Transform insight data for modal (convert objects to strings)
+    const transformedSelectedInsight = useMemo(() => {
+        if (!selectedInsight) return null;
+
+        const createdBy = selectedInsight?.createdBy || {};
+        const authorName =
+            createdBy?.first_name && createdBy?.last_name
+                ? `${createdBy?.first_name || ''} ${createdBy?.last_name || ''}`.trim()
+                : createdBy?.first_name || createdBy?.last_name || 'Unknown Author';
+
+        const categoryName = selectedInsight?.category?.name || (typeof selectedInsight?.category === 'string' ? selectedInsight?.category : 'Uncategorized');
+
+        // Format date
+        const date = selectedInsight?.createdAt
+            ? new Date(selectedInsight.createdAt).toLocaleString('en-US', {
+                month: 'short',
+                day: '2-digit',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+                hour12: true,
+            })
+            : '';
+
+        // Get formatted plain text
+        const plainTextDescription = selectedInsight?.description
+            ? convertRtkEditorToFormattedPlainText(selectedInsight.description, true)
+            : '';
+
+        // Get display format with clickable links for full view
+        const fullDisplayHtml = selectedInsight?.description
+            ? convertRtkEditorToDisplayFormat(selectedInsight.description, true, true)
+            : '';
+
+        // Get avatar from createdBy
+        const avatar = createdBy?.image || '/media/avatars/1.png';
+
+        return {
+            ...selectedInsight,
+            author: authorName,
+            category: categoryName,
+            date: date,
+            full: plainTextDescription || 'No content available.',
+            fullDisplayHtml: fullDisplayHtml || '',
+            avatar: avatar,
+        };
+    }, [selectedInsight]);
 
     // Handle share functionality
     const handleShare = () => {
@@ -246,12 +307,21 @@ export default function ViewProfile() {
                     <Card className="rounded-2xl p-6 shadow-sm">
                         <div className="flex items-center justify-between mb-4">
                             <h3 className="text-gray-900 dark:text-gray-200 text-xl font-bold">Courses</h3>
-                            <button className="text-primary text-sm hover:text-yellow-500 font-medium cursor-pointer">View All →</button>
+                            <button 
+                                onClick={() => navigate('/client/academy')}
+                                className="text-primary text-sm hover:text-yellow-500 font-medium cursor-pointer"
+                            >
+                                View All →
+                            </button>
                         </div>
                         <div className="grid grid-col-12 sm:grid-cols-2 gap-4">
                             {courses.length > 0 ? (
                                 courses.slice(0, 2).map((course) => (
-                                    <div key={course?._id || course?.id} className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden hover:shadow-lg transition-shadow">
+                                    <div 
+                                        key={course?._id || course?.id} 
+                                        className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden hover:shadow-lg transition-shadow cursor-pointer"
+                                        onClick={() => navigate('/client/academy')}
+                                    >
                                         {course?.imageUrl ? (
                                             <div className="h-32 relative">
                                                 <img
@@ -293,7 +363,14 @@ export default function ViewProfile() {
                         <div className="grid grid-col-12 sm:grid-cols-3 gap-4">
                             {ideas.length > 0 ? (
                                 ideas.slice(0, 3).map((idea, index) => (
-                                    <div key={idea?._id || idea?.id} className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden hover:shadow-lg transition-shadow">
+                                    <div 
+                                        key={idea?._id || idea?.id} 
+                                        className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden hover:shadow-lg transition-shadow cursor-pointer"
+                                        onClick={() => {
+                                            setSelectedIdea(idea);
+                                            setIsIdeaModalOpen(true);
+                                        }}
+                                    >
                                         {idea?.image_Url || (idea?.image && idea.image?.length > 0) ? (
                                             <div className="h-32 relative">
                                                 <img
@@ -344,7 +421,14 @@ export default function ViewProfile() {
                         <div className="grid grid-col-12 sm:grid-cols-3 gap-4">
                             {insights.length > 0 ? (
                                 insights.slice(0, 3).map((insight) => (
-                                    <div key={insight?._id || insight?.id} className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden hover:shadow-lg transition-shadow">
+                                    <div 
+                                        key={insight?._id || insight?.id} 
+                                        className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden hover:shadow-lg transition-shadow cursor-pointer"
+                                        onClick={() => {
+                                            setSelectedInsight(insight);
+                                            setIsInsightModalOpen(true);
+                                        }}
+                                    >
                                         {insight?.photos && insight.photos?.length > 0 ? (
                                             <div className="h-32 relative">
                                                 <img
@@ -544,6 +628,36 @@ export default function ViewProfile() {
                 onOpenChange={setIsVideoModalOpen}
                 videoUrl={selectedRecording?.videoUrl}
                 data={selectedRecording}
+            />
+
+            {/* Idea Modal */}
+            <ViewIdeaModel
+                idea={selectedIdea}
+                isOpen={isIdeaModalOpen}
+                onClose={() => {
+                    setIsIdeaModalOpen(false);
+                    setSelectedIdea(null);
+                }}
+            />
+
+            {/* Insight Modal */}
+            <ViewInsightModel
+                insight={transformedSelectedInsight}
+                isOpen={isInsightModalOpen}
+                onClose={() => {
+                    setIsInsightModalOpen(false);
+                    setSelectedInsight(null);
+                }}
+            />
+
+            {/* Crypto Modal */}
+            <ViewCryptoModel
+                crypto={selectedCrypto}
+                isOpen={isCryptoModalOpen}
+                onClose={() => {
+                    setIsCryptoModalOpen(false);
+                    setSelectedCrypto(null);
+                }}
             />
         </div>
     );

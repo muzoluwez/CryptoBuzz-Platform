@@ -41,6 +41,10 @@ const   ChatContainer = ({ sessionToken, callId }) => {
     ? user?.name
     : user?.first_name + " " + user?.last_name;
 
+
+  // Ensure we have all required props before calling useInitChat
+  const hasRequiredProps = userId && sessionToken && callId && userName;
+
   const {
     chatClient,
     currentChannel,
@@ -49,13 +53,35 @@ const   ChatContainer = ({ sessionToken, callId }) => {
     globalUnread,
     qaUnread,
   } = useInitChat({
-    userId,
-    userToken: sessionToken,
-    callId,
-    userName,
+    userId: userId || null,
+    userToken: sessionToken || null,
+    callId: callId || null,
+    userName: userName || null,
   });
 
-  if (!chatClient) return null;
+  // Show loading state if we don't have required props or chatClient or currentChannel
+  // if (!hasRequiredProps || !chatClient || !currentChannel) {
+  //   return (
+  //     <div className="flex items-center justify-center h-full">
+  //       <div className="text-center">
+  //         <p className="text-gray-500 dark:text-gray-400 text-sm">
+  //           {!hasRequiredProps 
+  //             ? "Initializing chat..." 
+  //             : !chatClient 
+  //               ? "Refresh the page and try again" 
+  //               : "Setting up channel..."}
+  //         </p>
+  //       </div>
+  //     </div>
+  //   );
+  // }
+
+  console.log("chatClient", chatClient);
+  console.log("currentChannel", currentChannel);
+  console.log("dmUnread", dmUnread);
+  console.log("eventUnread", eventUnread);
+  console.log("globalUnread", globalUnread);
+  console.log("qaUnread", qaUnread);
 
   return (
     <div className={`chat str-chat h-full`}>

@@ -87,20 +87,30 @@ export const useInitChat = ({ userId, userToken, callId, userName }) => {
 
   useEffect(() => {
     const initChat = async () => {
-      if (isInitializing.current) return; // Prevent concurrent initializations
+      if (isInitializing.current) {
+        console.log("Already initializing, skipping...");
+        return; // Prevent concurrent initializations
+      }
       isInitializing.current = true;
 
       try {
+        console.log("Initializing chat with:", { apiKey: !!apiKey, userId: !!userId, userToken: !!userToken, callId: !!callId });
+        
         if (!apiKey || !userId || !userToken || !callId) {
-          console.error("Missing API key, User ID, Token, or Call ID.");
+          console.error("Missing API key, User ID, Token, or Call ID.", {
+            apiKey: !!apiKey,
+            userId: !!userId,
+            userToken: !!userToken,
+            callId: !!callId,
+          });
           isInitializing.current = false;
           return;
         }
 
-        const client = StreamChat.getInstance(apiKey);
+        let client = StreamChat.getInstance(apiKey);
 
         if (!client) {
-          console.error("Failed to initialize StreamChat client.");
+          console.error("Failed to get StreamChat instance.");
           isInitializing.current = false;
           return;
         }
@@ -111,57 +121,111 @@ export const useInitChat = ({ userId, userToken, callId, userName }) => {
           client?.wsConnection && 
           client?.wsConnection?.isHealthy;
 
-        if (isAlreadyConnected) {
-          // User is already connected, just set up the channel
-          setChatClient(client);
-          
-          const globalChannel = client.channel("livestream", callId, {
-            name: "Global",
-          });
-          
-          await globalChannel.watch({ watchers: { limit: 100 } });
-          setCurrentChannel(globalChannel);
-          isInitializing.current = false;
-          return;
+        console.log("Is already connected:", isAlreadyConnected);
+
+        if (!isAlreadyConnected) {
+          // Connect user only if not already connected
+          console.log("Connecting user...");
+          await client.connectUser(
+            {
+              id: userId,
+              name: userName || "User",
+              image: `https://getstream.io/random_svg/?name=${userName || "User"}`,
+            },
+            userToken
+          );
+          console.log("User connected successfully");
+        } else {
+          console.log("User already connected, reusing connection");
         }
 
-        // Connect user only if not already connected
-        await client.connectUser(
-          {
-            id: userId,
-            name: userName,
-            image: `https://getstream.io/random_svg/?name=${userName}`,
-          },
-          userToken
-        );
+        // Set chat client first
+        setChatClient(client);
 
         // Create a unique chat per call
         const globalChannel = client.channel("livestream", callId, {
           name: "Global",
         });
 
-        await globalChannel.create(); // Ensure the channel exists
-        await globalChannel.watch({ watchers: { limit: 100 } });
+        console.log("Setting up channel for callId:", callId);
 
-        client.on("message.new", handleDmMessages);
-        client.on("notification.message_new", handleDmMessages);
+        try {
+          // Try to watch first (channel might already exist)
+          await globalChannel.watch({ watchers: { limit: 100 } });
+          console.log("Channel watched successfully");
+        } catch (watchErr) {
+          console.log("Watch failed, creating channel:", watchErr);
+          // If watch fails, create the channel
+          try {
+            await globalChannel.create();
+            await globalChannel.watch({ watchers: { limit: 100 } });
+            console.log("Channel created and watched successfully");
+          } catch (createErr) {
+            console.error("Error creating/watching channel:", createErr);
+            throw createErr;
+          }
+        }
 
-        setChatClient(client);
+        // Set up event listeners only if not already set
+        if (!isAlreadyConnected) {
+          client.on("message.new", handleDmMessages);
+          client.on("notification.message_new", handleDmMessages);
+        }
+
         setCurrentChannel(globalChannel);
+        console.log("Chat initialized successfully");
       } catch (error) {
         console.error("Error initializing chat:", error);
+        // Reset state on error so it can retry
+        setChatClient(null);
+        setCurrentChannel(null);
       } finally {
         isInitializing.current = false;
       }
     };
 
-    if (!chatClient && !isInitializing.current) {
+    // Only initialize if we have all required parameters and chatClient is not set
+    if (apiKey && userId && userToken && callId && !chatClient && !isInitializing.current) {
+      console.log("Triggering chat initialization...");
       initChat();
-    } else if (chatClient && callId) {
-      // Only switch channel if chat client exists and callId is available
-      switchChannel(chatType, eventName);
     }
-  }, [chatType, eventName, userToken, apiKey, userId, callId, userName]);
+    // If chatClient exists but currentChannel is null, set up the channel
+    else if (chatClient && callId && !currentChannel && !isInitializing.current) {
+      console.log("Setting up channel for existing client...");
+      const globalChannel = chatClient.channel("livestream", callId, {
+        name: "Global",
+      });
+      
+      globalChannel.watch({ watchers: { limit: 100 } })
+        .then(() => {
+          console.log("Channel watched successfully");
+          setCurrentChannel(globalChannel);
+        })
+        .catch((err) => {
+          console.error("Error watching channel, trying to create:", err);
+          globalChannel.create()
+            .then(() => globalChannel.watch({ watchers: { limit: 100 } }))
+            .then(() => {
+              console.log("Channel created and watched successfully");
+              setCurrentChannel(globalChannel);
+            })
+            .catch((createErr) => {
+              console.error("Error creating/watching channel:", createErr);
+            });
+        });
+    }
+    // If channel exists but callId changed, switch channel
+    else if (chatClient && callId && currentChannel) {
+      const currentChannelId = currentChannel?.id;
+      const expectedChannelId = `livestream:${callId}`;
+      
+      if (currentChannelId !== expectedChannelId && !isInitializing.current) {
+        console.log("CallId changed, switching channel...");
+        setCurrentChannel(null);
+        // Will trigger the else if above to set up new channel
+      }
+    }
+  }, [apiKey, userId, userToken, callId, userName]);
 
   useEffect(() => {
     return () => {
