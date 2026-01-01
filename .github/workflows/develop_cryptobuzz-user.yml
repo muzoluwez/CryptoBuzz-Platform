@@ -59,9 +59,8 @@ jobs:
         with:
           app-name: 'Cryptobuzz-user'
           slot-name: 'Production'
-          package: .
           publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_8F4C50E25DC742EDB94FF5508E3A7133 }}
-
+          package: node-app
 
 
 # name: Build and deploy Node.js app to Azure Web App - Cryptobuzz-user
@@ -117,5 +116,6 @@ jobs:
 #           slot-name: 'Production'
 #           package: .
 #           publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_8F4C50E25DC742EDB94FF5508E3A7133 }}
+
 
       
