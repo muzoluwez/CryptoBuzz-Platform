@@ -148,22 +148,24 @@ on:
       - develop
   workflow_dispatch:
 
+# 🔥 THIS IS THE FIX
+permissions:
+  contents: read
+  id-token: write
+
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
-      # 1️⃣ Checkout repo
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # 2️⃣ Use Node 20 (React 18 ke sath sabse stable)
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20.x'
 
-      # 3️⃣ FORCE React 18 + clean install (🔥 MAIN FIX)
       - name: Install dependencies (force React 18)
         working-directory: CryptoBuzz-fe
         run: |
@@ -174,12 +176,10 @@ jobs:
           rm -f package-lock.json
           npm install --legacy-peer-deps
 
-      # 4️⃣ Build Vite frontend
       - name: Build frontend
         working-directory: CryptoBuzz-fe
         run: npm run build
 
-      # 5️⃣ Upload ONLY required server files (🔥 FAST DEPLOY)
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
@@ -195,13 +195,11 @@ jobs:
     needs: build
 
     steps:
-      # 6️⃣ Download build artifact
       - name: Download artifact
         uses: actions/download-artifact@v4
         with:
           name: node-app
 
-      # 7️⃣ Azure Login
       - name: Azure Login
         uses: azure/login@v2
         with:
@@ -209,7 +207,6 @@ jobs:
           tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_E24630D5FA4E4A189A9D22AB3E0B42A6 }}
           subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_C80CFB42B05F48C4B884C6DC8B763C4D }}
 
-      # 8️⃣ Deploy to Azure Web App
       - name: Deploy to Azure Web App
         uses: azure/webapps-deploy@v3
         with:
