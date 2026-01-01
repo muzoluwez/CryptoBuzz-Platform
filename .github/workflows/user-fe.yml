@@ -173,6 +173,7 @@ jobs:
         run: |
           rm -f package-lock.json
           npm install --force
+          npm install express
 
       # 4️⃣ Build
       - name: Build frontend
