@@ -365,8 +365,8 @@ export default function LivePage() {
                     }}
                     className={`px-4 py-2 text-sm font-medium cursor-pointer transition-colors ${
                       activeCategory === category.name
-                        ? 'bg-[#FFF9E2] text-primary rounded-lg'
-                        : 'text-gray-600 hover:text-gray-900'
+                        ? 'bg-[#FFF9E2] dark:bg-[#fff9e224] text-primary rounded-lg'
+                        : 'text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white'
                     }`}
                   >
                     {category.name}
