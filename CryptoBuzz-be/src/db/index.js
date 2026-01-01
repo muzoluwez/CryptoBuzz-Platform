@@ -4,7 +4,7 @@ import { DB_NAME } from "../utils/constants.js";
 const connectDB = async () => {
     try {
         const mongoUri = process.env.MONGODB_URI;
-        if (!mongoUri) {
+        if (!mongoUri) {    
             throw new Error("MONGODB_URI is not defined in environment");
         }
 
