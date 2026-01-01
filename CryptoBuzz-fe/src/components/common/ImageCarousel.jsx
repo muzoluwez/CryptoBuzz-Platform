@@ -169,14 +169,14 @@ const ImageCarousel = ({
           </div>
         ) : null}
 
-        {/* View Button */}
+        {/* View Button (moved to bottom-left so it sits above other image controls) */}
         {showViewButton && (
           <button
             onClick={(e) => {
               e?.stopPropagation();
               handleImageClick();
             }}
-            className="absolute top-2 right-2 text-primary p-2 bg-white bg-opacity-90 hover:bg-opacity-100 rounded-full shadow-md transition-all z-10"
+            className="absolute left-3 bottom-3 z-30 text-primary p-2 bg-white bg-opacity-95 hover:bg-opacity-100 rounded-full shadow-md transition-all"
             aria-label="View image"
           >
             <Eye size={20} />

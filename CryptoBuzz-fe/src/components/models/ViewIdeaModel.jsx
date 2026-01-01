@@ -50,7 +50,7 @@ export default function ViewIdeaModel({ idea, isOpen, onClose }) {
                     <p className="text-gray-500">{idea.market}</p>
                   </div>
                 </div>
-                <p className=" font-medium">{idea.year}</p>
+                {/* <p className=" font-medium">{idea.year}</p> */}
               </div>
 
               {/* Chart Image Slider */}

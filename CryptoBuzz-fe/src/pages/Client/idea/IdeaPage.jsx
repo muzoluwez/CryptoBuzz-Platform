@@ -50,6 +50,7 @@ export default function IdeaPage() {
       : educator?.first_name || educator?.last_name || "Unknown Trader";
     
     const categoryName = idea?.category?.name || "Unknown Market";
+
     const year = idea?.createdAt ? new Date(idea.createdAt).getFullYear().toString() : "2025";
     
     // Determine tag type based on idea type
@@ -65,7 +66,11 @@ export default function IdeaPage() {
       ? { label: idea.category.name.toUpperCase(), type: "pair" }
       : null;
 
-    const tags = [typeTag, categoryTag, statusTag].filter(Boolean);
+    const name = idea?.name
+      ? { label: idea.name, type: "name" }
+      : null;
+
+    const tags = [typeTag, name, statusTag].filter(Boolean);
 
     // Handle images - can be array or single string
     const images = idea?.image 
@@ -161,7 +166,7 @@ export default function IdeaPage() {
                         <p className="text-sm ">{c.market}</p>
                       </div>
                     </div>
-                    <p className=" font-medium">{c.year}</p>
+                    {/* <p className=" font-medium">{c.year}</p> */}
                   </div>
                 </CardHeader>
 
@@ -193,27 +198,68 @@ export default function IdeaPage() {
 
                   {/* TAGS */}
                   <div className="absolute top-3 left-3 flex flex-wrap gap-2">
-                    {c.tags.map((tag, idx) => (
-                      <Badge
-                        key={idx}
-                        className={`px-3 py-1 text-sm font-semibold rounded-lg
-                      ${tag.type === "sell" &&
-                          "bg-red-200 text-red-600"
-                          }
-                      ${tag.type === "buy" &&
-                          "bg-green-200 text-green-600"
-                          }
-                      ${tag.type === "pair" &&
-                          "bg-gray-200 text-gray-600"
-                          }
-                      ${tag.type === "status" &&
-                          "bg-purple-200 text-yellow-600"
-                          }
-                    `}
-                      >
-                        {tag.label}
-                      </Badge>
-                    ))}
+                    {c.tags.map((tag, idx) => {
+                      console.log('Rendering tag:', tag);
+                      const base = "px-3 py-1 text-sm font-semibold rounded-lg";
+
+                      // Buy/Sell tags
+                      if (tag.type === "buy" || tag.type === "sell") {
+                        const buySellClass = tag.type === "buy" ? "bg-emerald-100 text-emerald-700" : "bg-red-100 text-red-700";
+                        return (
+                          <Badge key={idx} className={`${base} ${buySellClass}`}>
+                            {tag.label?.toString().toUpperCase()}
+                          </Badge>
+                        );
+                      }
+
+                      // Market / Pair tag
+                      if (tag.type === "pair") {
+                        return (
+                          <Badge key={idx} className={`${base} bg-gray-200 text-gray-600`}>
+                            {tag.label}
+                          </Badge>
+                        );
+                      }
+
+                      // Status tag - map to branded colors
+                      if (tag.type === "status") {
+                        const statusClassMap = {
+                          active: "bg-cyan-700 text-white",
+                          pending: "bg-purple-700 text-white",
+                          win: "bg-emerald-500 text-white",
+                          loss: "bg-red-500 text-white",
+                          partialWin: "bg-purple-500 text-white",
+                          breakEven: "bg-blue-500 text-white",
+                        };
+                        const statusKey = (tag.label || "").toString();
+                        const statusClass = statusClassMap[statusKey] || "bg-gray-200 text-gray-700";
+
+                        // Pretty label for statuses
+                        const pretty =
+                          statusKey === "win"
+                            ? `WIN ${c?.pips ? `+${c.pips}` : ""}`
+                            : statusKey === "loss"
+                            ? `LOSS ${c?.pips ? `-${c.pips}` : ""}`
+                            : statusKey === "partialWin"
+                            ? `PARTIAL ${c?.pips ?? ""}`
+                            : statusKey === "breakEven"
+                            ? "BREAK EVEN"
+                            : statusKey?.toUpperCase();
+
+                        return (
+                          <Badge key={idx} className={`${base} ${statusClass}`}>
+                            {pretty}
+                          </Badge>
+                        );
+                      }
+
+                      // Fallback
+                      return (
+                        <Badge key={idx} className={`${base} bg-gray-200 text-gray-600`}>
+                          {tag.label}
+                        </Badge>
+                      );
+                    })}
                   </div>
                 </div>
 
