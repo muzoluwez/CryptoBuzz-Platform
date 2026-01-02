@@ -130,7 +130,8 @@ export const createSchedule = async (req, res) => {
       ...body,
       callId: `callId-${uuidv4()}`,
       tags: Array.isArray(body.tags) ? body.tags : body.tags.split(",").map(tag => tag.trim()),
-      datetime: new Date(body.datetime),
+      datetime: Date.now(),
+      educator:  createdUser._id,
       create_by: createdUser
     };
 
