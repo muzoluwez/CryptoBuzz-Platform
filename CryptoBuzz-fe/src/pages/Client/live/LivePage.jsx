@@ -439,7 +439,7 @@ export default function LivePage() {
                         <div
                           className={`w-20 h-20 rounded-full p-[4px] transition-all ${
                             activeEducatorId === educator.id
-                              ? 'bg-[#4E34E3]'
+                              ? 'bg-[#ffcd0b]'
                               : 'bg-gray-300 dark:bg-gray-600'
                           }`}
                         >
@@ -515,7 +515,7 @@ export default function LivePage() {
                             }
                             className={`p-3 rounded-xl flex flex-col gap-2 cursor-pointer transition-all ${
                               isSessionToday
-                                ? 'bg-[#4E34E3] text-white shadow-lg'
+                                ? 'bg-[#ffcd0b] text-white shadow-lg'
                                 : 'bg-yellow-100 dark:bg-[#fff9e224] text-gray-900 dark:text-gray-100'
                             }`}
                           >
@@ -632,7 +632,7 @@ export default function LivePage() {
                               key={session?._id || idx}
                               className={`rounded-md p-2 mb-2 last:mb-0 cursor-pointer transition-all ${
                                 isToday
-                                  ? 'bg-[#4E34E3] text-white shadow-lg'
+                                  ? 'bg-[#ffcd0b] text-white shadow-lg'
                                   : 'bg-yellow-100 border-yellow-300 text-gray-900'
                               }`}
                               onClick={() =>
