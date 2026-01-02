@@ -14,7 +14,7 @@ const ClientLiveSession = () => {
         const fetchClientToken = async () => {
             try {
                 const response = await getClientToken(payload).unwrap();
-                setSessionToken(response.token);
+                setSessionToken(response?.token);
             } catch (err) {
                 console.error("Error:", err);
             }

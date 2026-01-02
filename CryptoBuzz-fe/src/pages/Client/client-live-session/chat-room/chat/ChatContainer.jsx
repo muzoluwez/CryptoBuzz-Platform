@@ -52,7 +52,7 @@ const   ChatContainer = ({ sessionToken, callId }) => {
     eventUnread,
     globalUnread,
     qaUnread,
-  } = useInitChat({
+  } = useInitChat?.({
     userId: userId || null,
     userToken: sessionToken || null,
     callId: callId || null,
@@ -97,7 +97,9 @@ const   ChatContainer = ({ sessionToken, callId }) => {
       )}
       {!isFullScreen && (
         <div className={`chat-components ${isFullScreen ? "full-screen" : ""}`}>
-          <Chat client={chatClient}>
+          {
+            chatClient && currentChannel ? (
+             <Chat client={chatClient}>
             <ChatHeader
               dmUnread={dmUnread}
               eventUnread={eventUnread}
@@ -118,11 +120,15 @@ const   ChatContainer = ({ sessionToken, callId }) => {
             >
               <ChannelInner />
             </Channel>
-          </Chat>
+             </Chat>
+         ) : (
+           <div className="flex items-center justify-center h-full">
+             <div className="text-center">Loading chat...</div>
         </div>
       )}
     </div>
+      )}
+    </div>
   );
-};
-
+}
 export default ChatContainer;
