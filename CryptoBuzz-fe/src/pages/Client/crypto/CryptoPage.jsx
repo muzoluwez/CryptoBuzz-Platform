@@ -10,19 +10,25 @@ import {
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useState, useMemo } from "react";
 import { AccessGate } from "@/components/common/AccessGate";
 import { useAccessControl } from "@/hooks/use-access-control";
 import { Lock } from "lucide-react";
 import { useGetCryptosQuery } from "@/store/client/clientCryptoApiSlice";
 import { convertRtkEditorToFormattedPlainText, convertRtkEditorToDisplayFormat } from "@/lib/rtkEditorUtils";
+import ImageViewer from "@/components/common/ImageViewer";
+import ImageCarousel from "@/components/common/ImageCarousel";
+import ViewCryptoModel from "@/components/models/ViewCryptoModel";
+import useDocumentTitle from '../../../hooks/use-document-title';
 
-export function CryptoPage() {
+export default function CryptoPage() {
+  useDocumentTitle('Crypto Analysis');
+  
   const { checkAccess } = useAccessControl();
 
   // ------------------- STATE -------------------
   const [selectedCrypto, setSelectedCrypto] = useState(null);
+  const [selectedImage, setSelectedImage] = useState(null);
   const [activeTab, setActiveTab] = useState("All");
 
   // ------------------- API CALL -------------------
@@ -86,30 +92,30 @@ export function CryptoPage() {
         : "No description available.";
 
       // Get image from photos array or use placeholder
-      const image = crypto.photos && crypto.photos.length > 0
+      const image = crypto?.photos && crypto.photos?.length > 0
         ? crypto.photos[0]
         : 'https://images.unsplash.com/photo-1518779578993-ec3579fee39f?q=80&w=1400&auto=format&fit=crop';
 
       // Get avatar from createdBy
-      const avatar = createdBy.image || '/media/avatars/1.png';
+      const avatar = createdBy?.image || '/media/avatars/1.png';
 
       return {
-        id: crypto._id,
-        _id: crypto._id,
-        title: crypto.title || "Untitled Crypto Analysis",
+        id: crypto?._id,
+        _id: crypto?._id,
+        title: crypto?.title || "Untitled Crypto Analysis",
         author: authorName,
         date: date,
         preview: preview,
         full: plainTextDescription || "No content available.",
         fullDisplayHtml: fullDisplayHtml || "", // HTML with clickable links and line breaks
-        fullHtml: crypto.description || "", // Keep original HTML for reference if needed
+        fullHtml: crypto?.description || "", // Keep original HTML for reference if needed
         image: image,
         avatar: avatar,
-        accessType: crypto.accessType || "PUBLIC",
-        allowedPlans: crypto.allowedPlans || [],
-        url: crypto.url,
-        data: crypto.data,
-        photos: crypto.photos || [],
+        accessType: crypto?.accessType || "PUBLIC",
+        allowedPlans: crypto?.allowedPlans || [],
+        url: crypto?.url,
+        data: crypto?.data,
+        photos: crypto?.photos || [],
         ...crypto, // Include all other properties
         category: categoryName, // Override category with string name after spread
       };
@@ -198,19 +204,27 @@ export function CryptoPage() {
               });
 
               return (
-                <Card key={crypto._id || crypto.id} className="bg-card border border-border overflow-hidden">
+                <Card key={crypto?._id || crypto?.id} className="bg-card border border-border overflow-hidden">
 
                 {/* image */}
                 <div className="w-full h-44 overflow-hidden relative">
                   {!hasAccess && (
-                    <div className="absolute inset-0 bg-black/40 backdrop-blur-[2px] flex items-center justify-center z-10">
+                    <div className="absolute inset-0 bg-black/40 backdrop-blur-[2px] flex items-center justify-center z-30 pointer-events-none">
                       <Lock className="w-8 h-8 text-white/80" />
                     </div>
                   )}
-                  <img
-                    src={crypto.image}
-                    alt={crypto.title}
-                    className="w-full h-full object-cover"
+                  <ImageCarousel
+                    images={
+                      crypto?.photos && Array.isArray(crypto.photos) && crypto.photos.length > 0
+                        ? crypto.photos
+                        : crypto?.image
+                        ? [crypto.image]
+                        : []
+                    }
+                    alt={crypto?.title || "Crypto analysis"}
+                    height="h-44"
+                    showViewButton={hasAccess}
+                    className={!hasAccess ? "blur-sm pointer-events-none" : ""}
                   />
                 </div>
 
@@ -219,27 +233,27 @@ export function CryptoPage() {
                   {/* Author */}
                   <div className="flex items-center gap-3">
                     <Avatar className="h-10 w-10">
-                      <AvatarImage src={crypto.avatar} alt={crypto.author} />
-                      <AvatarFallback>{crypto.author[0]}</AvatarFallback>
+                      <AvatarImage src={crypto?.avatar} alt={crypto?.author || "Author"} />
+                      <AvatarFallback>{crypto?.author?.[0] || "A"}</AvatarFallback>
                     </Avatar>
 
                     <div className="flex-1">
                       <div className="flex items-center justify-between">
                         <div>
-                          <p className="text-sm font-medium truncate">{crypto.author}</p>
-                          <p className="text-xs text-muted-foreground">{crypto.date}</p>
+                          <p className="text-sm font-medium truncate">{crypto?.author || "Unknown"}</p>
+                          <p className="text-xs text-muted-foreground">{crypto?.date || ""}</p>
                         </div>
-                        <Badge>{crypto.category}</Badge>
+                        <Badge>{crypto?.category || ""}</Badge>
                       </div>
                     </div>
                   </div>
 
                   {/* Title */}
-                  <h3 className="mt-4 text-lg font-bold text-primary">{crypto.title}</h3>
+                  <h3 className="mt-4 text-lg font-bold text-primary">{crypto?.title || "Untitled"}</h3>
 
                   {/* Preview - 2 lines max */}
                   <p className="mt-2 text-sm text-muted-foreground line-clamp-2">
-                    {hasAccess ? crypto.preview : "This content is locked. Upgrade your plan or log in to view full analysis."}
+                    {hasAccess ? crypto?.preview || "" : "This content is locked. Upgrade your plan or log in to view full analysis."}
                   </p>
 
                   {/* Button */}
@@ -256,7 +270,7 @@ export function CryptoPage() {
 
                 <CardFooter className="p-4">
                   <div className="text-sm text-muted-foreground">
-                    Published • {crypto.date.split(',')[0]}
+                    Published • {crypto?.date?.split(',')?.[0] || ""}
                   </div>
                 </CardFooter>
 
@@ -269,72 +283,28 @@ export function CryptoPage() {
       </div>
 
       {/* ------------------- MODAL ------------------- */}
-      <Dialog open={!!selectedCrypto} onOpenChange={(open) => !open && setSelectedCrypto(null)}>
-        <DialogContent className="max-w-xl w-full max-h-[85vh] p-0">
-          <DialogHeader className="p-4 border-b bg-background">
-            <DialogTitle className="text-lg font-bold">
-              {selectedCrypto?.title}
-            </DialogTitle>
-          </DialogHeader>
+      <ViewCryptoModel
+        crypto={selectedCrypto}
+        isOpen={!!selectedCrypto}
+        onClose={() => setSelectedCrypto(null)}
+      />
 
-          {/* AccessGate protects the Detail View */}
-          <AccessGate
-            accessType={selectedCrypto?.accessType}
-            allowedPlans={selectedCrypto?.allowedPlans}
-          >
-            <div className="bg-card p-4 overflow-y-auto max-h-[72vh]">
-              {/* Image */}
-              <img
-                src={selectedCrypto?.image}
-                className="w-full h-64 object-cover rounded-md"
-              />
-
-              <div className="mt-4 space-y-4">
-                <p className="text-sm text-muted-foreground">
-                  {selectedCrypto?.date} • {selectedCrypto?.category}
-                </p>
-
-                <h2 className="text-2xl font-bold">{selectedCrypto?.title}</h2>
-
-                {/* Full description with clickable links and line breaks preserved */}
-                <div 
-                  className="text-sm text-muted-foreground leading-relaxed"
-                  style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}
-                  dangerouslySetInnerHTML={{ 
-                    __html: selectedCrypto?.fullDisplayHtml || selectedCrypto?.full || "No content available." 
-                  }}
-                />
-
-                {/* Author */}
-                <div className="flex items-center gap-4 pt-4 border-t">
-                  <Avatar className="h-12 w-12">
-                    <AvatarImage src={selectedCrypto?.avatar} />
-                  </Avatar>
-                  <div>
-                    <p className="text-sm font-semibold">{selectedCrypto?.author}</p>
-                    <p className="text-xs text-muted-foreground">{selectedCrypto?.category}</p>
-                  </div>
-                </div>
-
-                {/* Buttons */}
-                <div className="flex gap-3 mt-4">
-                  <Button className="flex-1 bg-yellow-600 hover:bg-yellow-700 text-white">
-                    Save Analysis
-                  </Button>
-
-                  <Button
-                    className="flex-1 bg-gray-200"
-                    onClick={() => setSelectedCrypto(null)}
-                  >
-                    Close
-                  </Button>
-                </div>
-              </div>
-
-            </div>
-          </AccessGate>
-        </DialogContent>
-      </Dialog>
+      {/* Image Viewer Modal */}
+      <ImageViewer
+        image={selectedImage}
+        images={
+          selectedCrypto?.photos && Array.isArray(selectedCrypto.photos) && selectedCrypto.photos.length > 0
+            ? selectedCrypto.photos
+            : selectedCrypto?.image
+            ? [selectedCrypto.image]
+            : selectedImage
+            ? [selectedImage]
+            : []
+        }
+        isOpen={!!selectedImage}
+        onClose={() => setSelectedImage(null)}
+        alt="Crypto analysis chart"
+      />
     </>
   );
 }

@@ -19,8 +19,12 @@ export const clientEducatorApiSlice = createApi({
       },
       providesTags: ['Educators'],
     }),
-  }),
+    getEducatorDetails: builder.query({
+      query: (educatorId) => `/users/educator/details/${educatorId}`,
+      providesTags: ['EducatorDetails'],
+    }), // getEducatorDetails
+  })
 });
 
-export const { useGetAllEducatorsQuery, useLazyGetAllEducatorsQuery } =
+export const { useGetAllEducatorsQuery, useLazyGetAllEducatorsQuery, useGetEducatorDetailsQuery } =
   clientEducatorApiSlice;

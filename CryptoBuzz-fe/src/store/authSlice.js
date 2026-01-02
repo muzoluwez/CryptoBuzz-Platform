@@ -44,4 +44,7 @@ export default authSlice.reducer;
 // Selectors
 export const selectCurrentToken = (state) => state.auth.token;
 export const selectCurrentUser = (state) => state.auth.user;
-export const selectIsAuthenticated = (state) => state.auth.isAuthenticated;
+export const selectIsAuthenticated = (state) => {
+    // Ensure both user and token exist for authentication to be true
+    return state.auth.isAuthenticated && state.auth.user && state.auth.token;
+};

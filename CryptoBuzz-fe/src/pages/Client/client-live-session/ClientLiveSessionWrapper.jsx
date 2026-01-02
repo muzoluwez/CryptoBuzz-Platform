@@ -1,14 +1,11 @@
-import { useCall, useCallStateHooks } from "@stream-io/video-react-sdk";
 import React, { useEffect, useState } from "react";
-import ChatContainer from "./chat-room/chat/ChatContainer";
-import ClientLiveSessionPlayer from "./ClientLiveSessionPlayer";
-import { useEventContext } from "./chat-room/context/EventContext";
+import { useCall, useCallStateHooks } from "@stream-io/video-react-sdk";
 import { useResponsive } from "../../../hooks";
-import { toAbsoluteUrl } from "@/utils/Assets";
-import { Link } from "react-router-dom";
-import truncate from "html-truncate";
-import { useLivestreamStatus } from "./liveStreamStatus";
-import { Send } from "lucide-react";
+import { toAbsoluteUrl } from "../../../lib/helpers";
+import ChatContainer from "./chat-room/chat/ChatContainer";
+import { useEventContext } from "./chat-room/context/EventContext";
+import ClientLiveSessionPlayer from "./ClientLiveSessionPlayer";
+
 
 const ShowMoreLess = ({
   text = "",
@@ -148,16 +145,16 @@ const ClientLiveSessionContent = ({
     if (!htmlOrText) return "";
     return htmlOrText.replace(/(https?:\/\/[^\s]+|www\.[^\s]+)/g, (url) => {
       const clickableUrl = url.startsWith("http") ? url : `https://${url}`;
-      return `<a href="${clickableUrl}" target="_blank" rel="noopener noreferrer" class="text-yellow-600 underline hover:text-blue-800">${url}</a>`;
+      return `<a href="${clickableUrl}" target="_blank" rel="noopener noreferrer" class="text-blue-600 underline hover:text-blue-800">${url}</a>`;
     });
   };
 
   const safeHtml = makeClickableLinks(educatorData || "");
 
   return (
-    <div className="grid grid-cols-12 gap-y-8 md:gap-x-8 chatbox_chat">
+    <div className="grid grid-cols-12 gap-6 chatbox_chat">
       <div
-        className={`${isFullScreen ? (isMdUp ? "col-span-10 xl:col-span-11" : "col-span-12 md:col-span-7 xl:col-span-10") : isMdUp ? "col-span-12 md:col-span-7 xl:col-span-8" : "col-span-12 md:col-span-7 xl:col-span-11"} space-y-8`}
+        className={`${isFullScreen ? (isMdUp ? "col-span-10 xl:col-span-11" : "col-span-12 md:col-span-7 xl:col-span-10") : isMdUp ? "col-span-12 lg:col-span-8" : "col-span-12 md:col-span-7 xl:col-span-11"} space-y-8`}
       >
         <div className={`transition-all duration-300 ease-in-out h-full`}>
           <div className="grid gap-5 h-full">
@@ -179,7 +176,7 @@ const ClientLiveSessionContent = ({
       </div>
 
       <div
-        className={`${isFullScreen ? (isMdUp ? "col-span-2 xl:col-span-1" : "col-span-12 md:col-span-5 xl:col-span-2") : isMdUp ? "col-span-12 md:col-span-5 xl:col-span-4" : "col-span-12 md:col-span-5 xl:col-span-1"} space-y-8`}
+        className={`${isFullScreen ? (isMdUp ? "col-span-2 xl:col-span-1" : "col-span-12 md:col-span-5 xl:col-span-2") : isMdUp ? "col-span-12 lg:col-span-4" : "col-span-12 md:col-span-5 xl:col-span-1"} space-y-8`}
       >
         <div className={`transition-all duration-300 ease-in-out h-full`}>
           {token && callId && status === "live" && (
@@ -187,17 +184,17 @@ const ClientLiveSessionContent = ({
           )}
           {token && callId && status !== "live" && (
             <div className="card rounded-2xl shadow-md overflow-hidden h-full flex flex-col">
-              <div className="bg-[#1A1446] px-4 py-3 flex justify-between items-center rounded-t-2xl">
+              <div className="bg-[#ffcd0b] dark:bg-[#1A1446] px-4 py-3 flex justify-between items-center rounded-t-2xl">
                 <h3 className="text-white font-semibold text-sm">About </h3>
               </div>
 
               <div className="flex-1 p-4 overflow-y-auto">
-                <p className="text-gray-900 text-sm leading-relaxed whitespace-pre-line">
+                <p className="text-gray-900 dark:text-white text-sm leading-relaxed whitespace-pre-line">
                   {educatorData && (
                     <ShowMoreLess
                       html={safeHtml}
                       limit={500}
-                      className="text-sm text-gray-700 leading-relaxed font-termina whitespace-pre-wrap break-words"
+                      className="text-sm text-gray-700 dark:text-white leading-relaxed font-termina whitespace-pre-wrap break-words"
                     />
                   )}
                 </p>

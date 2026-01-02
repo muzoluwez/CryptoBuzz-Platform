@@ -27,7 +27,7 @@ const ShowMoreLess = ({
       {isHtml ? (
         <span dangerouslySetInnerHTML={{ __html: displayed }} />
       ) : (
-        <span>{displayed}</span>
+        <span style={{ whiteSpace: 'pre-line' }}>{displayed}</span>
       )}
       {isLong && (
         <span

@@ -6,10 +6,10 @@ import {
   useGetClientLiveScheduleQuery,
   useGetClientTokenMutation,
 } from "../../../store/api/client/clientLiveSessionApiSlice";
-import { useAuthContext } from "../../../auth/useAuthContext";
+import { useAuthContext } from "../../../context/AuthContext";
 import { EventProvider } from "./chat-room/context/EventContext";
 import ClientLiveSessionWrapper from "./ClientLiveSessionWrapper";
-import StreamWrapper from "../../admin/live-session/StreamWrapper";
+import StreamWrapper from "./StreamWrapper";
 import { format } from "date-fns";
 
 const apiKey = import.meta.env.VITE_APP_STREAM_API_KEY;
@@ -20,8 +20,8 @@ const ClientViewLiveSession = ({ bannerImage, callId, educatorData }) => {
   const [call, setCall] = useState(null);
   const isInitializing = useRef(false); // Track initialization attempts
   // const { callId } = useParams();
-  const { auth } = useAuthContext();
-  const userId = auth?.user?._id ?? null;
+  const { user } = useAuthContext();  
+  const userId = user?._id;
 
   const [recordings, setRecordings] = useState([]);
 
@@ -51,8 +51,8 @@ const ClientViewLiveSession = ({ bannerImage, callId, educatorData }) => {
       let newClient;
       try {
         newClient = new StreamVideoClient({ apiKey });
-        await newClient.connectUser({ id: userId }, token); // Authenticate FIRST
-        const newCall = newClient.call("livestream", callId);
+        await newClient?.connectUser({ id: userId }, token); // Authenticate FIRST
+        const newCall = newClient?.call("livestream", callId);
         // await newCall.get(); // Verify call exists
         await newCall.getOrCreate({
           data: {
@@ -75,7 +75,7 @@ const ClientViewLiveSession = ({ bannerImage, callId, educatorData }) => {
         setCall(newCall);
       } catch (err) {
         console.error("Stream init failed:", err);
-        if (newClient) await newClient.disconnectUser(); // Cleanup on failure
+        if (newClient) await newClient?.disconnectUser(); // Cleanup on failure
       } finally {
         isInitializing.current = false;
       }
@@ -88,20 +88,22 @@ const ClientViewLiveSession = ({ bannerImage, callId, educatorData }) => {
   useEffect(() => {
     return () => {
       if (client) {
-        client.disconnectUser().catch(console.error);
+        client?.disconnectUser()?.catch(console.error);
       }
     };
   }, [client]);
 
   // 4. Render logic with safe scheduleData access
   const isUpcoming = scheduleData?.data?.datetime
-    ? new Date(scheduleData.data.datetime) > new Date()
+    ? new Date(scheduleData?.data?.datetime) > new Date()
     : false;
 
   const fetchRecordings = async () => {
     try {
-      const response = await call.queryRecordings();
-      setRecordings(response.recordings);
+      if (call) {
+        const response = await call?.queryRecordings();
+        setRecordings(response?.recordings || []);
+      }
     } catch (err) {
       console.error("Failed to fetch recordings:", err);
     }
@@ -120,7 +122,7 @@ const ClientViewLiveSession = ({ bannerImage, callId, educatorData }) => {
           <p className="text-center text-lg pt-10 px-2">
             The event will start on{" "}
             {scheduleData?.data?.datetime 
-              ? format(new Date(scheduleData.data.datetime), "MMM dd, yyyy, hh:mm a")
+              ? format(new Date(scheduleData?.data?.datetime), "MMM dd, yyyy, hh:mm a")
               : "a future date"}
           </p>
         </div>

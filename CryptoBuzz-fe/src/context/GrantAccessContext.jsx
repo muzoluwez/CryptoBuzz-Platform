@@ -1,16 +1,22 @@
-
-import React, { createContext, useContext } from 'react';
+import React, { createContext, useContext, useState } from 'react';
 import { useAccessControl } from '@/hooks/use-access-control';
+
 
 const GrantAccessContext = createContext(null);
 
 export const GrantAccessProvider = ({ children }) => {
     // Reusing the existing hook logic to maintain consistency
     const { checkAccess, canAccessContent } = useAccessControl();
+     const [volume, setVolume] = useState(1);
+     const [isMuted, setIsMuted] = useState(false);
 
     const value = {
         checkAccess,
-        canAccessContent
+        canAccessContent,
+        volume,
+        setVolume,
+        isMuted,
+        setIsMuted,
     };
 
     return (

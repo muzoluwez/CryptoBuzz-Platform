@@ -16,11 +16,15 @@ const loginSchema = yup.object().shape({
 export const signinUser = async (req, res) => {
   try {
     await loginSchema.validate(req.body);
-    const { email, password, remember = false } = req.body;
+    const { email, password, remember = false, role="admin" } = req.body;
 
     const existingUser = await UserModel.findOne({ email: email });
     if (!existingUser) {
       return res.status(400).json({ message: "User not exist for this email" });
+    }
+
+    if (role && existingUser.role !== role) {
+      return res.status(400).json({ message: `You are not registered as ${role} Please contact to admin.` });
     }
 
     if (existingUser.status == "false") {

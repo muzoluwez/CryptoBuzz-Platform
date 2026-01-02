@@ -247,8 +247,8 @@ const PostCard = ({ post, onEdit, isOwnPost = false, refetch }) => {
     makeClickableLinks(displayText) +
     (plainTextContent.length > 200
       ? isExpanded
-        ? ` <span id="toggleText" className="text-yellow-600 hover:text-blue-800 cursor-pointer font-medium ml-1">Show less</span>`
-        : ` <span id="toggleText" className="text-yellow-600 hover:text-blue-800 cursor-pointer font-medium">...more</span>`
+        ? ` <span id="toggleText" class="text-yellow-600 hover:text-blue-800 cursor-pointer font-medium ml-1">Show less</span>`
+        : ` <span id="toggleText" class="text-yellow-600 hover:text-blue-800 cursor-pointer font-medium">...more</span>`
       : "");
 
   return (

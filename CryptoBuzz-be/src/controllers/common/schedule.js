@@ -59,8 +59,8 @@ export const listSchedule = async (req, res) => {
       query.category = category;
     }
 
-    if (educator && educator == "educator" && mongoose.Types.ObjectId.isValid(educator)) {
-      query.educator = educator;
+    if (educator && educator.role == "educator" ) {
+      query.educator = educator._id;
     }
 
     const totalCount = await Schedule.countDocuments(query);
@@ -124,13 +124,14 @@ export const createSchedule = async (req, res) => {
       });
     }
 
-    await scheduleValidationSchema.validate(body, { abortEarly: false });
+    // await scheduleValidationSchema.validate(body, { abortEarly: false });
 
     const scheduleData = {
       ...body,
       callId: `callId-${uuidv4()}`,
       tags: Array.isArray(body.tags) ? body.tags : body.tags.split(",").map(tag => tag.trim()),
-      datetime: new Date(body.datetime),
+      datetime: Date.now(),
+      educator:  createdUser._id,
       create_by: createdUser
     };
 

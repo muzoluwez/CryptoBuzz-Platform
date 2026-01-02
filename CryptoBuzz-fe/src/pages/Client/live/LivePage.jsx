@@ -3,11 +3,19 @@ import { useGetAcademyCategoryFetchQuery } from '@/store/client/clientAcademyCat
 import { useNavigate } from 'react-router';
 import { Card } from '../../../components/ui/card';
 import { useGetScheduleQuery } from '../../../store/client/clientScheduleApiSlice';
+import useDocumentTitle from '../../../hooks/use-document-title';
+import { Swiper, SwiperSlide } from 'swiper/react';
+import { Navigation } from 'swiper/modules';
+import 'swiper/css';
+import 'swiper/css/navigation';
 
-export function LivePage() {
+
+export default function LivePage() {
+  useDocumentTitle('Live Sessions');
   const [activeCategory, setActiveCategory] = useState(null);
   const [activeCategoryId, setActiveCategoryId] = useState(null);
   const [activeWeek, setActiveWeek] = useState('Current Week');
+  const [activeEducatorId, setActiveEducatorId] = useState(null);
   const navigate = useNavigate();
 
   // First, fetch categories
@@ -26,6 +34,7 @@ export function LivePage() {
       const firstCategory = categories[0];
       setActiveCategory(firstCategory.name);
       setActiveCategoryId(firstCategory._id);
+      setActiveEducatorId(null);
     }
   }, [categories, activeCategory]);
 
@@ -140,32 +149,32 @@ export function LivePage() {
     // Group schedules by educator
     const educatorsMap = {};
 
-    data.data.forEach((schedule) => {
-      const educator = schedule.educator || {};
+    data?.data?.forEach((schedule) => {
+      const educator = schedule?.educator || {};
 
       // Skip if educator is inactive (but allow admin/super_admin)
-      if (educator.status === 'false' || educator.status === 'inactive') return;
+      if (educator?.status === 'false' || educator?.status === 'inactive') return;
 
-      const educatorId = educator._id?.toString() || 'unknown';
+      const educatorId = educator?._id?.toString() || 'unknown';
       const educatorName =
-        educator.first_name && educator.last_name
-          ? `${educator.first_name} ${educator.last_name}`
-          : educator.first_name || educator.last_name || 'Unknown Educator';
+        educator?.first_name && educator?.last_name
+          ? `${educator?.first_name || ''} ${educator?.last_name || ''}`.trim()
+          : educator?.first_name || educator?.last_name || 'Unknown Educator';
 
       if (!educatorsMap[educatorId]) {
         educatorsMap[educatorId] = {
           id: educatorId,
           name: educatorName,
-          image: educator.image || 'plaid',
-          avatar: educator.image,
-          first_name: educator.first_name,
-          last_name: educator.last_name,
+          image: educator?.image || 'plaid',
+          avatar: educator?.image,
+          first_name: educator?.first_name,
+          last_name: educator?.last_name,
           sessions: {}, // Will store sessions by day
         };
       }
 
       // Get schedule date
-      const scheduleDate = new Date(schedule.datetime);
+      const scheduleDate = schedule?.datetime ? new Date(schedule.datetime) : new Date();
 
       // Find which day of the week this schedule belongs to
       const dayIndex = weekDays.findIndex((day) =>
@@ -191,6 +200,16 @@ export function LivePage() {
 
     return Object.values(educatorsMap);
   }, [data, weekDays]);
+
+  // Set first educator as active when educators are loaded
+  useEffect(() => {
+    if (educators.length > 0 && !activeEducatorId) {
+      setActiveEducatorId(educators[0].id);
+    }
+  }, [educators, activeEducatorId]);
+
+  // Get active educator
+  const activeEducator = educators.find((e) => e.id === activeEducatorId);
 
   // Loading state - check both categories and schedules
   if (categoriesLoading || (isLoading && activeCategoryId)) {
@@ -364,8 +383,8 @@ export function LivePage() {
                     }}
                     className={`px-4 py-2 text-sm font-medium cursor-pointer transition-colors ${
                       activeCategory === category.name
-                        ? 'bg-[#FFF9E2] text-primary rounded-lg'
-                        : 'text-gray-600 hover:text-gray-900'
+                        ? 'bg-[#FFF9E2] dark:bg-[#fff9e224] text-primary rounded-lg'
+                        : 'text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white'
                     }`}
                   >
                     {category.name}
@@ -392,7 +411,134 @@ export function LivePage() {
             ))}
           </div>
 
-          {/* Schedule Grid */}
+          {/* MOBILE VIEW - Educator Carousel */}
+          <div className="block md:hidden mb-8">
+            {educators.length > 0 && (
+              <div className="mb-6">
+                <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-4">
+                  Select Educator
+                </h3>
+                <Swiper
+                  slidesPerView={4}
+                  spaceBetween={15}
+                  navigation
+                  modules={[Navigation]}
+                  className="educator-carousel"
+                  breakpoints={{
+                    0: { slidesPerView: 3, spaceBetween: 10 },
+                    480: { slidesPerView: 4, spaceBetween: 12 },
+                    640: { slidesPerView: 5, spaceBetween: 15 },
+                  }}
+                >
+                  {educators.map((educator) => (
+                    <SwiperSlide key={educator.id}>
+                      <div
+                        onClick={() => setActiveEducatorId(educator.id)}
+                        className="flex flex-col items-center cursor-pointer select-none"
+                      >
+                        <div
+                          className={`w-20 h-20 rounded-full p-[4px] transition-all ${
+                            activeEducatorId === educator.id
+                              ? 'bg-[#ffcd0b]'
+                              : 'bg-gray-300 dark:bg-gray-600'
+                          }`}
+                        >
+                          {educator?.avatar ? (
+                            <img
+                              src={educator.avatar}
+                              alt={educator?.name || 'Educator'}
+                              className="w-full h-full rounded-full object-cover bg-white"
+                            />
+                          ) : (
+                            <div
+                              className={`w-full h-full rounded-full overflow-hidden flex items-center justify-center text-white font-bold text-xl ${
+                                educator?.image === 'plaid'
+                                  ? 'bg-gradient-to-br from-red-900 via-red-800 to-gray-800'
+                                  : 'bg-gradient-to-br from-blue-900 via-blue-800 to-slate-700'
+                              }`}
+                            >
+                              {educator?.name?.[0] || 'E'}
+                            </div>
+                          )}
+                        </div>
+                        <p className="mt-2 text-xs font-medium text-gray-800 dark:text-gray-300 text-center truncate w-20">
+                          {educator?.first_name || educator?.name}
+                        </p>
+                      </div>
+                    </SwiperSlide>
+                  ))}
+                </Swiper>
+              </div>
+            )}
+
+            {/* Educator Details Card */}
+            {activeEducator && (
+              <Card className="rounded-2xl shadow-md p-5 mb-8">
+                <div className="flex items-center gap-4 mb-4">
+                  {activeEducator?.avatar ? (
+                    <img
+                      src={activeEducator.avatar}
+                      className="w-12 h-12 rounded-full object-cover"
+                      alt={activeEducator?.name}
+                    />
+                  ) : (
+                    <div
+                      className={`w-12 h-12 rounded-full flex items-center justify-center text-white font-bold ${
+                        activeEducator?.image === 'plaid'
+                          ? 'bg-gradient-to-br from-red-900 via-red-800 to-gray-800'
+                          : 'bg-gradient-to-br from-blue-900 via-blue-800 to-slate-700'
+                      }`}
+                    >
+                      {activeEducator?.name?.[0] || 'E'}
+                    </div>
+                  )}
+                  <h3 className="font-semibold text-gray-900 dark:text-white">
+                    {activeEducator?.first_name} {activeEducator?.last_name}
+                  </h3>
+                </div>
+
+                <div className="flex flex-col gap-3">
+                  {Object.values(activeEducator?.sessions || {})
+                    .flat()
+                    .length > 0 ? (
+                    Object.values(activeEducator?.sessions || {})
+                      .flat()
+                      .map((session, idx) => {
+                        const isSessionToday = new Date(
+                          session.datetime,
+                        ).toDateString() === new Date().toDateString();
+                        return (
+                          <div
+                            key={session?._id || idx}
+                            onClick={() =>
+                              navigate(`/client/view-profile/${activeEducator?.id}`)
+                            }
+                            className={`p-3 rounded-xl flex flex-col gap-2 cursor-pointer transition-all ${
+                              isSessionToday
+                                ? 'bg-[#ffcd0b] text-white shadow-lg'
+                                : 'bg-yellow-100 dark:bg-[#fff9e224] text-gray-900 dark:text-gray-100'
+                            }`}
+                          >
+                            <span className="text-sm font-semibold">
+                              {session?.title || 'Session'}
+                            </span>
+                            <span className="text-xs font-medium">
+                              {session?.time || ''}
+                            </span>
+                          </div>
+                        );
+                      })
+                  ) : (
+                    <p className="text-sm text-gray-500">
+                      No sessions scheduled.
+                    </p>
+                  )}
+                </div>
+              </Card>
+            )}
+          </div>
+          {/* Desktop Schedule Grid */}
+          <div className="hidden md:block">
           {!activeCategoryId ? (
             <Card className="rounded-lg shadow-sm p-8">
               <div className="text-center text-gray-500">
@@ -436,30 +582,35 @@ export function LivePage() {
                   {/* Educator Profile */}
                   <div className="p-4 border-r border-gray-200 bg-white dark:bg-[#1f2227] dark:border-gray-700 flex items-center justify-center">
                     <div className="flex flex-col items-center">
-                      {educator.avatar ? (
+                      {educator?.avatar ? (
                         <img
                           src={educator.avatar}
-                          alt={educator.name}
+                          alt={educator?.name || 'Educator'}
                           className="w-16 h-16 rounded-lg object-cover mb-2 cursor-pointer"
                           onClick={() =>
-                            navigate(`/client/viewprofile/${educator.id}`)
+                            navigate(
+                              `/client/view-profile/${educator?._id || educator?.id}`,
+                              {
+                                state: { educatorId: educator?._id || educator?.id },
+                              },
+                            )
                           }
                         />
                       ) : (
                         <div
                           className={`w-16 h-16 rounded-lg overflow-hidden mb-2 ${
-                            educator.image === 'plaid'
+                            educator?.image === 'plaid'
                               ? 'bg-gradient-to-br from-red-900 via-red-800 to-gray-800'
                               : 'bg-gradient-to-br from-blue-900 via-blue-800 to-slate-700'
                           }`}
                         >
                           <div className="w-full h-full flex items-center justify-center text-white font-bold text-xl">
-                            {educator.name[0]}
+                            {educator?.name?.[0] || 'E'}
                           </div>
                         </div>
                       )}
                       <p className="text-xs font-medium text-center text-gray-700 dark:text-gray-300 mt-1">
-                        {educator.name}
+                        {educator?.name || 'Educator'}
                       </p>
                     </div>
                   </div>
@@ -467,7 +618,7 @@ export function LivePage() {
                   {/* Sessions for each day */}
                   {weekDays.map((day, dayIndex) => {
                     const dayKey = dayIndex.toString();
-                    const daySessions = educator.sessions[dayKey] || [];
+                    const daySessions = educator?.sessions?.[dayKey] || [];
                     const isToday = isSameDay(day, new Date());
 
                     return (
@@ -478,25 +629,25 @@ export function LivePage() {
                         {daySessions.length > 0 ? (
                           daySessions.map((session, idx) => (
                             <div
-                              key={session._id || idx}
+                              key={session?._id || idx}
                               className={`rounded-md p-2 mb-2 last:mb-0 cursor-pointer transition-all ${
                                 isToday
-                                  ? 'bg-[#4E34E3] text-white shadow-lg'
+                                  ? 'bg-[#ffcd0b] text-white shadow-lg'
                                   : 'bg-yellow-100 border-yellow-300 text-gray-900'
                               }`}
                               onClick={() =>
-                                navigate(`/client/viewprofile/${educator.id}`)
+                                navigate(`/client/view-profile/${educator?.id}`)
                               }
                             >
                               <p
                                 className={`text-xs font-semibold mb-1 ${isToday ? 'text-white' : 'text-gray-900'}`}
                               >
-                                {session.title}
+                                {session?.title || 'Session'}
                               </p>
                               <p
                                 className={`text-xs ${isToday ? 'text-white' : 'text-gray-600'}`}
                               >
-                                {session.time}
+                                {session?.time || ''}
                               </p>
                             </div>
                           ))
@@ -512,35 +663,41 @@ export function LivePage() {
               ))}
             </Card>
           )}
+          </div>
 
           {/* Educator Cards */}
           {educators.length > 0 && (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
               {educators.map((educator) => (
                 <div
-                  key={educator.id}
+                  key={educator?.id}
                   className={`rounded-lg overflow-hidden shadow-lg relative h-96 ${
-                    educator.image === 'plaid'
+                    educator?.image === 'plaid'
                       ? 'bg-gradient-to-br from-gray-400 via-gray-500 to-gray-600'
                       : 'bg-gradient-to-br from-slate-500 via-slate-600 to-slate-700'
                   }`}
                 >
                   <img
                     src={
-                      educator.avatar ||
+                      educator?.avatar ||
                       'https://images.unsplash.com/photo-1559526324-593bc073d938?q=80&w=800&auto=format&fit=crop'
                     }
-                    alt={educator.name}
+                    alt={educator?.name || 'Educator'}
                     className="w-full h-full object-cover"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent"></div>
                   <div className="absolute bottom-0 left-0 right-0 p-6">
                     <h3 className="text-2xl font-bold text-white mb-4">
-                      {educator.name}
+                      {educator?.name || 'Educator'}
                     </h3>
                     <button
                       onClick={() =>
-                        navigate(`/client/viewprofile/${educator.id}`)
+                        navigate(
+                          `/client/view-profile/${educator?._id || educator?.id}`,
+                          {
+                            state: { educatorId: educator?._id || educator?.id },
+                          },
+                        )
                       }
                       className="px-6 py-2 cursor-pointer bg-transparent border-2 border-white text-white rounded-md hover:bg-white hover:text-gray-900 transition-colors font-medium"
                     >

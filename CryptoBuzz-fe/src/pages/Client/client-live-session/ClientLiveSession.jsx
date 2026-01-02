@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import ClientLiveSessionList from './ClientLiveSessionList';
-import { useAuthContext } from '../../../auth/useAuthContext';
+import { useAuthContext } from '../../../context/AuthContext';
 import { useGetClientTokenMutation } from '../../../store/api/client/clientLiveSessionApiSlice';
 
 const ClientLiveSession = () => {
-    const { auth } = useAuthContext();
-    const userId = auth?.user?._id ?? null;
+    const { user } = useAuthContext();
+    const userId = user?._id;
     const [payload, setPayload] = useState({ userId: userId});
     const [sessionToken, setSessionToken] = useState(null);
     const [getClientToken, { data, error, isLoading }] = useGetClientTokenMutation();
@@ -14,7 +14,7 @@ const ClientLiveSession = () => {
         const fetchClientToken = async () => {
             try {
                 const response = await getClientToken(payload).unwrap();
-                setSessionToken(response.token);
+                setSessionToken(response?.token);
             } catch (err) {
                 console.error("Error:", err);
             }
@@ -27,7 +27,7 @@ const ClientLiveSession = () => {
         <div className='container-fluid'>
             <div className="popular pb-5 flex items-center justify-between">
                 <div>
-                    <a class="text-lg text-gray-800 mb-px" href="/public-profile/profiles/nft">Courses</a>
+                    <a className="text-lg text-gray-800 mb-px" href="/public-profile/profiles/nft">Live Sessions</a>
                 </div>
             </div>
             <ClientLiveSessionList userId={userId} userToken={sessionToken}/>

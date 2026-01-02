@@ -7,6 +7,8 @@ import authRoutes from "./auth.routes.js"
 import scheduleRoutes from "./schedule.routes.js"
 import categoryRoutes from "./category.routes.js"
 import educatorRoutes from "./educator.routes.js"
+import ratingRoutes from "./rating.routes.js"
+import courseRoutes from "./course.routes.js"
 
 const router = express.Router();
 
@@ -19,5 +21,7 @@ router.use("/social", socialRoutes);
 router.use("/schedule", scheduleRoutes);
 router.use("/category", categoryRoutes);
 router.use("/educator", educatorRoutes);
+router.use("/rating", ratingRoutes);
+router.use("/course", courseRoutes);
 
 export default router;

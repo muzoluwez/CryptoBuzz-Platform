@@ -1,10 +1,9 @@
-import {
-  LivestreamPlayer,
-  StreamCall,
-  StreamVideo,
-} from "@stream-io/video-react-sdk";
-import React, { useEffect, useState, useRef, useCallback } from "react";
-import { useLayout } from "../../../providers";
+import React, { useCallback, useEffect, useRef, useState } from "react";
+import { LivestreamPlayer, StreamCall, StreamVideo } from "@stream-io/video-react-sdk";
+import { Button } from "@/components/ui/button";
+import { useLayout } from "../../../components/layouts/layout-1/components/context";
+import { useGrantAccess } from '@/context/GrantAccessContext';
+
 
 /** ✅ Get real media elements (Stream SDK fallback) */
 const getStreamMediaElements = () =>
@@ -185,7 +184,7 @@ const ClientLiveSessionPlayer = ({ callId, client, call }) => {
     return () => unlockBodyScroll();
   }, [unlockBodyScroll]);
 
-  const { isMuted, volume } = useLayout();
+  const { isMuted, volume } = useGrantAccess();
 
   /** ✅ Sync volume with media elements */
   useEffect(() => {
@@ -231,7 +230,7 @@ const ClientLiveSessionPlayer = ({ callId, client, call }) => {
           style={fullscreenStyles}
         >
           {/* ✅ Fullscreen button */}
-          <button
+          {/* <Button
             type="button"
             onClick={(e) => {
               e.preventDefault();
@@ -240,6 +239,9 @@ const ClientLiveSessionPlayer = ({ callId, client, call }) => {
               alert("Button tapped! isFullscreen: " + isFullscreen);
               toggleFullscreen();
             }}
+            variant="ghost"
+            mode="icon"
+            size="sm"
             className="absolute bottom-[52px] right-3 z-[100000] bg-black/60 hover:bg-black/80 text-white rounded p-1.5 transition-all custom-fullscreen-btn"
             style={{
               pointerEvents: "auto",
@@ -277,7 +279,7 @@ const ClientLiveSessionPlayer = ({ callId, client, call }) => {
                 <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3" />
               </svg>
             )}
-          </button>
+          </Button> */}
 
           {/* ✅ Stream player */}
           <LivestreamPlayer

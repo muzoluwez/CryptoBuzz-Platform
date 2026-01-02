@@ -16,7 +16,7 @@ import {
   ToolbarHeading,
 } from '@/components/layouts/layout-7/components/toolbar';
 
-export function Layout7Page() {
+export default function Layout7Page() {
   const [date, setDate] = useState({
     from: new Date(2025, 0, 20),
     to: addDays(new Date(2025, 0, 20), 20),

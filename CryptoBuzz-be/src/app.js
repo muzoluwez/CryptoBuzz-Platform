@@ -3,6 +3,8 @@ import cors from "cors";
 import AppRoutes from "./routes/index.js";
 import swaggerUi from "swagger-ui-express";
 import { createRequire } from "module";
+import errorHandler from "./middlewares/errorHandler.js";
+
 const require = createRequire(import.meta.url);
 const swaggerDocument = require("../swagger.json");
 
@@ -33,5 +35,8 @@ const CSS_URL = "https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/4.1.0/swagger
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument, { customCssUrl: CSS_URL }));
 
 app.use("/api", AppRoutes);
+
+// Global error handler - must be last
+app.use(errorHandler);
 
 export { app };

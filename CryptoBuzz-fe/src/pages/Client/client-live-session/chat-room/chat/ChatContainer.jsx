@@ -1,17 +1,17 @@
 import React, { useEffect, useState } from "react";
+import { useLocation, useParams } from "react-router";
 import { Channel as StreamChannel } from "stream-chat";
 import { Channel, Chat } from "stream-chat-react";
+import { useAuthContext } from "../../../../../context/AuthContext";
 import { useEventContext } from "../context/EventContext";
 import { useInitChat } from "../hooks/useInitChat";
-import { MessageUI } from "./MessageUI";
-import { GiphyPreview } from "./GiphyPreview";
 import { ChannelInner } from "./ChannelInner";
-import { useGetClientTokenMutation } from "../../../../../store/api/client/clientLiveSessionApiSlice";
-import { useLocation, useParams } from "react-router";
-import { useAuthContext } from "../../../../../auth/useAuthContext";
-import { MessageInputUI } from "./MessageInput";
-import { ChatHeader } from "./ChatHeader";
+import { ChatHeader } from './ChatHeader';
 import { ChatSidebar } from "./ChatSidebar";
+import { GiphyPreview } from "./GiphyPreview";
+import { MessageInputUI } from "./MessageInput";
+import { MessageUI } from "./MessageUI";
+
 
 const   ChatContainer = ({ sessionToken, callId }) => {
   const {
@@ -35,11 +35,15 @@ const   ChatContainer = ({ sessionToken, callId }) => {
   // const { address: rtmp_url, token: rtmp_stream_key } = sessionData;
   // const token = rtmp_stream_key;
   const [call, setCall] = useState(null);
-  const { auth } = useAuthContext();
-  const userId = auth?.user?._id;
-  const userName = auth?.user?.name
-    ? auth?.user?.name
-    : auth?.user?.first_name + " " + auth?.user?.last_name;
+  const { user } = useAuthContext();
+  const userId = user?._id;
+  const userName = user?.name
+    ? user?.name
+    : user?.first_name + " " + user?.last_name;
+
+
+  // Ensure we have all required props before calling useInitChat
+  const hasRequiredProps = userId && sessionToken && callId && userName;
 
   const {
     chatClient,
@@ -48,14 +52,36 @@ const   ChatContainer = ({ sessionToken, callId }) => {
     eventUnread,
     globalUnread,
     qaUnread,
-  } = useInitChat({
-    userId,
-    userToken: sessionToken,
-    callId,
-    userName,
+  } = useInitChat?.({
+    userId: userId || null,
+    userToken: sessionToken || null,
+    callId: callId || null,
+    userName: userName || null,
   });
 
-  if (!chatClient) return null;
+  // Show loading state if we don't have required props or chatClient or currentChannel
+  // if (!hasRequiredProps || !chatClient || !currentChannel) {
+  //   return (
+  //     <div className="flex items-center justify-center h-full">
+  //       <div className="text-center">
+  //         <p className="text-gray-500 dark:text-gray-400 text-sm">
+  //           {!hasRequiredProps 
+  //             ? "Initializing chat..." 
+  //             : !chatClient 
+  //               ? "Refresh the page and try again" 
+  //               : "Setting up channel..."}
+  //         </p>
+  //       </div>
+  //     </div>
+  //   );
+  // }
+
+  console.log("chatClient", chatClient);
+  console.log("currentChannel", currentChannel);
+  console.log("dmUnread", dmUnread);
+  console.log("eventUnread", eventUnread);
+  console.log("globalUnread", globalUnread);
+  console.log("qaUnread", qaUnread);
 
   return (
     <div className={`chat str-chat h-full`}>
@@ -71,7 +97,9 @@ const   ChatContainer = ({ sessionToken, callId }) => {
       )}
       {!isFullScreen && (
         <div className={`chat-components ${isFullScreen ? "full-screen" : ""}`}>
-          <Chat client={chatClient}>
+          {
+            chatClient && currentChannel ? (
+             <Chat client={chatClient}>
             <ChatHeader
               dmUnread={dmUnread}
               eventUnread={eventUnread}
@@ -92,11 +120,15 @@ const   ChatContainer = ({ sessionToken, callId }) => {
             >
               <ChannelInner />
             </Channel>
-          </Chat>
+             </Chat>
+         ) : (
+           <div className="flex items-center justify-center h-full">
+             <div className="text-center">Loading chat...</div>
         </div>
       )}
     </div>
+      )}
+    </div>
   );
-};
-
+}
 export default ChatContainer;

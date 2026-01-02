@@ -1,13 +1,11 @@
 import { useCallback, useEffect, useState } from "react";
-import {
-  ChatAutoComplete,
-  CooldownTimer,
-  useMessageInputContext,
-} from "stream-chat-react";
+import EmojiPicker from "emoji-picker-react";
+import { Send } from "lucide-react";
+import { ChatAutoComplete, CooldownTimer, useMessageInputContext } from "stream-chat-react";
+import { Button } from "@/components/ui/button";
 import { useEventContext } from "../context/EventContext";
 import { useGiphyContext } from "../context/GiphyContext";
-import { Send } from "lucide-react";
-import EmojiPicker from "emoji-picker-react";
+
 
 export const MessageInputUI = () => {
   const {
@@ -88,23 +86,23 @@ export const MessageInputUI = () => {
   return (
     <div
       style={{
-        position: "relative",
-        display: "flex",
+        position: 'relative',
+        display: 'flex',
         // flexDirection: "column",
-        alignItems: "center",
-        width: "100%",
+        alignItems: 'center',
+        width: '100%',
       }}
     >
       {/* INPUT CONTAINER */}
       <div
-        className={`input-ui-input  dark:bg-gray-900 bg-gray-200 ${giphyState ? "giphy" : ""}`}
+        className={`input-ui-input  dark:bg-gray-800 text-gray-800 dark:text-gray-200 bg-gray-200 ${giphyState ? 'giphy' : ''}`}
         style={{
-          display: "flex",
-          alignItems: "center",
-          width: "100%",
-          borderRadius: "8px",
-          padding: "6px 10px",
-          boxSizing: "border-box",
+          display: 'flex',
+          alignItems: 'center',
+          width: '100%',
+          borderRadius: '0 0 8px 8px',
+          padding: '6px 10px',
+          boxSizing: 'border-box',
         }}
       >
         {/* EMOJI BUTTON */}
@@ -116,10 +114,10 @@ export const MessageInputUI = () => {
           }}
           aria-label="Toggle emoji picker"
           style={{
-            background: "transparent",
-            border: "none",
+            background: 'transparent',
+            border: 'none',
             fontSize: 22,
-            cursor: "pointer",
+            cursor: 'pointer',
             marginRight: 6,
           }}
         >
@@ -133,17 +131,17 @@ export const MessageInputUI = () => {
             onChange={onChange}
             placeholder="Your Comment..."
             style={{
-              width: "100%",
-              border: "none",
-              outline: "none",
-              fontSize: "14px",
-              background: "transparent",
+              width: '100%',
+              border: 'none',
+              outline: 'none',
+              fontSize: '14px',
+              background: 'transparent',
             }}
           />
         </div>
 
         {/* COMMANDS BUTTON (optional) */}
-        {chatType !== "qa" && (
+        {chatType !== 'qa' && (
           <></>
           // <div
           //   className={`input-ui-input-commands-button ${
@@ -166,11 +164,11 @@ export const MessageInputUI = () => {
       {showEmojiPicker && (
         <div
           style={{
-            position: "absolute",
-            bottom: "100px",
-            left: "0",
+            position: 'absolute',
+            bottom: '100px',
+            left: '0',
             zIndex: 1200,
-            boxShadow: "0 6px 18px rgba(0,0,0,0.15)",
+            boxShadow: '0 6px 18px rgba(0,0,0,0.15)',
           }}
           onClick={(e) => e.stopPropagation()}
         >
@@ -179,27 +177,31 @@ export const MessageInputUI = () => {
       )}
 
       {/* SEND BUTTON */}
-      <button
-        className={`btn btn-sm input-ui-send-button ${text ? "text" : ""} ${cooldownRemaining ? "cooldown" : ""
-          }`}
+      <Button
+        className={`btn btn-sm input-ui-send-button ${text ? 'text' : ''} ${
+          cooldownRemaining ? 'cooldown' : ''
+        }`}
         disabled={!text}
         onClick={handleSend}
+        variant="primary"
+        size="sm"
+        mode="icon"
         style={{
           marginTop: 12,
-          alignSelf: "flex-end",
-          background: "#4f46e5",
-          color: "#fff",
-          borderRadius: "6px",
-          padding: "6px 14px",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          cursor: text ? "pointer" : "not-allowed",
-          position: "absolute",
-          right: "20px",
+          alignSelf: 'flex-end',
+          background: '#7c4902',
+          color: '#fff',
+          borderRadius: '6px',
+          padding: '6px 14px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          cursor: text ? 'pointer' : 'not-allowed',
+          position: 'absolute',
+          right: '20px',
           zIndex: 1,
-          top:"15px",
-          bottom: "20px",
+          top: '15px',
+          bottom: '20px',
           opacity: text ? 1 : 0.6,
         }}
       >
@@ -215,7 +217,7 @@ export const MessageInputUI = () => {
         ) : (
           <Send size={20} />
         )}
-      </button>
-    </div >
+      </Button>
+    </div>
   );
 };

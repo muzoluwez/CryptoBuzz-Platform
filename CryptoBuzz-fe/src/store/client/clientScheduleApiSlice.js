@@ -22,8 +22,28 @@ export const clientScheduleApiSlice = createApi({
       },
       providesTags: ['Schedule'],
     }),
+    getToken: builder.mutation({
+      query: (payload) => ({
+        url: '/users/schedule/get-token',
+        method: 'POST',
+        body: payload,
+      }),
+    }),
+    getActiveLiveStreamByEducator: builder.query({
+      query: (educatorId) => `/users/schedule/educator/${educatorId}/active-live`,
+      providesTags: ['Schedule'],
+    }),
+    getAllActiveLiveStreams: builder.query({
+      query: () => `/users/schedule/active-live-streams`,
+      providesTags: ['Schedule'],
+    }),
   }),
 });
 
-export const { useGetScheduleQuery, useLazyGetScheduleQuery } =
-  clientScheduleApiSlice;
+export const {
+  useGetScheduleQuery,
+  useLazyGetScheduleQuery,
+  useGetTokenMutation,
+  useGetActiveLiveStreamByEducatorQuery,
+  useGetAllActiveLiveStreamsQuery,
+} = clientScheduleApiSlice;
