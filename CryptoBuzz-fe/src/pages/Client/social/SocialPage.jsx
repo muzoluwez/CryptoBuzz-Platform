@@ -299,7 +299,7 @@ export default function SocialPage() {
             >
               <Card className="max-w-full overflow-hidden rounded-xl shadow-md mb-5">
                 <CardHeader className="p-4 justify-between">
-                  <div className="flex items-start gap-3">
+                  <div className="flex items-center gap-3">
                     <Avatar className="h-10 w-10">
                       <AvatarImage
                         src={post?.author?.image}
@@ -339,7 +339,7 @@ export default function SocialPage() {
                 </CardHeader>
 
                 <CardContent className="p-4 pt-2">
-                  <div className="mb-5">
+                  <div className="">
                     <div className="text-sm text-gray-600 dark:text-gray-300 mt-2">
                       {post?.content ? (
                         <ShowMoreLess text={post.content} limit={100} />
@@ -352,7 +352,7 @@ export default function SocialPage() {
                   {post?.images &&
                     Array.isArray(post.images) &&
                     post.images.length > 0 && (
-                      <div className="rounded-xl overflow-hidden h-72 relative mb-4">
+                      <div className="rounded-xl overflow-hidden h-72 relative mt-5 mb-4">
                         <ImageCarousel
                           images={post.images}
                           alt={post?.content || 'Social post'}

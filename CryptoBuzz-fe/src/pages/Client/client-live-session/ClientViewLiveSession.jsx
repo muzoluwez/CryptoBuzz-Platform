@@ -51,8 +51,8 @@ const ClientViewLiveSession = ({ bannerImage, callId, educatorData }) => {
       let newClient;
       try {
         newClient = new StreamVideoClient({ apiKey });
-        await newClient.connectUser({ id: userId }, token); // Authenticate FIRST
-        const newCall = newClient.call("livestream", callId);
+        await newClient?.connectUser({ id: userId }, token); // Authenticate FIRST
+        const newCall = newClient?.call("livestream", callId);
         // await newCall.get(); // Verify call exists
         await newCall.getOrCreate({
           data: {
@@ -75,7 +75,7 @@ const ClientViewLiveSession = ({ bannerImage, callId, educatorData }) => {
         setCall(newCall);
       } catch (err) {
         console.error("Stream init failed:", err);
-        if (newClient) await newClient.disconnectUser(); // Cleanup on failure
+        if (newClient) await newClient?.disconnectUser(); // Cleanup on failure
       } finally {
         isInitializing.current = false;
       }
@@ -88,7 +88,7 @@ const ClientViewLiveSession = ({ bannerImage, callId, educatorData }) => {
   useEffect(() => {
     return () => {
       if (client) {
-        client.disconnectUser().catch(console.error);
+        client?.disconnectUser()?.catch(console.error);
       }
     };
   }, [client]);
@@ -101,7 +101,7 @@ const ClientViewLiveSession = ({ bannerImage, callId, educatorData }) => {
   const fetchRecordings = async () => {
     try {
       if (call) {
-        const response = await call.queryRecordings();
+        const response = await call?.queryRecordings();
         setRecordings(response?.recordings || []);
       }
     } catch (err) {

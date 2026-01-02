@@ -27,7 +27,7 @@ export default function ViewIdeaModel({ idea, isOpen, onClose }) {
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="text-2xl font-bold">Trading Signal Details</DialogTitle>
+          <DialogTitle className="text-2xl font-bold text-start">Trading Signal Details</DialogTitle>
           <DialogClose />
         </DialogHeader>
 

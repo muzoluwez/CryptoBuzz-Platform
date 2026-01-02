@@ -20,7 +20,7 @@ const ClientLiveSessionList = ({ userId, userToken }) => {
         setClient(streamClient);
 
         return () => {
-            streamClient.disconnectUser();
+            streamClient?.disconnectUser();
         };
     }, [userId, userToken]);
 
@@ -30,7 +30,7 @@ const ClientLiveSessionList = ({ userId, userToken }) => {
         setLoading(true);
 
         try {
-            const response = await client.queryCalls({
+            const response = await client?.queryCalls({
                 filter_conditions: { type: "livestream" },
                 sort: [{ field: "created_at", direction: -1 }],
                 limit: 5, // Adjust limit as needed
@@ -38,7 +38,7 @@ const ClientLiveSessionList = ({ userId, userToken }) => {
             });
 
             setLiveStreams((prev) =>
-                loadMore ? [...prev, ...response.calls] : response.calls
+                loadMore ? [...prev, ...response?.calls] : response.calls
             );
 
             setNext(response.next); // Update pagination cursor

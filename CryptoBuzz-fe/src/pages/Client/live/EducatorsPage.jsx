@@ -201,8 +201,8 @@ const EducatorsPage = () => {
       </Card>
       <div className="container mb-6">
         {/* Header Controls */}
-        <div className="flex items-center justify-between mb-8">
-          <div className="flex items-center gap-4">
+        <div className="flex items-center justify-between flex-wrap gap-4 mb-8">
+          <div className="flex items-center flex-wrap gap-4">
             {/* Tabs */}
             <button
               onClick={() => setActiveTab('All')}
@@ -405,7 +405,7 @@ const EducatorsPage = () => {
                       className={`py-2.5 rounded-lg font-medium transition-all flex items-center justify-center gap-2 cursor-pointer ${
                         followingIds.includes(educator.id)
                           ? 'bg-primary text-white hover:bg-primary-dark'
-                          : 'bg-primary/10 text-primary hover:bg-primary/20'
+                          : 'bg-primary/10 text-black dark:text-gray-200 hover:bg-primary/20'
                       }`}
                     >
                       {followingIds.includes(educator.id) ? (

@@ -86,27 +86,27 @@ const UpvoteButton = () => {
   const { message } = useMessageContext();
 
   const userUpVoted =
-    client.userID && message.up_votes?.includes(client.userID);
+    client?.userID && message?.up_votes?.includes(client?.userID);
 
   const handleClick = useCallback(
     async (event) => {
       event.stopPropagation();
 
-      const mentionIDs = message.mentioned_users?.map(({ id }) => id);
+      const mentionIDs = message?.mentioned_users?.map(({ id }) => id);
       let updatedUpVotes;
 
-      if (!message.up_votes) {
+      if (!message?.up_votes) {
         return await client.updateMessage({
           ...message,
           mentioned_users: mentionIDs,
-          up_votes: [client.userID],
+          up_votes: [client?.userID],
         });
-      } else if (client.userID && message.up_votes.includes(client.userID)) {
+      } else if (client?.userID && message?.up_votes?.includes(client?.userID)) {
         updatedUpVotes = message.up_votes.filter(
-          (userID) => userID !== client.userID
+          (userID) => userID !== client?.userID
         );
       } else {
-        updatedUpVotes = [...message.up_votes, client.userID];
+        updatedUpVotes = [...message.up_votes, client?.userID];
       }
 
       return await client.updateMessage({
@@ -242,11 +242,11 @@ export const MessageUI = ({ setMessageActionUser }) => {
   const isTopMessage = messages?.[0].id === message.id;
 
   const showTitle =
-    message.user?.title === "Admin" || message.user?.title === "Moderator";
+    message?.user?.title === "Admin" || message?.user?.title === "Moderator";
 
   const isQA = chatType === "qa";
 
-  if (!message.user) return null;
+  if (!message?.user) return null;
   return (
     <div
       ref={messageRef}
@@ -267,22 +267,22 @@ export const MessageUI = ({ setMessageActionUser }) => {
       )} */}
       <Avatar
         className="size-10 avatar_img"
-        image={message.user.image}
-        name={message.user.name || message.user.id}
+        image={message?.user?.image}
+        name={message?.user?.name || message?.user?.id}
       />
       <div className="message-ui-content">
         <div className="message-ui-content-top">
           <div className="message-ui-content-top-name">
-            {message.user.name || message.user.id}
+            {message?.user?.name || message?.user?.id}
           </div>
           {/* {showTitle && <div className='message-ui-content-top-title'>{message.user.title}</div>} */}
           <div className="message-ui-content-top-time">
             {getTimeSinceMessage()}
           </div>
         </div>
-        <div className="message-ui-content-bottom">{message.text}</div>
-        {!!message.attachments?.length && (
-          <Attachment attachments={message.attachments} />
+        <div className="message-ui-content-bottom">{message?.text}</div>
+        {!!message?.attachments?.length && (
+          <Attachment attachments={message?.attachments} />
         )}
         <OpenThreadButton />
         <SimpleReactionsList reactionOptions={customReactions} />
