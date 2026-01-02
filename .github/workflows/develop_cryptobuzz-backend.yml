@@ -97,10 +97,9 @@ jobs:
         working-directory: CryptoBuzz-be
         run: npm install
 
-      - name: Create deployment zip
+      - name: Zip backend (KEEP FOLDER)
         run: |
-          cd CryptoBuzz-be
-          zip -r ../backend.zip .
+          zip -r backend.zip CryptoBuzz-be
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
@@ -111,8 +110,6 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     needs: build
-
-    # 🔥 THIS IS THE FIX
     permissions:
       id-token: write
       contents: read
@@ -130,7 +127,7 @@ jobs:
           tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_D74A9B2104CF4C768AA2E65BC88F0879 }}
           subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_B51BF8285D9944268F77DCC868A355C5 }}
 
-      - name: Deploy ZIP to Azure
+      - name: Deploy to Azure
         uses: azure/webapps-deploy@v3
         with:
           app-name: cryptoBuzz-backend
