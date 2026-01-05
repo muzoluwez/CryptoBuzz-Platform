@@ -6,17 +6,20 @@ export const getToken = async (req, res) => {
   const { userId } = req.body;
   if (!userId) return res.status(400).send("User ID is required");
 
+  if (!streamClient) {
+    return res.status(500).send("Stream client is not initialized");
+  }
+
   try {
-    const token = streamClient.generateUserToken(
-      { user_id: userId },
-      process.env.JWT_SECRET,
-      {
-        expiresIn: "1y",
-      }
-    );
+    // Stream's generateUserToken uses the API secret automatically (no need to pass JWT_SECRET)
+    // validity_in_seconds: 31536000 = 1 year (365 * 24 * 60 * 60)
+    const token = streamClient.generateUserToken({
+      user_id: userId,
+      validity_in_seconds: 31536000, // 1 year
+    });
     res.json({ token });
   } catch (error) {
-    console.error(error);
+    console.error("Error generating Stream token:", error);
     res.status(500).send("Error generating token");
   }
 };

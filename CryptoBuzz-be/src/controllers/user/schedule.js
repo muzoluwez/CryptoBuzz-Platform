@@ -66,12 +66,15 @@ export const getToken = asyncHandler(async (req, res) => {
   }
 
   try {
-    const token = streamClient.generateUserToken({ user_id: userId }, process.env.JWT_SECRET, {
-      expiresIn: "1y"
+    // Stream's generateUserToken uses the API secret automatically (no need to pass JWT_SECRET)
+    // validity_in_seconds: 31536000 = 1 year (365 * 24 * 60 * 60)
+    const token = streamClient.generateUserToken({
+      user_id: userId,
+      validity_in_seconds: 31536000, // 1 year
     });
     return res.status(200).json(ApiResponse(200, { token }, "Token generated successfully"));
   } catch (error) {
-    console.error("Error generating token:", error);
+    console.error("Error generating Stream token:", error);
     throw new ApiError(500, "Error generating token");
   }
 });
