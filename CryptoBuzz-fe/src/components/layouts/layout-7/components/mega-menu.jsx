@@ -96,7 +96,7 @@ export function MegaMenu() {
               className={cn(linkClass)}
               data-active={isActive('/client/crypto') || undefined}
             >
-              Crypto
+              Crypto Projects
             </Link>
           </NavigationMenuLink>
         </NavigationMenuItem>
