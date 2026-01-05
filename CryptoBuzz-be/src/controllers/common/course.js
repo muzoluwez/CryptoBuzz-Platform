@@ -33,7 +33,8 @@ const courseValidationSchema = yup.object().shape({
   instructor: yup
     .string()
     .matches(/^[0-9a-fA-F]{24}$/)
-    .required()
+    .required(),
+  hotmartProductId: yup.string().nullable().optional(),
 });
 
 const courseReorderSchema = yup.object().shape({

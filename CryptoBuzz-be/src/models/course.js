@@ -36,6 +36,11 @@ const CourseSchema = new mongoose.Schema(
       { type: mongoose.Schema.Types.ObjectId, ref: "Section" }
     ],
 
+    hotmartProductId: {
+      type: String,
+      default: null,
+    },
+
     isDeleted: { type: Boolean, default: false },
     deletedAt: { type: Date },
   },
