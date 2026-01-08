@@ -99,6 +99,9 @@ export const CourseBasedOnSection = async (req, res) => {
           categories: sortCategories(categoriesData),
           course: [],
           AllCourse: coursesData.map(item => ({
+            tier: item.tier,
+            price: item.price,
+            hotmartProductId: item.hotmartProductId,
             _id: item._id,
             title: item.title,
             description: item.description,
@@ -161,13 +164,16 @@ export const CourseBasedOnSection = async (req, res) => {
         language: languageData,
         categories: sortCategories(categoriesData),
         course: [],
-        AllCourse: coursesData.map(item => ({
-          _id: item._id,
-          title: item.title,
-          description: item.description,
-          imageUrl: item.imageUrl
-        }))
-      });
+          AllCourse: coursesData.map(item => ({
+            _id: item._id,
+            title: item.title,
+            description: item.description,
+            imageUrl: item.imageUrl,
+            tier: item.tier,
+            price: item.price,
+            hotmartProductId: item.hotmartProductId
+          }))
+        });
     }
 
     // STEP 2: Extract required values
@@ -216,7 +222,10 @@ export const CourseBasedOnSection = async (req, res) => {
       _id: item._id,
       title: item.title,
       description: item.description,
-      imageUrl: item.imageUrl
+      imageUrl: item.imageUrl,
+      tier: item.tier,
+      price: item.price,
+      hotmartProductId: item.hotmartProductId
     }));
 
     const activeCourse = allCourses.filter(course => course._id.toString() == id);

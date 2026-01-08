@@ -134,12 +134,12 @@ const verifyHotmartHottok = (receivedHottok, expectedHottok) => {
     console.warn("HOTMART_HOTTOK not configured. Skipping validation.");
     return true; // Allow if not configured (for development/testing)
   }
-  
+
   if (!receivedHottok) {
     console.error("No hottok found in webhook payload");
     return false;
   }
-  
+
   return receivedHottok === expectedHottok;
 };
 
@@ -158,7 +158,8 @@ export const handleHotmartWebhook = async (req, res) => {
     // hottok is Hotmart's authentication token included in EVERY webhook payload
     // It validates that the webhook request is actually from Hotmart
     // Get your hottok from: Hotmart Dashboard → Tools → Webhook → Authentication tab
-    const receivedHottok = req.body.hottok || req.query.hottok;
+    // Note: Hotmart sends it in the header 'x-hotmart-hottok' or in body/query
+    const receivedHottok = req.headers['x-hotmart-hottok'] || req.body.hottok || req.query.hottok;
     const expectedHottok = process.env.HOTMART_HOTTOK;
 
     // Validate hottok to ensure request is from Hotmart
@@ -194,17 +195,17 @@ export const handleHotmartWebhook = async (req, res) => {
       data = req.body;
     }
 
-    console.log("📥 Hotmart webhook received:", { 
-      eventType, 
+    console.log("📥 Hotmart webhook received:", {
+      eventType,
       hottok: receivedHottok ? "***" + receivedHottok.slice(-4) : "missing",
-      hasData: !!data 
+      hasData: !!data
     });
     console.log("Webhook payload:", JSON.stringify(data, null, 2));
 
     // Handle different event types
     // Hotmart event types may vary: PURCHASE_APPROVED, PURCHASE_COMPLETE, PURCHASE_REFUNDED, etc.
     const normalizedEventType = eventType.toUpperCase();
-    
+
     switch (normalizedEventType) {
       case "PURCHASE_APPROVED":
       case "APPROVED":
@@ -429,6 +430,77 @@ export const getUserPurchases = async (req, res) => {
 };
 
 /**
+ * Batch check access for multiple courses (efficient approach)
+ * Accepts array of course IDs and returns access status for each
+ */
+export const batchCheckCourseAccess = async (req, res) => {
+  try {
+    const userId = req.user._id;
+    const { courseIds } = req.body;
+
+    if (!Array.isArray(courseIds) || courseIds.length === 0) {
+      return res.status(400).json({ message: "courseIds array is required" });
+    }
+
+    // Fetch all courses and user purchases in parallel
+    const [courses, purchases] = await Promise.all([
+      Course.find({ _id: { $in: courseIds } }),
+      CoursePurchase.find({ 
+        user: userId,
+        status: "approved",
+        accessGranted: true,
+        course: { $in: courseIds }
+      })
+    ]);
+
+    // Create a Set of purchased course IDs for O(1) lookup
+    const purchasedCourseIds = new Set(
+      purchases.map(p => p.course.toString())
+    );
+
+    // Build access map for each course
+    const accessMap = {};
+    
+    for (const course of courses) {
+      const courseId = course._id.toString();
+      const isPremium = course.tier === "PREMIUM" || (course.price && course.price > 0);
+      
+      if (!isPremium) {
+        // Free course - everyone has access
+        accessMap[courseId] = {
+          hasAccess: true,
+          isPremium: false,
+          reason: "free_course",
+          coursePrice: course.price || 0,
+          courseTier: course.tier
+        };
+      } else {
+        // Premium course - check if purchased
+        const hasAccess = purchasedCourseIds.has(courseId);
+        const purchase = purchases.find(p => p.course.toString() === courseId);
+        
+        accessMap[courseId] = {
+          hasAccess,
+          isPremium: true,
+          purchase: purchase || null,
+          coursePrice: course.price || 0,
+          courseTier: course.tier
+        };
+      }
+    }
+
+    return res.status(200).json(
+      ApiResponse(200, accessMap, "Batch access check completed")
+    );
+  } catch (error) {
+    console.error("Error in batch check course access:", error);
+    return res.status(500).json({
+      message: error.message,
+    });
+  }
+};
+
+/**
  * Check if user has access to a course
  */
 export const checkCourseAccess = async (req, res) => {
@@ -458,8 +530,15 @@ export const checkCourseAccess = async (req, res) => {
 
     const hasAccess = !!purchase;
 
+    // Return additional info to help frontend determine if course is premium
     return res.status(200).json(
-      ApiResponse(200, { hasAccess, purchase: purchase || null }, "Access check completed")
+      ApiResponse(200, { 
+        hasAccess, 
+        purchase: purchase || null,
+        isPremium: course.tier === "PREMIUM" || course.price > 0,
+        courseTier: course.tier,
+        coursePrice: course.price
+      }, "Access check completed")
     );
   } catch (error) {
     console.error("Error checking course access:", error);

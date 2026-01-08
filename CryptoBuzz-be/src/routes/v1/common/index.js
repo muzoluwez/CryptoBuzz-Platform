@@ -14,6 +14,7 @@ import CryptoAnalysisRoute from "./cryptoAnalysis.routes.js";
 import StreamRoute from "./stream.routes.js";
 import healthcheckRoute from "./healthcheck.routes.js";
 import PaymentRoute from "./payment.routes.js";
+import HotmartRoute from "./hotmart.routes.js";
 
 router.use("/auth", AuthRoute);
 router.use("/dashboard", DashboardRoute);
@@ -28,6 +29,7 @@ router.use("/crypto-analysis", CryptoAnalysisRoute);
 router.use("/stream", StreamRoute);
 router.use("/healthCheck", healthcheckRoute);
 router.use("/payment", PaymentRoute);
+router.use("/hotmart", HotmartRoute);
 
 export default router;
 

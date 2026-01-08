@@ -8,6 +8,7 @@ import {
   useGetLanguageListQuery,
 } from "../../../../../../../store/api/admin/adminAcademyCategoryApiSlice";
 import { useGetAdminCoursesTypesQuery } from "../../../../../../../store/api/admin/adminCoursesTypesApiSlice";
+import { useGetHotmartProductsQuery } from "../../../../../../../store/api/admin/adminHotmartApiSlice";
 import {
   Select,
   SelectContent,
@@ -34,8 +35,17 @@ const createCourseSchema = z.object({
   tier: z.enum(["FREE", "PREMIUM"], {
     required_error: "Please select a tier",
   }),
+  hotmartProductId: z.string().optional(),
   section: z.string().min(1, "Please select a course type"),
   language: z.string().min(1, "Please select a course language"),
+}).refine((data) => {
+  if (data.tier === "PREMIUM" && !data.hotmartProductId) {
+    return false;
+  }
+  return true;
+}, {
+  message: "Hotmart Product is required for Premium courses",
+  path: ["hotmartProductId"],
 });
 
 const editCourseSchema = z.object({
@@ -61,8 +71,17 @@ const editCourseSchema = z.object({
   tier: z.enum(["FREE", "PREMIUM"], {
     required_error: "Please select a tier",
   }),
+  hotmartProductId: z.string().optional(),
   section: z.string().min(1, "Please select a course type"),
   language: z.string().min(1, "Please select a course language"),
+}).refine((data) => {
+  if (data.tier === "PREMIUM" && !data.hotmartProductId) {
+    return false;
+  }
+  return true;
+}, {
+  message: "Hotmart Product is required for Premium courses",
+  path: ["hotmartProductId"],
 });
 
 const CourseForm = ({ onSubmit, initialData, isLoading }) => {
@@ -72,7 +91,8 @@ const CourseForm = ({ onSubmit, initialData, isLoading }) => {
   const [currentImageFile, setCurrentImageFile] = useState(null);
   const { data } = useGetEducatorAcademyCategoryQuery();
   const { data: languagesList } = useGetLanguageListQuery();
-  const { data: courseTypesList } = useGetAdminCoursesTypesQuery()
+  const { data: courseTypesList } = useGetAdminCoursesTypesQuery();
+  const { data: hotmartProducts } = useGetHotmartProductsQuery();
 
   // Choose schema based on whether we're editing or creating
   const courseSchema = initialData ? editCourseSchema : createCourseSchema;
@@ -97,6 +117,8 @@ const CourseForm = ({ onSubmit, initialData, isLoading }) => {
       section: "",
       language: "",
       tier: "FREE",
+      price: 0,
+      hotmartProductId: "",
     },
   });
 
@@ -108,6 +130,9 @@ const CourseForm = ({ onSubmit, initialData, isLoading }) => {
       }
       if (initialData.category?._id) {
         setValue("category", initialData.category._id);
+      }
+      if (initialData.hotmartProductId) {
+        setValue("hotmartProductId", initialData.hotmartProductId);
       }
     }
   }, [initialData, setValue]);
@@ -138,8 +163,13 @@ const CourseForm = ({ onSubmit, initialData, isLoading }) => {
     formData.append("published", data.published);
     formData.append("isFeatured", data.isFeatured);
     formData.append("tier", data.tier);
+    formData.append("price", data.tier === "FREE" ? 0 : data.price);
     formData.append("section", data.section);
     formData.append("language", data.language);
+
+    if (data.tier === "PREMIUM" && data.hotmartProductId) {
+      formData.append("hotmartProductId", data.hotmartProductId);
+    }
 
     // Handle image file - required for new courses, optional for edits with existing image
     if (data.imageFile instanceof File && data.imageFile.size > 0) {
@@ -396,6 +426,71 @@ const CourseForm = ({ onSubmit, initialData, isLoading }) => {
           )}
         </div>
       </div>
+
+      {selectedTier === "PREMIUM" && (
+        <div className="space-y-2">
+          <label
+            htmlFor="hotmartProductId"
+            className="block text-sm font-medium text-gray-700"
+          >
+            Hotmart Product <span className="text-red-500 font-bold">*</span>
+          </label>
+          <Controller
+            name="hotmartProductId"
+            control={control}
+            render={({ field }) => (
+              <Select
+                value={field.value}
+                onValueChange={field.onChange}
+                className={`form-control input input-md w-full ${errors.hotmartProductId ? "border border-danger" : ""}`}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select Hotmart Product" />
+                </SelectTrigger>
+                <SelectContent>
+                  {hotmartProducts?.data?.items?.length > 0 ? (
+                    hotmartProducts.data.items.map((product) => (
+                      <SelectItem key={product.id} value={String(product.id)}>
+                        {product.name}
+                      </SelectItem>
+                    ))
+                  ) : (
+                    <SelectItem disabled value="null">
+                      No products found
+                    </SelectItem>
+                  )}
+                </SelectContent>
+              </Select>
+            )}
+          />
+          {errors.hotmartProductId && (
+            <p className="text-sm text-red-600">{errors.hotmartProductId.message}</p>
+          )}
+        </div>
+      )}
+
+      {selectedTier === "PREMIUM" && (
+        <div className="space-y-2">
+          <label
+            htmlFor="price"
+            className="block text-sm font-medium text-gray-700"
+          >
+            Course Price (USD) <span className="text-red-500 font-bold">*</span>
+          </label>
+          <input
+            id="price"
+            type="number"
+            step="0.01"
+            min="0"
+            className="form-control input input-md w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm"
+            placeholder="Enter course price in USD"
+            {...register("price", { valueAsNumber: true })}
+          />
+          {errors.price && (
+            <p className="text-sm text-red-600">{errors.price.message}</p>
+          )}
+        </div>
+      )}
 
       <div className="flex items-center justify-between p-4 border rounded-lg">
         <div>

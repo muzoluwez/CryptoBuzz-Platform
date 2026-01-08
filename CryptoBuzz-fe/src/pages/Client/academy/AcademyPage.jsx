@@ -1,10 +1,19 @@
-import React, { useEffect, useState } from 'react';
-import { ChevronDown, Play } from 'lucide-react';
+import React, { useEffect, useState, useRef } from 'react';
+import { ChevronDown, Play, Lock } from 'lucide-react';
 import { useLocation } from 'react-router';
+import { useSelector } from 'react-redux';
 import { Card, CardContent } from '../../../components/ui/card';
 import useDocumentTitle from '../../../hooks/use-document-title';
 import { convertRtkEditorToFormattedPlainText } from '../../../lib/rtkEditorUtils';
 import { useGetAcademyCategoryByMainSectionQuery } from '../../../store/client/clientAcademyCategoryApiSlice';
+import { useCourseAccessFromMap } from '../../../hooks/use-batch-course-access';
+import { useBatchCourseAccess } from '../../../hooks/use-batch-course-access';
+import { CourseLockOverlay } from '../../../components/payment/CourseLockOverlay';
+import { PurchaseButton } from '../../../components/payment/PurchaseButton';
+import { RecommendedCourseCard } from '../../../components/payment/RecommendedCourseCard';
+import { useCreatePaymentLinkMutation } from '../../../store/client/clientPaymentApiSlice';
+import { selectCurrentToken } from '../../../store/authSlice';
+import { toast } from 'sonner';
 
 
 // Helper function to convert video URLs to embeddable formats
@@ -80,7 +89,8 @@ function CourseUI({
   onCourseClick,
   onBackToVault,
   academyCourseLoading = false,
-  academyCourseFetching = false
+  academyCourseFetching = false,
+  courseAccessMap = {}
 }) {
 
   // console.log("CourseUI Rendered with lecture:", lecture, "and currentCourse:", currentCourse);
@@ -94,6 +104,44 @@ function CourseUI({
   // Video player state - sync with parent lecture state
   const [selectedVideo, setSelectedVideo] = useState(null);
   const [isVideoPlaying, setIsVideoPlaying] = useState(false);
+  
+  // Payment state
+  const [createPaymentLink, { isLoading: isPurchasing }] = useCreatePaymentLinkMutation();
+  
+  // Get current course for access check
+  // Note: currentCourse[0] is a section, the actual course ID is in currentCourse[0].course
+  const currentCourseSection = currentCourse?.[0] || null;
+  const currentCourseId = currentCourseSection?.course || currentCourseSection?._id || null;
+  
+  // Use batch access map for access checking (no individual API calls)
+  const { hasAccess, isPremium, coursePrice } = useCourseAccessFromMap(
+    currentCourseId,
+    courseAccessMap, // Use batch access map
+    currentCourseSection // Pass course section if available
+  );
+  
+  // Handle purchase
+  const handlePurchase = async () => {
+    if (!currentCourseId) {
+      toast.error('Course ID is required');
+      return;
+    }
+
+    try {
+      const response = await createPaymentLink(currentCourseId).unwrap();
+      
+      if (response?.data?.checkoutUrl) {
+        // Redirect to Hotmart checkout
+        window.location.href = response.data.checkoutUrl;
+      } else {
+        throw new Error('Checkout URL not received');
+      }
+    } catch (error) {
+      console.error('Purchase error:', error);
+      const errorMessage = error?.data?.message || error?.message || 'Failed to create payment link';
+      toast.error(errorMessage);
+    }
+  };
   
   // Check if current category has no courses
   // Show "Coming Soon" if:
@@ -143,6 +191,12 @@ function CourseUI({
   
   // Handle video selection
   const handleVideoSelect = (lessonId, videoUrl) => {
+    // Prevent video selection if course is locked
+    if (isPremium && !hasAccess) {
+      toast.error('Please purchase this course to access the lessons');
+      return;
+    }
+    
     if (videoUrl) {
       setSelectedVideo({ id: lessonId, url: videoUrl });
       setIsVideoPlaying(true);
@@ -155,6 +209,12 @@ function CourseUI({
   
   // Handle play button click on main video area
   const handleMainVideoPlay = () => {
+    // Prevent play if course is locked
+    if (isPremium && !hasAccess) {
+      toast.error('Please purchase this course to access the lessons');
+      return;
+    }
+    
     // Set first lesson video as default
     const firstLesson = introLessons?.[0];
     const videoUrl = getVideoUrl(firstLesson);
@@ -220,29 +280,52 @@ function CourseUI({
             ) : (
               <>
                 {/* Main Video Area */}
-                {isVideoPlaying && selectedVideo ? (
-                  <div className="aspect-video w-full border border-gray-200 rounded-lg overflow-hidden shadow-lg bg-black ">
-                    <iframe
-                      src={getEmbedUrl(selectedVideo?.url)}
-                      className="w-full h-full rounded-lg"
-                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                      allowFullScreen
-                      title="Video Player"
-                    />
-                  </div>
-                ) : (
-                  <div className="relative bg-gradient-to-br from-yellow-600 via-yellow-700 to-gray-800 rounded-lg overflow-hidden aspect-video shadow-lg">
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <button 
-                        onClick={handleMainVideoPlay}
-                        className="bg-white/20 backdrop-blur-sm hover:bg-white/30 transition-all rounded-xl p-6"
-                      >
-                        <Play className="w-12 h-12 text-white fill-white" />
-                      </button>
+                <div className="relative">
+                  {isVideoPlaying && selectedVideo && hasAccess ? (
+                    <div className="aspect-video w-full border border-gray-200 rounded-lg overflow-hidden shadow-lg bg-black ">
+                      <iframe
+                        src={getEmbedUrl(selectedVideo?.url)}
+                        className="w-full h-full rounded-lg"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                        allowFullScreen
+                        title="Video Player"
+                      />
                     </div>
-                    <div className="absolute inset-0 bg-black/20"></div>
-                  </div>
-                )}
+                  ) : (
+                    <div className="relative bg-gradient-to-br from-yellow-600 via-yellow-700 to-gray-800 rounded-lg overflow-hidden aspect-video shadow-lg">
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <button 
+                          onClick={handleMainVideoPlay}
+                          disabled={isPremium && !hasAccess}
+                          className="bg-white/20 backdrop-blur-sm hover:bg-white/30 transition-all rounded-xl p-6 disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                          <Play className="w-12 h-12 text-white fill-white" />
+                        </button>
+                      </div>
+                      <div className="absolute inset-0 bg-black/20"></div>
+                      
+                      {/* Show lock overlay if course is premium and not purchased */}
+                      {isPremium && !hasAccess && (
+                        <CourseLockOverlay
+                          course={currentCourseSection}
+                          onPurchase={handlePurchase}
+                          isPurchasing={isPurchasing}
+                          price={coursePrice}
+                        />
+                      )}
+                    </div>
+                  )}
+                  
+                      {/* Show lock overlay over video player if course is locked */}
+                      {isVideoPlaying && selectedVideo && isPremium && !hasAccess && (
+                        <CourseLockOverlay
+                          course={currentCourseSection}
+                          onPurchase={handlePurchase}
+                          isPurchasing={isPurchasing}
+                          price={coursePrice}
+                        />
+                      )}
+                </div>
 
                 <div className="flex items-center justify-between flex-wrap gap-4 mt-6">
                   <h2 className="text-3xl font-bold text-gray-900 dark:text-gray-200">
@@ -316,27 +399,38 @@ function CourseUI({
                       const lessonId = lesson?._id || lesson?.id;
                       const isSelected = activeLectureId === lessonId || selectedVideo?.id === lessonId;
                       const videoUrl = lesson?.videoUrl || lesson?.content;
+                      const isLocked = isPremium && !hasAccess;
                       
                       return (
                         <button
                           key={lessonId}
                           onClick={() => {
+                            if (isLocked) {
+                              toast.error('Please purchase this course to access the lessons');
+                              return;
+                            }
                             if (videoUrl) {
                               handleVideoSelect(lessonId, videoUrl);
                             }
                           }}
-                          className={`w-full flex items-center gap-3 p-3 rounded-lg transition-colors mt-2 ${
+                          disabled={isLocked}
+                          className={`w-full flex items-center gap-3 p-3 rounded-lg transition-colors mt-2 relative ${
                             isSelected
                               ? "bg-yellow-400 hover:bg-yellow-500"
                               : "bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 "
-                          }`}
+                          } ${isLocked ? "opacity-60 cursor-not-allowed" : ""}`}
                         >
+                          {isLocked && (
+                            <div className="absolute right-2 top-2">
+                              <Lock className="w-4 h-4 text-gray-500" />
+                            </div>
+                          )}
                           <div className="w-8 h-8 rounded-full flex items-center justify-center bg-gray-900">
                             <Play className="w-4 h-4 text-white fill-white" />
                           </div>
 
                           <span
-                            className={`text-sm font-medium ${
+                            className={`text-sm font-medium flex-1 text-left ${
                               isSelected
                                 ? "text-gray-900"
                                 : "text-gray-700 dark:text-gray-300"
@@ -378,26 +472,36 @@ function CourseUI({
                         const lectureId = lectureItem?._id || index;
                         const isSelected = activeLectureId === lectureId;
                         const videoUrl = lectureItem?.videoUrl || lectureItem?.content;
+                        const isLocked = isPremium && !hasAccess;
                         
                         return (
                           <button
                             key={lectureId}
                             onClick={() => {
+                              if (isLocked) {
+                                toast.error('Please purchase this course to access the lessons');
+                                return;
+                              }
                               if (videoUrl) {
                                 handleVideoSelect(lectureId, videoUrl);
                               }
                             }}
-                            className={`w-full flex items-center gap-3 p-3 rounded-lg transition-colors ${
+                            disabled={isLocked}
+                            className={`w-full flex items-center gap-3 p-3 rounded-lg transition-colors relative ${
                               isSelected
                                 ? "bg-yellow-400 hover:bg-yellow-500"
                                 : "bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700"
-                            }`}
+                            } ${isLocked ? "opacity-60 cursor-not-allowed" : ""}`}
                           >
+                            {isLocked && (
+                              <div className="absolute right-2 top-2">
+                                <Lock className="w-4 h-4 text-gray-500" />
+                              </div>
+                            )}
                             <div className="w-8 h-8 rounded-full flex items-center justify-center bg-gray-900">
                               <Play className="w-4 h-4 text-white fill-white" />
                             </div>
-
-                            <span className={`text-sm font-medium ${
+                            <span className={`text-sm font-medium flex-1 text-left ${
                               isSelected
                                 ? "text-gray-900"
                                 : "text-gray-700 dark:text-gray-300"
@@ -442,33 +546,12 @@ function CourseUI({
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {courses.map((course) => {
                 return (
-                  <Card 
-                    key={course?.id || course?._id} 
-                    className="relative bg-black text-white h-[438px] p-0 overflow-hidden group cursor-pointer transition-all"
-                    onClick={() => onCourseClick?.(course)}
-                  >
-                    <CardContent className="p-0">
-                      <div className="relative h-full">
-                        <img
-                          src={course?.imageUrl || "https://images.unsplash.com/photo-1559526324-593bc073d938?q=80&w=800&auto=format&fit=crop"}
-                          alt={course?.title || "course"}
-                          className="w-full h-full object-cover transition-all duration-300"
-                          onError={(e) => {
-                            e.target.onerror = null;
-                            e.target.src = "https://placehold.co/400x225/E0BBE4/957DAD?text=Image+Error";
-                          }}
-                        />
-                        <div className="absolute left-4 bottom-4 text-white z-10">
-                          <h4 className="text-2xl font-bold">{course?.title}</h4>
-                          <p className="text-md mt-3 text-gray-200">{course?.description ? convertRtkEditorToFormattedPlainText(course.description, true) : ''}</p>
-                          <button className="text-yellow-600 hover:text-yellow-700 text-sm font-medium cursor-pointer">
-                            {course?.link || "Show more"}
-                          </button>
-                        </div>
-                      </div>
-                    </CardContent>
-                    <div className='absolute bg-gradient-black inset-0 bg-gradient-green z-0'></div>
-                  </Card>
+                  <RecommendedCourseCard
+                    key={course?.id || course?._id}
+                    course={course}
+                    onCourseClick={onCourseClick}
+                    accessMap={courseAccessMap}
+                  />
                 )
               })}
             </div>
@@ -503,6 +586,11 @@ export default function AcademyPage() {
   const [selectedCourseId, setSelectedCourseId] = useState(null); // For API id parameter
   const [hideVault, setHideVault] = useState(false); // Hide Recommended Courses when course is clicked
   const [recommendedCourses, setRecommendedCourses] = useState([]); // Store recommended courses separately to persist across category changes
+  const [courseAccessMap, setCourseAccessMap] = useState({}); // Batch access map for all courses
+  const isCheckingAccessRef = useRef(false); // Prevent duplicate API calls
+  
+  // Get token from Redux state (primary) or localStorage (fallback)
+  const tokenFromRedux = useSelector(selectCurrentToken);
 
   // URL parameter handling
   const { search } = useLocation();
@@ -790,7 +878,7 @@ export default function AcademyPage() {
     const newCourses = (data?.upcomingCourse && data?.upcomingCourse?.length > 0) 
       ? data.upcomingCourse 
       : (data?.AllCourse && data?.AllCourse?.length > 0) 
-        ? data.AllCourse 
+? data.AllCourse 
         : [];
 
     // Always update recommended courses when API returns new course lists (initial load or category selection)
@@ -809,6 +897,91 @@ export default function AcademyPage() {
       : (data?.AllCourse && data?.AllCourse?.length > 0) 
         ? data.AllCourse 
         : [];
+
+  // Combine recommended courses with current course for batch access check
+  const currentCourseForBatch = React.useMemo(() => {
+    const currentSection = currentCourse?.[0] || null;
+    const currentId = currentSection?.course || currentSection?._id || null;
+    return currentId ? { _id: currentId, ...currentSection } : null;
+  }, [currentCourse]);
+
+  const allCoursesForBatchCheck = React.useMemo(() => {
+    const allCourses = [...courses];
+    // Add current course if it's not already in the list
+    if (currentCourseForBatch && !allCourses.find(c => (c?._id || c?.id) === currentCourseForBatch._id)) {
+      allCourses.push(currentCourseForBatch);
+    }
+    
+    // Debug logging
+    console.log('📚 All Courses for Batch Check:', {
+      recommendedCoursesCount: courses.length,
+      allCoursesCount: allCourses.length,
+      courses: allCourses.map(c => ({ 
+        id: c?._id || c?.id, 
+        title: c?.title,
+        tier: c?.tier,
+        price: c?.price
+      }))
+    });
+    
+    return allCourses;
+  }, [courses, currentCourseForBatch]);
+
+  // Batch access hook for all courses (recommended + current)
+  const { checkAccess: checkBatchAccess, courseIds } = useBatchCourseAccess(allCoursesForBatchCheck);
+
+  // Create a stable string key from courseIds for comparison
+  const courseIdsKey = React.useMemo(() => {
+    return courseIds.length > 0 ? courseIds.sort().join(',') : '';
+  }, [courseIds]);
+
+  // Batch check access when courseIds change (only when courses actually change)
+  useEffect(() => {
+    // Check token from Redux state OR localStorage/sessionStorage
+    const token = tokenFromRedux || localStorage.getItem('token') || sessionStorage.getItem('token');
+    
+    // Debug logging
+    console.log('🔍 Batch Access Check Effect:', {
+      courseIds,
+      courseIdsKey,
+      coursesCount: courses.length,
+      allCoursesForBatchCheck: allCoursesForBatchCheck.length,
+      isCheckingAccessRef: isCheckingAccessRef.current,
+      hasToken: !!token,
+      tokenSource: tokenFromRedux ? 'Redux' : (localStorage.getItem('token') ? 'localStorage' : 'none')
+    });
+
+    // Prevent duplicate calls
+    if (isCheckingAccessRef.current) {
+      console.log('⏸️ Skipping batch access check - already checking');
+      return;
+    }
+
+    if (courseIds.length > 0) {
+      // Always call API - RTK Query will handle token automatically via baseQuery
+      // The API will return proper access data even if user is not authenticated (just all courses will show as locked)
+      console.log('✅ Calling batch access API with courseIds:', courseIds);
+      isCheckingAccessRef.current = true;
+      checkBatchAccess().then((accessMap) => {
+        console.log('✅ Batch access API response:', accessMap);
+        if (accessMap && Object.keys(accessMap).length > 0) {
+          setCourseAccessMap(accessMap);
+        } else {
+          console.warn('⚠️ Batch access API returned empty or invalid response');
+        }
+        isCheckingAccessRef.current = false;
+      }).catch((error) => {
+        console.error('❌ Error fetching batch access:', error);
+        isCheckingAccessRef.current = false;
+      });
+    } else {
+      console.log('⚠️ No courseIds available - clearing access map');
+      // Clear access map if no courses
+      setCourseAccessMap({});
+      isCheckingAccessRef.current = false;
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [courseIdsKey, tokenFromRedux]); // Use stable courseIdsKey instead of courseIds array
 
   // Handle course click from Recommended Courses (IQ Vault behavior)
   const handleCourseClick = (course) => {
@@ -904,6 +1077,7 @@ export default function AcademyPage() {
         hideVault={hideVault}
         academyCourseLoading={academyCourseLoading}
         academyCourseFetching={academyCourseFetching}
+        courseAccessMap={courseAccessMap}
         onCourseClick={handleCourseClick}
         onBackToVault={handleBackToVault}
         onLectureSelect={(lectureId) => {

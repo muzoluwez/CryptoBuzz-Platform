@@ -69,6 +69,7 @@ const CreateCourseModal = forwardRef(
           tier: formData.get("tier"),
           language: formData.get("language"),
           section: formData.get("section"),
+          hotmartProductId: formData.get("hotmartProductId"),
           instructor: auth?.user?._id,
         };
 

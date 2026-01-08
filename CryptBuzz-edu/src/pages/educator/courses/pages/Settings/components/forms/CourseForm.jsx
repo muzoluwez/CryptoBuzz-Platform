@@ -13,6 +13,7 @@ import {
 import { Checkbox } from "@/components/ui/checkbox";
 import { useGetLanguagesQuery } from "../../../../../../../store/api/educator/educatorLanguageApiSlice";
 import { useFetchCategoriesQuery, useGetEducatorCoursesTypesQuery } from "../../../../../../../store/api/educator/educatorAcademyCategoryApiSlice";
+import { useGetHotmartProductsQuery } from "../../../../../../../store/api/educator/educatorHotmartApiSlice";
 ;
 
 // Schema for course validation
@@ -30,8 +31,17 @@ const createCourseSchema = z.object({
   tier: z.enum(["FREE", "PREMIUM"], {
     required_error: "Please select a tier",
   }),
+  hotmartProductId: z.string().optional(),
   section: z.string().min(1, "Please select a course type"),
   language: z.string().min(1, "Please select a course language"),
+}).refine((data) => {
+  if (data.tier === "PREMIUM" && !data.hotmartProductId) {
+    return false;
+  }
+  return true;
+}, {
+  message: "Hotmart Product is required for Premium courses",
+  path: ["hotmartProductId"],
 });
 
 const editCourseSchema = z.object({
@@ -57,8 +67,17 @@ const editCourseSchema = z.object({
   tier: z.enum(["FREE", "PREMIUM"], {
     required_error: "Please select a tier",
   }),
+  hotmartProductId: z.string().optional(),
   section: z.string().min(1, "Please select a course type"),
   language: z.string().min(1, "Please select a course language"),
+}).refine((data) => {
+  if (data.tier === "PREMIUM" && !data.hotmartProductId) {
+    return false;
+  }
+  return true;
+}, {
+  message: "Hotmart Product is required for Premium courses",
+  path: ["hotmartProductId"],
 });
 
 const CourseForm = ({ onSubmit, initialData, isLoading }) => {
@@ -68,7 +87,8 @@ const CourseForm = ({ onSubmit, initialData, isLoading }) => {
   const [currentImageFile, setCurrentImageFile] = useState(null);
   const { data } = useFetchCategoriesQuery();
   const { data: languagesList } = useGetLanguagesQuery();
-  const { data: courseTypesList } = useGetEducatorCoursesTypesQuery()
+  const { data: courseTypesList } = useGetEducatorCoursesTypesQuery();
+  const { data: hotmartProducts } = useGetHotmartProductsQuery();
 
   // Choose schema based on whether we're editing or creating
   const courseSchema = initialData ? editCourseSchema : createCourseSchema;
@@ -93,6 +113,7 @@ const CourseForm = ({ onSubmit, initialData, isLoading }) => {
       section: "",
       language: "",
       tier: "FREE",
+      hotmartProductId: "",
     },
   });
 
@@ -104,6 +125,9 @@ const CourseForm = ({ onSubmit, initialData, isLoading }) => {
       }
       if (initialData.category?._id) {
         setValue("category", initialData.category._id);
+      }
+      if (initialData.hotmartProductId) {
+        setValue("hotmartProductId", initialData.hotmartProductId);
       }
     }
   }, [initialData, setValue]);
@@ -136,6 +160,10 @@ const CourseForm = ({ onSubmit, initialData, isLoading }) => {
     formData.append("tier", data.tier);
     formData.append("section", data.section);
     formData.append("language", data.language);
+
+    if (data.tier === "PREMIUM" && data.hotmartProductId) {
+      formData.append("hotmartProductId", data.hotmartProductId);
+    }
 
     // Handle image file - required for new courses, optional for edits with existing image
     if (data.imageFile instanceof File && data.imageFile.size > 0) {
@@ -392,6 +420,48 @@ const CourseForm = ({ onSubmit, initialData, isLoading }) => {
           )}
         </div>
       </div>
+
+      {selectedTier === "PREMIUM" && (
+        <div className="space-y-2">
+          <label
+            htmlFor="hotmartProductId"
+            className="block text-sm font-medium text-gray-700"
+          >
+            Hotmart Product <span className="text-red-500 font-bold">*</span>
+          </label>
+          <Controller
+            name="hotmartProductId"
+            control={control}
+            render={({ field }) => (
+              <Select
+                value={field.value}
+                onValueChange={field.onChange}
+                className={`form-control input input-md w-full ${errors.hotmartProductId ? "border border-danger" : ""}`}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select Hotmart Product" />
+                </SelectTrigger>
+                <SelectContent>
+                  {hotmartProducts?.data?.items?.length > 0 ? (
+                    hotmartProducts.data.items.map((product) => (
+                      <SelectItem key={product.id} value={String(product.id)}>
+                        {product.name}
+                      </SelectItem>
+                    ))
+                  ) : (
+                    <SelectItem disabled value="null">
+                      No products found
+                    </SelectItem>
+                  )}
+                </SelectContent>
+              </Select>
+            )}
+          />
+          {errors.hotmartProductId && (
+            <p className="text-sm text-red-600">{errors.hotmartProductId.message}</p>
+          )}
+        </div>
+      )}
 
       <div className="flex items-center justify-between p-4 border rounded-lg">
         <div>
