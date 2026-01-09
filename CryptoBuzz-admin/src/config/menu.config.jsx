@@ -21,6 +21,7 @@ import {
   ListTodo,
   Star,
   BadgeCent,
+  Wallet,
 } from "lucide-react";
 import { useAuthContext } from "../auth/useAuthContext";
 
@@ -1339,6 +1340,11 @@ export const sideMenus = {
       title: "Courses",
       icon: <BookOpen />,
       path: "/admin/courses",
+    },
+    {
+      title: "Payment Plans",
+      icon: <Wallet />,
+      path: "/admin/plan",
     },
 
     {

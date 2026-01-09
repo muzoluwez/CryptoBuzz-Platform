@@ -8,7 +8,7 @@ import {
   useGetLanguageListQuery,
 } from "../../../../../../../store/api/admin/adminAcademyCategoryApiSlice";
 import { useGetAdminCoursesTypesQuery } from "../../../../../../../store/api/admin/adminCoursesTypesApiSlice";
-import { useGetHotmartProductsQuery } from "../../../../../../../store/api/admin/adminHotmartApiSlice";
+import { useFetchPlansQuery } from "../../../../../../../store/api/admin/adminPlanApiSlice";
 import {
   Select,
   SelectContent,
@@ -35,17 +35,17 @@ const createCourseSchema = z.object({
   tier: z.enum(["FREE", "PREMIUM"], {
     required_error: "Please select a tier",
   }),
-  hotmartProductId: z.string().optional(),
+  plan: z.string().optional(),
   section: z.string().min(1, "Please select a course type"),
   language: z.string().min(1, "Please select a course language"),
 }).refine((data) => {
-  if (data.tier === "PREMIUM" && !data.hotmartProductId) {
+  if (data.tier === "PREMIUM" && !data.plan) {
     return false;
   }
   return true;
 }, {
-  message: "Hotmart Product is required for Premium courses",
-  path: ["hotmartProductId"],
+  message: "Payment Plan is required for Premium courses",
+  path: ["plan"],
 });
 
 const editCourseSchema = z.object({
@@ -71,17 +71,17 @@ const editCourseSchema = z.object({
   tier: z.enum(["FREE", "PREMIUM"], {
     required_error: "Please select a tier",
   }),
-  hotmartProductId: z.string().optional(),
+  plan: z.string().optional(),
   section: z.string().min(1, "Please select a course type"),
   language: z.string().min(1, "Please select a course language"),
 }).refine((data) => {
-  if (data.tier === "PREMIUM" && !data.hotmartProductId) {
+  if (data.tier === "PREMIUM" && !data.plan) {
     return false;
   }
   return true;
 }, {
-  message: "Hotmart Product is required for Premium courses",
-  path: ["hotmartProductId"],
+  message: "Payment Plan is required for Premium courses",
+  path: ["plan"],
 });
 
 const CourseForm = ({ onSubmit, initialData, isLoading }) => {
@@ -92,7 +92,7 @@ const CourseForm = ({ onSubmit, initialData, isLoading }) => {
   const { data } = useGetEducatorAcademyCategoryQuery();
   const { data: languagesList } = useGetLanguageListQuery();
   const { data: courseTypesList } = useGetAdminCoursesTypesQuery();
-  const { data: hotmartProducts } = useGetHotmartProductsQuery();
+  const { data: plans } = useFetchPlansQuery();
 
   // Choose schema based on whether we're editing or creating
   const courseSchema = initialData ? editCourseSchema : createCourseSchema;
@@ -117,8 +117,7 @@ const CourseForm = ({ onSubmit, initialData, isLoading }) => {
       section: "",
       language: "",
       tier: "FREE",
-      price: 0,
-      hotmartProductId: "",
+      plan: "",
     },
   });
 
@@ -131,8 +130,10 @@ const CourseForm = ({ onSubmit, initialData, isLoading }) => {
       if (initialData.category?._id) {
         setValue("category", initialData.category._id);
       }
-      if (initialData.hotmartProductId) {
-        setValue("hotmartProductId", initialData.hotmartProductId);
+      if (initialData.plan?._id) {
+        setValue("plan", initialData.plan._id);
+      } else if (initialData.plan) {
+        setValue("plan", initialData.plan);
       }
     }
   }, [initialData, setValue]);
@@ -163,12 +164,22 @@ const CourseForm = ({ onSubmit, initialData, isLoading }) => {
     formData.append("published", data.published);
     formData.append("isFeatured", data.isFeatured);
     formData.append("tier", data.tier);
-    formData.append("price", data.tier === "FREE" ? 0 : data.price);
     formData.append("section", data.section);
     formData.append("language", data.language);
 
-    if (data.tier === "PREMIUM" && data.hotmartProductId) {
-      formData.append("hotmartProductId", data.hotmartProductId);
+    // For premium courses, get price from selected plan
+    if (data.tier === "PREMIUM" && data.plan) {
+      formData.append("plan", data.plan);
+      // Get price from selected plan
+      const selectedPlan = plans?.data?.find(p => p._id === data.plan);
+      if (selectedPlan?.price) {
+        formData.append("price", selectedPlan.price);
+      } else {
+        formData.append("price", 0);
+      }
+    } else {
+      // Free courses have price 0
+      formData.append("price", 0);
     }
 
     // Handle image file - required for new courses, optional for edits with existing image
@@ -430,65 +441,45 @@ const CourseForm = ({ onSubmit, initialData, isLoading }) => {
       {selectedTier === "PREMIUM" && (
         <div className="space-y-2">
           <label
-            htmlFor="hotmartProductId"
+            htmlFor="plan"
             className="block text-sm font-medium text-gray-700"
           >
-            Hotmart Product <span className="text-red-500 font-bold">*</span>
+            Payment Plan <span className="text-red-500 font-bold">*</span>
           </label>
           <Controller
-            name="hotmartProductId"
+            name="plan"
             control={control}
             render={({ field }) => (
               <Select
                 value={field.value}
                 onValueChange={field.onChange}
-                className={`form-control input input-md w-full ${errors.hotmartProductId ? "border border-danger" : ""}`}
+                className={`form-control input input-md w-full ${errors.plan ? "border border-danger" : ""}`}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="Select Hotmart Product" />
+                  <SelectValue placeholder="Select Payment Plan" />
                 </SelectTrigger>
                 <SelectContent>
-                  {hotmartProducts?.data?.items?.length > 0 ? (
-                    hotmartProducts.data.items.map((product) => (
-                      <SelectItem key={product.id} value={String(product.id)}>
-                        {product.name}
+                  {plans?.data?.length > 0 ? (
+                    plans.data.map((plan) => (
+                      <SelectItem key={plan._id} value={plan._id}>
+                        {plan.name} - ${plan.price?.toFixed(2) || "0.00"} ({plan.hotmartCheckoutCode || "N/A"})
                       </SelectItem>
                     ))
                   ) : (
                     <SelectItem disabled value="null">
-                      No products found
+                      No plans found. Please create a plan first.
                     </SelectItem>
                   )}
                 </SelectContent>
               </Select>
             )}
           />
-          {errors.hotmartProductId && (
-            <p className="text-sm text-red-600">{errors.hotmartProductId.message}</p>
+          {errors.plan && (
+            <p className="text-sm text-red-600">{errors.plan.message}</p>
           )}
-        </div>
-      )}
-
-      {selectedTier === "PREMIUM" && (
-        <div className="space-y-2">
-          <label
-            htmlFor="price"
-            className="block text-sm font-medium text-gray-700"
-          >
-            Course Price (USD) <span className="text-red-500 font-bold">*</span>
-          </label>
-          <input
-            id="price"
-            type="number"
-            step="0.01"
-            min="0"
-            className="form-control input input-md w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm"
-            placeholder="Enter course price in USD"
-            {...register("price", { valueAsNumber: true })}
-          />
-          {errors.price && (
-            <p className="text-sm text-red-600">{errors.price.message}</p>
-          )}
+          <p className="text-xs text-gray-500">
+            Select a payment plan for this premium course.
+          </p>
         </div>
       )}
 

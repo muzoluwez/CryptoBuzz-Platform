@@ -69,9 +69,20 @@ const CreateCourseModal = forwardRef(
           tier: formData.get("tier"),
           language: formData.get("language"),
           section: formData.get("section"),
-          hotmartProductId: formData.get("hotmartProductId"),
           instructor: auth?.user?._id,
         };
+
+        // Add plan field if present (for premium courses)
+        const planField = formData.get("plan");
+        if (planField) {
+          payload.plan = planField;
+        }
+
+        // Add price field if present (from plan)
+        const priceField = formData.get("price");
+        if (priceField !== null) {
+          payload.price = priceField;
+        }
 
         let requestData;
 
@@ -79,14 +90,19 @@ const CreateCourseModal = forwardRef(
         if (isImageAFile) {
           const uploadFormData = new FormData();
           Object.entries(payload).forEach(([key, value]) => {
-            uploadFormData.append(key, value);
+            if (value !== null && value !== undefined) {
+              uploadFormData.append(key, value);
+            }
           });
           uploadFormData.append("image", imageFile); // append file with correct key
 
           requestData = uploadFormData;
         } else {
           // 3. If no file, send as regular JSON object
-          payload.imageUrl = formData.get("imageUrl");
+          const imageUrl = formData.get("imageUrl");
+          if (imageUrl) {
+            payload.imageUrl = imageUrl;
+          }
           requestData = payload;
         }
 

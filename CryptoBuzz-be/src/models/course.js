@@ -36,6 +36,14 @@ const CourseSchema = new mongoose.Schema(
       { type: mongoose.Schema.Types.ObjectId, ref: "Section" }
     ],
 
+    // Plan reference for Hotmart payment integration
+    plan: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Plan",
+      default: null,
+    },
+
+    // Legacy field - keep for backward compatibility during migration
     hotmartProductId: {
       type: String,
       default: null,

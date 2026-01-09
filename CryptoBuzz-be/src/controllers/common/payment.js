@@ -1,6 +1,8 @@
 import CoursePurchase from "../../models/coursePurchase.js";
 import Course from "../../models/course.js";
+import Plan from "../../models/plan.js";
 import User from "../../models/user.js";
+import UserCredential from "../../models/userCredential.js";
 import { ApiResponse } from "../../utils/ApiResponse.js";
 import crypto from "crypto";
 import * as yup from "yup";
@@ -13,12 +15,24 @@ const createPaymentLinkSchema = yup.object().shape({
     .required("Course ID is required"),
 });
 
-// Hotmart checkout base URL
-const HOTMART_CHECKOUT_BASE_URL = "https://pay.hotmart.com";
+/**
+ * Helper function to extract checkout code from Hotmart checkout URL
+ * (for backward compatibility and webhook matching)
+ */
+const extractCheckoutCodeFromUrl = (url) => {
+  if (!url) return null;
+  const match = url.match(/https?:\/\/pay\.hotmart\.com\/([A-Z0-9]+)/i);
+  if (match && match[1]) return match[1].toUpperCase();
+  const segments = url.split('/').filter(Boolean);
+  const lastSegment = segments[segments.length - 1];
+  if (lastSegment && /^[A-Z0-9]+$/i.test(lastSegment)) return lastSegment.toUpperCase();
+  return null;
+};
+
 
 /**
  * Generate Hotmart payment checkout URL
- * Note: You need to create the product in Hotmart dashboard first and get the product ID
+ * Uses the stored checkout URL directly from Plan model (no need to generate)
  */
 export const createPaymentLink = async (req, res) => {
   try {
@@ -27,16 +41,167 @@ export const createPaymentLink = async (req, res) => {
 
     await createPaymentLinkSchema.validate({ courseId });
 
-    // Check if course exists
-    const course = await Course.findById(courseId);
+    // Check if course exists and populate plan
+    const course = await Course.findById(courseId).populate("plan");
     if (!course) {
       return res.status(404).json({ message: "Course not found" });
     }
 
-    // Check if course is premium/paid
-    if (course.tier === "FREE" || course.price <= 0) {
+    // Get checkout URL directly from plan - it's already stored, no need to generate
+    let hotmartCheckoutUrl = null;
+    let planCheckoutCode = null;
+    let plan = null;
+
+    // Always fetch plan explicitly to ensure we have the latest data
+    if (course.plan) {
+      // Check if plan is already populated (has hotmartCheckoutUrl property)
+      if (course.plan && typeof course.plan === 'object' && course.plan.hotmartCheckoutUrl) {
+        // Plan is populated - use it directly
+        plan = course.plan;
+      } else {
+        // Plan reference exists but wasn't populated - fetch it manually
+        const planId = course.plan._id || course.plan;
+        plan = await Plan.findById(planId);
+        
+        if (!plan) {
+          console.error("Plan reference exists but plan document not found:", {
+            planReference: planId,
+            courseId: courseId,
+            courseTitle: course.title
+          });
+        }
+      }
+      
+      // Get checkout URL directly from plan
+      if (plan) {
+        if (plan.hotmartCheckoutUrl) {
+          const trimmedUrl = plan.hotmartCheckoutUrl.trim();
+          
+          // Validate it's not null, empty, or contains "null"
+          if (trimmedUrl && 
+              trimmedUrl !== 'null' && 
+              trimmedUrl.toLowerCase() !== 'null' &&
+              !trimmedUrl.toLowerCase().includes('/null') &&
+              !trimmedUrl.toLowerCase().endsWith('/null')) {
+            hotmartCheckoutUrl = trimmedUrl;
+            planCheckoutCode = plan.hotmartCheckoutCode || extractCheckoutCodeFromUrl(hotmartCheckoutUrl);
+          } else {
+            console.error("Plan has invalid checkout URL:", {
+              planId: plan._id,
+              planName: plan.name,
+              checkoutUrl: plan.hotmartCheckoutUrl,
+              checkoutUrlType: typeof plan.hotmartCheckoutUrl,
+              courseId: courseId,
+              courseTitle: course.title
+            });
+          }
+        } else {
+          console.error("Plan found but missing hotmartCheckoutUrl:", {
+            planId: plan._id,
+            planName: plan.name,
+            planFields: Object.keys(plan.toObject ? plan.toObject() : plan),
+            courseId: courseId,
+            courseTitle: course.title
+          });
+        }
+      }
+    } else {
+      console.warn("Course does not have a plan assigned:", {
+        courseId: courseId,
+        courseTitle: course.title,
+        courseTier: course.tier,
+        coursePrice: course.price
+      });
+    }
+
+    // Determine if course is premium/paid:
+    // 1. If course has a plan assigned (course.plan exists), it's premium (regardless of tier or price)
+    // 2. If course.tier === "PREMIUM", it's premium
+    // 3. If course.price > 0, it's premium
+    // 4. If plan exists and plan.price > 0, it's premium
+    // Only block payment if course is truly free (no plan reference, tier === "FREE", price <= 0) AND no checkout URL
+    const hasPlanReference = !!course.plan; // Check if plan reference exists (even if plan document wasn't fetched)
+    const hasPlanDocument = !!plan; // Check if plan document was successfully fetched
+    const isPremiumByTier = course.tier === "PREMIUM";
+    const coursePrice = plan?.price ?? course.price ?? 0;
+    const isPremiumByPrice = coursePrice > 0;
+    const isPremiumCourse = hasPlanReference || hasPlanDocument || isPremiumByTier || isPremiumByPrice;
+    
+    // Debug logging for troubleshooting
+    console.log("Payment checkout request:", {
+      courseId: courseId,
+      courseTitle: course.title,
+      courseTier: course.tier,
+      coursePrice: course.price,
+      coursePlanRef: course.plan || null,
+      hasPlanReference: hasPlanReference,
+      hasPlanDocument: hasPlanDocument,
+      planId: plan?._id || null,
+      planName: plan?.name || null,
+      planPrice: plan?.price || null,
+      coursePriceFromPlan: coursePrice,
+      isPremiumByTier,
+      isPremiumByPrice,
+      isPremiumCourse,
+      hasCheckoutUrl: !!hotmartCheckoutUrl,
+      checkoutUrl: hotmartCheckoutUrl || null
+    });
+    
+    // Only block if course is truly free (not premium) AND has no checkout URL
+    if (!isPremiumCourse && !hotmartCheckoutUrl) {
+      console.warn("Blocking payment - course is free:", {
+        courseId: courseId,
+        courseTitle: course.title,
+        courseTier: course.tier,
+        coursePrice: course.price,
+        hasPlanReference: hasPlanReference,
+        hasPlanDocument: hasPlanDocument,
+        planPrice: plan?.price || null,
+        isPremiumCourse: isPremiumCourse
+      });
       return res.status(400).json({
         message: "This course is free. Payment is not required.",
+      });
+    }
+
+    // If no checkout URL, cannot proceed with payment
+    if (!hotmartCheckoutUrl) {
+      return res.status(400).json({
+        message: "Hotmart checkout URL not configured for this course. Please assign a Plan with a valid checkout URL or contact support.",
+        details: plan ? `The Plan "${plan.name}" assigned to this course is missing a checkout URL. Please update the Plan in the admin panel.` : "The course does not have a Plan assigned. Please assign a Plan with a valid checkout URL."
+      });
+    }
+
+    // Validate URL format and ensure it's not null/undefined/contains "null"
+    // Also explicitly reject the word "null" in the URL path
+    const isValidUrl = hotmartCheckoutUrl && 
+                       typeof hotmartCheckoutUrl === 'string' && 
+                       hotmartCheckoutUrl.toLowerCase() !== 'null' &&
+                       !hotmartCheckoutUrl.toLowerCase().includes('/null') &&
+                       !hotmartCheckoutUrl.toLowerCase().endsWith('/null') &&
+                       hotmartCheckoutUrl.match(/^https?:\/\/pay\.hotmart\.com\/[A-Z0-9]+$/i) &&
+                       !hotmartCheckoutUrl.match(/\/null($|\?|#)/i); // Explicitly reject /null at end or followed by query/fragment
+    
+    if (!isValidUrl) {
+      console.error("Invalid or missing checkout URL:", {
+        courseId,
+        courseTitle: course.title,
+        planId: plan?._id || course.plan || null,
+        planName: plan?.name || null,
+        planHasCheckoutUrl: plan?.hotmartCheckoutUrl ? true : false,
+        planCheckoutUrlValue: plan?.hotmartCheckoutUrl ? JSON.stringify(plan.hotmartCheckoutUrl) : null,
+        hotmartCheckoutUrl: hotmartCheckoutUrl || "null/undefined",
+        hotmartCheckoutUrlType: typeof hotmartCheckoutUrl,
+        hotmartProductId: course.hotmartProductId || null,
+        courseTier: course.tier,
+        containsNull: hotmartCheckoutUrl?.toLowerCase().includes('null') || false
+      });
+      return res.status(400).json({
+        message: "Invalid Hotmart checkout URL format.",
+        details: "The checkout URL must be in format: https://pay.hotmart.com/J103673988Y and cannot contain 'null'.",
+        received: hotmartCheckoutUrl || "null/undefined",
+        courseId: courseId,
+        suggestion: plan ? "The course has a Plan assigned, but the Plan has an invalid checkout URL (possibly contains 'null'). Please update the Plan with a valid checkout URL in the admin panel." : "The course does not have a Plan assigned. Please assign a Plan with a valid checkout URL."
       });
     }
 
@@ -53,7 +218,7 @@ export const createPaymentLink = async (req, res) => {
       });
     }
 
-    // Check if there's a pending purchase
+    // Check if there's a pending purchase - return stored checkout URL for existing pending purchase
     const pendingPurchase = await CoursePurchase.findOne({
       user: userId,
       course: courseId,
@@ -61,52 +226,144 @@ export const createPaymentLink = async (req, res) => {
     });
 
     if (pendingPurchase) {
-      return res.status(400).json({
-        message: "You have a pending purchase for this course",
-        purchaseId: pendingPurchase._id,
-      });
+      // IMPORTANT: Always re-fetch plan data when there's a pending purchase
+      // This ensures we have the latest checkout URL even if the plan was updated
+      // or if the plan wasn't populated correctly initially
+      if (course.plan) {
+        // Get plan ID (handle both populated and unpopulated cases)
+        const planId = (course.plan._id || course.plan).toString();
+        const refreshedPlan = await Plan.findById(planId);
+        
+        if (refreshedPlan) {
+          plan = refreshedPlan;
+          
+          // Get fresh checkout URL from plan - validate thoroughly
+          if (refreshedPlan.hotmartCheckoutUrl && 
+              refreshedPlan.hotmartCheckoutUrl !== null && 
+              refreshedPlan.hotmartCheckoutUrl !== 'null' && 
+              refreshedPlan.hotmartCheckoutUrl.trim() !== '' &&
+              typeof refreshedPlan.hotmartCheckoutUrl === 'string' &&
+              refreshedPlan.hotmartCheckoutUrl.toLowerCase() !== 'null' &&
+              !refreshedPlan.hotmartCheckoutUrl.toLowerCase().includes('/null')) {
+            const trimmedUrl = refreshedPlan.hotmartCheckoutUrl.trim();
+            hotmartCheckoutUrl = trimmedUrl;
+            planCheckoutCode = refreshedPlan.hotmartCheckoutCode || extractCheckoutCodeFromUrl(hotmartCheckoutUrl);
+          } else {
+            console.error("Plan found but has invalid checkout URL for pending purchase:", {
+              courseId,
+              purchaseId: pendingPurchase._id,
+              planId: refreshedPlan._id,
+              planName: refreshedPlan.name,
+              checkoutUrl: refreshedPlan.hotmartCheckoutUrl,
+              checkoutUrlType: typeof refreshedPlan.hotmartCheckoutUrl,
+              checkoutUrlValue: JSON.stringify(refreshedPlan.hotmartCheckoutUrl),
+              containsNull: refreshedPlan.hotmartCheckoutUrl?.toLowerCase().includes('null') || false
+            });
+          }
+        } else {
+          console.error("Plan reference exists but plan document not found for pending purchase:", {
+            courseId,
+            purchaseId: pendingPurchase._id,
+            planReference: planId
+          });
+        }
+      }
+
+      // Re-validate checkout URL - this MUST be valid before we return
+      // Explicitly check for null, "null" string, and URLs containing "/null"
+      const isValidPendingUrl = hotmartCheckoutUrl && 
+                                typeof hotmartCheckoutUrl === 'string' && 
+                                hotmartCheckoutUrl !== 'null' &&
+                                hotmartCheckoutUrl.toLowerCase() !== 'null' &&
+                                hotmartCheckoutUrl.trim() !== '' &&
+                                !hotmartCheckoutUrl.toLowerCase().includes('/null') &&
+                                !hotmartCheckoutUrl.toLowerCase().endsWith('/null') &&
+                                hotmartCheckoutUrl.match(/^https?:\/\/pay\.hotmart\.com\/[A-Z0-9]+$/i) &&
+                                !hotmartCheckoutUrl.match(/\/null($|\?|#)/i);
+      
+      if (!isValidPendingUrl) {
+        // If we don't have a valid checkout URL, something is wrong with the course/plan configuration
+        console.error("No valid checkout URL found for pending purchase:", {
+          courseId,
+          purchaseId: pendingPurchase._id,
+          planId: plan?._id || course.plan || null,
+          planExists: !!plan,
+          planCheckoutUrl: plan?.hotmartCheckoutUrl || null,
+          planCheckoutUrlValue: plan?.hotmartCheckoutUrl ? JSON.stringify(plan.hotmartCheckoutUrl) : null,
+          hotmartCheckoutUrl: hotmartCheckoutUrl,
+          hotmartCheckoutUrlType: typeof hotmartCheckoutUrl,
+          containsNull: hotmartCheckoutUrl?.toLowerCase().includes('null') || false
+        });
+        // Delete the invalid pending purchase and let the user try again
+        await CoursePurchase.findByIdAndDelete(pendingPurchase._id);
+        return res.status(400).json({
+          message: "Hotmart checkout URL not configured for this course. Please assign a Plan or contact support.",
+          details: plan ? `The Plan "${plan.name}" assigned to this course has an invalid checkout URL (possibly contains 'null'). Please update the Plan in the admin panel with a valid checkout URL.` : "The course does not have a Plan assigned. Please assign a Plan with a valid checkout URL."
+        });
+      }
+
+      // Get price from plan if available, otherwise use course price
+      const purchaseAmount = plan?.price ?? course.price ?? 0;
+
+      // Final safety check: Ensure checkout URL doesn't contain "null" anywhere
+      if (hotmartCheckoutUrl && (hotmartCheckoutUrl.toLowerCase().includes('null') || hotmartCheckoutUrl === 'null')) {
+        console.error("FATAL: Checkout URL contains 'null' - this should have been caught earlier:", {
+          courseId,
+          purchaseId: pendingPurchase._id,
+          checkoutUrl: hotmartCheckoutUrl
+        });
+        await CoursePurchase.findByIdAndDelete(pendingPurchase._id);
+        return res.status(500).json({
+          message: "Internal server error: Invalid checkout URL configuration detected.",
+          details: "The checkout URL contains invalid data. This has been logged. Please contact support."
+        });
+      }
+
+      return res.status(200).json(
+        ApiResponse(200, {
+          purchaseId: pendingPurchase._id,
+          checkoutUrl: hotmartCheckoutUrl, // Return the validated URL
+          amount: purchaseAmount,
+          currency: "USD",
+        }, "Existing pending purchase found. Redirecting to checkout.")
+      );
     }
 
-    // Get Hotmart product ID from course or use default
-    const hotmartProductId = course.hotmartProductId || process.env.HOTMART_DEFAULT_PRODUCT_ID;
-
-    if (!hotmartProductId) {
-      return res.status(400).json({
-        message: "Hotmart product ID not configured for this course. Please contact support.",
-      });
-    }
+    // Get price from plan if available, otherwise use course price
+    const purchaseAmount = plan?.price ?? course.price ?? 0;
 
     // Create a purchase record
     const purchase = await CoursePurchase.create({
       user: userId,
       course: courseId,
-      amount: course.price,
+      amount: purchaseAmount,
       currency: "USD",
       status: "pending",
       paymentMethod: "hotmart",
-      hotmartProductId: hotmartProductId,
+      hotmartProductId: planCheckoutCode || extractCheckoutCodeFromUrl(hotmartCheckoutUrl) || null, // Store checkout code for webhook matching
     });
 
-    // Generate checkout URL
-    // Hotmart checkout URL format: https://pay.hotmart.com/{product_id}?checkoutMode=default
-    // You can add custom parameters using the checkout builder or API
-    const checkoutUrl = `${HOTMART_CHECKOUT_BASE_URL}/${hotmartProductId}`;
+    // Final safety check: Ensure checkout URL doesn't contain "null" anywhere
+    if (hotmartCheckoutUrl && (hotmartCheckoutUrl.toLowerCase().includes('null') || hotmartCheckoutUrl === 'null')) {
+      console.error("FATAL: Checkout URL contains 'null' - this should have been caught earlier:", {
+        courseId,
+        purchaseId: purchase._id,
+        checkoutUrl: hotmartCheckoutUrl
+      });
+      // Delete the invalid purchase that was just created
+      await CoursePurchase.findByIdAndDelete(purchase._id);
+      return res.status(500).json({
+        message: "Internal server error: Invalid checkout URL configuration detected.",
+        details: "The checkout URL contains invalid data. This has been logged. Please contact support."
+      });
+    }
 
-    // Add custom parameters (buyer email, etc.)
-    const user = await User.findById(userId);
-    const checkoutParams = new URLSearchParams({
-      checkoutMode: "default",
-      email: user.email || "",
-      // Add your custom parameters here if needed
-    });
-
-    const fullCheckoutUrl = `${checkoutUrl}?${checkoutParams.toString()}`;
-
+    // Return the stored checkout URL directly from plan (no need to generate)
     return res.status(200).json(
       ApiResponse(200, {
         purchaseId: purchase._id,
-        checkoutUrl: fullCheckoutUrl,
-        amount: course.price,
+        checkoutUrl: hotmartCheckoutUrl, // Return the stored URL directly (no generation needed)
+        amount: purchaseAmount,
         currency: "USD",
       }, "Payment link generated successfully")
     );
@@ -242,7 +499,7 @@ export const handleHotmartWebhook = async (req, res) => {
 
 /**
  * Handle purchase approved event
- * Handles multiple webhook data formats from Hotmart
+ * Updated to find courses by Plan and track each course purchase individually
  */
 const handlePurchaseApproved = async (data) => {
   try {
@@ -285,10 +542,34 @@ const handlePurchaseApproved = async (data) => {
       return;
     }
 
-    // Find course by Hotmart product ID
-    const course = await Course.findOne({ hotmartProductId });
-    if (!course) {
-      console.error(`Course not found for Hotmart product ID: ${hotmartProductId}`);
+    // Find plan by hotmartProductId/checkout code from webhook
+    // Webhook might send either product ID or checkout code
+    const extractedCode = extractCheckoutCodeFromUrl(`https://pay.hotmart.com/${hotmartProductId}`) || hotmartProductId;
+    
+    const plan = await Plan.findOne({
+      $or: [
+        { hotmartProductId: hotmartProductId },
+        { hotmartCheckoutCode: hotmartProductId },
+        { hotmartCheckoutCode: extractedCode },
+        { hotmartCheckoutUrl: { $regex: hotmartProductId, $options: "i" } }
+      ]
+    });
+
+    let courses = [];
+    
+    if (plan) {
+      // New approach: Find all courses using this plan
+      courses = await Course.find({ plan: plan._id });
+    } else {
+      // Legacy approach: Find course by direct hotmartProductId
+      const legacyCourse = await Course.findOne({ hotmartProductId });
+      if (legacyCourse) {
+        courses = [legacyCourse];
+      }
+    }
+
+    if (courses.length === 0) {
+      console.error(`No courses found for Hotmart product ID/checkout code: ${hotmartProductId}`);
       return;
     }
 
@@ -297,48 +578,71 @@ const handlePurchaseApproved = async (data) => {
       return;
     }
 
-    // Find user by email
-    const user = await User.findOne({ email: buyerEmail });
+    // Find user by email (check both User and UserCredential models)
+    let user = await User.findOne({ email: buyerEmail });
+    if (!user) {
+      const userCredential = await UserCredential.findOne({ email: buyerEmail }).select("-password");
+      if (userCredential) {
+        user = {
+          _id: userCredential._id,
+          email: userCredential.email,
+          first_name: userCredential.first_name,
+          last_name: userCredential.last_name,
+          name: userCredential.name,
+          role: userCredential.role || 'student',
+          image: userCredential.image,
+        };
+      }
+    }
+
     if (!user) {
       console.error(`User not found for email: ${buyerEmail}`);
       return;
     }
 
     // Parse amount and date
-    const parsedAmount = typeof amount === "string" ? parseFloat(amount) : amount || course.price;
     const parsedDate = purchaseDate ? new Date(purchaseDate) : new Date();
 
-    // Update or create purchase record
-    const purchase = await CoursePurchase.findOneAndUpdate(
-      {
-        hotmartTransactionCode: transactionCode,
-      },
-      {
-        user: user._id,
-        course: course._id,
-        hotmartTransactionCode: transactionCode,
-        status: "approved",
-        amount: parsedAmount,
-        currency: currency,
-        hotmartProductId: hotmartProductId,
-        hotmartBuyerEmail: buyerEmail,
-        hotmartBuyerName: buyerName,
-        purchaseDate: parsedDate,
-        accessGranted: true,
-        accessGrantedAt: new Date(),
-        metadata: {
-          productName: productName || course.title,
-          paymentMethod: paymentMethod || "hotmart",
-          rawData: data, // Store raw data for debugging
-        },
-      },
-      {
-        upsert: true,
-        new: true,
-      }
-    );
+    // Process purchases for all courses using this plan
+    // This ensures we track purchases correctly - each course purchase is linked to the specific course
+    for (const course of courses) {
+      // Get price from plan if available, otherwise use course price
+      const parsedAmount = typeof amount === "string" ? parseFloat(amount) : amount || (plan?.price ?? course.price ?? 0);
 
-    console.log(`Purchase approved: ${transactionCode} for course ${course._id}, user ${user._id}`);
+      // Update or create purchase record for this specific course
+      // This is crucial: we track which specific course the user purchased
+      await CoursePurchase.findOneAndUpdate(
+        {
+          hotmartTransactionCode: transactionCode,
+          course: course._id, // Link to specific course
+        },
+        {
+          user: user._id,
+          course: course._id, // Link to specific course - this is how we track purchases
+          hotmartTransactionCode: transactionCode,
+          status: "approved",
+          amount: parsedAmount,
+          currency: currency,
+          hotmartProductId: plan ? (plan.hotmartProductId || plan.hotmartCheckoutCode) : hotmartProductId,
+          hotmartBuyerEmail: buyerEmail,
+          hotmartBuyerName: buyerName,
+          purchaseDate: parsedDate,
+          accessGranted: true,
+          accessGrantedAt: new Date(),
+          metadata: {
+            productName: productName || course.title,
+            paymentMethod: paymentMethod || "hotmart",
+            rawData: data, // Store raw data for debugging
+          },
+        },
+        {
+          upsert: true,
+          new: true,
+        }
+      );
+
+      console.log(`Purchase approved: ${transactionCode} for course ${course._id}, user ${user._id}`);
+    }
   } catch (error) {
     console.error("Error handling purchase approved:", error);
     throw error;
@@ -365,7 +669,7 @@ const handlePurchaseCancelled = async (data) => {
       return;
     }
 
-    await CoursePurchase.findOneAndUpdate(
+    await CoursePurchase.updateMany(
       { hotmartTransactionCode: transactionCode },
       {
         status: "cancelled",
@@ -392,7 +696,7 @@ const handlePurchaseRefunded = async (data) => {
       return;
     }
 
-    await CoursePurchase.findOneAndUpdate(
+    await CoursePurchase.updateMany(
       { hotmartTransactionCode: transactionCode },
       {
         status: "refunded",
@@ -432,6 +736,7 @@ export const getUserPurchases = async (req, res) => {
 /**
  * Batch check access for multiple courses (efficient approach)
  * Accepts array of course IDs and returns access status for each
+ * Updated to use Plan for price information
  */
 export const batchCheckCourseAccess = async (req, res) => {
   try {
@@ -444,7 +749,7 @@ export const batchCheckCourseAccess = async (req, res) => {
 
     // Fetch all courses and user purchases in parallel
     const [courses, purchases] = await Promise.all([
-      Course.find({ _id: { $in: courseIds } }),
+      Course.find({ _id: { $in: courseIds } }).populate("plan"),
       CoursePurchase.find({ 
         user: userId,
         status: "approved",
@@ -463,7 +768,12 @@ export const batchCheckCourseAccess = async (req, res) => {
     
     for (const course of courses) {
       const courseId = course._id.toString();
-      const isPremium = course.tier === "PREMIUM" || (course.price && course.price > 0);
+      
+      // Get price from plan if available, otherwise use course price
+      const coursePrice = course.plan?.price ?? course.price ?? 0;
+      
+      // Determine if premium: tier is PREMIUM or price > 0
+      const isPremium = course.tier === "PREMIUM" || coursePrice > 0;
       
       if (!isPremium) {
         // Free course - everyone has access
@@ -471,7 +781,7 @@ export const batchCheckCourseAccess = async (req, res) => {
           hasAccess: true,
           isPremium: false,
           reason: "free_course",
-          coursePrice: course.price || 0,
+          coursePrice: coursePrice,
           courseTier: course.tier
         };
       } else {
@@ -483,7 +793,7 @@ export const batchCheckCourseAccess = async (req, res) => {
           hasAccess,
           isPremium: true,
           purchase: purchase || null,
-          coursePrice: course.price || 0,
+          coursePrice: coursePrice,
           courseTier: course.tier
         };
       }
@@ -502,19 +812,23 @@ export const batchCheckCourseAccess = async (req, res) => {
 
 /**
  * Check if user has access to a course
+ * Updated to use Plan for price information
  */
 export const checkCourseAccess = async (req, res) => {
   try {
     const userId = req.user._id;
     const { courseId } = req.params;
 
-    const course = await Course.findById(courseId);
+    const course = await Course.findById(courseId).populate("plan");
     if (!course) {
       return res.status(404).json({ message: "Course not found" });
     }
 
+    // Get price from plan if available, otherwise use course price
+    const coursePrice = course.plan?.price ?? course.price ?? 0;
+
     // Free courses are accessible to everyone
-    if (course.tier === "FREE" || course.price <= 0) {
+    if (course.tier === "FREE" || coursePrice <= 0) {
       return res.status(200).json(
         ApiResponse(200, { hasAccess: true, reason: "free_course" }, "Access granted")
       );
@@ -535,9 +849,9 @@ export const checkCourseAccess = async (req, res) => {
       ApiResponse(200, { 
         hasAccess, 
         purchase: purchase || null,
-        isPremium: course.tier === "PREMIUM" || course.price > 0,
+        isPremium: course.tier === "PREMIUM" || coursePrice > 0,
         courseTier: course.tier,
-        coursePrice: course.price
+        coursePrice: coursePrice
       }, "Access check completed")
     );
   } catch (error) {
@@ -548,3 +862,60 @@ export const checkCourseAccess = async (req, res) => {
   }
 };
 
+/**
+ * @deprecated This endpoint is no longer needed. Use Plan management instead.
+ * Update Hotmart checkout code for a course
+ * Utility endpoint to fix courses with numeric product IDs
+ */
+/*
+export const updateCourseCheckoutCode = async (req, res) => {
+  try {
+    const { courseId, hotmartCheckoutCode } = req.body;
+
+    if (!courseId) {
+      return res.status(400).json({ message: "courseId is required" });
+    }
+
+    if (!hotmartCheckoutCode) {
+      return res.status(400).json({ message: "hotmartCheckoutCode is required" });
+    }
+
+    // Validate course ID format
+    if (!/^[0-9a-fA-F]{24}$/.test(courseId)) {
+      return res.status(400).json({ message: "Invalid courseId format" });
+    }
+
+    // Validate checkout code format (should be alphanumeric, not just numeric)
+    if (/^\d+$/.test(hotmartCheckoutCode)) {
+      return res.status(400).json({
+        message: "Invalid checkout code format. Checkout codes must be alphanumeric (e.g., 'J103673988Y'), not numeric.",
+        received: hotmartCheckoutCode,
+        expectedFormat: "Alphanumeric checkout code from Hotmart dashboard"
+      });
+    }
+
+    // Find and update the course
+    const course = await Course.findById(courseId);
+    if (!course) {
+      return res.status(404).json({ message: "Course not found" });
+    }
+
+    const oldCheckoutCode = course.hotmartProductId;
+    course.hotmartProductId = hotmartCheckoutCode;
+    await course.save();
+
+    return res.status(200).json(
+      ApiResponse(200, {
+        courseId: course._id,
+        courseTitle: course.title,
+        oldCheckoutCode: oldCheckoutCode || null,
+        newCheckoutCode: hotmartCheckoutCode,
+      }, "Course checkout code updated successfully")
+    );
+  } catch (error) {
+    console.error("Error updating course checkout code:", error);
+    return res.status(500).json({
+      message: error.message,
+    });
+  }
+};*/

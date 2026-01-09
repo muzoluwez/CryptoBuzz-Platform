@@ -34,6 +34,12 @@ const courseValidationSchema = yup.object().shape({
     .string()
     .matches(/^[0-9a-fA-F]{24}$/)
     .required(),
+  plan: yup
+    .string()
+    .matches(/^[0-9a-fA-F]{24}$/)
+    .nullable()
+    .optional(),
+  // Legacy field - keep for backward compatibility
   hotmartProductId: yup.string().nullable().optional(),
 });
 

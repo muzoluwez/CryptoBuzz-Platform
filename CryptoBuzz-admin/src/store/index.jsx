@@ -27,6 +27,7 @@ import { adminTaskManagementApiSlice } from "./api/admin/adminTaskManagementApiS
 import { ratingApiSlice } from "./api/admin/adminRatingApiSlice";
 import { adminCryptoAnalysisApiSlice } from "./api/admin/adminCryptoAnalysisApiSlice";
 import { adminHotmartApiSlice } from "./api/admin/adminHotmartApiSlice";
+import { adminPlanApiSlice } from "./api/admin/adminPlanApiSlice";
 
 // ============================================================================
 // REDUX PERSIST CONFIGURATION
@@ -88,6 +89,7 @@ export const store = configureStore({
     [ratingApiSlice.reducerPath]: ratingApiSlice.reducer,
     [adminCryptoAnalysisApiSlice.reducerPath]: adminCryptoAnalysisApiSlice.reducer,
     [adminHotmartApiSlice.reducerPath]: adminHotmartApiSlice.reducer,
+    [adminPlanApiSlice.reducerPath]: adminPlanApiSlice.reducer,
   },
 
   middleware: (getDefaultMiddleware) =>
@@ -113,7 +115,8 @@ export const store = configureStore({
       adminTaskManagementApiSlice.middleware,
       ratingApiSlice.middleware,
       adminCryptoAnalysisApiSlice.middleware,
-      adminHotmartApiSlice.middleware
+      adminHotmartApiSlice.middleware,
+      adminPlanApiSlice.middleware
     ),
 });
 

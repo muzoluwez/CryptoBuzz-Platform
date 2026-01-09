@@ -15,8 +15,9 @@ export function CourseLockOverlay({
   price,
   className 
 }) {
+  // Since this overlay is only shown for premium courses without access,
+  // we always show the purchase flow (no free course check needed)
   const displayPrice = price || course?.price || 0;
-  const isFree = displayPrice === 0 || course?.tier === 'FREE';
 
   return (
     <div 
@@ -40,49 +41,37 @@ export function CourseLockOverlay({
                 Course Locked
               </h3>
               <p className="text-sm text-gray-600 dark:text-gray-400">
-                {isFree 
-                  ? "This course is free and should be accessible."
-                  : "You need to purchase this course to access the content. Unlock all lessons and start learning today!"
-                }
+                You need to purchase this course to access the content. Unlock all lessons and start learning today!
               </p>
             </div>
 
             {/* Price Display */}
-            {!isFree && displayPrice > 0 && (
+            {displayPrice > 0 && (
               <div className="flex items-center gap-2 text-2xl font-bold text-primary">
                 <DollarSign className="w-6 h-6" />
                 <span>{displayPrice.toFixed(2)}</span>
               </div>
             )}
 
-            {/* Purchase Button */}
-            {!isFree && (
-              <Button
-                onClick={onPurchase}
-                disabled={isPurchasing}
-                className="w-full bg-primary hover:bg-primary/90 text-white"
-                size="lg"
-              >
-                {isPurchasing ? (
-                  <>
-                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                    Processing...
-                  </>
-                ) : (
-                  <>
-                    <ShoppingCart className="w-4 h-4 mr-2" />
-                    Purchase Course
-                  </>
-                )}
-              </Button>
-            )}
-
-            {/* Free course notice */}
-            {isFree && (
-              <p className="text-xs text-gray-500 dark:text-gray-500">
-                If you're seeing this, there may be an access issue. Please contact support.
-              </p>
-            )}
+            {/* Purchase Button - Always shown for locked courses */}
+            <Button
+              onClick={onPurchase}
+              disabled={isPurchasing}
+              className="w-full bg-primary hover:bg-primary/90 text-white"
+              size="lg"
+            >
+              {isPurchasing ? (
+                <>
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                  Processing...
+                </>
+              ) : (
+                <>
+                  <ShoppingCart className="w-4 h-4 mr-2" />
+                  Purchase Course
+                </>
+              )}
+            </Button>
           </div>
         </CardContent>
       </Card>
