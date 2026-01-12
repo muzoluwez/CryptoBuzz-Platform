@@ -135,7 +135,7 @@ const routes = {
 /**
  * AppRoutingSetup Component
  * 
- * Main routing configuration for the CryptoBuzz Educator application.
+ * Main routing configuration for the Cripto Buzz Educator application.
  * 
  * Features:
  * - Educator-only routes with Demo1Layout wrapper

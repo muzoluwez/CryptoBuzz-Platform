@@ -6,10 +6,10 @@ import { useEffect } from 'react';
  *
  * @param {string} title - Main title to show in the browser tab
  * @param {object} options
- * @param {string} options.suffix - Optional suffix (default: 'CryptoBuzz')
+ * @param {string} options.suffix - Optional suffix (default: 'Cripto Buzz')
  * @param {boolean} options.keepOnUnmount - If true, do not restore previous title on unmount
  */
-export default function useDocumentTitle(title, { suffix = 'CryptoBuzz', keepOnUnmount = false } = {}) {
+export default function useDocumentTitle(title, { suffix = 'Cripto Buzz', keepOnUnmount = false } = {}) {
   useEffect(() => {
     if (!title) return;
     const previous = document.title;

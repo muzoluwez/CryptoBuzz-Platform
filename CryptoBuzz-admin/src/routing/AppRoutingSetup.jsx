@@ -156,7 +156,7 @@ const routes = {
 /**
  * AppRoutingSetup Component
  * 
- * Main routing configuration for the CryptoBuzz Admin application.
+ * Main routing configuration for the Cripto Buzz Admin application.
  * 
  * Features:
  * - Admin-only routes with Demo1Layout wrapper

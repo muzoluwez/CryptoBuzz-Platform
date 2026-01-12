@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useGetIdeasQuery } from '@/store/client/clientIdeaApiSlice';
-import { CopyIcon, Eye } from "lucide-react";
+import { CopyIcon, Eye, LockKeyhole } from "lucide-react";
 import { toast } from 'sonner';
 import { useAccessControl } from '@/hooks/use-access-control';
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -11,6 +11,7 @@ import ImageViewer from '@/components/common/ImageViewer';
 import { Toolbar, ToolbarHeading } from '@/components/layouts/layout-7/components/toolbar';
 import ViewIdeaModel from '@/components/models/ViewIdeaModel';
 import useDocumentTitle from '@/hooks/use-document-title';
+
 
 export default function IdeaPage() {
   const [selectedImage, setSelectedImage] = useState(null);
@@ -48,20 +49,20 @@ export default function IdeaPage() {
     const educatorName = educator?.first_name && educator?.last_name
       ? `${educator?.first_name || ''} ${educator?.last_name || ''}`.trim()
       : educator?.first_name || educator?.last_name || "Unknown Trader";
-    
+
     const categoryName = idea?.category?.name || "Unknown Market";
 
     const year = idea?.createdAt ? new Date(idea.createdAt).getFullYear().toString() : "2025";
-    
+
     // Determine tag type based on idea type
     const typeTag = idea?.type
       ? { label: idea.type.toUpperCase(), type: idea.type.toLowerCase() }
       : null;
-    
+
     const statusTag = idea?.status
       ? { label: idea.status, type: "status" }
       : { label: "Pending", type: "status" };
-    
+
     const categoryTag = idea?.category?.name
       ? { label: idea.category.name.toUpperCase(), type: "pair" }
       : null;
@@ -73,11 +74,11 @@ export default function IdeaPage() {
     const tags = [typeTag, name, statusTag].filter(Boolean);
 
     // Handle images - can be array or single string
-    const images = idea?.image 
+    const images = idea?.image
       ? (Array.isArray(idea.image) ? idea.image : [idea.image])
-      : idea?.image_Url 
-      ? [idea.image_Url] 
-      : ["https://via.placeholder.com/400x300"];
+      : idea?.image_Url
+        ? [idea.image_Url]
+        : ["https://via.placeholder.com/400x300"];
 
     return {
       _id: idea?._id,
@@ -89,7 +90,7 @@ export default function IdeaPage() {
       year: year,
       entry: idea?.entry?.toString() || "0",
       invalidation: idea?.invalidation?.toString() || "0",
-      exits: Array.isArray(idea?.exits) 
+      exits: Array.isArray(idea?.exits)
         ? idea.exits.map(exit => exit?.toString() || "0")
         : ["0"],
       tags: tags,
@@ -102,7 +103,7 @@ export default function IdeaPage() {
 
   return (
     <>
-      <div className="container my-6">
+      <div className="my-6">
         <header className="mb-6">
           <h1 className="text-2xl font-semibold text-black dark:text-white">
             Trading Signals
@@ -160,7 +161,8 @@ export default function IdeaPage() {
               return (
                 <Card
                   key={c._id || i}
-                  className="rounded-2xl shadow-lg border border-gray-medium overflow-hidden animate-slideInUp"
+                  className="rounded-2xl shadow-lg border border-gray-medium overflow-hidden animate-slideInUp relative"
+
                   style={{ animationDelay: `${i * 0.1}s` }}
                 >
                   <CardHeader className="p-4">
@@ -178,11 +180,31 @@ export default function IdeaPage() {
                       {/* <p className=" font-medium">{c.year}</p> */}
                     </div>
                   </CardHeader>
+                  <div className="absolute inset-0 flex items-center justify-center bg-black/10 z-40 pointer-events-none">
+                    <div className="bg-black/60 p-2 rounded-full">
+                       <LockKeyhole className="w-6 h-6 text-white"/>  
+                    </div>
+                  </div>
+                  <div className={isLocked ? 'blur-xs' : ''}>
 
-                  {/* TOP CHART IMAGE CAROUSEL */}
-                  <div className="relative">
-                    {isLocked ? (
-                      <div className="relative">
+                    {/* TOP CHART IMAGE CAROUSEL */}
+                    <div className="relative">
+                      {isLocked ? (
+                        <div className="relative">
+                          <ImageCarousel
+                            images={
+                              Array.isArray(c.image)
+                                ? c.image
+                                : [c.image || c.image_Url]
+                            }
+                            alt={c.name || 'Trading idea'}
+                            height="h-52"
+                            showViewButton={false}
+
+                          />
+
+                        </div>
+                      ) : (
                         <ImageCarousel
                           images={
                             Array.isArray(c.image)
@@ -191,53 +213,83 @@ export default function IdeaPage() {
                           }
                           alt={c.name || 'Trading idea'}
                           height="h-52"
-                          showViewButton={false}
-                          className={isLocked ? 'blur-md' : ''}
+                          showViewButton={true}
                         />
-                        <div className="absolute inset-0 flex items-center justify-center bg-black/10 z-30 pointer-events-none">
-                          <div className="bg-black/60 p-2 rounded-full">
-                            <CopyIcon className="w-6 h-6 text-white" />
-                          </div>
-                        </div>
-                      </div>
-                    ) : (
-                      <ImageCarousel
-                        images={
-                          Array.isArray(c.image)
-                            ? c.image
-                            : [c.image || c.image_Url]
-                        }
-                        alt={c.name || 'Trading idea'}
-                        height="h-52"
-                        showViewButton={true}
-                      />
-                    )}
+                      )}
 
-                    {/* TAGS */}
-                    <div className="absolute top-3 left-3 flex flex-wrap gap-2">
-                      {c.tags.map((tag, idx) => {
-                        console.log('Rendering tag:', tag);
-                        const base =
-                          'px-3 py-1 text-sm font-semibold rounded-lg';
+                      {/* TAGS */}
+                      <div className="absolute top-3 left-3 flex flex-wrap gap-2">
+                        {c.tags.map((tag, idx) => {
+                          console.log('Rendering tag:', tag);
+                          const base =
+                            'px-3 py-1 text-sm font-semibold rounded-lg';
 
-                        // Buy/Sell tags
-                        if (tag.type === 'buy' || tag.type === 'sell') {
-                          const buySellClass =
-                            tag.type === 'buy'
-                              ? 'bg-emerald-100 text-emerald-700'
-                              : 'bg-red-100 text-red-700';
-                          return (
-                            <Badge
-                              key={idx}
-                              className={`${base} ${buySellClass}`}
-                            >
-                              {tag.label?.toString().toUpperCase()}
-                            </Badge>
-                          );
-                        }
+                          // Buy/Sell tags
+                          if (tag.type === 'buy' || tag.type === 'sell') {
+                            const buySellClass =
+                              tag.type === 'buy'
+                                ? 'bg-emerald-100 text-emerald-700'
+                                : 'bg-red-100 text-red-700';
+                            return (
+                              <Badge
+                                key={idx}
+                                className={`${base} ${buySellClass}`}
+                              >
+                                {tag.label?.toString().toUpperCase()}
+                              </Badge>
+                            );
+                          }
 
-                        // Market / Pair tag
-                        if (tag.type === 'pair') {
+                          // Market / Pair tag
+                          if (tag.type === 'pair') {
+                            return (
+                              <Badge
+                                key={idx}
+                                className={`${base} bg-gray-200 text-gray-600`}
+                              >
+                                {tag.label}
+                              </Badge>
+                            );
+                          }
+
+                          // Status tag - map to branded colors
+                          if (tag.type === 'status') {
+                            const statusClassMap = {
+                              active: 'bg-cyan-700 text-white',
+                              pending: 'bg-purple-700 text-white',
+                              win: 'bg-emerald-500 text-white',
+                              loss: 'bg-red-500 text-white',
+                              partialWin: 'bg-purple-500 text-white',
+                              breakEven: 'bg-blue-500 text-white',
+                            };
+                            const statusKey = (tag.label || '').toString();
+                            const statusClass =
+                              statusClassMap[statusKey] ||
+                              'bg-gray-200 text-gray-700';
+
+                            // Pretty label for statuses
+                            const pretty =
+                              statusKey === 'win'
+                                ? `WIN ${c?.pips ? `+${c.pips}` : ''}`
+                                : statusKey === 'loss'
+                                  ? `LOSS ${c?.pips ? `-${c.pips}` : ''}`
+                                  : statusKey === 'partialWin'
+                                    ? `PARTIAL ${c?.pips ?? ''}`
+                                    : statusKey === 'breakEven'
+                                      ? 'BREAK EVEN'
+                                      : statusKey?.toUpperCase();
+
+                            return (
+                              <Badge
+                                key={idx}
+                                className={`${base} ${statusClass}`}
+                              >
+                                {pretty}
+                              </Badge>
+                            );
+                          }
+
+                          // Fallback
                           return (
                             <Badge
                               key={idx}
@@ -246,117 +298,43 @@ export default function IdeaPage() {
                               {tag.label}
                             </Badge>
                           );
-                        }
-
-                        // Status tag - map to branded colors
-                        if (tag.type === 'status') {
-                          const statusClassMap = {
-                            active: 'bg-cyan-700 text-white',
-                            pending: 'bg-purple-700 text-white',
-                            win: 'bg-emerald-500 text-white',
-                            loss: 'bg-red-500 text-white',
-                            partialWin: 'bg-purple-500 text-white',
-                            breakEven: 'bg-blue-500 text-white',
-                          };
-                          const statusKey = (tag.label || '').toString();
-                          const statusClass =
-                            statusClassMap[statusKey] ||
-                            'bg-gray-200 text-gray-700';
-
-                          // Pretty label for statuses
-                          const pretty =
-                            statusKey === 'win'
-                              ? `WIN ${c?.pips ? `+${c.pips}` : ''}`
-                              : statusKey === 'loss'
-                                ? `LOSS ${c?.pips ? `-${c.pips}` : ''}`
-                                : statusKey === 'partialWin'
-                                  ? `PARTIAL ${c?.pips ?? ''}`
-                                  : statusKey === 'breakEven'
-                                    ? 'BREAK EVEN'
-                                    : statusKey?.toUpperCase();
-
-                          return (
-                            <Badge
-                              key={idx}
-                              className={`${base} ${statusClass}`}
-                            >
-                              {pretty}
-                            </Badge>
-                          );
-                        }
-
-                        // Fallback
-                        return (
-                          <Badge
-                            key={idx}
-                            className={`${base} bg-gray-200 text-gray-600`}
-                          >
-                            {tag.label}
-                          </Badge>
-                        );
-                      })}
+                        })}
+                      </div>
                     </div>
-                  </div>
 
-                  {/* CONTENT */}
-                  <CardContent className="p-5">
-                    {/* PRICE ROWS */}
-                    <div className="space-y-2">
-                      <div className="flex items-center justify-between">
-                        <p>Entry</p>
-                        <div className="flex items-center gap-2 justify-between min-w-20">
-                          <CopyIcon
-                            className={`w-4 ${!isLocked && c?.entry ? 'cursor-pointer hover:text-primary transition-colors' : 'cursor-not-allowed opacity-50'}`}
-                            onClick={() =>
-                              !isLocked &&
-                              copyToClipboard(c?.entry, 'Entry price')
-                            }
-                          />
-                          <p
-                            className={
-                              !isLocked ? 'text-green-500' : 'text-gray-400'
-                            }
-                          >
-                            {isLocked ? '****' : c?.entry || '0'}
-                          </p>
-                        </div>
-                      </div>
-                      <div className="flex items-center justify-between ">
-                        <p>Invalidation</p>
-                        <div className="flex items-center gap-2 justify-between min-w-20">
-                          <CopyIcon
-                            className={`w-4 ${!isLocked && c?.invalidation ? 'cursor-pointer hover:text-primary transition-colors' : 'cursor-not-allowed opacity-50'}`}
-                            onClick={() =>
-                              !isLocked &&
-                              copyToClipboard(
-                                c?.invalidation,
-                                'Invalidation level',
-                              )
-                            }
-                          />
-                          <p
-                            className={
-                              !isLocked ? 'text-red-500' : 'text-gray-400'
-                            }
-                          >
-                            {isLocked ? '****' : c?.invalidation || '0'}
-                          </p>
-                        </div>
-                      </div>
-                      {c?.exits?.map((exitVal, idx) => (
-                        <div
-                          key={idx}
-                          className="flex items-center justify-between"
-                        >
-                          <p>{`Exit ${idx + 1}`}</p>
+                    {/* CONTENT */}
+                    <CardContent className="p-5">
+                      {/* PRICE ROWS */}
+                      <div className="space-y-2">
+                        <div className="flex items-center justify-between">
+                          <p>Entry</p>
                           <div className="flex items-center gap-2 justify-between min-w-20">
                             <CopyIcon
-                              className={`w-4 ${!isLocked && exitVal ? 'cursor-pointer hover:text-primary transition-colors' : 'cursor-not-allowed opacity-50'}`}
+                              className={`w-4 ${!isLocked && c?.entry ? 'cursor-pointer hover:text-primary transition-colors' : 'cursor-not-allowed opacity-50'}`}
+                              onClick={() =>
+                                !isLocked &&
+                                copyToClipboard(c?.entry, 'Entry price')
+                              }
+                            />
+                            <p
+                              className={
+                                !isLocked ? 'text-green-500' : 'text-gray-400'
+                              }
+                            >
+                              {isLocked ? '****' : c?.entry || '0'}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="flex items-center justify-between ">
+                          <p>Invalidation</p>
+                          <div className="flex items-center gap-2 justify-between min-w-20">
+                            <CopyIcon
+                              className={`w-4 ${!isLocked && c?.invalidation ? 'cursor-pointer hover:text-primary transition-colors' : 'cursor-not-allowed opacity-50'}`}
                               onClick={() =>
                                 !isLocked &&
                                 copyToClipboard(
-                                  exitVal,
-                                  `Exit target ${idx + 1}`,
+                                  c?.invalidation,
+                                  'Invalidation level',
                                 )
                               }
                             />
@@ -365,13 +343,40 @@ export default function IdeaPage() {
                                 !isLocked ? 'text-red-500' : 'text-gray-400'
                               }
                             >
-                              {isLocked ? '****' : exitVal || '0'}
+                              {isLocked ? '****' : c?.invalidation || '0'}
                             </p>
                           </div>
                         </div>
-                      ))}
-                    </div>
-                  </CardContent>
+                        {c?.exits?.map((exitVal, idx) => (
+                          <div
+                            key={idx}
+                            className="flex items-center justify-between"
+                          >
+                            <p>{`Exit ${idx + 1}`}</p>
+                            <div className="flex items-center gap-2 justify-between min-w-20">
+                              <CopyIcon
+                                className={`w-4 ${!isLocked && exitVal ? 'cursor-pointer hover:text-primary transition-colors' : 'cursor-not-allowed opacity-50'}`}
+                                onClick={() =>
+                                  !isLocked &&
+                                  copyToClipboard(
+                                    exitVal,
+                                    `Exit target ${idx + 1}`,
+                                  )
+                                }
+                              />
+                              <p
+                                className={
+                                  !isLocked ? 'text-red-500' : 'text-gray-400'
+                                }
+                              >
+                                {isLocked ? '****' : exitVal || '0'}
+                              </p>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </CardContent>
+                  </div>
 
                   {/* FOOTER */}
                   <CardFooter className="p-5 pt-0">

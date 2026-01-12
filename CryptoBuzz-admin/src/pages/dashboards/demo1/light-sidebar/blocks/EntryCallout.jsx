@@ -43,7 +43,7 @@ const EntryCallout = ({
 
           <p className="text-sm font-normal text-gray-700 leading-5.5">
             Level up your trading skills with structured <br />
-            lessons and expert insights. Join CryptoBuzz  <br />
+            lessons and expert insights. Join Cripto Buzz  <br />
             for smarter, faster learning.
           </p>
         </div>

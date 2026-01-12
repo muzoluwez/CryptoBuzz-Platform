@@ -176,7 +176,7 @@ function CourseUI({
 
   return (
     <>
-      <div className="container my-6">
+      <div className="">
 
         <h1 className="text-2xl font-bold">Courses</h1>
         <p className="text-sm text-gray-500">Home / Courses / Crypto</p>
