@@ -7,13 +7,14 @@ import {
   convertRtkEditorToDisplayFormat,
   convertRtkEditorToFormattedPlainText,
 } from '@/lib/rtkEditorUtils';
-import { useAccessControl } from '@/hooks/use-access-control';
+import { useNavigate } from 'react-router-dom';
+import { useGrantAccess } from '@/context/GrantAccessContext';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
-import { AccessGate } from '@/components/common/AccessGate';
 import ViewInsightModel from '@/components/models/ViewInsightModel';
+
 import {
   Toolbar,
   ToolbarHeading,
@@ -22,12 +23,13 @@ import useDocumentTitle from '../../../hooks/use-document-title';
 
 export default function InsightPage() {
   useDocumentTitle('Insights');
-  const { checkAccess } = useAccessControl();
-
-  // ------------------- STATE -------------------
+  const [hoveredInsightId, setHoveredInsightId] = useState(null);
   const [selectedInsight, setSelectedInsight] = useState(null);
   const [selectedImage, setSelectedImage] = useState(null);
   const [activeTab, setActiveTab] = useState('All');
+  const { checkAccess } = useGrantAccess();
+  const navigate = useNavigate();
+
 
   // ------------------- API CALL -------------------
   const { data, isLoading, error } = useGetTradeAnalysisQuery({
@@ -51,21 +53,21 @@ export default function InsightPage() {
       // Format date
       const date = insight?.createdAt
         ? new Date(insight.createdAt).toLocaleString('en-US', {
-            month: 'short',
-            day: '2-digit',
-            year: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit',
-            hour12: true,
-          })
+          month: 'short',
+          day: '2-digit',
+          year: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit',
+          hour12: true,
+        })
         : new Date().toLocaleString('en-US', {
-            month: 'short',
-            day: '2-digit',
-            year: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit',
-            hour12: true,
-          });
+          month: 'short',
+          day: '2-digit',
+          year: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit',
+          hour12: true,
+        });
 
       // Get formatted plain text - converts HTML and \r\n to proper plain text
       const plainTextDescription = insight?.description
@@ -186,10 +188,9 @@ export default function InsightPage() {
                 className={`
                   px-4 py-2 text-sm font-medium rounded-lg
                   transition cursor-pointer
-                  ${
-                    activeTab === tab
-                      ? 'bg-yellow-500 text-white shadow'
-                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700'
+                  ${activeTab === tab
+                    ? 'bg-yellow-500 text-white shadow'
+                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700'
                   }
                 `}
               >
@@ -217,87 +218,113 @@ export default function InsightPage() {
               });
 
               return (
-                <Card
-                  key={insight?._id || insight?.id}
-                  className="bg-card border border-border overflow-hidden"
+                <div
+                  className="relative h-full"
+                  onMouseEnter={() => !hasAccess && setHoveredInsightId(insight._id)}
+                  onMouseLeave={() => setHoveredInsightId(null)}
                 >
-                  {/* image */}
-                  <div className="w-full h-44 overflow-hidden relative">
-                    {!hasAccess && (
-                      <div className="absolute inset-0 bg-black/40 backdrop-blur-[2px] flex items-center justify-center z-30 pointer-events-none">
-                        <Lock className="w-8 h-8 text-white/80" />
-                      </div>
-                    )}
-                    <ImageCarousel
-                      images={
-                        insight?.photos && Array.isArray(insight.photos) && insight.photos.length > 0
-                          ? insight.photos
-                          : insight?.image
-                          ? [insight.image]
-                          : []
-                      }
-                      alt={insight?.title || "Trade insight"}
-                      height="h-44"
-                      showViewButton={hasAccess}
-                      className={!hasAccess ? "blur-sm pointer-events-none" : ""}
-                    />
-                  </div>
+                  <Card
+                    key={insight?._id || insight?.id}
+                    className="bg-card border border-border overflow-hidden h-full"
+                  >
 
-                  <CardContent className="p-4">
-                    {/* Author */}
-                    <div className="flex items-center gap-3">
-                      <Avatar className="h-10 w-10">
-                        <AvatarImage
-                          src={insight?.avatar}
-                          alt={insight?.author || "Author"}
-                        />
-                        <AvatarFallback>{insight?.author?.[0] || "A"}</AvatarFallback>
-                      </Avatar>
+                    {/* image */}
+                    <div className="w-full h-44 overflow-hidden relative">
+                      {!hasAccess && (
+                        <div className="absolute inset-0 bg-black/40 backdrop-blur-[2px] flex items-center justify-center z-30 pointer-events-none">
+                          <Lock className="w-8 h-8 text-white/80" />
+                        </div>
+                      )}
+                      <ImageCarousel
+                        images={
+                          insight?.photos && Array.isArray(insight.photos) && insight.photos.length > 0
+                            ? insight.photos
+                            : insight?.image
+                              ? [insight.image]
+                              : []
+                        }
+                        alt={insight?.title || "Trade insight"}
+                        height="h-44"
+                        showViewButton={hasAccess}
+                        className={!hasAccess ? "blur-sm pointer-events-none" : ""}
+                      />
+                    </div>
 
-                      <div className="flex-1">
-                        <div className="flex items-center justify-between">
-                          <div>
-                            <p className="text-sm font-medium truncate">
-                              {insight?.author || "Unknown"}
-                            </p>
-                            <p className="text-xs text-muted-foreground">
-                              {insight?.date || ""}
-                            </p>
+                    <CardContent className="p-4">
+                      {/* Author */}
+                      <div className="flex items-center gap-3">
+                        <Avatar className="h-10 w-10">
+                          <AvatarImage
+                            src={insight?.avatar}
+                            alt={insight?.author || "Author"}
+                          />
+                          <AvatarFallback>{insight?.author?.[0] || "A"}</AvatarFallback>
+                        </Avatar>
+
+                        <div className="flex-1">
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <p className="text-sm font-medium truncate">
+                                {insight?.author || "Unknown"}
+                              </p>
+                              <p className="text-xs text-muted-foreground">
+                                {insight?.date || ""}
+                              </p>
+                            </div>
+                            <Badge>{insight?.category || ""}</Badge>
                           </div>
-                          <Badge>{insight?.category || ""}</Badge>
                         </div>
                       </div>
+
+                      {/* Title */}
+                      <h3 className="mt-4 text-lg font-bold text-primary">
+                        {insight?.title || "Untitled"}
+                      </h3>
+
+                      {/* Preview - 2 lines max */}
+                      <p className="mt-2 text-sm text-muted-foreground line-clamp-2">
+                        {hasAccess
+                          ? insight?.preview || ""
+                          : 'This content is locked. Upgrade your plan or log in to view full insights.'}
+                      </p>
+
+                      {/* Button */}
+                      <div className="mt-4">
+                        <Button
+                          onClick={() => setSelectedInsight(insight)}
+                          className="w-full bg-yellow-600 text-white hover:bg-yellow-700"
+                        >
+                          {hasAccess ? 'View Details' : 'Unlock Insight'}
+                        </Button>
+                      </div>
+                    </CardContent>
+
+                    <CardFooter className="p-4">
+                      <div className="text-sm text-muted-foreground">
+                        Published • {insight?.date?.split(',')?.[0] || ""}
+                      </div>
+                    </CardFooter>
+                  </Card>
+
+                  {/* Hover Overlay with Message */}
+                  {!hasAccess && hoveredInsightId === insight._id && (
+                    <div
+                      className="absolute inset-0 bg-black/70 flex items-center justify-center z-50 rounded-xl cursor-pointer transition-opacity animate-in fade-in duration-200"
+                      onClick={() => navigate('/login')}
+                    >
+                      <div className="text-center text-white p-6">
+                        <Lock className="w-12 h-12 mx-auto mb-4" />
+                        <h3 className="text-xl font-semibold mb-2">
+                          Login Required
+                        </h3>
+                        <p className="text-sm opacity-90">
+                          Please login to view insights
+                        </p>
+                      </div>
                     </div>
+                  )}
+                </div>
 
-                    {/* Title */}
-                    <h3 className="mt-4 text-lg font-bold text-primary">
-                      {insight?.title || "Untitled"}
-                    </h3>
-
-                    {/* Preview - 2 lines max */}
-                    <p className="mt-2 text-sm text-muted-foreground line-clamp-2">
-                      {hasAccess
-                        ? insight?.preview || ""
-                        : 'This content is locked. Upgrade your plan or log in to view full insights.'}
-                    </p>
-
-                    {/* Button */}
-                    <div className="mt-4">
-                      <Button
-                        onClick={() => setSelectedInsight(insight)}
-                        className="w-full bg-yellow-600 text-white hover:bg-yellow-700"
-                      >
-                        {hasAccess ? 'View Details' : 'Unlock Insight'}
-                      </Button>
-                    </div>
-                  </CardContent>
-
-                  <CardFooter className="p-4">
-                    <div className="text-sm text-muted-foreground">
-                      Published • {insight?.date?.split(',')?.[0] || ""}
-                    </div>
-                  </CardFooter>
-                </Card>
               );
             })}
           </div>
@@ -318,10 +345,10 @@ export default function InsightPage() {
           selectedInsight?.photos && Array.isArray(selectedInsight.photos) && selectedInsight.photos.length > 0
             ? selectedInsight.photos
             : selectedInsight?.image
-            ? [selectedInsight.image]
-            : selectedImage
-            ? [selectedImage]
-            : []
+              ? [selectedInsight.image]
+              : selectedImage
+                ? [selectedImage]
+                : []
         }
         isOpen={!!selectedImage}
         onClose={() => setSelectedImage(null)}

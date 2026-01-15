@@ -1,8 +1,10 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { useGetIdeasQuery } from '@/store/client/clientIdeaApiSlice';
 import { CopyIcon, Eye, LockKeyhole } from "lucide-react";
 import { toast } from 'sonner';
-import { useAccessControl } from '@/hooks/use-access-control';
+import { useGrantAccess } from '@/context/GrantAccessContext';
+
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
@@ -14,12 +16,15 @@ import useDocumentTitle from '@/hooks/use-document-title';
 
 
 export default function IdeaPage() {
+  const [hoveredCardId, setHoveredCardId] = useState(null);
   const [selectedImage, setSelectedImage] = useState(null);
   const [selectedCard, setSelectedCard] = useState(null);
-  const { checkAccess } = useAccessControl();
+  const { checkAccess } = useGrantAccess();
+  const navigate = useNavigate();
 
   // Set the browser tab title for this page
   useDocumentTitle('Trade Ideas');
+
 
   // Copy to clipboard function
   const copyToClipboard = async (text, label) => {
@@ -159,33 +164,32 @@ export default function IdeaPage() {
               const isLocked = !access.hasAccess;
 
               return (
-                <Card
-                  key={c._id || i}
-                  className="rounded-2xl shadow-lg border border-gray-medium overflow-hidden animate-slideInUp relative"
-
-                  style={{ animationDelay: `${i * 0.1}s` }}
+                <div
+                  className="relative h-full"
+                  onMouseEnter={() => isLocked && setHoveredCardId(c._id)}
+                  onMouseLeave={() => setHoveredCardId(null)}
                 >
-                  <CardHeader className="p-4">
-                    <div className="flex items-center justify-between w-full">
-                      <div className="flex items-center gap-3">
-                        <Avatar className="size-10">
-                          <AvatarImage src={c.avatar} />
-                          <AvatarFallback>U</AvatarFallback>
-                        </Avatar>
-                        <div>
-                          <p className="font-semibold">{c.trader}</p>
-                          <p className="text-sm ">{c.market}</p>
+                  <Card
+                    key={c._id || i}
+                    className="rounded-2xl shadow-lg border border-gray-medium overflow-hidden animate-slideInUp h-full"
+                    style={{ animationDelay: `${i * 0.1}s` }}
+                  >
+
+                    <CardHeader className="p-4">
+                      <div className="flex items-center justify-between w-full">
+                        <div className="flex items-center gap-3">
+                          <Avatar className="size-10">
+                            <AvatarImage src={c.avatar} />
+                            <AvatarFallback>U</AvatarFallback>
+                          </Avatar>
+                          <div>
+                            <p className="font-semibold">{c.trader}</p>
+                            <p className="text-sm ">{c.market}</p>
+                          </div>
                         </div>
+                        {/* <p className=" font-medium">{c.year}</p> */}
                       </div>
-                      {/* <p className=" font-medium">{c.year}</p> */}
-                    </div>
-                  </CardHeader>
-                  <div className="absolute inset-0 flex items-center justify-center bg-black/10 z-40 pointer-events-none">
-                    <div className="bg-black/60 p-2 rounded-full">
-                       <LockKeyhole className="w-6 h-6 text-white"/>  
-                    </div>
-                  </div>
-                  <div className={isLocked ? 'blur-xs' : ''}>
+                    </CardHeader>
 
                     {/* TOP CHART IMAGE CAROUSEL */}
                     <div className="relative">
@@ -200,9 +204,13 @@ export default function IdeaPage() {
                             alt={c.name || 'Trading idea'}
                             height="h-52"
                             showViewButton={false}
-
+                            className={isLocked ? 'blur-md' : ''}
                           />
-
+                          <div className="absolute inset-0 flex items-center justify-center bg-black/10 z-30 pointer-events-none">
+                            <div className="bg-black/60 p-2 rounded-full">
+                              <CopyIcon className="w-6 h-6 text-white" />
+                            </div>
+                          </div>
                         </div>
                       ) : (
                         <ImageCarousel
@@ -376,24 +384,42 @@ export default function IdeaPage() {
                         ))}
                       </div>
                     </CardContent>
-                  </div>
 
-                  {/* FOOTER */}
-                  <CardFooter className="p-5 pt-0">
-                    <button
-                      onClick={() => setSelectedCard(c)}
-                      className="btn bg-primary text-black w-full flex! items-center justify-center gap-2 mt-4 hover:scale-up transition-all duration-300"
+                    {/* FOOTER */}
+                    <CardFooter className="p-5 pt-0">
+                      <button
+                        onClick={() => setSelectedCard(c)}
+                        className="btn bg-primary text-black w-full flex! items-center justify-center gap-2 mt-4 hover:scale-up transition-all duration-300"
+                      >
+                        {isLocked ? (
+                          'Unlock Content'
+                        ) : (
+                          <>
+                            <Eye size={18} /> View Details
+                          </>
+                        )}
+                      </button>
+                    </CardFooter>
+                  </Card>
+
+                  {/* Hover Overlay with Message */}
+                  {isLocked && hoveredCardId === c._id && (
+                    <div
+                      className="absolute inset-0 bg-black/70 flex items-center justify-center z-50 rounded-2xl cursor-pointer transition-opacity animate-in fade-in duration-200"
+                      onClick={() => navigate('/login')}
                     >
-                      {isLocked ? (
-                        'Unlock Content'
-                      ) : (
-                        <>
-                          <Eye size={18} /> View Details
-                        </>
-                      )}
-                    </button>
-                  </CardFooter>
-                </Card>
+                      <div className="text-center text-white p-6">
+                        <LockKeyhole className="w-12 h-12 mx-auto mb-4" />
+                        <h3 className="text-xl font-semibold mb-2">
+                          Login Required
+                        </h3>
+                        <p className="text-sm opacity-90">
+                          Please login to view details
+                        </p>
+                      </div>
+                    </div>
+                  )}
+                </div>
               );
             })}
           </div>

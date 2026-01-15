@@ -505,13 +505,29 @@ export default function AcademyPage() {
   const [recommendedCourses, setRecommendedCourses] = useState([]); // Store recommended courses separately to persist across category changes
 
   // URL parameter handling
-  const { search } = useLocation();
+  const { search, state } = useLocation();
   const params = new URLSearchParams(search);
   console.log("URL Params:", Object.fromEntries(params.entries()));
   const mainSection = params.get("mainSection");
   const language = params.get("language");
   const categoryName = params.get("categoryId");
   const courseId = params.get("courseId");
+
+  // Handle course passed from navigation state (from ViewProfilePage)
+  useEffect(() => {
+    if (state?.selectedCourse) {
+      const course = state?.selectedCourse;
+      const courseIdFromState = course?._id || course?.id;
+      if (courseIdFromState) {
+        // Set the course ID to trigger API call
+        setSelectedCourseId(courseIdFromState);
+        // Hide vault to show course content
+        setHideVault(true);
+        // Clear state to prevent re-triggering on re-render
+        window?.history?.replaceState?.({}, document?.title);
+      }
+    }
+  }, [state?.selectedCourse]);
 
   // API call with category and id parameters - refetches when activeTab or selectedCourseId changes
   const {
@@ -548,11 +564,11 @@ export default function AcademyPage() {
     if (data?.categories?.length > 0 && !activeTab) {
       // Priority 1: Try to select from ActiveCategory
       if (data?.ActiveCategory?.length > 0) {
-        setActiveTab(`${data.ActiveCategory[0]?.categoryId}`);
+        setActiveTab(`${data?.ActiveCategory?.[0]?.categoryId}`);
       }
       // Priority 2: Try to select from categories
       else {
-        setActiveTab(`${data.categories[0]?._id}`);
+        setActiveTab(`${data?.categories?.[0]?._id}`);
       }
     }
   }, [data?.categories, data?.ActiveCategory]);
@@ -660,16 +676,16 @@ export default function AcademyPage() {
   useEffect(() => {
     // Listen for visibility change to refetch when user returns to page
     const handleVisibilityChange = () => {
-      if (!document.hidden && activeTab) {
+      if (!document?.hidden && activeTab) {
         refetch();
       }
     };
 
-    document.addEventListener("visibilitychange", handleVisibilityChange);
+    document?.addEventListener?.("visibilitychange", handleVisibilityChange);
 
     // Cleanup listener on unmount
     return () => {
-      document.removeEventListener("visibilitychange", handleVisibilityChange);
+      document?.removeEventListener?.("visibilitychange", handleVisibilityChange);
     };
   }, [refetch, activeTab]);
 
@@ -764,7 +780,7 @@ export default function AcademyPage() {
   // Get category name for display
   const getCategoryName = (categoryId) => {
     if (!categoryId || !data) return '';
-    const category = data?.categories?.find(cat => `${cat?._id}` === `${categoryId}`);
+    const category = data?.categories?.find?.(cat => `${cat?._id}` === `${categoryId}`);
     return category?.name || categoryId;
   };
 
@@ -788,13 +804,13 @@ export default function AcademyPage() {
   // Store recommended courses from initial load (don't overwrite on category change)
   useEffect(() => {
     const newCourses = (data?.upcomingCourse && data?.upcomingCourse?.length > 0) 
-      ? data.upcomingCourse 
+      ? data?.upcomingCourse 
       : (data?.AllCourse && data?.AllCourse?.length > 0) 
-        ? data.AllCourse 
+        ? data?.AllCourse 
         : [];
 
     // Always update recommended courses when API returns new course lists (initial load or category selection)
-    if (newCourses.length > 0) {
+    if (newCourses?.length > 0) {
       setRecommendedCourses(newCourses);
     } else {
       setRecommendedCourses([]);
@@ -802,12 +818,12 @@ export default function AcademyPage() {
   }, [data?.upcomingCourse, data?.AllCourse, activeTab]);
 
   // Get recommended courses - use stored courses or current data
-  const courses = recommendedCourses.length > 0 
+  const courses = recommendedCourses?.length > 0 
     ? recommendedCourses 
     : (data?.upcomingCourse && data?.upcomingCourse?.length > 0) 
-      ? data.upcomingCourse 
+      ? data?.upcomingCourse 
       : (data?.AllCourse && data?.AllCourse?.length > 0) 
-        ? data.AllCourse 
+        ? data?.AllCourse 
         : [];
 
   // Handle course click from Recommended Courses (IQ Vault behavior)
@@ -836,9 +852,9 @@ export default function AcademyPage() {
     setSelectedCourseId(null);
     // Optionally reset to first category
     if (data?.ActiveCategory?.length > 0) {
-      setActiveTab(`${data.ActiveCategory[0]?.categoryId}`);
+      setActiveTab(`${data?.ActiveCategory?.[0]?.categoryId}`);
     } else if (data?.categories?.length > 0) {
-      setActiveTab(`${data.categories[0]?._id}`);
+      setActiveTab(`${data?.categories?.[0]?._id}`);
     }
     setCurrentCourse([]);
     setLecture(null);

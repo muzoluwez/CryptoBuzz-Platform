@@ -1,14 +1,23 @@
 import React, { useMemo, useState } from 'react';
+import { useGrantAccess } from '@/context/GrantAccessContext';
 import { formatDistanceToNow } from 'date-fns';
-import { Calendar, Loader2, Lock, Play, Share2, Volume2, VolumeX  } from 'lucide-react';
+import {
+  Calendar,
+  Loader2,
+  Lock,
+  Play,
+  Share2,
+  Volume2,
+  VolumeX,
+} from 'lucide-react';
 import { useParams } from 'react-router';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
+import { LoginRequired } from '@/components/common/access-states/LoginRequired';
 import ViewCryptoModel from '../../../components/models/ViewCryptoModel';
 import ViewIdeaModel from '../../../components/models/ViewIdeaModel';
 import ViewInsightModel from '../../../components/models/ViewInsightModel';
 import { Button } from '../../../components/ui/button';
-import { useGrantAccess } from '@/context/GrantAccessContext';
 import { Card } from '../../../components/ui/card';
 import { useAuthContext } from '../../../context/AuthContext';
 import useDocumentTitle from '../../../hooks/use-document-title';
@@ -20,7 +29,6 @@ import { useGetEducatorDetailsQuery } from '../../../store/client/clientEducator
 import EducatorLiveStreamView from './EducatorLiveStreamView';
 import RatingModal from './RatingModel';
 import VideoPlayerModal from './VideoPlayerModal';
-import { LoginRequired } from '@/components/common/access-states/LoginRequired';
 
 export default function ViewProfile() {
   useDocumentTitle('Educator Profile');
@@ -372,7 +380,7 @@ export default function ViewProfile() {
                   <div
                     key={course?._id || course?.id}
                     className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden hover:shadow-lg transition-shadow cursor-pointer"
-                    onClick={() => navigate('/client/academy')}
+                    onClick={() => navigate('/client/academy', { state: { selectedCourse: course } })}
                   >
                     {course?.imageUrl ? (
                       <div className="h-32 relative">
@@ -477,8 +485,10 @@ export default function ViewProfile() {
                       </p>
                       <p className="text-xs text-gray-600 mt-1 dark:text-gray-300">
                         {idea?.type ||
-                          idea?.description?.substring(0, 50) ||
-                          ''}
+                          convertRtkEditorToFormattedPlainText(
+                            idea?.description?.substring(0, 50),
+                          ) ||
+                          ''}<br />
                       </p>
                     </div>
                   </div>
@@ -550,7 +560,7 @@ export default function ViewProfile() {
                         {insight?.title || 'Insight'}
                       </p>
                       <p className="text-xs text-gray-600 mt-2 line-clamp-2 dark:text-gray-300">
-                        {insight?.description?.substring(0, 100) || ''}
+                        {convertRtkEditorToFormattedPlainText(insight?.description?.substring(0, 50)) || ''}
                       </p>
                     </div>
                   </div>
