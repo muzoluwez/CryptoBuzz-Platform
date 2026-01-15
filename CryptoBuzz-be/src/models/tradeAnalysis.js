@@ -35,6 +35,12 @@ const tradeAnalysisSchema = new mongoose.Schema(
         type: String, // Stores URLs or file paths
       },
     ],
+    accessType: {
+      type: String,
+      enum: ["PUBLIC", "LOGGED_IN", "UID_ONLY", "PLAN_BASED"],
+      default: "PUBLIC",
+      required: true
+    },
 
     isDeleted: {
       type: Boolean,

@@ -53,6 +53,18 @@ export const getInsights = asyncHandler(async (req, res) => {
         TradeAnalysisModel.countDocuments(query)
     ]);
 
+    const formattedInsights = insights.map(insight => ({
+        _id: insight._id,
+        title: insight.title,
+        description: insight.description,
+        url: insight.url,
+        photos: insight.photos,
+        accessType: insight.accessType,
+        createdAt: insight.createdAt,
+        category: insight.category,
+        createdBy: insight.createdBy
+    }));
+
     const pagination = {
         totalRecords,
         totalPages: Math.ceil(totalRecords / limitNum),
@@ -60,7 +72,7 @@ export const getInsights = asyncHandler(async (req, res) => {
         limit: limitNum
     };
 
-    return res.status(200).json(GetApiResponse(200, insights, pagination, "Insights fetched successfully"));
+    return res.status(200).json(GetApiResponse(200, formattedInsights, pagination, "Insights fetched successfully"));
 });
 
 export default { getInsights };

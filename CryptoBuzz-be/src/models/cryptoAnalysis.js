@@ -36,6 +36,12 @@ const cryptoAnalysisSchema = new mongoose.Schema(
         type: String, // Image URLs
       },
     ],
+    accessType: {
+      type: String,
+      enum: ["PUBLIC", "LOGGED_IN", "UID_ONLY", "PLAN_BASED"],
+      default: "PUBLIC",
+      required: true
+    },
 
     isDeleted: {
       type: Boolean,

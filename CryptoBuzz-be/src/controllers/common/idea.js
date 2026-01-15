@@ -43,7 +43,8 @@ const itemValidationSchema = yup.object().shape({
     .array()
     .of(yup.string().required("Each exit is required"))
     .min(1, "At least one exit is required")
-    .required("Exits are required")
+    .required("Exits are required"),
+  accessType: yup.string().optional()
 });
 
 export const getIdea = async (req, res) => {
@@ -102,6 +103,7 @@ export const getIdea = async (req, res) => {
         description: data.description,
         exits: data.exits,
         pips: data.pips,
+        accessType: data.accessType || "PUBLIC",
         createdAt: data.createdAt
       }));
 
@@ -139,6 +141,7 @@ export const getIdea = async (req, res) => {
       description: data.description,
       exits: data.exits,
       pips: data.pips,
+      accessType: data.accessType,
       createdAt: data.createdAt
     }));
 
@@ -166,7 +169,8 @@ export const createIdea = async (req, res) => {
       invalidation,
       description,
       exits,
-      pips
+      pips,
+      accessType
     } = req.body;
 
     const educatorUser = req.user;
@@ -198,7 +202,8 @@ export const createIdea = async (req, res) => {
       invalidation,
       description,
       exits,
-      pips
+      pips,
+      accessType
     });
 
     await newIdea.save();
@@ -253,7 +258,8 @@ export const updateIdea = async (req, res) => {
       invalidation,
       exits,
       description,
-      pips = 0
+      pips = 0,
+      accessType
     } = req.body;
     const { id } = req.params;
     const idea = await IdeaModel.findById(id);
@@ -286,6 +292,7 @@ export const updateIdea = async (req, res) => {
     idea.description = description;
     idea.image = updatedImageUrls;
     idea.pips = pips;
+    idea.accessType = accessType;
 
     await idea.save();
 

@@ -16,7 +16,8 @@ const createCryptoAnalysisSchema = Yup.object().shape({
   title: Yup.string().required("title is required"),
   createdBy: Yup.string().required("Educator ID is required"),
   description: Yup.string().required("Entry is required"),
-  url: Yup.string().url("Please enter a valid URL").optional()
+  url: Yup.string().url("Please enter a valid URL").optional(),
+  accessType: Yup.string().optional()
 });
 
 /* ================================
@@ -57,7 +58,8 @@ export const getCryptoAnalysis = async (req, res) => {
       category: data.category,
       createdBy: data.createdBy,
       url: data.url,
-      image: Array.isArray(data.photos) ? data.photos.map(img => `${img}`) : `${data.photos}`
+      image: Array.isArray(data.photos) ? data.photos.map(img => `${img}`) : `${data.photos}`,
+      accessType: data.accessType
     }));
 
     const pagination = {
@@ -83,7 +85,7 @@ export const createCryptoAnalysis = async (req, res) => {
   try {
     await createCryptoAnalysisSchema.validate(req.body);
 
-    const { title, description, createdBy, url } = req.body;
+    const { title, description, createdBy, url, accessType } = req.body;
 
     if (!req.files || req.files.length === 0) return res.status(400).json({ message: "Images are required." });
 
@@ -105,7 +107,8 @@ export const createCryptoAnalysis = async (req, res) => {
       createdBy,
       category: cryptoCategory ? cryptoCategory._id : "",
       url,
-      photos: imageUrls
+      photos: imageUrls,
+      accessType
     });
 
     // await notifyFollowersOfEducator(
@@ -132,7 +135,7 @@ export const createCryptoAnalysis = async (req, res) => {
 ================================ */
 export const updateCryptoAnalysis = async (req, res) => {
   try {
-    const { title, description, url } = req.body;
+    const { title, description, url, accessType } = req.body;
 
     const record = await CryptoAnalysisModel.findById(req.params.id);
     if (!record) return res.status(404).json({ error: "Not found" });
@@ -159,6 +162,7 @@ export const updateCryptoAnalysis = async (req, res) => {
     record.description = description || record.description;
     record.url = url || record.url;
     record.photos = updatedImages;
+    record.accessType = accessType ?? record.accessType;
 
     await record.save();
     return res.status(200).json(ApiResponse(200, record, "Record updated successfully"));

@@ -58,6 +58,18 @@ export const getCryptos = asyncHandler(async (req, res) => {
         Crypto.countDocuments(query)
     ]);
 
+    const formattedCryptos = cryptos.map(crypto => ({
+        _id: crypto._id,
+        title: crypto.title,
+        description: crypto.description,
+        url: crypto.url,
+        photos: crypto.photos,
+        accessType: crypto.accessType,
+        createdAt: crypto.createdAt,
+        category: crypto.category,
+        createdBy: crypto.createdBy
+    }));
+
     const pagination = {
         totalRecords,
         totalPages: Math.ceil(totalRecords / limitNum),
@@ -65,7 +77,7 @@ export const getCryptos = asyncHandler(async (req, res) => {
         limit: limitNum
     };
 
-    return res.status(200).json(GetApiResponse(200, cryptos, pagination, "Crypto analysis fetched successfully"));
+    return res.status(200).json(GetApiResponse(200, formattedCryptos, pagination, "Crypto analysis fetched successfully"));
 });
 
 export default { getCryptos };

@@ -19,7 +19,8 @@ const createTradeAnalysisSchema = Yup.object().shape({
   title: Yup.string().required("title is required"),
   createdBy: Yup.string().required("Educator ID is required"),
   description: Yup.string().required("Entry is required"),
-  url: Yup.string().url("Please enter a valid URL").optional()
+  url: Yup.string().url("Please enter a valid URL").optional(),
+  accessType: Yup.string().optional()
 });
 
 // ------------------------
@@ -66,6 +67,7 @@ export const getTradeAnalysis = async (req, res) => {
       category: d.category,
       url: d.url,
       image: Array.isArray(d.photos) ? d.photos : [d.photos],
+      accessType: d.accessType,
       createdAt: d.createdAt
     }));
 
@@ -92,7 +94,7 @@ export const createTradeAnalysis = async (req, res) => {
   try {
     await createTradeAnalysisSchema.validate(req.body);
 
-    const { title, description, createdBy, url, category } = req.body;
+    const { title, description, createdBy, url, category, accessType } = req.body;
     const educatorUser = req.user;
 
     if (!educatorUser) return res.status(400).json({ message: "Token is required." });
@@ -113,7 +115,8 @@ export const createTradeAnalysis = async (req, res) => {
       createdBy,
       url,
       category,
-      photos: imageUrls
+      photos: imageUrls,
+      accessType
     });
 
     await UserModel.updateOne({ _id: educatorUser._id }, { $inc: { insightCount: 1 } });
@@ -148,7 +151,7 @@ export const createTradeAnalysis = async (req, res) => {
 // ------------------------
 export const updateTradeAnalysis = async (req, res) => {
   try {
-    const { title, description, url, category } = req.body;
+    const { title, description, url, category, accessType } = req.body;
 
     const trade = await TradeAnalysisModel.findById(req.params.id);
     if (!trade) return res.status(404).json({ error: "Not found" });
@@ -175,6 +178,7 @@ export const updateTradeAnalysis = async (req, res) => {
     trade.category = category ?? trade.category;
     trade.url = url ?? trade.url;
     trade.photos = updatedImages;
+    trade.accessType = accessType ?? trade.accessType;
 
     await trade.save();
     return res.status(200).json(ApiResponse(200, trade, "Record updated successfully"));
