@@ -122,7 +122,7 @@ const Main = ({ onSelectCourse }) => {
         </div>
         {viewAllLink && (
           <a
-            href={viewAllLink}
+            href="/admin/educators"
             className="text-primary text-sm font-medium flex items-center gap-1"
           >
             View all

@@ -161,11 +161,11 @@ export default function HomePage() {
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent"></div>
 
-                <div className="absolute left-6 bottom-6 text-white mb-4">
+                <div className="absolute px-4 bottom-6 text-white mb-4">
                   <h2 className="text-2xl md:text-3xl font-semibold drop-shadow-md">
                     Cripto Buzz
                   </h2>
-                  <p className="text-sm md:text-base drop-shadow-sm">
+                  <p className="text-sm md:text-base drop-shadow-sm line-clamp-2">
                     Cripto Buzz is a platform for learning about cryptocurrencies
                     and trading strategies.
                   </p>
@@ -180,12 +180,12 @@ export default function HomePage() {
                 <div className="grid grid-cols-1 md:grid-cols-1 gap-6">
                   <div className="flex flex-col gap-5">
                     <Card className="relative text-white bg-[url('../../../../public/media/images/FreeMembershipTraining.png')] bg-cover h-64 overflow-hidden">
-                      <CardContent className="flex flex-col justify-center h-full z-10 max-w-[75%]">
+                      <CardContent className="flex flex-col justify-center h-full z-10 md:max-w-[75%]">
                         <div>
                           <CardHeading className="text-2xl font-black">
                             Academy
                           </CardHeading>
-                          <p className="mt-2 text-lg">
+                          <p className="mt-2 text-lg line-clamp-3">
                             Comprehensive trading education from basics to
                             advanced strategies
                           </p>
@@ -193,7 +193,7 @@ export default function HomePage() {
                         <div className="mt-4">
                           <Link
                             to="/client/academy"
-                            className="btn bg-black text-white cursor-pointer">
+                            className="btn bg-white text-black cursor-pointer">
                             Start Learning
                           </Link>
                         </div>
@@ -201,12 +201,12 @@ export default function HomePage() {
                       <div className="absolute inset-0 bg-gradient-black z-0"></div>
                     </Card>
                     <Card className="relative text-white bg-[url('../../../../public/media/images/PremiumAcademy.png')] bg-cover h-64 overflow-hidden">
-                      <CardContent className="flex flex-col justify-center h-full z-10 max-w-[75%]">
+                      <CardContent className="flex flex-col justify-center h-full z-10 md:max-w-[75%]">
                         <div>
                           <CardHeading className="text-2xl font-black">
                             Premium Membership
                           </CardHeading>
-                          <p className="mt-2 text-lg">
+                          <p className="mt-2 text-lg line-clamp-3">
                             Cripto Buzz Premium Membership is a platform for
                             learning about cryptocurrencies and trading
                             strategies.
