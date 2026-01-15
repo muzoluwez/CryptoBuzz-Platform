@@ -1,10 +1,12 @@
 import React, { useEffect, useState } from 'react';
+import { useSelector } from 'react-redux';
 import { ChevronDown, Play } from 'lucide-react';
 import { useLocation } from 'react-router';
 import { Card, CardContent } from '../../../components/ui/card';
 import useDocumentTitle from '../../../hooks/use-document-title';
 import { convertRtkEditorToFormattedPlainText } from '../../../lib/rtkEditorUtils';
 import { useGetAcademyCategoryByMainSectionQuery } from '../../../store/client/clientAcademyCategoryApiSlice';
+import { selectSelectedLanguage } from '../../../store/languageSlice';
 
 
 // Helper function to convert video URLs to embeddable formats
@@ -62,13 +64,13 @@ const getEmbedUrl = (url) => {
   return url;
 };
 
-function CourseUI({ 
-  activeTab, 
-  setActiveTab, 
-  toggle, 
-  open, 
-  introLessons, 
-  sections, 
+function CourseUI({
+  activeTab,
+  setActiveTab,
+  toggle,
+  open,
+  introLessons,
+  sections,
   courses,
   categories = [],
   currentCourse = [],
@@ -94,7 +96,7 @@ function CourseUI({
   // Video player state - sync with parent lecture state
   const [selectedVideo, setSelectedVideo] = useState(null);
   const [isVideoPlaying, setIsVideoPlaying] = useState(false);
-  
+
   // Check if current category has no courses
   // Show "Coming Soon" if:
   // 1. We have an active tab
@@ -102,17 +104,17 @@ function CourseUI({
   // 3. The active tab matches the ActiveCategory from API (meaning we've fetched for this category)
   // 4. The API returned empty course array for this category
   const activeCategoryId = data?.ActiveCategory?.[0]?.categoryId;
-  const tabMatchesActiveCategory = activeTab && activeCategoryId && 
+  const tabMatchesActiveCategory = activeTab && activeCategoryId &&
     (activeTab === `${activeCategoryId}` || activeTab === activeCategoryId);
-  const hasNoCourses = tabMatchesActiveCategory && 
-    currentCourse?.length === 0 && 
+  const hasNoCourses = tabMatchesActiveCategory &&
+    currentCourse?.length === 0 &&
     (!data?.course || data?.course?.length === 0);
-  
+
   // Get video URL from lecture (prefer videoUrl, fallback to content)
   const getVideoUrl = (lecture) => {
     return lecture?.videoUrl || lecture?.content || null;
   };
-  
+
   // Reset video when switching to category with no courses
   useEffect(() => {
     if (hasNoCourses) {
@@ -129,7 +131,7 @@ function CourseUI({
       setIsVideoPlaying(false);
       return;
     }
-    
+
     const videoUrl = getVideoUrl(lecture);
     if (videoUrl) {
       setSelectedVideo({ id: lecture?._id, url: videoUrl });
@@ -140,7 +142,7 @@ function CourseUI({
       setIsVideoPlaying(false);
     }
   }, [lecture, hasNoCourses]);
-  
+
   // Handle video selection
   const handleVideoSelect = (lessonId, videoUrl) => {
     if (videoUrl) {
@@ -152,7 +154,7 @@ function CourseUI({
       }
     }
   };
-  
+
   // Handle play button click on main video area
   const handleMainVideoPlay = () => {
     // Set first lesson video as default
@@ -162,7 +164,7 @@ function CourseUI({
       handleVideoSelect(firstLesson?.id || firstLesson?._id, videoUrl);
     }
   };
-  
+
   // Auto-select first video on mount
   useEffect(() => {
     if (!selectedVideo && introLessons?.length > 0) {
@@ -233,7 +235,7 @@ function CourseUI({
                 ) : (
                   <div className="relative bg-gradient-to-br from-yellow-600 via-yellow-700 to-gray-800 rounded-lg overflow-hidden aspect-video shadow-lg">
                     <div className="absolute inset-0 flex items-center justify-center">
-                      <button 
+                      <button
                         onClick={handleMainVideoPlay}
                         className="bg-white/20 backdrop-blur-sm hover:bg-white/30 transition-all rounded-xl p-6"
                       >
@@ -246,10 +248,10 @@ function CourseUI({
 
                 <div className="flex items-center justify-between flex-wrap gap-4 mt-6">
                   <h2 className="text-3xl font-bold text-gray-900 dark:text-gray-200">
-                    {lecture?.title || selectedVideo 
-                      ? (introLessons?.find(l => (l?.id === selectedVideo?.id || l?._id === selectedVideo?.id))?.title || 
-                         currentCourse?.flatMap(c => c?.lectures || [])?.find(l => l?._id === selectedVideo?.id)?.title ||
-                         "Lesson Title")
+                    {lecture?.title || selectedVideo
+                      ? (introLessons?.find(l => (l?.id === selectedVideo?.id || l?._id === selectedVideo?.id))?.title ||
+                        currentCourse?.flatMap(c => c?.lectures || [])?.find(l => l?._id === selectedVideo?.id)?.title ||
+                        "Lesson Title")
                       : "Select a lesson to begin"}
                   </h2>
                   {selectedVideo && (
@@ -295,122 +297,118 @@ function CourseUI({
                 <>
                   {/* First Section (Intro Series) */}
                   {currentCourse?.length > 0 && currentCourse?.[0]?.title && (
-                <div className="mb-2">
-                  <button
-                    onClick={() => toggle(currentCourse?.[0]?.title || "Intro Series")}
-                    className="w-full flex items-center gap-3 p-3 rounded-lg transition-colors justify-between hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer"
-                  >
-                    <h3 className="font-bold text-gray-900 dark:text-gray-200">
-                      {currentCourse?.[0]?.title || "Intro Series"}
-                    </h3>
-                    <ChevronDown
-                      className={`w-5 h-5 text-gray-600 dark:text-gray-400 transition-transform
+                    <div className="mb-2">
+                      <button
+                        onClick={() => toggle(currentCourse?.[0]?.title || "Intro Series")}
+                        className="w-full flex items-center gap-3 p-3 rounded-lg transition-colors justify-between hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer"
+                      >
+                        <h3 className="font-bold text-gray-900 dark:text-gray-200">
+                          {currentCourse?.[0]?.title || "Intro Series"}
+                        </h3>
+                        <ChevronDown
+                          className={`w-5 h-5 text-gray-600 dark:text-gray-400 transition-transform
                 ${open === (currentCourse?.[0]?.title || "Intro Series") ? "rotate-180" : ""}
               `}
-                    />
-                  </button>
+                        />
+                      </button>
 
-                  {open === (currentCourse?.[0]?.title || "Intro Series") && (
-                  <div className="space-y-2">
-                    {introLessons?.map((lesson) => {
-                      const lessonId = lesson?._id || lesson?.id;
-                      const isSelected = activeLectureId === lessonId || selectedVideo?.id === lessonId;
-                      const videoUrl = lesson?.videoUrl || lesson?.content;
-                      
-                      return (
-                        <button
-                          key={lessonId}
-                          onClick={() => {
-                            if (videoUrl) {
-                              handleVideoSelect(lessonId, videoUrl);
-                            }
-                          }}
-                          className={`w-full flex items-center gap-3 p-3 rounded-lg transition-colors mt-2 ${
-                            isSelected
-                              ? "bg-yellow-400 hover:bg-yellow-500"
-                              : "bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 "
-                          }`}
-                        >
-                          <div className="w-8 h-8 rounded-full flex items-center justify-center bg-gray-900">
-                            <Play className="w-4 h-4 text-white fill-white" />
-                          </div>
+                      {open === (currentCourse?.[0]?.title || "Intro Series") && (
+                        <div className="space-y-2">
+                          {introLessons?.map((lesson) => {
+                            const lessonId = lesson?._id || lesson?.id;
+                            const isSelected = activeLectureId === lessonId || selectedVideo?.id === lessonId;
+                            const videoUrl = lesson?.videoUrl || lesson?.content;
 
-                          <span
-                            className={`text-sm font-medium ${
-                              isSelected
-                                ? "text-gray-900"
-                                : "text-gray-700 dark:text-gray-300"
-                            }`}
-                          >
-                            {lesson?.title}
-                          </span>
-                        </button>
-                      );
-                    })}
-                  </div>
-                  )}
-                </div>
-              )}
+                            return (
+                              <button
+                                key={lessonId}
+                                onClick={() => {
+                                  if (videoUrl) {
+                                    handleVideoSelect(lessonId, videoUrl);
+                                  }
+                                }}
+                                className={`w-full flex items-center gap-3 p-3 rounded-lg transition-colors mt-2 ${isSelected
+                                    ? "bg-yellow-400 hover:bg-yellow-500"
+                                    : "bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 "
+                                  }`}
+                              >
+                                <div className="w-8 h-8 rounded-full flex items-center justify-center bg-gray-900">
+                                  <Play className="w-4 h-4 text-white fill-white" />
+                                </div>
 
-              {/* ----------------- OTHER ACCORDIONS ----------------- */}
-              {Object.keys(sections).map((section) => (
-                <div key={section} className="mb-2">
-
-                  {/* HEADER */}
-                  <button
-                    onClick={() => toggle(section)}
-                    className="w-full flex items-center justify-between p-3 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg transition-colors"
-                  >
-                    <span className="font-bold text-gray-900 dark:text-gray-200">
-                      {section}
-                    </span>
-
-                    <ChevronDown
-                      className={`w-5 h-5 text-gray-600 dark:text-gray-400 transition-transform ${open === section ? "rotate-180" : ""
-                        }`}
-                    />
-                  </button>
-
-                  {/* CONTENT */}
-                  {open === section && (
-                    <div className="mt-2 space-y-2">
-                      {sections?.[section]?.map((lectureItem, index) => {
-                        const lectureId = lectureItem?._id || index;
-                        const isSelected = activeLectureId === lectureId;
-                        const videoUrl = lectureItem?.videoUrl || lectureItem?.content;
-                        
-                        return (
-                          <button
-                            key={lectureId}
-                            onClick={() => {
-                              if (videoUrl) {
-                                handleVideoSelect(lectureId, videoUrl);
-                              }
-                            }}
-                            className={`w-full flex items-center gap-3 p-3 rounded-lg transition-colors ${
-                              isSelected
-                                ? "bg-yellow-400 hover:bg-yellow-500"
-                                : "bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700"
-                            }`}
-                          >
-                            <div className="w-8 h-8 rounded-full flex items-center justify-center bg-gray-900">
-                              <Play className="w-4 h-4 text-white fill-white" />
-                            </div>
-
-                            <span className={`text-sm font-medium ${
-                              isSelected
-                                ? "text-gray-900"
-                                : "text-gray-700 dark:text-gray-300"
-                            }`}>
-                              {lectureItem?.title || `Lesson ${index + 1}`}
-                            </span>
-                          </button>
-                        );
-                      })}
+                                <span
+                                  className={`text-sm font-medium ${isSelected
+                                      ? "text-gray-900"
+                                      : "text-gray-700 dark:text-gray-300"
+                                    }`}
+                                >
+                                  {lesson?.title}
+                                </span>
+                              </button>
+                            );
+                          })}
+                        </div>
+                      )}
                     </div>
                   )}
-                </div>
-              ))}
+
+                  {/* ----------------- OTHER ACCORDIONS ----------------- */}
+                  {Object.keys(sections).map((section) => (
+                    <div key={section} className="mb-2">
+
+                      {/* HEADER */}
+                      <button
+                        onClick={() => toggle(section)}
+                        className="w-full flex items-center justify-between p-3 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg transition-colors"
+                      >
+                        <span className="font-bold text-gray-900 dark:text-gray-200">
+                          {section}
+                        </span>
+
+                        <ChevronDown
+                          className={`w-5 h-5 text-gray-600 dark:text-gray-400 transition-transform ${open === section ? "rotate-180" : ""
+                            }`}
+                        />
+                      </button>
+
+                      {/* CONTENT */}
+                      {open === section && (
+                        <div className="mt-2 space-y-2">
+                          {sections?.[section]?.map((lectureItem, index) => {
+                            const lectureId = lectureItem?._id || index;
+                            const isSelected = activeLectureId === lectureId;
+                            const videoUrl = lectureItem?.videoUrl || lectureItem?.content;
+
+                            return (
+                              <button
+                                key={lectureId}
+                                onClick={() => {
+                                  if (videoUrl) {
+                                    handleVideoSelect(lectureId, videoUrl);
+                                  }
+                                }}
+                                className={`w-full flex items-center gap-3 p-3 rounded-lg transition-colors ${isSelected
+                                    ? "bg-yellow-400 hover:bg-yellow-500"
+                                    : "bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700"
+                                  }`}
+                              >
+                                <div className="w-8 h-8 rounded-full flex items-center justify-center bg-gray-900">
+                                  <Play className="w-4 h-4 text-white fill-white" />
+                                </div>
+
+                                <span className={`text-sm font-medium ${isSelected
+                                    ? "text-gray-900"
+                                    : "text-gray-700 dark:text-gray-300"
+                                  }`}>
+                                  {lectureItem?.title || `Lesson ${index + 1}`}
+                                </span>
+                              </button>
+                            );
+                          })}
+                        </div>
+                      )}
+                    </div>
+                  ))}
                 </>
               )}
             </Card>
@@ -431,7 +429,7 @@ function CourseUI({
               </div> */}
             </div>
 
-            { (academyCourseLoading || academyCourseFetching) ? (
+            {(academyCourseLoading || academyCourseFetching) ? (
               <div className="mt-6">
                 <Card className="rounded-lg p-6 shadow-md text-center">
                   <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
@@ -439,39 +437,39 @@ function CourseUI({
                 </Card>
               </div>
             ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {courses.map((course) => {
-                return (
-                  <Card 
-                    key={course?.id || course?._id} 
-                    className="relative bg-black text-white h-[438px] p-0 overflow-hidden group cursor-pointer transition-all"
-                    onClick={() => onCourseClick?.(course)}
-                  >
-                    <CardContent className="p-0">
-                      <div className="relative h-full">
-                        <img
-                          src={course?.imageUrl || "https://images.unsplash.com/photo-1559526324-593bc073d938?q=80&w=800&auto=format&fit=crop"}
-                          alt={course?.title || "course"}
-                          className="w-full h-full object-cover transition-all duration-300"
-                          onError={(e) => {
-                            e.target.onerror = null;
-                            e.target.src = "https://placehold.co/400x225/E0BBE4/957DAD?text=Image+Error";
-                          }}
-                        />
-                        <div className="absolute left-4 bottom-4 text-white z-10">
-                          <h4 className="text-2xl font-bold">{course?.title}</h4>
-                          <p className="text-md mt-3 text-gray-200">{course?.description ? convertRtkEditorToFormattedPlainText(course.description, true) : ''}</p>
-                          <button className="text-yellow-600 hover:text-yellow-700 text-sm font-medium cursor-pointer">
-                            {course?.link || "Show more"}
-                          </button>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {courses.map((course) => {
+                  return (
+                    <Card
+                      key={course?.id || course?._id}
+                      className="relative bg-black text-white h-[438px] p-0 overflow-hidden group cursor-pointer transition-all"
+                      onClick={() => onCourseClick?.(course)}
+                    >
+                      <CardContent className="p-0">
+                        <div className="relative h-full">
+                          <img
+                            src={course?.imageUrl || "https://images.unsplash.com/photo-1559526324-593bc073d938?q=80&w=800&auto=format&fit=crop"}
+                            alt={course?.title || "course"}
+                            className="w-full h-full object-cover transition-all duration-300"
+                            onError={(e) => {
+                              e.target.onerror = null;
+                              e.target.src = "https://placehold.co/400x225/E0BBE4/957DAD?text=Image+Error";
+                            }}
+                          />
+                          <div className="absolute left-4 bottom-4 text-white z-10">
+                            <h4 className="text-2xl font-bold">{course?.title}</h4>
+                            <p className="text-md mt-3 text-gray-200">{course?.description ? convertRtkEditorToFormattedPlainText(course.description, true) : ''}</p>
+                            <button className="text-yellow-600 hover:text-yellow-700 text-sm font-medium cursor-pointer">
+                              {course?.link || "Show more"}
+                            </button>
+                          </div>
                         </div>
-                      </div>
-                    </CardContent>
-                    <div className='absolute bg-gradient-black inset-0 bg-gradient-green z-0'></div>
-                  </Card>
-                )
-              })}
-            </div>
+                      </CardContent>
+                      <div className='absolute bg-gradient-black inset-0 bg-gradient-green z-0'></div>
+                    </Card>
+                  )
+                })}
+              </div>
             )}
           </div>
         )}
@@ -494,7 +492,7 @@ function CourseUI({
 
 
 export default function AcademyPage() {
-    useDocumentTitle('Courses');
+  useDocumentTitle('Courses');
   const [activeTab, setActiveTab] = useState('');
   const [open, setOpen] = useState('');
   const [currentCourse, setCurrentCourse] = useState([]);
@@ -508,10 +506,15 @@ export default function AcademyPage() {
   const { search, state } = useLocation();
   const params = new URLSearchParams(search);
   console.log("URL Params:", Object.fromEntries(params.entries()));
-  const mainSection = params.get("mainSection");
-  const language = params.get("language");
-  const categoryName = params.get("categoryId");
-  const courseId = params.get("courseId");
+  const mainSection = params?.get?.("mainSection");
+  const languageFromUrl = params?.get?.("language");
+  const categoryName = params?.get?.("categoryId");
+  const courseId = params?.get?.("courseId");
+
+  // Get selected language from Redux store
+  const selectedLanguage = useSelector(selectSelectedLanguage);
+  // Use URL language first, then Redux store language, then default to 'English'
+  const language = languageFromUrl || selectedLanguage?.name || 'English';
 
   // Handle course passed from navigation state (from ViewProfilePage)
   useEffect(() => {
@@ -539,7 +542,7 @@ export default function AcademyPage() {
   } = useGetAcademyCategoryByMainSectionQuery(
     {
       mainSection: mainSection ? mainSection : 'Academy',
-      language: language ? language : 'English',
+      language: language,
       category: activeTab ? activeTab : activeTab || undefined,
       id: courseId ? courseId : selectedCourseId || undefined,
     },
@@ -550,7 +553,7 @@ export default function AcademyPage() {
     },
   );
 
-  console.log(academyCourseData , "academyCourseData");
+  console.log(academyCourseData, "academyCourseData");
   console.log("selectedCourseId:", selectedCourseId, "activeTab:", activeTab);
 
   // Extract data from API response
@@ -579,7 +582,7 @@ export default function AcademyPage() {
     if (selectedCourseId && data?.course && Array.isArray(data?.course) && data?.course?.length > 0) {
       // Display the course data from API response
       setCurrentCourse(data?.course);
-      
+
       // Auto-select first lecture
       const firstCourse = data?.course?.[0];
       if (firstCourse?.lectures?.length > 0) {
@@ -587,7 +590,7 @@ export default function AcademyPage() {
         setActiveLectureId(firstLecture?._id);
         setLecture(firstLecture);
       }
-      
+
       // Set activeTab to match the course's category from API response
       // Always update activeTab based on API response when course is clicked
       const activeCategoryId = data?.ActiveCategory?.[0]?.categoryId;
@@ -742,7 +745,7 @@ export default function AcademyPage() {
   // Transform API data to match UI component expectations
   const transformIntroLessons = (courseData) => {
     if (!courseData || courseData?.length === 0) return [];
-    
+
     // Get first section's lectures as intro lessons
     const firstSection = courseData?.[0];
     if (!firstSection?.lectures || firstSection?.lectures?.length === 0) return [];
@@ -760,7 +763,7 @@ export default function AcademyPage() {
   // Transform sections data
   const transformSections = (courseData) => {
     if (!courseData || courseData?.length === 0) return {};
-    
+
     const sectionsObj = {};
     // Skip first section (it's used for intro lessons)
     courseData?.slice(1)?.forEach((section) => {
@@ -773,7 +776,7 @@ export default function AcademyPage() {
         })) || [];
       }
     });
-    
+
     return sectionsObj;
   };
 
@@ -803,10 +806,10 @@ export default function AcademyPage() {
 
   // Store recommended courses from initial load (don't overwrite on category change)
   useEffect(() => {
-    const newCourses = (data?.upcomingCourse && data?.upcomingCourse?.length > 0) 
-      ? data?.upcomingCourse 
-      : (data?.AllCourse && data?.AllCourse?.length > 0) 
-        ? data?.AllCourse 
+    const newCourses = (data?.upcomingCourse && data?.upcomingCourse?.length > 0)
+      ? data?.upcomingCourse
+      : (data?.AllCourse && data?.AllCourse?.length > 0)
+        ? data?.AllCourse
         : [];
 
     // Always update recommended courses when API returns new course lists (initial load or category selection)
@@ -818,30 +821,30 @@ export default function AcademyPage() {
   }, [data?.upcomingCourse, data?.AllCourse, activeTab]);
 
   // Get recommended courses - use stored courses or current data
-  const courses = recommendedCourses?.length > 0 
-    ? recommendedCourses 
-    : (data?.upcomingCourse && data?.upcomingCourse?.length > 0) 
-      ? data?.upcomingCourse 
-      : (data?.AllCourse && data?.AllCourse?.length > 0) 
-        ? data?.AllCourse 
+  const courses = recommendedCourses?.length > 0
+    ? recommendedCourses
+    : (data?.upcomingCourse && data?.upcomingCourse?.length > 0)
+      ? data?.upcomingCourse
+      : (data?.AllCourse && data?.AllCourse?.length > 0)
+        ? data?.AllCourse
         : [];
 
   // Handle course click from Recommended Courses (IQ Vault behavior)
   const handleCourseClick = (course) => {
     const courseId = course?._id || course?.id;
-    
+
     // Set the course ID for API - this will trigger API call with course ID
     // The API will return the course data and category information
     setSelectedCourseId(courseId);
-    
+
     // Hide the Vault section
     setHideVault(true);
-    
+
     // Reset course and lecture state - will be populated when API response arrives
     setCurrentCourse([]);
     setLecture(null);
     setActiveLectureId(null);
-    
+
     // Don't manually set activeTab - let the API response determine it
     // The useEffect will handle setting activeTab based on API response's ActiveCategory
   };
