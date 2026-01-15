@@ -611,7 +611,7 @@ export default function AcademyPage() {
   } = useGetAcademyCategoryByMainSectionQuery(
     {
       mainSection: mainSection ? mainSection : 'Academy',
-      language: language ? language : 'English ',
+      language: language ? language : 'English',
       category: activeTab ? activeTab : activeTab || undefined,
       id: courseId ? courseId : selectedCourseId || undefined,
     },
