@@ -36,7 +36,14 @@ const CourseSchema = new mongoose.Schema(
       { type: mongoose.Schema.Types.ObjectId, ref: "Section" }
     ],
 
-    // Plan reference for Hotmart payment integration
+    // Plans array - a course can belong to multiple plans
+    plans: [{
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Plan",
+    }],
+    
+    // Legacy single plan field - kept for backward compatibility
+    // Will be populated from plans array if only one plan exists
     plan: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Plan",

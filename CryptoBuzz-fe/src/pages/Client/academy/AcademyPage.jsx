@@ -10,8 +10,9 @@ import { useCourseAccessFromMap } from '../../../hooks/use-batch-course-access';
 import { useBatchCourseAccess } from '../../../hooks/use-batch-course-access';
 import { CourseLockOverlay } from '../../../components/payment/CourseLockOverlay';
 import { PurchaseButton } from '../../../components/payment/PurchaseButton';
+import { PlanSelectionModal } from '../../../components/payment/PlanSelectionModal';
 import { RecommendedCourseCard } from '../../../components/payment/RecommendedCourseCard';
-import { useCreatePaymentLinkMutation } from '../../../store/client/clientPaymentApiSlice';
+import { useCreatePaymentLinkMutation, useLazyGetCoursePlansQuery } from '../../../store/client/clientPaymentApiSlice';
 import { selectCurrentToken } from '../../../store/authSlice';
 import { toast } from 'sonner';
 
@@ -106,12 +107,30 @@ function CourseUI({
   const [isVideoPlaying, setIsVideoPlaying] = useState(false);
   
   // Payment state
+  const [showPlanModal, setShowPlanModal] = useState(false);
+  const [modalPlans, setModalPlans] = useState([]); // Plans to show in modal (from query or checkout response)
   const [createPaymentLink, { isLoading: isPurchasing }] = useCreatePaymentLinkMutation();
+  
+  // Get token at component level (hooks must be at top level)
+  const authToken = useSelector(selectCurrentToken) || localStorage.getItem('token') || '';
   
   // Get current course for access check
   // Note: currentCourse[0] is a section, the actual course ID is in currentCourse[0].course
   const currentCourseSection = currentCourse?.[0] || null;
   const currentCourseId = currentCourseSection?.course || currentCourseSection?._id || null;
+  
+  // Use lazy query to fetch plans only when needed
+  // This ensures we always get fresh data when purchase is clicked
+  const [triggerGetPlans, { data: plansData, isLoading: isLoadingPlans, isFetching: isFetchingPlans }] = useLazyGetCoursePlansQuery();
+
+  const plans = plansData?.data?.plans || [];
+  
+  // Update modal plans when plans data changes
+  useEffect(() => {
+    if (plans.length > 0) {
+      setModalPlans(plans);
+    }
+  }, [plans]);
   
   // Use batch access map for access checking (no individual API calls)
   const { hasAccess, isPremium, coursePrice } = useCourseAccessFromMap(
@@ -120,26 +139,116 @@ function CourseUI({
     currentCourseSection // Pass course section if available
   );
   
-  // Handle purchase
+  // Handle purchase - Fetch plans first, then decide
   const handlePurchase = async () => {
+    console.log('🚨🚨🚨 handlePurchase CALLED! 🚨🚨🚨');
+    console.log('Current courseId:', currentCourseId);
+    
     if (!currentCourseId) {
+      console.error('❌ No courseId!');
       toast.error('Course ID is required');
       return;
     }
 
+    console.log('✅ Purchase clicked - Fetching plans for course:', currentCourseId);
+
+    // Show loading state
+    toast.info('Loading plans...', { duration: 2000 });
+
+    // CRITICAL: Fetch plans FIRST before doing anything else
+    console.log('🔄 STEP 1: Starting plans fetch for course:', currentCourseId);
+    
     try {
-      const response = await createPaymentLink(currentCourseId).unwrap();
+      // Use native fetch to ensure we wait for the response
+      // Use full API URL (same as RTK Query uses)
+      const apiBaseUrl = `${import.meta.env.VITE_APP_API_URL || 'http://localhost:8000'}/api/v1`;
+      const plansApiUrl = `${apiBaseUrl}/common/payment/course/${currentCourseId}/plans`;
+      console.log('📡 STEP 2: Calling plans API:', plansApiUrl, 'with token:', authToken ? 'YES' : 'NO');
+      
+      const plansResponse = await fetch(plansApiUrl, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(authToken && { 'Authorization': `Bearer ${authToken}` })
+        },
+      });
+      
+      console.log('📥 STEP 3: Plans API response received, status:', plansResponse.status);
+      
+      if (!plansResponse.ok) {
+        const errorText = await plansResponse.text();
+        console.error('❌ Plans API failed:', plansResponse.status, errorText);
+        throw new Error(`Plans API failed: ${plansResponse.status}`);
+      }
+      
+      const plansResult = await plansResponse.json();
+      console.log('📦 STEP 4: Plans API response parsed:', plansResult);
+      
+      // Extract plans from the response
+      let fetchedPlans = [];
+      if (plansResult?.data?.plans) {
+        fetchedPlans = plansResult.data.plans;
+      } else if (plansResult?.plans) {
+        fetchedPlans = plansResult.plans;
+      } else if (Array.isArray(plansResult?.data)) {
+        fetchedPlans = plansResult.data;
+      }
+      
+      console.log('✅ Plans extracted:', { fetchedPlans, count: fetchedPlans.length });
+
+      // Check if multiple plans
+      if (fetchedPlans.length > 1) {
+        // Multiple plans - show modal
+        console.log('✅ Multiple plans detected, opening modal', { plansCount: fetchedPlans.length, plans: fetchedPlans });
+        setModalPlans(fetchedPlans);
+        setShowPlanModal(true);
+        return; // Exit early - don't call checkout
+      }
+      
+      // Even if single plan, log it
+      console.log('Single plan or no plans:', { plansCount: fetchedPlans.length, plans: fetchedPlans });
+
+      // Single plan or no plans - proceed with checkout
+      const planId = fetchedPlans.length === 1 ? fetchedPlans[0]._id : undefined;
+      const payload = planId ? { courseId: currentCourseId, planId } : currentCourseId;
+      
+      console.log('💰 STEP 5: Proceeding to checkout with payload:', payload);
+      console.log('⚠️ CHECKOUT API WILL BE CALLED NOW');
+      const response = await createPaymentLink(payload).unwrap();
       
       if (response?.data?.checkoutUrl) {
-        // Redirect to Hotmart checkout
         window.location.href = response.data.checkoutUrl;
       } else {
         throw new Error('Checkout URL not received');
       }
     } catch (error) {
-      console.error('Purchase error:', error);
-      const errorMessage = error?.data?.message || error?.message || 'Failed to create payment link';
-      toast.error(errorMessage);
+      console.error('❌ Purchase error:', error);
+      console.error('Error details:', {
+        message: error?.message,
+        data: error?.data,
+        stack: error?.stack
+      });
+      
+      // If error is from plans fetch, don't proceed to checkout
+      if (error?.message?.includes('Plans API failed')) {
+        toast.error('Failed to load payment plans. Please try again.');
+        return; // Exit - don't call checkout
+      }
+      
+      // If error says plan selection needed, try to get plans from error response
+      if (error?.data?.data?.requiresPlanSelection || error?.data?.data?.plans) {
+        const errorPlans = error.data.data.plans || [];
+        if (errorPlans.length > 1) {
+          setModalPlans(errorPlans);
+          setShowPlanModal(true);
+          return;
+        }
+      }
+      
+      // Only show error if we haven't already handled it
+      if (!error?.message?.includes('Plans API failed')) {
+        toast.error(error?.data?.message || error?.message || 'Failed to create payment link');
+      }
     }
   };
   
@@ -309,7 +418,7 @@ function CourseUI({
                         <CourseLockOverlay
                           course={currentCourseSection}
                           onPurchase={handlePurchase}
-                          isPurchasing={isPurchasing}
+                          isPurchasing={isPurchasing || isLoadingPlans}
                           price={coursePrice}
                         />
                       )}
@@ -321,7 +430,7 @@ function CourseUI({
                         <CourseLockOverlay
                           course={currentCourseSection}
                           onPurchase={handlePurchase}
-                          isPurchasing={isPurchasing}
+                          isPurchasing={isPurchasing || isLoadingPlans}
                           price={coursePrice}
                         />
                       )}
@@ -571,6 +680,15 @@ function CourseUI({
           </div>
         )}
       </div>
+
+      {/* Plan Selection Modal - Always render when showPlanModal is true */}
+      <PlanSelectionModal
+        open={showPlanModal}
+        onOpenChange={setShowPlanModal}
+        courseId={currentCourseId}
+        courseTitle={currentCourseSection?.title || 'this course'}
+        plans={modalPlans.length > 0 ? modalPlans : plans}
+      />
     </>
   );
 }

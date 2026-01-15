@@ -1346,6 +1346,11 @@ export const sideMenus = {
       icon: <Wallet />,
       path: "/admin/plan",
     },
+    {
+      title: "Purchases",
+      icon: <BadgeCent />,
+      path: "/admin/purchase",
+    },
 
     {
       title: "Live Stream",

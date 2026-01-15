@@ -72,9 +72,23 @@ const CreateCourseModal = forwardRef(
           instructor: auth?.user?._id,
         };
 
-        // Add plan field if present (for premium courses)
+        // Handle plans array (new approach - multiple plans)
+        const plansArray = [];
+        // FormData sends plans[] as multiple entries, collect them all
+        for (const [key, value] of formData.entries()) {
+          if (key === "plans[]" && value && value !== "" && value !== "null" && value !== "undefined") {
+            plansArray.push(value);
+          }
+        }
+        
+        // Add plans array if any plans were selected
+        if (plansArray.length > 0) {
+          payload.plans = plansArray;
+        }
+        
+        // Also add single plan field for backward compatibility (first plan)
         const planField = formData.get("plan");
-        if (planField) {
+        if (planField && planField !== "" && planField !== "null" && planField !== "undefined") {
           payload.plan = planField;
         }
 
@@ -91,7 +105,12 @@ const CreateCourseModal = forwardRef(
           const uploadFormData = new FormData();
           Object.entries(payload).forEach(([key, value]) => {
             if (value !== null && value !== undefined) {
-              uploadFormData.append(key, value);
+              // Handle plans array specially - send as JSON string for FormData
+              if (key === "plans" && Array.isArray(value)) {
+                uploadFormData.append("plans", JSON.stringify(value));
+              } else {
+                uploadFormData.append(key, value);
+              }
             }
           });
           uploadFormData.append("image", imageFile); // append file with correct key

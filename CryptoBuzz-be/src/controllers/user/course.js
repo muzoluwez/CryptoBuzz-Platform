@@ -41,10 +41,36 @@ export const CourseBasedOnSection = async (req, res) => {
       return res.status(400).json({ success: false, message: "mainSection is required" });
     }
 
-    let query = { section: mainSection, published: true };
-    if (categoryId) query.category = categoryId;
-    if (language) query.language = language;
-    if (id) query._id = id;
+    // Build query with explicit isDeleted filter
+    let query = { 
+      section: mainSection, 
+      published: true,
+      isDeleted: false  // Explicitly filter out deleted courses
+    };
+    
+    if (categoryId) {
+      // Ensure categoryId is a valid ObjectId
+      if (mongoose.Types.ObjectId.isValid(categoryId)) {
+        query.category = new mongoose.Types.ObjectId(categoryId);
+      } else {
+        return res.status(400).json({ success: false, message: "Invalid categoryId format" });
+      }
+    }
+    
+    // Handle language with trim and regex to match even if database has trailing spaces
+    if (language) {
+      const trimmedLanguage = language.trim();
+      // Use regex to handle trailing/leading whitespace in database
+      query.language = { $regex: new RegExp(`^${trimmedLanguage.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\s*$`, 'i') };
+    }
+    if (id) {
+      // Ensure id is a valid ObjectId
+      if (mongoose.Types.ObjectId.isValid(id)) {
+        query._id = new mongoose.Types.ObjectId(id);
+      } else {
+        return res.status(400).json({ success: false, message: "Invalid course id format" });
+      }
+    }
 
     // Fetch all courses for AllCourse data
     const coursesData = await Course.find(query).sort({ createdAt: 1 }).populate("category", "_id name").lean();
@@ -63,12 +89,37 @@ export const CourseBasedOnSection = async (req, res) => {
 
     if (mainSection) {
       // If both ID and section are provided, find single course
-      const singleCourse = await Course.findOne({
-        _id: id ? id : coursesData[0]?._id,
+      const singleCourseQuery = {
         section: mainSection,
-        category: categoryId ? categoryId : coursesData[0]?.category._id,
-        language: language ? language : coursesData[0]?.language
-      })
+        published: true,
+        isDeleted: false  // Explicitly filter out deleted courses
+      };
+      
+      if (id) {
+        if (mongoose.Types.ObjectId.isValid(id)) {
+          singleCourseQuery._id = new mongoose.Types.ObjectId(id);
+        }
+      } else if (coursesData[0]?._id) {
+        singleCourseQuery._id = coursesData[0]._id;
+      }
+      
+      if (categoryId) {
+        if (mongoose.Types.ObjectId.isValid(categoryId)) {
+          singleCourseQuery.category = new mongoose.Types.ObjectId(categoryId);
+        }
+      } else if (coursesData[0]?.category?._id) {
+        singleCourseQuery.category = coursesData[0].category._id;
+      }
+      
+      if (language) {
+        const trimmedLanguage = language.trim();
+        singleCourseQuery.language = { $regex: new RegExp(`^${trimmedLanguage.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\s*$`, 'i') };
+      } else if (coursesData[0]?.language) {
+        const trimmedLang = String(coursesData[0].language).trim();
+        singleCourseQuery.language = { $regex: new RegExp(`^${trimmedLang.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\s*$`, 'i') };
+      }
+      
+      const singleCourse = await Course.findOne(singleCourseQuery)
         .sort({ createdAt: -1 })
         .lean();
 
@@ -113,10 +164,14 @@ export const CourseBasedOnSection = async (req, res) => {
       courses.push(singleCourse); // put into array for consistent handling
     } else {
       // If no filters applied, use first course
-      let courseQuery = { section: mainSection };
+      let courseQuery = { 
+        section: mainSection,
+        published: true,
+        isDeleted: false  // Explicitly filter out deleted courses
+      };
 
       const categoriesActiveData = await Category.find({
-        _id: { $in: categoryId ? categoryId : coursesData[0]?.category._id },
+        _id: { $in: categoryId ? (mongoose.Types.ObjectId.isValid(categoryId) ? new mongoose.Types.ObjectId(categoryId) : null) : (coursesData[0]?.category?._id ? coursesData[0].category._id : null) },
         status: true
       });
 
@@ -148,9 +203,16 @@ export const CourseBasedOnSection = async (req, res) => {
         }
         courseQuery._id = coursesData[0]._id;
       } else {
-        if (categoryId) courseQuery.category = categoryId;
-        if (language) courseQuery.language = language;
-        if (id) courseQuery._id = id;
+        if (categoryId && mongoose.Types.ObjectId.isValid(categoryId)) {
+          courseQuery.category = new mongoose.Types.ObjectId(categoryId);
+        }
+        if (language) {
+          const trimmedLanguage = language.trim();
+          courseQuery.language = { $regex: new RegExp(`^${trimmedLanguage.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\s*$`, 'i') };
+        }
+        if (id && mongoose.Types.ObjectId.isValid(id)) {
+          courseQuery._id = new mongoose.Types.ObjectId(id);
+        }
       }
 
       courses = await Course.find(courseQuery).sort({ createdAt: 1 }).lean();

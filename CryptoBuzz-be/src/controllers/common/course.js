@@ -36,7 +36,27 @@ const courseValidationSchema = yup.object().shape({
     .required(),
   plan: yup
     .string()
-    .matches(/^[0-9a-fA-F]{24}$/)
+    .nullable()
+    .optional()
+    .test(
+      "is-valid-objectid",
+      "Plan must be a valid ObjectId",
+      function (value) {
+        // If plan is null, undefined, or empty string, it's valid (for free courses)
+        if (!value || value === "" || value === "null") {
+          return true;
+        }
+        // If plan is provided, it must be a valid ObjectId
+        return /^[0-9a-fA-F]{24}$/.test(value);
+      }
+    ),
+  plans: yup
+    .array()
+    .of(
+      yup
+        .string()
+        .matches(/^[0-9a-fA-F]{24}$/, "Each plan must be a valid ObjectId")
+    )
     .nullable()
     .optional(),
   // Legacy field - keep for backward compatibility
@@ -126,6 +146,8 @@ export const getOneCourse = async (req, res) => {
 
     const course = await Course.findById(id)
       .populate("instructor", "name email")
+      .populate("plan", "name price currency hotmartCheckoutUrl status")
+      .populate("plans", "name price currency hotmartCheckoutUrl status description")
       .populate({
         path: "sections",
         populate: {
@@ -160,12 +182,83 @@ export const createCourse = async (req, res) => {
 
     if (!req.file) return res.status(400).json({ message: "Image is required" });
 
-
+    // Clean up plan/plans fields - remove them for FREE courses or if invalid
+    const cleanedBody = { ...body };
+    
+    if (cleanedBody.tier === "FREE") {
+      // For free courses, remove plan/plans fields entirely
+      delete cleanedBody.plan;
+      delete cleanedBody.plans;
+    } else {
+      // Handle plans array (new approach - multiple plans)
+      if (cleanedBody.plans) {
+        // Parse JSON string if sent as JSON (from FormData)
+        if (typeof cleanedBody.plans === "string") {
+          try {
+            const parsed = JSON.parse(cleanedBody.plans);
+            if (Array.isArray(parsed)) {
+              cleanedBody.plans = parsed;
+            } else {
+              // If not JSON array, try comma-separated
+              cleanedBody.plans = cleanedBody.plans
+                .split(",")
+                .map(p => p.trim())
+                .filter(p => p && p !== "null" && p !== "undefined");
+            }
+          } catch (e) {
+            // Not JSON, try comma-separated string
+            cleanedBody.plans = cleanedBody.plans
+              .split(",")
+              .map(p => p.trim())
+              .filter(p => p && p !== "null" && p !== "undefined");
+          }
+        }
+        // Ensure it's an array and filter out invalid values
+        if (Array.isArray(cleanedBody.plans)) {
+          cleanedBody.plans = cleanedBody.plans
+            .filter(p => p && p !== "null" && p !== "undefined" && /^[0-9a-fA-F]{24}$/.test(p));
+          // If plans array is empty, remove it
+          if (cleanedBody.plans.length === 0) {
+            delete cleanedBody.plans;
+          }
+        }
+      }
+      
+      // Handle legacy single plan field (for backward compatibility)
+      if (cleanedBody.plan) {
+        // If plans array exists, also add single plan to it
+        if (!cleanedBody.plans) {
+          cleanedBody.plans = [];
+        }
+        const planValue = String(cleanedBody.plan).trim();
+        if (planValue && planValue !== "null" && planValue !== "undefined" && /^[0-9a-fA-F]{24}$/.test(planValue)) {
+          if (!cleanedBody.plans.includes(planValue)) {
+            cleanedBody.plans.push(planValue);
+          }
+          // Set single plan field for backward compatibility
+          cleanedBody.plan = planValue;
+        } else {
+          delete cleanedBody.plan;
+        }
+      } else {
+        // No single plan, but we might have plans array
+        if (cleanedBody.plans && cleanedBody.plans.length > 0) {
+          // Set first plan as the primary plan for backward compatibility
+          cleanedBody.plan = cleanedBody.plans[0];
+        }
+      }
+      
+      // If no plans at all after cleaning, remove both fields
+      if (!cleanedBody.plans || cleanedBody.plans.length === 0) {
+        delete cleanedBody.plans;
+        delete cleanedBody.plan;
+      }
+    }
 
     const azureUrl = await uploadImageToAzure(req.file.buffer, req.file.originalname);
 
     const newCoursePayload = {
-      ...body,
+      ...cleanedBody,
       imageUrl: azureUrl,
       createdBy: reqUser,
       order: nextOrder,
@@ -193,8 +286,81 @@ export const updateCourse = async (req, res) => {
   try {
     const { id } = req.params;
 
+    // Clean up plan/plans fields - remove them for FREE courses or if invalid
+    const cleanedBody = { ...req.body };
+    
+    if (cleanedBody.tier === "FREE") {
+      // For free courses, remove plan/plans fields entirely
+      delete cleanedBody.plan;
+      delete cleanedBody.plans;
+    } else {
+      // Handle plans array (new approach - multiple plans)
+      if (cleanedBody.plans) {
+        // Parse JSON string if sent as JSON (from FormData)
+        if (typeof cleanedBody.plans === "string") {
+          try {
+            const parsed = JSON.parse(cleanedBody.plans);
+            if (Array.isArray(parsed)) {
+              cleanedBody.plans = parsed;
+            } else {
+              // If not JSON array, try comma-separated
+              cleanedBody.plans = cleanedBody.plans
+                .split(",")
+                .map(p => p.trim())
+                .filter(p => p && p !== "null" && p !== "undefined");
+            }
+          } catch (e) {
+            // Not JSON, try comma-separated string
+            cleanedBody.plans = cleanedBody.plans
+              .split(",")
+              .map(p => p.trim())
+              .filter(p => p && p !== "null" && p !== "undefined");
+          }
+        }
+        // Ensure it's an array and filter out invalid values
+        if (Array.isArray(cleanedBody.plans)) {
+          cleanedBody.plans = cleanedBody.plans
+            .filter(p => p && p !== "null" && p !== "undefined" && /^[0-9a-fA-F]{24}$/.test(p));
+          // If plans array is empty, remove it
+          if (cleanedBody.plans.length === 0) {
+            delete cleanedBody.plans;
+          }
+        }
+      }
+      
+      // Handle legacy single plan field (for backward compatibility)
+      if (cleanedBody.plan) {
+        // If plans array exists, also add single plan to it
+        if (!cleanedBody.plans) {
+          cleanedBody.plans = [];
+        }
+        const planValue = String(cleanedBody.plan).trim();
+        if (planValue && planValue !== "null" && planValue !== "undefined" && /^[0-9a-fA-F]{24}$/.test(planValue)) {
+          if (!cleanedBody.plans.includes(planValue)) {
+            cleanedBody.plans.push(planValue);
+          }
+          // Set single plan field for backward compatibility
+          cleanedBody.plan = planValue;
+        } else {
+          delete cleanedBody.plan;
+        }
+      } else {
+        // No single plan, but we might have plans array
+        if (cleanedBody.plans && cleanedBody.plans.length > 0) {
+          // Set first plan as the primary plan for backward compatibility
+          cleanedBody.plan = cleanedBody.plans[0];
+        }
+      }
+      
+      // If no plans at all after cleaning, remove both fields
+      if (!cleanedBody.plans || cleanedBody.plans.length === 0) {
+        delete cleanedBody.plans;
+        delete cleanedBody.plan;
+      }
+    }
+
     const updatePayload = {
-      ...req.body,
+      ...cleanedBody,
       instructor: req.user._id
     };
 

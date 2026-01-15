@@ -13,6 +13,11 @@ const createPaymentLinkSchema = yup.object().shape({
     .string()
     .matches(/^[0-9a-fA-F]{24}$/)
     .required("Course ID is required"),
+  planId: yup
+    .string()
+    .matches(/^[0-9a-fA-F]{24}$/)
+    .nullable()
+    .optional(),
 });
 
 /**
@@ -37,44 +42,105 @@ const extractCheckoutCodeFromUrl = (url) => {
 export const createPaymentLink = async (req, res) => {
   try {
     const userId = req.user._id;
-    const { courseId } = req.body;
+    const { courseId, planId } = req.body;
 
-    await createPaymentLinkSchema.validate({ courseId });
+    await createPaymentLinkSchema.validate({ courseId, planId });
 
-    // Check if course exists and populate plan
-    const course = await Course.findById(courseId).populate("plan");
+    // Check if course exists and populate plans
+    const course = await Course.findById(courseId)
+      .populate("plan") // Legacy single plan
+      .populate("plans"); // Multiple plans array
     if (!course) {
       return res.status(404).json({ message: "Course not found" });
     }
 
-    // Get checkout URL directly from plan - it's already stored, no need to generate
+    // Collect all available plans for this course
+    const availablePlans = [];
+    const planIdMap = new Map(); // For quick lookup
+    
+    // Add plans from plans array (new approach - multiple plans)
+    if (course.plans && Array.isArray(course.plans)) {
+      course.plans.forEach(plan => {
+        if (plan && plan._id && plan.status === "active" && !plan.isDeleted) {
+          const planId = plan._id.toString();
+          availablePlans.push(plan);
+          planIdMap.set(planId, plan);
+        }
+      });
+    }
+
+    // Add single plan if it exists and not already in array (backward compatibility)
+    if (course.plan && course.plan._id) {
+      const planIdStr = course.plan._id.toString();
+      if (!planIdMap.has(planIdStr) && course.plan.status === "active" && !course.plan.isDeleted) {
+        availablePlans.push(course.plan);
+        planIdMap.set(planIdStr, course.plan);
+      }
+    }
+
+    // If no plans available and course is premium, return error
+    if (availablePlans.length === 0 && (course.tier === "PREMIUM" || course.price > 0)) {
+      return res.status(400).json({
+        message: "No active plans available for this course. Please contact support.",
+      });
+    }
+
+    // If multiple plans available and no planId specified, return all plans for selection
+    if (availablePlans.length > 1 && !planId) {
+      return res.status(200).json(
+        ApiResponse(200, {
+          requiresPlanSelection: true,
+          plans: availablePlans.map(p => ({
+            _id: p._id,
+            name: p.name,
+            description: p.description,
+            price: p.price,
+            currency: p.currency,
+            hotmartCheckoutUrl: p.hotmartCheckoutUrl,
+          })),
+          courseId: courseId,
+          courseTitle: course.title,
+        }, "Please select a plan to proceed with checkout")
+      );
+    }
+
+    // Determine which plan to use
+    let selectedPlan = null;
+    if (planId) {
+      // Validate that the provided planId is one of the available plans
+      selectedPlan = planIdMap.get(planId);
+      if (!selectedPlan) {
+        return res.status(400).json({
+          message: "Invalid plan selected. The plan is not available for this course.",
+          availablePlans: availablePlans.map(p => ({
+            _id: p._id,
+            name: p.name,
+            price: p.price,
+          })),
+        });
+      }
+    } else if (availablePlans.length === 1) {
+      // Only one plan available, use it
+      selectedPlan = availablePlans[0];
+    } else if (availablePlans.length === 0) {
+      // Free course or no plans
+      if (course.tier === "FREE" || course.price <= 0) {
+        return res.status(400).json({
+          message: "This course is free. Payment is not required.",
+        });
+      }
+    }
+
+    // Use the selected plan (already populated from availablePlans)
+    const plan = selectedPlan;
     let hotmartCheckoutUrl = null;
     let planCheckoutCode = null;
-    let plan = null;
 
-    // Always fetch plan explicitly to ensure we have the latest data
-    if (course.plan) {
-      // Check if plan is already populated (has hotmartCheckoutUrl property)
-      if (course.plan && typeof course.plan === 'object' && course.plan.hotmartCheckoutUrl) {
-        // Plan is populated - use it directly
-        plan = course.plan;
-      } else {
-        // Plan reference exists but wasn't populated - fetch it manually
-        const planId = course.plan._id || course.plan;
-        plan = await Plan.findById(planId);
-        
-        if (!plan) {
-          console.error("Plan reference exists but plan document not found:", {
-            planReference: planId,
-            courseId: courseId,
-            courseTitle: course.title
-          });
-        }
-      }
-      
+    // Get checkout URL from the selected plan
+    if (plan) {
+      // Plan is already populated from availablePlans, so we can use it directly
       // Get checkout URL directly from plan
-      if (plan) {
-        if (plan.hotmartCheckoutUrl) {
+      if (plan.hotmartCheckoutUrl) {
           const trimmedUrl = plan.hotmartCheckoutUrl.trim();
           
           // Validate it's not null, empty, or contains "null"
@@ -104,7 +170,6 @@ export const createPaymentLink = async (req, res) => {
             courseTitle: course.title
           });
         }
-      }
     } else {
       console.warn("Course does not have a plan assigned:", {
         courseId: courseId,
@@ -123,7 +188,7 @@ export const createPaymentLink = async (req, res) => {
     const hasPlanReference = !!course.plan; // Check if plan reference exists (even if plan document wasn't fetched)
     const hasPlanDocument = !!plan; // Check if plan document was successfully fetched
     const isPremiumByTier = course.tier === "PREMIUM";
-    const coursePrice = plan?.price ?? course.price ?? 0;
+    const coursePrice = (plan && plan.price) || course.price || 0;
     const isPremiumByPrice = coursePrice > 0;
     const isPremiumCourse = hasPlanReference || hasPlanDocument || isPremiumByTier || isPremiumByPrice;
     
@@ -226,45 +291,42 @@ export const createPaymentLink = async (req, res) => {
     });
 
     if (pendingPurchase) {
-      // IMPORTANT: Always re-fetch plan data when there's a pending purchase
-      // This ensures we have the latest checkout URL even if the plan was updated
-      // or if the plan wasn't populated correctly initially
-      if (course.plan) {
-        // Get plan ID (handle both populated and unpopulated cases)
-        const planId = (course.plan._id || course.plan).toString();
-        const refreshedPlan = await Plan.findById(planId);
-        
-        if (refreshedPlan) {
-          plan = refreshedPlan;
-          
-          // Get fresh checkout URL from plan - validate thoroughly
-          if (refreshedPlan.hotmartCheckoutUrl && 
-              refreshedPlan.hotmartCheckoutUrl !== null && 
-              refreshedPlan.hotmartCheckoutUrl !== 'null' && 
-              refreshedPlan.hotmartCheckoutUrl.trim() !== '' &&
-              typeof refreshedPlan.hotmartCheckoutUrl === 'string' &&
-              refreshedPlan.hotmartCheckoutUrl.toLowerCase() !== 'null' &&
-              !refreshedPlan.hotmartCheckoutUrl.toLowerCase().includes('/null')) {
-            const trimmedUrl = refreshedPlan.hotmartCheckoutUrl.trim();
-            hotmartCheckoutUrl = trimmedUrl;
-            planCheckoutCode = refreshedPlan.hotmartCheckoutCode || extractCheckoutCodeFromUrl(hotmartCheckoutUrl);
-          } else {
-            console.error("Plan found but has invalid checkout URL for pending purchase:", {
-              courseId,
-              purchaseId: pendingPurchase._id,
-              planId: refreshedPlan._id,
-              planName: refreshedPlan.name,
-              checkoutUrl: refreshedPlan.hotmartCheckoutUrl,
-              checkoutUrlType: typeof refreshedPlan.hotmartCheckoutUrl,
-              checkoutUrlValue: JSON.stringify(refreshedPlan.hotmartCheckoutUrl),
-              containsNull: refreshedPlan.hotmartCheckoutUrl?.toLowerCase().includes('null') || false
-            });
-          }
+      // IMPORTANT: Use the plan from the request (if provided) or from pending purchase or course
+      // Priority: request planId > pendingPurchase.plan > course.plan > selectedPlan
+      let planToUse = plan; // Use the selected plan from above (already populated)
+      
+      // If planId is provided in request, use that plan (already set in selectedPlan above)
+      // Otherwise, check if pending purchase has a plan stored
+      if (!planToUse && pendingPurchase.plan) {
+        const pendingPlanId = (pendingPurchase.plan._id || pendingPurchase.plan).toString();
+        planToUse = await Plan.findById(pendingPlanId);
+      }
+      
+      // If still no plan, try course.plan
+      if (!planToUse && course.plan) {
+        const coursePlanId = (course.plan._id || course.plan).toString();
+        planToUse = await Plan.findById(coursePlanId);
+      }
+      
+      // If we have a plan to use, get checkout URL from it
+      if (planToUse) {
+        if (planToUse.hotmartCheckoutUrl && 
+            planToUse.hotmartCheckoutUrl !== null && 
+            planToUse.hotmartCheckoutUrl !== 'null' && 
+            planToUse.hotmartCheckoutUrl.trim() !== '' &&
+            typeof planToUse.hotmartCheckoutUrl === 'string' &&
+            planToUse.hotmartCheckoutUrl.toLowerCase() !== 'null' &&
+            !planToUse.hotmartCheckoutUrl.toLowerCase().includes('/null')) {
+          const trimmedUrl = planToUse.hotmartCheckoutUrl.trim();
+          hotmartCheckoutUrl = trimmedUrl;
+          planCheckoutCode = planToUse.hotmartCheckoutCode || extractCheckoutCodeFromUrl(hotmartCheckoutUrl);
         } else {
-          console.error("Plan reference exists but plan document not found for pending purchase:", {
+          console.error("Plan found but has invalid checkout URL for pending purchase:", {
             courseId,
             purchaseId: pendingPurchase._id,
-            planReference: planId
+            planId: planToUse._id,
+            planName: planToUse.name,
+            checkoutUrl: planToUse.hotmartCheckoutUrl
           });
         }
       }
@@ -286,10 +348,10 @@ export const createPaymentLink = async (req, res) => {
         console.error("No valid checkout URL found for pending purchase:", {
           courseId,
           purchaseId: pendingPurchase._id,
-          planId: plan?._id || course.plan || null,
-          planExists: !!plan,
-          planCheckoutUrl: plan?.hotmartCheckoutUrl || null,
-          planCheckoutUrlValue: plan?.hotmartCheckoutUrl ? JSON.stringify(plan.hotmartCheckoutUrl) : null,
+          planId: planToUse?._id || plan?._id || course.plan || null,
+          planExists: !!planToUse || !!plan,
+          planCheckoutUrl: planToUse?.hotmartCheckoutUrl || plan?.hotmartCheckoutUrl || null,
+          planCheckoutUrlValue: planToUse?.hotmartCheckoutUrl || plan?.hotmartCheckoutUrl ? JSON.stringify(planToUse?.hotmartCheckoutUrl || plan?.hotmartCheckoutUrl) : null,
           hotmartCheckoutUrl: hotmartCheckoutUrl,
           hotmartCheckoutUrlType: typeof hotmartCheckoutUrl,
           containsNull: hotmartCheckoutUrl?.toLowerCase().includes('null') || false
@@ -298,12 +360,12 @@ export const createPaymentLink = async (req, res) => {
         await CoursePurchase.findByIdAndDelete(pendingPurchase._id);
         return res.status(400).json({
           message: "Hotmart checkout URL not configured for this course. Please assign a Plan or contact support.",
-          details: plan ? `The Plan "${plan.name}" assigned to this course has an invalid checkout URL (possibly contains 'null'). Please update the Plan in the admin panel with a valid checkout URL.` : "The course does not have a Plan assigned. Please assign a Plan with a valid checkout URL."
+          details: (planToUse || plan) ? `The Plan "${(planToUse || plan).name}" assigned to this course has an invalid checkout URL (possibly contains 'null'). Please update the Plan in the admin panel with a valid checkout URL.` : "The course does not have a Plan assigned. Please assign a Plan with a valid checkout URL."
         });
       }
 
       // Get price from plan if available, otherwise use course price
-      const purchaseAmount = plan?.price ?? course.price ?? 0;
+      const purchaseAmount = (planToUse && planToUse.price) || (plan && plan.price) || course.price || 0;
 
       // Final safety check: Ensure checkout URL doesn't contain "null" anywhere
       if (hotmartCheckoutUrl && (hotmartCheckoutUrl.toLowerCase().includes('null') || hotmartCheckoutUrl === 'null')) {
@@ -330,17 +392,23 @@ export const createPaymentLink = async (req, res) => {
     }
 
     // Get price from plan if available, otherwise use course price
-    const purchaseAmount = plan?.price ?? course.price ?? 0;
+    const purchaseAmount = (plan && plan.price) || course.price || 0;
 
-    // Create a purchase record
+    // Get user details for the purchase record
+    const user = await User.findById(userId).select("email first_name last_name name");
+    
+    // Create a purchase record with user details
     const purchase = await CoursePurchase.create({
       user: userId,
       course: courseId,
+      plan: plan?._id || null, // Store the selected plan
       amount: purchaseAmount,
-      currency: "USD",
+      currency: plan?.currency || "USD",
       status: "pending",
       paymentMethod: "hotmart",
       hotmartProductId: planCheckoutCode || extractCheckoutCodeFromUrl(hotmartCheckoutUrl) || null, // Store checkout code for webhook matching
+      hotmartBuyerEmail: user?.email || null,
+      hotmartBuyerName: user?.name || (user?.first_name && user?.last_name ? `${user.first_name} ${user.last_name}` : null),
     });
 
     // Final safety check: Ensure checkout URL doesn't contain "null" anywhere
@@ -558,8 +626,13 @@ const handlePurchaseApproved = async (data) => {
     let courses = [];
     
     if (plan) {
-      // New approach: Find all courses using this plan
-      courses = await Course.find({ plan: plan._id });
+      // New approach: Find all courses using this plan (from plans array or single plan field)
+      courses = await Course.find({
+        $or: [
+          { plans: plan._id }, // Course has this plan in plans array
+          { plan: plan._id }   // Course has this plan as single plan (legacy)
+        ]
+      });
     } else {
       // Legacy approach: Find course by direct hotmartProductId
       const legacyCourse = await Course.findOne({ hotmartProductId });
@@ -607,18 +680,25 @@ const handlePurchaseApproved = async (data) => {
     // This ensures we track purchases correctly - each course purchase is linked to the specific course
     for (const course of courses) {
       // Get price from plan if available, otherwise use course price
-      const parsedAmount = typeof amount === "string" ? parseFloat(amount) : amount || (plan?.price ?? course.price ?? 0);
+      const parsedAmount = typeof amount === "string" ? parseFloat(amount) : amount || (plan && plan.price) || course.price || 0;
 
-      // Update or create purchase record for this specific course
-      // This is crucial: we track which specific course the user purchased
-      await CoursePurchase.findOneAndUpdate(
-        {
-          hotmartTransactionCode: transactionCode,
-          course: course._id, // Link to specific course
-        },
-        {
-          user: user._id,
-          course: course._id, // Link to specific course - this is how we track purchases
+      // First, try to find an existing pending purchase for this user and course
+      // This handles the case where user initiated checkout but payment completed later
+      const existingPendingPurchase = await CoursePurchase.findOne({
+        user: user._id,
+        course: course._id,
+        status: "pending",
+        $or: [
+          { hotmartTransactionCode: { $exists: false } },
+          { hotmartTransactionCode: null },
+          { hotmartTransactionCode: "" }
+        ]
+      });
+
+      // If we find a pending purchase, update it with transaction details
+      if (existingPendingPurchase) {
+        await CoursePurchase.findByIdAndUpdate(existingPendingPurchase._id, {
+          plan: plan?._id || existingPendingPurchase.plan, // Update or keep plan
           hotmartTransactionCode: transactionCode,
           status: "approved",
           amount: parsedAmount,
@@ -634,14 +714,42 @@ const handlePurchaseApproved = async (data) => {
             paymentMethod: paymentMethod || "hotmart",
             rawData: data, // Store raw data for debugging
           },
-        },
-        {
-          upsert: true,
-          new: true,
-        }
-      );
-
-      console.log(`Purchase approved: ${transactionCode} for course ${course._id}, user ${user._id}`);
+        });
+        console.log(`Updated pending purchase to approved: ${transactionCode} for course ${course._id}, user ${user._id}`);
+      } else {
+        // If no pending purchase exists, create or update based on transaction code
+        await CoursePurchase.findOneAndUpdate(
+          {
+            hotmartTransactionCode: transactionCode,
+            course: course._id, // Link to specific course
+          },
+          {
+            user: user._id,
+            course: course._id, // Link to specific course - this is how we track purchases
+            plan: plan?._id || null, // Store the plan
+            hotmartTransactionCode: transactionCode,
+            status: "approved",
+            amount: parsedAmount,
+            currency: currency,
+            hotmartProductId: plan ? (plan.hotmartProductId || plan.hotmartCheckoutCode) : hotmartProductId,
+            hotmartBuyerEmail: buyerEmail,
+            hotmartBuyerName: buyerName,
+            purchaseDate: parsedDate,
+            accessGranted: true,
+            accessGrantedAt: new Date(),
+            metadata: {
+              productName: productName || course.title,
+              paymentMethod: paymentMethod || "hotmart",
+              rawData: data, // Store raw data for debugging
+            },
+          },
+          {
+            upsert: true,
+            new: true,
+          }
+        );
+        console.log(`Purchase approved: ${transactionCode} for course ${course._id}, user ${user._id}`);
+      }
     }
   } catch (error) {
     console.error("Error handling purchase approved:", error);
@@ -748,20 +856,49 @@ export const batchCheckCourseAccess = async (req, res) => {
     }
 
     // Fetch all courses and user purchases in parallel
-    const [courses, purchases] = await Promise.all([
-      Course.find({ _id: { $in: courseIds } }).populate("plan"),
+    const [courses, allUserPurchases] = await Promise.all([
+      Course.find({ _id: { $in: courseIds } }).populate("plan").populate("plans"),
+      // Fetch ALL user purchases (not just for these courses) to check plan-based access
       CoursePurchase.find({ 
         user: userId,
         status: "approved",
         accessGranted: true,
-        course: { $in: courseIds }
+      }).populate("plan").populate({
+        path: "course",
+        populate: [{ path: "plan" }, { path: "plans" }]
       })
     ]);
 
     // Create a Set of purchased course IDs for O(1) lookup
     const purchasedCourseIds = new Set(
-      purchases.map(p => p.course.toString())
+      allUserPurchases.map(p => p.course?._id?.toString() || p.course?.toString()).filter(Boolean)
     );
+
+    // Create a Set of purchased plan IDs for plan-based access check
+    // Check both purchase.plan (direct) and course.plan/course.plans
+    const purchasedPlanIds = new Set();
+    allUserPurchases.forEach(purchase => {
+      // Direct plan from purchase
+      if (purchase.plan) {
+        const planId = (purchase.plan._id || purchase.plan).toString();
+        purchasedPlanIds.add(planId);
+      }
+      // Plan from purchased course (legacy)
+      const purchasedCourse = purchase.course;
+      if (purchasedCourse?.plan) {
+        const planId = (purchasedCourse.plan._id || purchasedCourse.plan).toString();
+        purchasedPlanIds.add(planId);
+      }
+      // Plans array from purchased course (new)
+      if (purchasedCourse?.plans && Array.isArray(purchasedCourse.plans)) {
+        purchasedCourse.plans.forEach(p => {
+          if (p && p._id) {
+            const planId = (p._id || p).toString();
+            purchasedPlanIds.add(planId);
+          }
+        });
+      }
+    });
 
     // Build access map for each course
     const accessMap = {};
@@ -769,14 +906,36 @@ export const batchCheckCourseAccess = async (req, res) => {
     for (const course of courses) {
       const courseId = course._id.toString();
       
-      // Get price from plan if available, otherwise use course price
-      const coursePrice = course.plan?.price ?? course.price ?? 0;
+      // Check if course has any plans (new plans array or legacy single plan)
+      const hasPlansArray = course.plans && Array.isArray(course.plans) && course.plans.length > 0;
+      const hasSinglePlan = course.plan && (typeof course.plan === 'object' ? course.plan._id : course.plan);
+      const hasAnyPlan = hasPlansArray || hasSinglePlan;
       
-      // Determine if premium: tier is PREMIUM or price > 0
-      const isPremium = course.tier === "PREMIUM" || coursePrice > 0;
+      // Get price from plans: check plans array first, then single plan, then course price
+      let coursePrice = course.price || 0;
+      if (hasPlansArray && course.plans.length > 0) {
+        // If multiple plans, use the first plan's price (or minimum price)
+        const planPrices = course.plans
+          .filter(p => p && p.price !== undefined && p.price !== null)
+          .map(p => p.price);
+        if (planPrices.length > 0) {
+          coursePrice = Math.min(...planPrices);
+        }
+      } else if (hasSinglePlan && typeof course.plan === 'object' && course.plan.price !== undefined) {
+        coursePrice = course.plan.price;
+      }
       
-      if (!isPremium) {
+      // Determine if premium:
+      // A course is FREE if tier is explicitly "FREE" (regardless of plans or price)
+      // A course is PREMIUM if:
+      // 1. tier is "PREMIUM", OR
+      // 2. tier is not "FREE" AND (has plans OR price > 0)
+      const isFreeByTier = course.tier === "FREE";
+      const isPremium = isFreeByTier ? false : (course.tier === "PREMIUM" || hasAnyPlan || coursePrice > 0);
+      
+      if (!isPremium || isFreeByTier) {
         // Free course - everyone has access
+        // Course is free if tier is "FREE" OR (no plans, tier is not PREMIUM, and price <= 0)
         accessMap[courseId] = {
           hasAccess: true,
           isPremium: false,
@@ -785,16 +944,76 @@ export const batchCheckCourseAccess = async (req, res) => {
           courseTier: course.tier
         };
       } else {
-        // Premium course - check if purchased
-        const hasAccess = purchasedCourseIds.has(courseId);
-        const purchase = purchases.find(p => p.course.toString() === courseId);
+        // Premium course - check access via:
+        // 1. Direct purchase of this course
+        // 2. Plan-based access (user purchased ANY course using the same plan)
+        let hasAccess = purchasedCourseIds.has(courseId);
+        let purchase = allUserPurchases.find(p => {
+          const pCourseId = p.course?._id?.toString() || p.course?.toString();
+          return pCourseId === courseId;
+        });
+        
+        // If no direct purchase, check plan-based access
+        // Check both single plan and plans array
+        if (!hasAccess) {
+          const coursePlanIds = new Set();
+          
+          // Add single plan (legacy)
+          if (course.plan) {
+            const planId = (course.plan._id || course.plan).toString();
+            coursePlanIds.add(planId);
+          }
+          
+          // Add plans from array (new)
+          if (course.plans && Array.isArray(course.plans)) {
+            course.plans.forEach(p => {
+              if (p && p._id) {
+                const planId = (p._id || p).toString();
+                coursePlanIds.add(planId);
+              }
+            });
+          }
+          
+          // Check if user has purchased any of these plans
+          for (const coursePlanId of coursePlanIds) {
+            if (purchasedPlanIds.has(coursePlanId)) {
+              hasAccess = true;
+              
+              // Find purchase for this plan
+              if (!purchase) {
+                purchase = allUserPurchases.find(p => {
+                  // Check purchase.plan (direct)
+                  if (p.plan) {
+                    const pPlanId = (p.plan._id || p.plan).toString();
+                    if (pPlanId === coursePlanId) return true;
+                  }
+                  // Check course.plan/course.plans
+                  const pCourse = p.course;
+                  if (pCourse?.plan) {
+                    const pPlanId = (pCourse.plan._id || pCourse.plan).toString();
+                    if (pPlanId === coursePlanId) return true;
+                  }
+                  if (pCourse?.plans && Array.isArray(pCourse.plans)) {
+                    return pCourse.plans.some(plan => {
+                      const pPlanId = (plan._id || plan).toString();
+                      return pPlanId === coursePlanId;
+                    });
+                  }
+                  return false;
+                });
+              }
+              break; // Found access, no need to check other plans
+            }
+          }
+        }
         
         accessMap[courseId] = {
           hasAccess,
           isPremium: true,
           purchase: purchase || null,
           coursePrice: coursePrice,
-          courseTier: course.tier
+          courseTier: course.tier,
+          accessVia: hasAccess ? (purchasedCourseIds.has(courseId) ? "direct_purchase" : "plan_access") : null
         };
       }
     }
@@ -819,43 +1038,234 @@ export const checkCourseAccess = async (req, res) => {
     const userId = req.user._id;
     const { courseId } = req.params;
 
-    const course = await Course.findById(courseId).populate("plan");
+    const course = await Course.findById(courseId).populate("plan").populate("plans");
     if (!course) {
       return res.status(404).json({ message: "Course not found" });
     }
 
-    // Get price from plan if available, otherwise use course price
-    const coursePrice = course.plan?.price ?? course.price ?? 0;
+    // Check if course has any plans (new plans array or legacy single plan)
+    const hasPlansArray = course.plans && Array.isArray(course.plans) && course.plans.length > 0;
+    const hasSinglePlan = course.plan && (typeof course.plan === 'object' ? course.plan._id : course.plan);
+    const hasAnyPlan = hasPlansArray || hasSinglePlan;
+    
+    // Get price from plans: check plans array first, then single plan, then course price
+    let coursePrice = course.price ?? 0;
+    if (hasPlansArray && course.plans.length > 0) {
+      // If multiple plans, use the first plan's price (or minimum price)
+      const planPrices = course.plans
+        .filter(p => p && p.price !== undefined && p.price !== null)
+        .map(p => p.price);
+      if (planPrices.length > 0) {
+        coursePrice = Math.min(...planPrices);
+      }
+    } else if (hasSinglePlan && typeof course.plan === 'object' && course.plan.price !== undefined) {
+      coursePrice = course.plan.price;
+    }
+
+    // Determine if premium:
+    // A course is FREE if tier is explicitly "FREE" (regardless of plans or price)
+    // A course is PREMIUM if:
+    // 1. tier is "PREMIUM", OR
+    // 2. tier is not "FREE" AND (has plans OR price > 0)
+    const isFreeByTier = course.tier === "FREE";
+    const isPremium = isFreeByTier ? false : (course.tier === "PREMIUM" || hasAnyPlan || coursePrice > 0);
 
     // Free courses are accessible to everyone
-    if (course.tier === "FREE" || coursePrice <= 0) {
+    // Course is free if tier is "FREE" OR (no plans, tier is not PREMIUM, and price <= 0)
+    if (!isPremium || isFreeByTier) {
       return res.status(200).json(
-        ApiResponse(200, { hasAccess: true, reason: "free_course" }, "Access granted")
+        ApiResponse(200, { 
+          hasAccess: true, 
+          reason: "free_course",
+          isPremium: false,
+          coursePrice: coursePrice,
+          courseTier: course.tier
+        }, "Access granted")
       );
     }
 
-    // Check if user has approved purchase
-    const purchase = await CoursePurchase.findOne({
+    // Check if user has approved purchase for this specific course
+    let purchase = await CoursePurchase.findOne({
       user: userId,
       course: courseId,
       status: "approved",
       accessGranted: true,
-    });
+    }).populate("course", "plan");
 
-    const hasAccess = !!purchase;
+    let hasAccess = !!purchase;
+    let accessVia = hasAccess ? "direct_purchase" : null;
+
+    // If no direct purchase, check plan-based access
+    // User has access if they purchased ANY plan that includes this course
+    if (!hasAccess) {
+      // Collect all plan IDs for this course
+      const coursePlanIds = [];
+      if (course.plan) {
+        const planId = typeof course.plan === 'object' ? (course.plan._id || course.plan).toString() : course.plan.toString();
+        coursePlanIds.push(planId);
+      }
+      if (course.plans && Array.isArray(course.plans)) {
+        course.plans.forEach(p => {
+          if (p && p._id) {
+            const planId = (p._id || p).toString();
+            coursePlanIds.push(planId);
+          }
+        });
+      }
+      
+      // Check if user has purchased any of these plans
+      if (coursePlanIds.length > 0) {
+        const planBasedPurchase = await CoursePurchase.findOne({
+          user: userId,
+          status: "approved",
+          accessGranted: true,
+          plan: { $in: coursePlanIds }
+        }).populate("plan");
+
+        if (planBasedPurchase) {
+          hasAccess = true;
+          purchase = planBasedPurchase;
+          accessVia = "plan_access";
+        }
+      }
+    }
 
     // Return additional info to help frontend determine if course is premium
     return res.status(200).json(
       ApiResponse(200, { 
         hasAccess, 
         purchase: purchase || null,
-        isPremium: course.tier === "PREMIUM" || coursePrice > 0,
+        isPremium: isPremium,
         courseTier: course.tier,
-        coursePrice: coursePrice
+        coursePrice: coursePrice,
+        accessVia: accessVia
       }, "Access check completed")
     );
   } catch (error) {
     console.error("Error checking course access:", error);
+    return res.status(500).json({
+      message: error.message,
+    });
+  }
+};
+
+/**
+ * Get courses included in a plan
+ * Returns all courses that belong to the specified plan
+ */
+export const getPlanCourses = async (req, res) => {
+  try {
+    const { planId } = req.params;
+
+    if (!planId || !/^[0-9a-fA-F]{24}$/.test(planId)) {
+      return res.status(400).json({ message: "Invalid plan ID" });
+    }
+
+    // Fetch plan
+    const plan = await Plan.findById(planId);
+    if (!plan) {
+      return res.status(404).json({ message: "Plan not found" });
+    }
+
+    // Find all courses that include this plan (from plans array or single plan field)
+    const courses = await Course.find({
+      $or: [
+        { plans: planId }, // Course has this plan in plans array
+        { plan: planId }   // Course has this plan as single plan (legacy)
+      ],
+      isDeleted: false,
+      published: true, // Only return published courses
+    })
+      .select("_id title description imageUrl price tier category language")
+      .populate("category", "name")
+      .populate("instructor", "first_name last_name email image")
+      .sort({ createdAt: -1 });
+
+    return res.status(200).json(
+      ApiResponse(200, {
+        planId: plan._id,
+        planName: plan.name,
+        planDescription: plan.description,
+        planPrice: plan.price,
+        planCurrency: plan.currency,
+        courses: courses,
+      }, "Plan courses retrieved successfully")
+    );
+  } catch (error) {
+    console.error("Error getting plan courses:", error);
+    return res.status(500).json({
+      message: error.message,
+    });
+  }
+};
+
+/**
+ * Get available plans for a course
+ * Returns all plans that include this course
+ */
+export const getCoursePlans = async (req, res) => {
+  try {
+    const { courseId } = req.params;
+
+    if (!courseId || !/^[0-9a-fA-F]{24}$/.test(courseId)) {
+      return res.status(400).json({ message: "Invalid course ID" });
+    }
+
+    // Fetch course with populated plans
+    const course = await Course.findById(courseId)
+      .populate("plan")
+      .populate("plans");
+
+    if (!course) {
+      return res.status(404).json({ message: "Course not found" });
+    }
+
+    // Collect all plans - from plans array (new) or single plan (legacy)
+    const availablePlans = [];
+    
+    // Add plans from plans array
+    if (course.plans && Array.isArray(course.plans)) {
+      course.plans.forEach(plan => {
+        if (plan && plan._id && plan.status === "active" && !plan.isDeleted) {
+          availablePlans.push({
+            _id: plan._id,
+            name: plan.name,
+            description: plan.description,
+            price: plan.price,
+            currency: plan.currency,
+            hotmartCheckoutUrl: plan.hotmartCheckoutUrl,
+            status: plan.status,
+          });
+        }
+      });
+    }
+
+    // Add single plan if it exists and not already in array (backward compatibility)
+    if (course.plan && course.plan._id) {
+      const planIdStr = course.plan._id.toString();
+      const existsInArray = availablePlans.some(p => p._id.toString() === planIdStr);
+      if (!existsInArray && course.plan.status === "active" && !course.plan.isDeleted) {
+        availablePlans.push({
+          _id: course.plan._id,
+          name: course.plan.name,
+          description: course.plan.description,
+          price: course.plan.price,
+          currency: course.plan.currency,
+          hotmartCheckoutUrl: course.plan.hotmartCheckoutUrl,
+          status: course.plan.status,
+        });
+      }
+    }
+
+    return res.status(200).json(
+      ApiResponse(200, {
+        courseId: course._id,
+        courseTitle: course.title,
+        plans: availablePlans,
+      }, "Available plans retrieved successfully")
+    );
+  } catch (error) {
+    console.error("Error getting course plans:", error);
     return res.status(500).json({
       message: error.message,
     });

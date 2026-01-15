@@ -12,6 +12,11 @@ const CoursePurchaseSchema = new mongoose.Schema(
       ref: "Course",
       required: true,
     },
+    plan: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Plan",
+      // Not required - for backward compatibility with purchases that don't have plan
+    },
     hotmartTransactionCode: {
       type: String,
       unique: true,

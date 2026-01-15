@@ -5,6 +5,8 @@ import {
   getUserPurchases,
   checkCourseAccess,
   batchCheckCourseAccess,
+  getCoursePlans,
+  getPlanCourses,
 } from "../../../controllers/common/payment.js";
 import Auth from "../../../middlewares/auth.js";
 
@@ -21,6 +23,12 @@ router.post("/access/batch", Auth.UserAuth, batchCheckCourseAccess);
 
 // Check course access for single course (authenticated - all users)
 router.get("/access/course/:courseId", Auth.UserAuth, checkCourseAccess);
+
+// Get available plans for a course (authenticated - all users)
+router.get("/course/:courseId/plans", Auth.UserAuth, getCoursePlans);
+
+// Get courses included in a plan (authenticated - all users)
+router.get("/plan/:planId/courses", Auth.UserAuth, getPlanCourses);
 
 // Create payment link (authenticated - all users)
 router.post("/checkout", Auth.UserAuth, createPaymentLink);

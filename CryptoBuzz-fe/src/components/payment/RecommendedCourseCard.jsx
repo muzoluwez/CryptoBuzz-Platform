@@ -1,9 +1,10 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Lock } from 'lucide-react';
 import { Card, CardContent } from '../ui/card';
 import { useCourseAccessFromMap } from '@/hooks/use-batch-course-access';
 import { CourseLockOverlay } from './CourseLockOverlay';
-import { useCreatePaymentLinkMutation } from '@/store/client/clientPaymentApiSlice';
+import { useCreatePaymentLinkMutation, useLazyGetCoursePlansQuery } from '@/store/client/clientPaymentApiSlice';
+import { PlanSelectionModal } from './PlanSelectionModal';
 import { toast } from 'sonner';
 import { convertRtkEditorToFormattedPlainText } from '@/lib/rtkEditorUtils';
 
@@ -17,6 +18,8 @@ import { convertRtkEditorToFormattedPlainText } from '@/lib/rtkEditorUtils';
 export function RecommendedCourseCard({ course, onCourseClick, accessMap = {} }) {
   const courseId = course?._id || course?.id;
   const [createPaymentLink, { isLoading: isPurchasing }] = useCreatePaymentLinkMutation();
+  const [showPlanModal, setShowPlanModal] = useState(false);
+  const [modalPlans, setModalPlans] = useState([]);
 
   // Get course access from batch access map (efficient)
   const { hasAccess, isPremium, coursePrice } = useCourseAccessFromMap(
@@ -25,7 +28,7 @@ export function RecommendedCourseCard({ course, onCourseClick, accessMap = {} })
     course
   );
 
-  // Handle purchase
+  // Handle purchase - Fetch plans first, then decide
   const handlePurchase = async (e) => {
     e.stopPropagation(); // Prevent course click
 
@@ -34,11 +37,49 @@ export function RecommendedCourseCard({ course, onCourseClick, accessMap = {} })
       return;
     }
 
+    console.log('🔄 RecommendedCourseCard: Fetching plans for course:', courseId);
+
     try {
-      const response = await createPaymentLink(courseId).unwrap();
+      // ALWAYS fetch plans first
+      // Use full API URL (same as RTK Query uses)
+      const apiBaseUrl = `${import.meta.env.VITE_APP_API_URL || 'http://localhost:8000'}/api/v1`;
+      const plansApiUrl = `${apiBaseUrl}/common/payment/course/${courseId}/plans`;
+      const authToken = localStorage.getItem('token') || '';
+      
+      console.log('📡 RecommendedCourseCard: Calling plans API:', plansApiUrl);
+      
+      const plansResponse = await fetch(plansApiUrl, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(authToken && { 'Authorization': `Bearer ${authToken}` })
+        },
+      });
+
+      if (!plansResponse.ok) {
+        throw new Error(`Plans API failed: ${plansResponse.status}`);
+      }
+
+      const plansResult = await plansResponse.json();
+      const fetchedPlans = plansResult?.data?.plans || [];
+
+      console.log('✅ Plans fetched:', { fetchedPlans, count: fetchedPlans.length });
+
+      // Check if multiple plans
+      if (fetchedPlans.length > 1) {
+        console.log('✅ Multiple plans - opening modal');
+        setModalPlans(fetchedPlans);
+        setShowPlanModal(true);
+        return;
+      }
+
+      // Single plan or no plans - proceed with checkout
+      const planId = fetchedPlans.length === 1 ? fetchedPlans[0]._id : undefined;
+      const payload = planId ? { courseId, planId } : courseId;
+      
+      const response = await createPaymentLink(payload).unwrap();
       
       if (response?.data?.checkoutUrl) {
-        // Redirect to Hotmart checkout
         window.location.href = response.data.checkoutUrl;
       } else {
         throw new Error('Checkout URL not received');
@@ -149,6 +190,15 @@ export function RecommendedCourseCard({ course, onCourseClick, accessMap = {} })
           className="rounded-lg"
         />
       )}
+      
+      {/* Plan Selection Modal */}
+      <PlanSelectionModal
+        open={showPlanModal}
+        onOpenChange={setShowPlanModal}
+        courseId={courseId}
+        courseTitle={course?.title || 'this course'}
+        plans={modalPlans}
+      />
     </Card>
   );
 }

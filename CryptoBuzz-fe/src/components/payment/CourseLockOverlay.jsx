@@ -57,13 +57,15 @@ export function CourseLockOverlay({
             <Button
               onClick={onPurchase}
               disabled={isPurchasing}
-              className="w-full bg-primary hover:bg-primary/90 text-white"
+              className="w-full bg-primary hover:bg-primary/90 text-white disabled:opacity-50 disabled:cursor-not-allowed"
               size="lg"
             >
               {isPurchasing ? (
                 <>
                   <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                  Processing...
+                  {isPurchasing && typeof isPurchasing === 'object' && isPurchasing?.loadingPlans 
+                    ? 'Loading Plans...' 
+                    : 'Processing...'}
                 </>
               ) : (
                 <>
