@@ -122,7 +122,7 @@ const CreateAdminPlan = forwardRef(
           status: selectedRow?.status || "active",
         };
         formik.setValues(initData);
-        
+
         // If there's a hotmartProductId, try to find the product
         if (initData.hotmartProductId && hotmartProducts?.data?.items) {
           const product = hotmartProducts.data.items.find(
@@ -179,11 +179,10 @@ const CreateAdminPlan = forwardRef(
                     type="text"
                     placeholder="Enter plan name (e.g., Basic Plan, Premium Plan)"
                     autoComplete="off"
-                    className={`form-control input input-md w-full ${
-                      formik.errors.name && formik.touched.name
+                    className={`form-control input input-md w-full ${formik.errors.name && formik.touched.name
                         ? "border border-danger"
                         : ""
-                    }`}
+                      }`}
                     {...formik.getFieldProps("name")}
                   />
                   {formik.touched.name && formik.errors.name && (
@@ -202,11 +201,11 @@ const CreateAdminPlan = forwardRef(
                   <textarea
                     placeholder="Enter plan description (optional)"
                     rows={3}
-                    className={`form-control input input-md w-full ${
-                      formik.errors.description && formik.touched.description
+                    className={`form-control input input-md w-full px-3 py-2 rounded-md shadow-sm min-h-[100px] 
+                      ${formik.errors.description && formik.touched.description
                         ? "border border-danger"
-                        : ""
-                    }`}
+                        : "border border-gray-300"
+                      }`}
                     {...formik.getFieldProps("description")}
                   />
                   {formik.touched.description && formik.errors.description && (
@@ -227,11 +226,10 @@ const CreateAdminPlan = forwardRef(
                     step="0.01"
                     min="0"
                     placeholder="0.00"
-                    className={`form-control input input-md w-full ${
-                      formik.errors.price && formik.touched.price
+                    className={`form-control input input-md w-full ${formik.errors.price && formik.touched.price
                         ? "border border-danger"
                         : ""
-                    }`}
+                      }`}
                     {...formik.getFieldProps("price")}
                   />
                   {formik.touched.price && formik.errors.price && (
@@ -254,11 +252,10 @@ const CreateAdminPlan = forwardRef(
                     }
                   >
                     <SelectTrigger
-                      className={`form-control input input-md w-full ${
-                        formik.errors.currency && formik.touched.currency
+                      className={`form-control input input-md w-full ${formik.errors.currency && formik.touched.currency
                           ? "border border-danger"
                           : ""
-                      }`}
+                        }`}
                     >
                       <SelectValue placeholder="Select currency" />
                     </SelectTrigger>
@@ -316,18 +313,17 @@ const CreateAdminPlan = forwardRef(
                     Hotmart Checkout URL<span className="text-danger">*</span>
                   </label>
                   <p className="text-xs text-gray-500 mb-2">
-                    Enter the full checkout URL from Hotmart (e.g., https://pay.hotmart.com/J103673988Y). 
+                    Enter the full checkout URL from Hotmart (e.g., https://pay.hotmart.com/J103673988Y).
                     This URL is easily available in your Hotmart dashboard under the product's checkout/payment settings.
                   </p>
                   <input
                     type="url"
                     placeholder="https://pay.hotmart.com/J103673988Y"
                     autoComplete="off"
-                    className={`form-control input input-md w-full font-mono text-sm ${
-                      formik.errors.hotmartCheckoutUrl && formik.touched.hotmartCheckoutUrl
+                    className={`form-control input input-md w-full font-mono text-sm ${formik.errors.hotmartCheckoutUrl && formik.touched.hotmartCheckoutUrl
                         ? "border border-danger"
                         : ""
-                    }`}
+                      }`}
                     {...formik.getFieldProps("hotmartCheckoutUrl")}
                   />
                   {formik.touched.hotmartCheckoutUrl && formik.errors.hotmartCheckoutUrl && (
