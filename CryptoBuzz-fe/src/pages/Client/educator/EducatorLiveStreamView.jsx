@@ -83,8 +83,9 @@ const EducatorLiveStreamView = () => {
 
   // Access control for live stream
   // Check both LiveStream model and Schedule model for tier/plans
+  // Schedule tier takes precedence since that's where the paid plans are typically stored
   const schedule = activeLiveStream?.schedule;
-  const tier = activeLiveStream?.accessType || activeLiveStream?.tier || schedule?.tier || schedule?.accessType || 'PUBLIC';
+  const tier = schedule?.tier || schedule?.accessType || activeLiveStream?.accessType || activeLiveStream?.tier || 'PUBLIC';
   const contentPlans = useMemo(() => {
     // Check both LiveStream plans and Schedule plans
     const liveStreamPlans = (activeLiveStream?.plans || []).map(p => (p?._id || p)?.toString()).filter(Boolean);
@@ -93,23 +94,42 @@ const EducatorLiveStreamView = () => {
     return [...new Set([...liveStreamPlans, ...schedulePlans])];
   }, [activeLiveStream?.plans, schedule?.plans]);
   
+  // Check if user has purchased any plan associated with this content
   const hasPurchase = useMemo(() => {
-    if (contentPlans.length === 0) return false;
-    return contentPlans.some(planId => purchasedPlanIds.has(planId));
-  }, [contentPlans, purchasedPlanIds]);
+    if (tier === "PRO" && contentPlans.length > 0 && purchasedPlanIds.size > 0) {
+      return contentPlans.some(planId => purchasedPlanIds.has(planId));
+    }
+    return false;
+  }, [tier, contentPlans, purchasedPlanIds]);
 
   const accessResult = useMemo(() => {
     if (!isLive || !activeLiveStream) {
       // If stream is not live, no access check needed
       return { hasAccess: true, showLock: false, lockReason: null, lockMessage: '' };
     }
-    return checkAccess({
+    
+    const result = checkAccess({
       tier,
       isAuthenticated: isAuthenticatedRedux,
       userUid,
       hasPurchase,
+      isPremium: tier === "PRO",
     });
-  }, [isLive, activeLiveStream, tier, isAuthenticatedRedux, userUid, hasPurchase]);
+    
+    // Debug logs
+    console.log('Live Stream Access Control:', {
+      tier,
+      scheduleTier: schedule?.tier,
+      liveStreamTier: activeLiveStream?.tier,
+      isAuthenticated: isAuthenticatedRedux,
+      hasPurchase,
+      contentPlansLength: contentPlans.length,
+      purchasedPlanIdsSize: purchasedPlanIds.size,
+      accessResult: result,
+    });
+    
+    return result;
+  }, [isLive, activeLiveStream, tier, isAuthenticatedRedux, userUid, hasPurchase, schedule, contentPlans.length, purchasedPlanIds.size]);
 
   // Purchase handler for live stream
   const handleLiveStreamPurchase = () => {
@@ -118,7 +138,11 @@ const EducatorLiveStreamView = () => {
       return;
     }
 
-    const rawPlans = schedule?.plans || [];
+    // Combine plans from both LiveStream and Schedule
+    const liveStreamPlans = activeLiveStream?.plans || [];
+    const schedulePlans = schedule?.plans || [];
+    const rawPlans = [...liveStreamPlans, ...schedulePlans];
+    
     const plans = rawPlans
       .filter(p => p && (p._id || p))
       .map(p => {
@@ -183,10 +207,12 @@ const EducatorLiveStreamView = () => {
     }
   }, [isLive, client, call, token]);
 
-  // Fetch token when we have an active live stream (only if authenticated)
+  // Fetch token when we have an active live stream (only if authenticated AND has access)
   useEffect(() => {
     const fetchToken = async () => {
       if (!isAuthenticated || !userId || !callId || token || !isLive) return;
+      // Don't fetch token if user doesn't have access
+      if (isLive && activeLiveStream && accessResult.showLock && !accessResult.hasAccess) return;
 
       try {
         const response = await getToken({ userId }).unwrap();
@@ -196,15 +222,17 @@ const EducatorLiveStreamView = () => {
       }
     };
 
-    if (isAuthenticated && isLive && activeLiveStream && callId) {
+    if (isAuthenticated && isLive && activeLiveStream && callId && accessResult.hasAccess) {
       fetchToken();
     }
-  }, [isAuthenticated, userId, callId, activeLiveStream, getToken, token, isLive]);
+  }, [isAuthenticated, userId, callId, activeLiveStream, getToken, token, isLive, accessResult]);
 
-  // Initialize Stream client when token and callId are available (only if authenticated)
+  // Initialize Stream client when token and callId are available (only if authenticated AND has access)
   useEffect(() => {
     const initClient = async () => {
       if (!isAuthenticated || !token || !callId || client || isInitializing.current || !isLive) return;
+      // Don't initialize client if user doesn't have access
+      if (isLive && activeLiveStream && accessResult.showLock && !accessResult.hasAccess) return;
       isInitializing.current = true;
 
       let newClient;
@@ -250,10 +278,10 @@ const EducatorLiveStreamView = () => {
       }
     };
 
-    if (isAuthenticated && isLive && activeLiveStream && callId && token && userId) {
+    if (isAuthenticated && isLive && activeLiveStream && callId && token && userId && accessResult.hasAccess) {
       initClient();
     }
-  }, [isAuthenticated, token, callId, userId, activeLiveStream, client, isLive]);
+  }, [isAuthenticated, token, callId, userId, activeLiveStream, client, isLive, accessResult]);
 
   // Cleanup on unmount or when dependencies change
   useEffect(() => {
@@ -320,23 +348,8 @@ const EducatorLiveStreamView = () => {
     );
   }
 
-  // No active live stream - show banner image and About section
-  // This should be shown when:
-  // 1. isLive is false (educator hasn't clicked Go Live or has stopped the stream)
-  // 2. callId is missing
-  // 3. Stream is not fully initialized yet
-  if (!isLive || !callId || !activeLiveStream) {
-    return (
-      <StreamWrapper
-        call={null}
-        bannerImage={bannerImage}
-        educatorData={educatorData}
-      />
-    );
-  }
-
-  // Check if live stream is locked (PRO tier without purchase)
-  // If locked, show lock overlay instead of stream content
+  // Check if live stream is locked (PRO tier without purchase) - CHECK THIS EARLY
+  // If locked, show lock overlay instead of stream content - NO STREAM VIEWER SHOULD RENDER
   if (isLive && activeLiveStream && accessResult.showLock && !accessResult.hasAccess) {
     return (
       <div className="relative w-full h-[600px] bg-gray-900 rounded-xl overflow-hidden">
@@ -350,30 +363,48 @@ const EducatorLiveStreamView = () => {
             />
           </div>
         )}
-        {/* Lock overlay */}
+        {/* Lock overlay - full height for live stream */}
         <CourseLockOverlay
           course={schedule}
           tier={tier}
           lockReason={accessResult.lockReason}
           lockMessage={accessResult.lockMessage}
           onPurchase={handleLiveStreamPurchase}
+          className="h-full"
+          contentType="Live Stream"
         />
         {/* Plan Selection Modal */}
-        {showPlanModal && selectedContentForPurchase && (
+        {selectedContentForPurchase && (
           <PlanSelectionModal
-            isOpen={showPlanModal}
-            onClose={() => {
-              setShowPlanModal(false);
-              setSelectedContentForPurchase(null);
+            open={showPlanModal}
+            onOpenChange={(open) => {
+              setShowPlanModal(open);
+              if (!open) {
+                setSelectedContentForPurchase(null);
+              }
             }}
             plans={selectedContentForPurchase.plans}
-            contentId={selectedContentForPurchase.id}
-            contentTitle={selectedContentForPurchase.title}
-            contentType={selectedContentForPurchase.contentType}
+            courseId={selectedContentForPurchase.id}
+            courseTitle={selectedContentForPurchase.title}
             useDirectPlanCheckout={true}
           />
         )}
       </div>
+    );
+  }
+
+  // No active live stream - show banner image and About section
+  // This should be shown when:
+  // 1. isLive is false (educator hasn't clicked Go Live or has stopped the stream)
+  // 2. callId is missing
+  // 3. Stream is not fully initialized yet
+  if (!isLive || !callId || !activeLiveStream) {
+    return (
+      <StreamWrapper
+        call={null}
+        bannerImage={bannerImage}
+        educatorData={educatorData}
+      />
     );
   }
 

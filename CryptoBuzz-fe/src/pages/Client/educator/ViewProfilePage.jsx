@@ -44,7 +44,6 @@ export default function ViewProfile() {
   const [isRatingModalOpen, setIsRatingModalOpen] = useState(false);
   const [selectedRecording, setSelectedRecording] = useState(null);
   const [isVideoModalOpen, setIsVideoModalOpen] = useState(false);
-  const [showHoverMessage, setShowHoverMessage] = useState(false);
   const [isIdeaModalOpen, setIsIdeaModalOpen] = useState(false);
   const [showLoginRequired, setShowLoginRequired] = useState(false);
   const [selectedIdea, setSelectedIdea] = useState(null);
@@ -169,12 +168,16 @@ export default function ViewProfile() {
 
   // Purchase handlers
   const handleCoursePurchase = (course) => {
+    console.log('handleCoursePurchase called', { course, plans: course?.plans });
+    
     if (!isAuthenticatedRedux) {
       navigate('/login', { state: { from: window.location.pathname } });
       return;
     }
 
     const rawPlans = course?.plans || [];
+    console.log('Raw plans from course:', rawPlans);
+    
     const contentPlans = rawPlans
       .filter(p => p && (p._id || p))
       .map(p => {
@@ -189,12 +192,15 @@ export default function ViewProfile() {
       })
       .filter(Boolean);
 
+    console.log('Processed content plans:', contentPlans);
+
     if (contentPlans.length === 0) {
       toast.error('No plans available for this content. Please assign plans in the admin panel.');
       return;
     }
 
     if (contentPlans.length > 1) {
+      console.log('Multiple plans - opening plan selection modal');
       setSelectedContentForPurchase({
         id: course._id,
         title: course.title,
@@ -203,6 +209,7 @@ export default function ViewProfile() {
       });
       setShowPlanModal(true);
     } else {
+      console.log('Single plan - redirecting to checkout');
       const plan = contentPlans[0];
       if (plan.hotmartCheckoutUrl) {
         window.location.href = plan.hotmartCheckoutUrl;
@@ -218,7 +225,7 @@ export default function ViewProfile() {
       return;
     }
 
-    const rawPlans = idea?.plans || [];
+    const rawPlans = idea?.plans || idea?.allowedPlans || [];
     const contentPlans = rawPlans
       .filter(p => p && (p._id || p))
       .map(p => {
@@ -262,7 +269,7 @@ export default function ViewProfile() {
       return;
     }
 
-    const rawPlans = insight?.plans || [];
+    const rawPlans = insight?.plans || insight?.allowedPlans || [];
     const contentPlans = rawPlans
       .filter(p => p && (p._id || p))
       .map(p => {
@@ -493,34 +500,7 @@ export default function ViewProfile() {
       {/* Live Stream Section */}
       <div className="grid grid-cols-12 gap-y-8 md:gap-x-8">
         <div className="col-span-12 xl:col-span-12 space-y-8 mb-8">
-          {isAuthenticated ? (
-            <EducatorLiveStreamView />
-          ) : (
-            <div
-              className="relative"
-              onMouseEnter={() => setShowHoverMessage(true)}
-              onMouseLeave={() => setShowHoverMessage(false)}
-              onClick={() => navigate('/login')}
-            >
-              {/* Banner Image and About Section */}
-              <EducatorLiveStreamView />
-
-              {/* Hover Overlay with Message */}
-              {showHoverMessage && (
-                <div className="absolute inset-0 bg-black/70 flex items-center justify-center z-10 rounded-xl cursor-pointer transition-opacity">
-                  <div className="text-center text-white p-6">
-                    <Lock className="w-12 h-12 mx-auto mb-4" />
-                    <h3 className="text-xl font-semibold mb-2">
-                      Login Required
-                    </h3>
-                    <p className="text-sm opacity-90">
-                      Please login to watch live streaming
-                    </p>
-                  </div>
-                </div>
-              )}
-            </div>
-          )}
+          <EducatorLiveStreamView />
         </div>
       </div>
 
@@ -544,13 +524,18 @@ export default function ViewProfile() {
                 courses.slice(0, 2).map((course) => {
                   const tier = course?.tier || 'PUBLIC';
                   const contentPlans = (course?.plans || []).map(p => (p?._id || p)?.toString()).filter(Boolean);
-                  const hasPurchase = contentPlans.length > 0 && contentPlans.some(planId => purchasedPlanIds.has(planId));
+                  
+                  // Check if user has purchased any plan associated with this content
+                  const hasPurchase = tier === "PRO" && contentPlans.length > 0 && purchasedPlanIds.size > 0
+                    ? contentPlans.some(planId => purchasedPlanIds.has(planId))
+                    : false;
                   
                   const accessResult = checkAccess({
                     tier,
                     isAuthenticated: isAuthenticatedRedux,
                     userUid,
                     hasPurchase,
+                    isPremium: tier === "PRO",
                   });
 
                   return (
@@ -628,14 +613,19 @@ export default function ViewProfile() {
               {ideas.length > 0 ? (
                 ideas.slice(0, 3).map((idea, index) => {
                   const tier = idea?.accessType || idea?.tier || 'PUBLIC';
-                  const contentPlans = (idea?.plans || []).map(p => (p?._id || p)?.toString()).filter(Boolean);
-                  const hasPurchase = contentPlans.length > 0 && contentPlans.some(planId => purchasedPlanIds.has(planId));
+                  const contentPlans = (idea?.plans || idea?.allowedPlans || []).map(p => (p?._id || p)?.toString()).filter(Boolean);
+                  
+                  // Check if user has purchased any plan associated with this content
+                  const hasPurchase = tier === "PRO" && contentPlans.length > 0 && purchasedPlanIds.size > 0
+                    ? contentPlans.some(planId => purchasedPlanIds.has(planId))
+                    : false;
                   
                   const accessResult = checkAccess({
                     tier,
                     isAuthenticated: isAuthenticatedRedux,
                     userUid,
                     hasPurchase,
+                    isPremium: tier === "PRO",
                   });
 
                   return (
@@ -732,14 +722,19 @@ export default function ViewProfile() {
               {insights.length > 0 ? (
                 insights.slice(0, 3).map((insight) => {
                   const tier = insight?.accessType || insight?.tier || 'PUBLIC';
-                  const contentPlans = (insight?.plans || []).map(p => (p?._id || p)?.toString()).filter(Boolean);
-                  const hasPurchase = contentPlans.length > 0 && contentPlans.some(planId => purchasedPlanIds.has(planId));
+                  const contentPlans = (insight?.plans || insight?.allowedPlans || []).map(p => (p?._id || p)?.toString()).filter(Boolean);
+                  
+                  // Check if user has purchased any plan associated with this content
+                  const hasPurchase = tier === "PRO" && contentPlans.length > 0 && purchasedPlanIds.size > 0
+                    ? contentPlans.some(planId => purchasedPlanIds.has(planId))
+                    : false;
                   
                   const accessResult = checkAccess({
                     tier,
                     isAuthenticated: isAuthenticatedRedux,
                     userUid,
                     hasPurchase,
+                    isPremium: tier === "PRO",
                   });
 
                   return (
@@ -1068,17 +1063,18 @@ export default function ViewProfile() {
       )}
 
       {/* Plan Selection Modal */}
-      {showPlanModal && selectedContentForPurchase && (
+      {selectedContentForPurchase && (
         <PlanSelectionModal
-          isOpen={showPlanModal}
-          onClose={() => {
-            setShowPlanModal(false);
-            setSelectedContentForPurchase(null);
+          open={showPlanModal}
+          onOpenChange={(open) => {
+            setShowPlanModal(open);
+            if (!open) {
+              setSelectedContentForPurchase(null);
+            }
           }}
           plans={selectedContentForPurchase.plans}
-          contentId={selectedContentForPurchase.id}
-          contentTitle={selectedContentForPurchase.title}
-          contentType={selectedContentForPurchase.contentType}
+          courseId={selectedContentForPurchase.id}
+          courseTitle={selectedContentForPurchase.title}
           useDirectPlanCheckout={true}
         />
       )}
