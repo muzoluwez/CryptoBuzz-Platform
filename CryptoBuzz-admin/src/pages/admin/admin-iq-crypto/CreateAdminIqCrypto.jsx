@@ -93,11 +93,11 @@ const CreateAdminIqCrypto = forwardRef(
             let a = await updateAdminCryptoAnalysis({ id: selectedRow?._id, formData }).unwrap();
 
             refetch();
-            toast.success("Crypto Project updated successfully!");
+            toast.success("Cripto Project updated successfully!");
           } else {
             await createAdminCryptoAnalysis(formData).unwrap();
             refetch();
-            toast.success("Crypto Project created successfully!");
+            toast.success("Cripto Project created successfully!");
           }
           formik.resetForm();
           setSelectedRow({});
@@ -174,7 +174,7 @@ const CreateAdminIqCrypto = forwardRef(
           <DialogContent className="p-5 max-w-[600px]" ref={ref}>
             <DialogHeader className="pb-5 pt-0 px-0">
               <DialogTitle>
-                {selectedRow?._id ? "Update Crypto Project" : " Create Crypto Project"}
+                {selectedRow?._id ? "Update Cripto Project" : " Create Cripto Project"}
               </DialogTitle>
             </DialogHeader>
             <div className="grid gap-5 px-0 pb-5">

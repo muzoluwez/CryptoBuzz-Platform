@@ -123,7 +123,7 @@ const routes = {
     { path: "admin/general-setting", element: <GeneralSetting /> },
 
     // Social Buzz - Manage community feed and social interactions
-    { path: "/admin/iq-social", element: <IqSocial /> },
+    { path: "/admin/cripto-social", element: <IqSocial /> },
 
     // KPIs - View educator performance metrics
     { path: "/admin/kpis", element: <EducatorKpi /> },
@@ -153,7 +153,7 @@ const routes = {
     },
 
     // Crypto Project - Cryptocurrency analysis and insights
-    { path: "/admin/iq-crypto", element: <AdminIqCrypto /> },
+    { path: "/admin/cripto", element: <AdminIqCrypto /> },
   ],
 };
 

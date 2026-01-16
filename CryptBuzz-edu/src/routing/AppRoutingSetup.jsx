@@ -97,11 +97,11 @@ const routes = {
 
     // Social Buzz - Manage community feed and social interactions
 
-    { path: "/educator/iq-social", element: <EducatorCommunityFeed /> },
+    { path: "/educator/cripto-social", element: <EducatorCommunityFeed /> },
 
     { path: "/educator/rating", element: <EducatorRating /> },
 
-    { path: "/educator/iq-crypto", element: <EducatorIqCrypto /> },
+    { path: "/educator/cripto", element: <EducatorIqCrypto /> },
 
 
 

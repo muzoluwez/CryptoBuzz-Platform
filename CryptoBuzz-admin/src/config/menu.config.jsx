@@ -1391,9 +1391,9 @@ export const sideMenus = {
       path: "/admin/trade-analysis",
     },
     {
-      title: "Crypto Projects",
+      title: "Cripto Projects",
       icon: <BadgeCent />,
-      path: "/admin/iq-crypto",
+      path: "/admin/cripto",
     },
     {
       title: "Trade Ideas",
@@ -1447,7 +1447,7 @@ export const sideMenus = {
     {
       title: "Social Buzz",
       icon: <MessageCircleMore />,
-      path: "/admin/iq-social",
+      path: "/admin/cripto-social",
     },
     {
       title: "Tickets",
