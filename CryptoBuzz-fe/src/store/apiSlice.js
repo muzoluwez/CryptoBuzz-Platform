@@ -3,10 +3,26 @@ import { fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 const baseQuery = fetchBaseQuery({
     baseUrl: `${import.meta.env.VITE_APP_API_URL}/api/v1` || "http://localhost:8000/api/v1",
     prepareHeaders: (headers, { getState }) => {
-        const token = getState().auth.token;
+        // Try to get token from Redux state first
+        let token = getState().auth?.token;
+        let tokenSource = 'Redux';
+        
+        // Fallback to localStorage if not in Redux state
+        if (!token) {
+            token = localStorage.getItem('token') || sessionStorage.getItem('token');
+            tokenSource = localStorage.getItem('token') ? 'localStorage' : (sessionStorage.getItem('token') ? 'sessionStorage' : 'none');
+        }
+        
         if (token) {
             headers.set('authorization', `Bearer ${token}`);
+            // Log token info for debugging (only first few chars for security)
+            if (process.env.NODE_ENV === 'development') {
+                console.log(`🔑 Token added to headers (source: ${tokenSource}, length: ${token.length})`);
+            }
+        } else {
+            console.warn('⚠️ No token found in Redux, localStorage, or sessionStorage');
         }
+        
         return headers;
     },
 });
@@ -19,11 +35,23 @@ const baseQueryWithReauth = async (args, api, extraOptions) => {
     if (result.error) {
         const { status, data } = result.error;
 
-        if (status === 401 || data?.error === "jwt expired" || data?.error === "invalid signature") {
-            console.warn("JWT expired! Logging out...");
+        // Log error details for debugging
+        console.error('🚨 API Error:', {
+            url: args?.url || 'unknown',
+            method: args?.method || 'GET',
+            status,
+            statusText: result.error?.statusText,
+            data,
+            message: data?.message || result.error?.error || 'Unknown error'
+        });
 
+        if (status === 401 || data?.error === "jwt expired" || data?.error === "invalid signature") {
+            console.warn("⚠️ JWT expired or invalid! Message:", data?.message || result.error?.error);
+            
+            // Only redirect on actual auth failures, not on missing token for public endpoints
             // Clear local storage
             localStorage.clear();
+            sessionStorage.clear();
 
             // Redirect user to login page
             window.location.href = "/auth/login"; // Adjust route as needed

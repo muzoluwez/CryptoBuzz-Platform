@@ -24,6 +24,7 @@ import { clientRatingApiSlice } from './client/clientRatingApiSlice';
 import { clientScheduleApiSlice } from './client/clientScheduleApiSlice';
 import { clientSocialApiSlice } from './client/clientSocialApiSlice';
 import { clientTradeAnalysisApiSlice } from './client/clientTradeAnalysisApiSlice';
+import { clientPaymentApiSlice } from './client/clientPaymentApiSlice';
 
 const persistConfig = {
   key: 'root',
@@ -39,6 +40,7 @@ const rootReducer = combineReducers({
   [clientAcademyCategoryApiSlice.reducerPath]:
     clientAcademyCategoryApiSlice.reducer,
   [clientCoursesApiSlice.reducerPath]: clientCoursesApiSlice.reducer,
+  [clientPaymentApiSlice.reducerPath]: clientPaymentApiSlice.reducer,
   [clientTradeAnalysisApiSlice.reducerPath]:
     clientTradeAnalysisApiSlice.reducer,
   [clientCryptoApiSlice.reducerPath]: clientCryptoApiSlice.reducer,
@@ -63,6 +65,7 @@ export const store = configureStore({
       clientAuthApiSlice.middleware,
       clientAcademyCategoryApiSlice.middleware,
       clientCoursesApiSlice.middleware,
+      clientPaymentApiSlice.middleware,
       clientTradeAnalysisApiSlice.middleware,
       clientCryptoApiSlice.middleware,
       clientEducatorApiSlice.middleware,

@@ -36,6 +36,26 @@ const CourseSchema = new mongoose.Schema(
       { type: mongoose.Schema.Types.ObjectId, ref: "Section" }
     ],
 
+    // Plans array - a course can belong to multiple plans
+    plans: [{
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Plan",
+    }],
+    
+    // Legacy single plan field - kept for backward compatibility
+    // Will be populated from plans array if only one plan exists
+    plan: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Plan",
+      default: null,
+    },
+
+    // Legacy field - keep for backward compatibility during migration
+    hotmartProductId: {
+      type: String,
+      default: null,
+    },
+
     isDeleted: { type: Boolean, default: false },
     deletedAt: { type: Date },
   },

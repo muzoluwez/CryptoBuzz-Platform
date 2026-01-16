@@ -25,6 +25,8 @@ const AdminRecordingSession = lazy(() => import("../pages/admin/recording/AdminR
 // Course & Academy Pages
 const Courses = lazy(() => import("../pages/admin/courses/Courses"));
 const AdminAcademyCategory = lazy(() => import("../pages/admin/academy-category/AdminAcademyCategory"));
+const AdminPlan = lazy(() => import("../pages/admin/plan/AdminPlan"));
+const AdminPurchase = lazy(() => import("../pages/admin/purchase/AdminPurchase"));
 
 // Educator Management Pages
 const Educators = lazy(() => import("../pages/admin/educators/Educators"));
@@ -101,6 +103,12 @@ const routes = {
 
     // Courses Category - Manage course categories
     { path: "/admin/academy-category", element: <AdminAcademyCategory /> },
+
+    // Payment Plans - Manage payment plans for courses
+    { path: "/admin/plan", element: <AdminPlan /> },
+
+    // Purchases - View all course purchase records
+    { path: "/admin/purchase", element: <AdminPurchase /> },
 
     // Stream Schedule - View and manage streaming schedules
     { path: "/admin/stream-schedule", element: <AdminStreamSchedule /> },

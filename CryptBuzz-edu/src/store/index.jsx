@@ -42,6 +42,8 @@ import { educatorStreamScheduleApiSlice } from "./api/educator/educatorStreamSch
 import { educatorProfileApiSlice } from "./api/educator/educatorProfileApiSlice";
 import { educatorClientApiSlice } from "./api/educator/educatorClientApiSlice";
 import { educatorRecordingApiSlice } from "./api/educator/educatorRecordingApiSlice";
+import { educatorHotmartApiSlice } from "./api/educator/educatorHotmartApiSlice";
+import { educatorPlanApiSlice } from "./api/educator/educatorPlanApiSlice";
 
 
 // ============================================================================
@@ -114,6 +116,8 @@ export const store = configureStore({
     [educatorStreamScheduleApiSlice.reducerPath]: educatorStreamScheduleApiSlice.reducer,
     [educatorProfileApiSlice.reducerPath]: educatorProfileApiSlice.reducer,
     [educatorClientApiSlice.reducerPath]: educatorClientApiSlice.reducer,
+    [educatorHotmartApiSlice.reducerPath]: educatorHotmartApiSlice.reducer,
+    [educatorPlanApiSlice.reducerPath]: educatorPlanApiSlice.reducer,
   },
 
   middleware: (getDefaultMiddleware) =>
@@ -150,6 +154,8 @@ export const store = configureStore({
       educatorStreamScheduleApiSlice.middleware,
       educatorProfileApiSlice.middleware,
       educatorClientApiSlice.middleware,
+      educatorHotmartApiSlice.middleware,
+      educatorPlanApiSlice.middleware
     ),
 });
 
