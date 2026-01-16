@@ -1,12 +1,12 @@
 import { useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useGetSocialsQuery } from '@/store/client/clientSocialApiSlice';
 import { Button } from 'react-aria-components';
-import { Link } from 'react-router';
-import { useAccessControl } from '@/hooks/use-access-control';
+import { LockKeyhole } from 'lucide-react';
+import { useGrantAccess } from '@/context/GrantAccessContext';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuLabel, DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { AccessGate } from '@/components/common/AccessGate';
 import ImageCarousel from '@/components/common/ImageCarousel';
 import ImageViewer from '@/components/common/ImageViewer';
 import ShowMoreLess from '@/components/common/ShowMoreLess';
@@ -20,13 +20,15 @@ export default function SocialPage() {
   const [sortValue, setSortValue] = useState('latest');
   const [selectedImage, setSelectedImage] = useState(null);
   const [selectedImages, setSelectedImages] = useState([]);
+  const [hoveredCardId, setHoveredCardId] = useState(null);
   const [filters, setFilters] = useState({
     images: false,
     videos: false,
     textPosts: false,
   });
 
-  const { checkAccess } = useAccessControl();
+  const { checkAccess } = useGrantAccess();
+  const navigate = useNavigate();
 
   // Fetch social posts from API
   const { data, isLoading, isError, error } = useGetSocialsQuery({
@@ -79,7 +81,7 @@ export default function SocialPage() {
       const imageUrls = post?.images && Array.isArray(post.images) && post.images.length > 0
         ? post.images.map(img => img?.url || img).filter(Boolean)
         : [];
-      
+
       // Get first image for backward compatibility
       const image = imageUrls?.length > 0 ? imageUrls[0] : null;
 
@@ -105,8 +107,8 @@ export default function SocialPage() {
         (post?.shares?.length || 0);
       const views = totalViews > 0 ? formatViews(totalViews) : '0';
 
-      // Make all posts PUBLIC (free access)
-      const accessType = 'PUBLIC';
+      // Get access type from API response (same as IdeaPage.jsx)
+      const accessType = post?.accessType || 'PUBLIC';
 
       // Get category for host name
       const category = post?.category || 'Event';
@@ -119,6 +121,9 @@ export default function SocialPage() {
           role: 'Educator', // Default role
           avatar: avatar,
           fallback: fallback,
+          first_name: author?.first_name,
+          last_name: author?.last_name,
+          image: author?.image,
         },
         time: timeAgo,
         content: post?.content || 'No content available.',
@@ -131,7 +136,7 @@ export default function SocialPage() {
         },
         views: views,
         accessType: accessType,
-        allowedPlans: post?.allowedPlans || [],
+        allowedPlans: post?.plans || [],
         category: category,
         hashtags: post?.hashtags || [],
         mentions: post?.mentions || [],
@@ -203,26 +208,6 @@ export default function SocialPage() {
             </h1>
             <p className="text-xs text-gray-500 mt-1">Latest community posts</p>
           </header>
-          {/* <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button className="btn !flex gap-2 bg-primary !text-dark cursor-pointer ">
-                Filter <FilterIcon className="w-5" />{' '}
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent className="w-48">
-              <DropdownMenuLabel>Filter</DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              <DropdownMenuRadioGroup>
-                <DropdownMenuRadioItem>
-                  Email Notifications
-                </DropdownMenuRadioItem>
-                <DropdownMenuRadioItem>SMS Notifications</DropdownMenuRadioItem>
-                <DropdownMenuRadioItem>
-                  Push Notifications
-                </DropdownMenuRadioItem>
-              </DropdownMenuRadioGroup>
-            </DropdownMenuContent>
-          </DropdownMenu> */}
         </div>
         <div className="flex items-center justify-center min-h-[400px]">
           <div className="text-center">
@@ -243,204 +228,175 @@ export default function SocialPage() {
             </h1>
             <p className="text-xs text-gray-500 mt-1">Latest community posts</p>
           </header>
-          {/* <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button className="btn !flex gap-2 bg-primary !text-dark cursor-pointer ">
-                Filter <FilterIcon className="w-5" />{' '}
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent className="w-48">
-              <DropdownMenuLabel>Filter</DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              <DropdownMenuRadioGroup>
-                <DropdownMenuRadioItem>
-                  Email Notifications
-                </DropdownMenuRadioItem>
-                <DropdownMenuRadioItem>SMS Notifications</DropdownMenuRadioItem>
-                <DropdownMenuRadioItem>
-                  Push Notifications
-                </DropdownMenuRadioItem>
-              </DropdownMenuRadioGroup>
-            </DropdownMenuContent>
-          </DropdownMenu> */}
         </div>
         <div>
-          {posts?.map((post) => (
-            <AccessGate
-              key={post?.id || post?._id}
-              accessType={post?.accessType}
-              allowedPlans={post?.allowedPlans || []}
-              fallback={
-                <Card className="max-w-full overflow-hidden rounded-xl shadow-md mb-5 opacity-75">
-                  <CardHeader className="p-4 justify-between blur-[2px]">
-                    {/* Masked Header */}
-                    <div className="flex items-start gap-3">
+          {posts?.map((post) => {
+            const access = checkAccess({
+              accessType: post?.accessType,
+              allowedPlans: post?.allowedPlans || [],
+            });
+            const isLocked = !access?.hasAccess;
+
+            return (
+              <div
+                key={post?.id || post?._id}
+                className="relative mb-5"
+                onMouseEnter={() => isLocked && setHoveredCardId(post?._id)}
+                onMouseLeave={() => setHoveredCardId(null)}
+              >
+                <Card className="max-w-full overflow-hidden rounded-xl shadow-md">
+                  <CardHeader className="p-4 justify-between">
+                    <div className="flex items-center gap-3">
                       <Avatar className="h-10 w-10">
-                        <AvatarFallback>?</AvatarFallback>
+                        <AvatarImage
+                          src={post?.author?.image}
+                          alt={post?.author?.name || 'Author'}
+                        />
+                        <AvatarFallback>
+                          {post?.author?.fallback || 'U'}
+                        </AvatarFallback>
                       </Avatar>
-                      <div className="flex-1">
-                        <div className="h-4 w-32 bg-gray-200 rounded animate-pulse mb-2"></div>
-                        <div className="h-3 w-24 bg-gray-100 rounded animate-pulse"></div>
-                      </div>
-                    </div>
-                  </CardHeader>
-                  <CardContent className="p-4 pt-2 flex flex-col items-center justify-center min-h-[200px] gap-3">
-                    <span className="text-lg font-semibold text-gray-500">
-                      {post.accessType === 'LOGIN_REQUIRED'
-                        ? 'Login to view this post'
-                        : 'Upgrade to view this post'}
-                    </span>
-                    <Button className="bg-primary text-white" disabled>
-                      Locked Content
-                    </Button>
-                  </CardContent>
-                </Card>
-              }
-            >
-              <Card className="max-w-full overflow-hidden rounded-xl shadow-md mb-5">
-                <CardHeader className="p-4 justify-between">
-                  <div className="flex items-center gap-3">
-                    <Avatar className="h-10 w-10">
-                      <AvatarImage
-                        src={post?.author?.image}
-                        alt={post?.author?.name || 'Author'}
-                      />
-                      <AvatarFallback>
-                        {post?.author?.fallback || 'U'}
-                      </AvatarFallback>
-                    </Avatar>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center justify-between gap-3">
-                        <div className="min-w-0">
-                          <div className="text-sm font-semibold truncate">
-                            {`${post?.author?.first_name || ''} ${post?.author?.last_name || ''}`.trim() ||
-                              'Unknown Author'}{' '}
-                            <span className="text-xs font-normal text-gray-400">
-                              • {post?.author?.role || 'Educator'}
-                            </span>
-                          </div>
-                          <div className="text-xs text-gray-400 truncate">
-                            {/* {post?.time || ''} */}
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center justify-between gap-3">
+                          <div className="min-w-0">
+                            <div className="text-sm font-semibold truncate">
+                              {`${post?.author?.first_name || ''} ${post?.author?.last_name || ''}`.trim() ||
+                                'Unknown Author'}{' '}
+                              <span className="text-xs font-normal text-gray-400">
+                                • {post?.author?.role || 'Educator'}
+                              </span>
+                            </div>
+                            <div className="text-xs text-gray-400 truncate">
+                              {post?.time || ''}
+                            </div>
                           </div>
                         </div>
                       </div>
                     </div>
-                  </div>
-                  {/* <CardToolbar>
-                    <Button
-                      mode="icon"
-                      variant="outline"
-                      size="sm"
-                      className="opacity-80"
-                    >
-                      <Settings />
-                    </Button>
-                  </CardToolbar> */}
-                </CardHeader>
+                  </CardHeader>
 
-                <CardContent className="p-4 pt-2">
-                  <div className="">
-                    <div className="text-sm text-gray-600 dark:text-gray-300 mt-2">
-                      {post?.content ? (
-                        <ShowMoreLess text={post.content} limit={100} />
-                      ) : (
-                        <p className="line-clamp-3">No content available.</p>
+                  <CardContent className="p-4 pt-2">
+                    {/* Content - blur if locked */}
+                    <div className={isLocked ? 'blur-sm select-none' : ''}>
+                      <div className="text-sm text-gray-600 dark:text-gray-300 mt-2">
+                        {post?.content ? (
+                          isLocked ? (
+                            <p className="line-clamp-3">This content is locked. Please login or upgrade your plan to view.</p>
+                          ) : (
+                            <ShowMoreLess text={post.content} limit={100} />
+                          )
+                        ) : (
+                          <p className="line-clamp-3">No content available.</p>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Images - blur if locked */}
+                    {post?.images &&
+                      Array.isArray(post.images) &&
+                      post.images.length > 0 && (
+                        <div className="rounded-xl overflow-hidden h-72 relative mt-5 mb-4">
+                          {isLocked ? (
+                            <div className="relative h-full">
+                              <ImageCarousel
+                                images={post.images}
+                                alt={post?.content || 'Social post'}
+                                height="h-72"
+                                showViewButton={false}
+                                className="rounded-xl blur-md"
+                              />
+                              <div className="absolute inset-0 flex items-center justify-center bg-black/10 z-30 pointer-events-none">
+                                <div className="bg-black/60 p-2 rounded-full">
+                                  <LockKeyhole className="w-6 h-6 text-white" />
+                                </div>
+                              </div>
+                            </div>
+                          ) : (
+                            <>
+                              <ImageCarousel
+                                images={post.images}
+                                alt={post?.content || 'Social post'}
+                                height="h-72"
+                                showViewButton={true}
+                                className="rounded-xl"
+                              />
+                              <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent pointer-events-none" />
+                            </>
+                          )}
+                        </div>
                       )}
+
+                    {/* Videos - blur if locked */}
+                    {post?.videos &&
+                      Array.isArray(post.videos) &&
+                      post.videos.length > 0 && (
+                        <div className={`rounded-xl overflow-hidden space-y-4 mb-4 ${isLocked ? 'blur-md pointer-events-none' : ''}`}>
+                          {post.videos.map((video, idx) => (
+                            <div
+                              key={idx}
+                              className="relative w-full h-72 rounded-xl overflow-hidden bg-black"
+                            >
+                              {isLocked ? (
+                                <div className="absolute inset-0 flex items-center justify-center bg-black/50">
+                                  <div className="bg-black/60 p-2 rounded-full">
+                                    <LockKeyhole className="w-6 h-6 text-white" />
+                                  </div>
+                                </div>
+                              ) : (
+                                <video
+                                  src={video}
+                                  controls
+                                  className="w-full h-full object-contain"
+                                  onError={(e) => {
+                                    if (e?.target) {
+                                      e.target.style.display = 'none';
+                                    }
+                                  }}
+                                >
+                                  Your browser does not support the video tag.
+                                </video>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                  </CardContent>
+
+                  {/* Footer with unlock button for locked content */}
+                  {isLocked && (
+                    <CardFooter className="p-4 pt-0">
+                      <button
+                        onClick={() => navigate('/login')}
+                        className="btn bg-primary text-black w-full flex! items-center justify-center gap-2 hover:scale-up transition-all duration-300"
+                      >
+                        <LockKeyhole size={18} /> Unlock Content
+                      </button>
+                    </CardFooter>
+                  )}
+                </Card>
+
+                {/* Hover Overlay with Message - same as IdeaPage */}
+                {isLocked && hoveredCardId === post?._id && (
+                  <div
+                    className="absolute inset-0 bg-black/70 flex items-center justify-center z-50 rounded-xl cursor-pointer transition-opacity animate-in fade-in duration-200"
+                    onClick={() => navigate('/login')}
+                  >
+                    <div className="text-center text-white p-6">
+                      <LockKeyhole className="w-12 h-12 mx-auto mb-4" />
+                      <h3 className="text-xl font-semibold mb-2">
+                        {post?.accessType === 'LOGGED_IN' ? 'Login Required' : 'Upgrade Required'}
+                      </h3>
+                      <p className="text-sm opacity-90">
+                        {post?.accessType === 'LOGGED_IN'
+                          ? 'Please login to view this content'
+                          : 'Please upgrade your plan to view this content'}
+                      </p>
                     </div>
                   </div>
-                  {/* Images */}
-                  {post?.images &&
-                    Array.isArray(post.images) &&
-                    post.images.length > 0 && (
-                      <div className="rounded-xl overflow-hidden h-72 relative mt-5 mb-4">
-                        <ImageCarousel
-                          images={post.images}
-                          alt={post?.content || 'Social post'}
-                          height="h-72"
-                          showViewButton={true}
-                          className="rounded-xl"
-                        />
-                        {/* <Link
-                          to="/client/viewprofile"
-                          className="absolute inset-0 z-10"
-                          onClick={(e) => e?.stopPropagation()}
-                        /> */}
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent pointer-events-none" />
-                        {/* <div className="absolute left-4 bottom-4 text-white z-20">
-                          <div className="text-xs uppercase opacity-80 tracking-wider">
-                            Hosted by
-                          </div>
-                          <div className="text-lg font-bold text-primary">
-                            {post?.host?.name || post?.category || ''}
-                          </div>
-                          <div className="text-sm opacity-90">
-                            {post?.host?.desc || 'Social Post'}
-                          </div>
-                        </div> */}
-                      </div>
-                    )}
-                  {/* Videos */}
-                  {post?.videos &&
-                    Array.isArray(post.videos) &&
-                    post.videos.length > 0 && (
-                      <div className="rounded-xl overflow-hidden space-y-4 mb-4">
-                        {post.videos.map((video, idx) => (
-                          <div
-                            key={idx}
-                            className="relative w-full h-72 rounded-xl overflow-hidden bg-black"
-                          >
-                            <video
-                              src={video}
-                              controls
-                              className="w-full h-full object-contain"
-                              onError={(e) => {
-                                if (e?.target) {
-                                  e.target.style.display = 'none';
-                                }
-                              }}
-                            >
-                              Your browser does not support the video tag.
-                            </video>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                </CardContent>
-
-                {/* <CardFooter className="p-4 pt-2 flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <Button
-                      mode="icon"
-                      variant="ghost"
-                      size="sm"
-                      className="text-gray-600 cursor-pointer hover:text-primary"
-                    >
-                      <ThumbsUpIcon />
-                    </Button>
-                    <Button
-                      mode="icon"
-                      variant="ghost"
-                      size="sm"
-                      className="text-gray-600 cursor-pointer hover:text-primary"
-                    >
-                      <MessageCircle />
-                    </Button>
-                    <Button
-                      mode="icon"
-                      variant="ghost"
-                      size="sm"
-                      className="text-gray-600 cursor-pointer hover:text-primary"
-                    >
-                      <Forward />
-                    </Button>
-                  </div>
-                  <div className="text-xs text-gray-700">
-                    {post.views} views
-                  </div>
-                </CardFooter> */}
-              </Card>
-            </AccessGate>
-          ))}
+                )}
+              </div>
+            );
+          })}
         </div>
       </div>
 
