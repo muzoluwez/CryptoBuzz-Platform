@@ -78,7 +78,6 @@ export default function LivePage() {
       categoryId: activeCategoryId,
       startDate: currentWeekDates.startDate.toISOString(),
       endDate: currentWeekDates.endDate.toISOString(),
-      language: 'en',
     },
     {
       skip: !activeCategoryId, // Skip query if no category selected
