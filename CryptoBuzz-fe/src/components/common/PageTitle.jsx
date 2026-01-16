@@ -1,7 +1,7 @@
 import React from 'react';
 import useDocumentTitle from '@/hooks/use-document-title';
 
-const PageTitle = ({ title, description, suffix = 'CryptoBuzz' }) => {
+const PageTitle = ({ title, description, suffix = 'Cripto Buzz' }) => {
   useDocumentTitle(title, { suffix });
 
   return (

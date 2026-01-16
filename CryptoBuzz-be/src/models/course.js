@@ -7,7 +7,11 @@ const CourseSchema = new mongoose.Schema(
     price: { type: Number, default: 0 },
     published: { type: Boolean, default: false },
     isFeatured: { type: Boolean, default: false },
-    tier: { type: String, default: "FREE" },
+    tier: { 
+      type: String, 
+      enum: ["PUBLIC", "LOGGED_IN", "UID_ONLY", "PRO"],
+      default: "PUBLIC" 
+    },
     order: { type: Number, required: true },
     section: { type: String, required: true },
     language: { type: String, required: true },
@@ -35,6 +39,26 @@ const CourseSchema = new mongoose.Schema(
     sections: [
       { type: mongoose.Schema.Types.ObjectId, ref: "Section" }
     ],
+
+    // Plans array - a course can belong to multiple plans
+    plans: [{
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Plan",
+    }],
+    
+    // Legacy single plan field - kept for backward compatibility
+    // Will be populated from plans array if only one plan exists
+    plan: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Plan",
+      default: null,
+    },
+
+    // Legacy field - keep for backward compatibility during migration
+    hotmartProductId: {
+      type: String,
+      default: null,
+    },
 
     isDeleted: { type: Boolean, default: false },
     deletedAt: { type: Date },

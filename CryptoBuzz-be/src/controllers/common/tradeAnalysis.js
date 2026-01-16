@@ -19,7 +19,8 @@ const createTradeAnalysisSchema = Yup.object().shape({
   title: Yup.string().required("title is required"),
   createdBy: Yup.string().required("Educator ID is required"),
   description: Yup.string().required("Entry is required"),
-  url: Yup.string().url("Please enter a valid URL").optional()
+  url: Yup.string().url("Please enter a valid URL").optional(),
+  accessType: Yup.string().optional()
 });
 
 // ------------------------
@@ -56,6 +57,7 @@ export const getTradeAnalysis = async (req, res) => {
       .sort({ createdAt: -1 })
       .populate("createdBy", "first_name last_name image")
       .populate("category", "_id name")
+      .populate("plans", "name price description hotmartCheckoutCode hotmartCheckoutUrl")
       .lean();
 
     const response = data.map(d => ({
@@ -66,6 +68,8 @@ export const getTradeAnalysis = async (req, res) => {
       category: d.category,
       url: d.url,
       image: Array.isArray(d.photos) ? d.photos : [d.photos],
+      accessType: d.accessType,
+      plans: d.plans || [],
       createdAt: d.createdAt
     }));
 
@@ -92,7 +96,23 @@ export const createTradeAnalysis = async (req, res) => {
   try {
     await createTradeAnalysisSchema.validate(req.body);
 
-    const { title, description, createdBy, url, category } = req.body;
+    // Handle plans array from FormData (can come as req.body['plans[]'] or req.body.plans)
+    let plansArray = [];
+    if (req.body['plans[]']) {
+      // Multer sends arrays as 'plans[]'
+      plansArray = Array.isArray(req.body['plans[]']) 
+        ? req.body['plans[]'] 
+        : [req.body['plans[]']];
+    } else if (req.body.plans) {
+      plansArray = Array.isArray(req.body.plans) ? req.body.plans : [req.body.plans];
+    }
+    
+    // Filter and validate plan IDs
+    const validPlans = plansArray
+      .filter(p => p && p !== "null" && p !== "undefined" && /^[0-9a-fA-F]{24}$/.test(String(p)))
+      .map(p => new mongoose.Types.ObjectId(p));
+
+    const { title, description, createdBy, url, category, accessType } = req.body;
     const educatorUser = req.user;
 
     if (!educatorUser) return res.status(400).json({ message: "Token is required." });
@@ -113,7 +133,10 @@ export const createTradeAnalysis = async (req, res) => {
       createdBy,
       url,
       category,
-      photos: imageUrls
+      photos: imageUrls,
+      accessType,
+      // Only add plans if PRO tier and valid plans exist
+      plans: accessType === "PRO" && validPlans.length > 0 ? validPlans : []
     });
 
     await UserModel.updateOne({ _id: educatorUser._id }, { $inc: { insightCount: 1 } });
@@ -148,7 +171,23 @@ export const createTradeAnalysis = async (req, res) => {
 // ------------------------
 export const updateTradeAnalysis = async (req, res) => {
   try {
-    const { title, description, url, category } = req.body;
+    // Handle plans array from FormData (can come as req.body['plans[]'] or req.body.plans)
+    let plansArray = [];
+    if (req.body['plans[]']) {
+      // Multer sends arrays as 'plans[]'
+      plansArray = Array.isArray(req.body['plans[]']) 
+        ? req.body['plans[]'] 
+        : [req.body['plans[]']];
+    } else if (req.body.plans) {
+      plansArray = Array.isArray(req.body.plans) ? req.body.plans : [req.body.plans];
+    }
+    
+    // Filter and validate plan IDs
+    const validPlans = plansArray
+      .filter(p => p && p !== "null" && p !== "undefined" && /^[0-9a-fA-F]{24}$/.test(String(p)))
+      .map(p => new mongoose.Types.ObjectId(p));
+
+    const { title, description, url, category, accessType } = req.body;
 
     const trade = await TradeAnalysisModel.findById(req.params.id);
     if (!trade) return res.status(404).json({ error: "Not found" });
@@ -175,6 +214,13 @@ export const updateTradeAnalysis = async (req, res) => {
     trade.category = category ?? trade.category;
     trade.url = url ?? trade.url;
     trade.photos = updatedImages;
+    trade.accessType = accessType ?? trade.accessType;
+    // Update plans: only set if PRO tier, otherwise clear
+    if (accessType === "PRO" && validPlans.length > 0) {
+      trade.plans = validPlans;
+    } else if (accessType !== "PRO") {
+      trade.plans = [];
+    }
 
     await trade.save();
     return res.status(200).json(ApiResponse(200, trade, "Record updated successfully"));

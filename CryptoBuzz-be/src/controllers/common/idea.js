@@ -43,7 +43,8 @@ const itemValidationSchema = yup.object().shape({
     .array()
     .of(yup.string().required("Each exit is required"))
     .min(1, "At least one exit is required")
-    .required("Exits are required")
+    .required("Exits are required"),
+  accessType: yup.string().optional()
 });
 
 export const getIdea = async (req, res) => {
@@ -83,8 +84,8 @@ export const getIdea = async (req, res) => {
         .limit(limit) // Limit the number of items per page
         .sort({ createdAt: -1 })
         .populate("educatorId", "first_name last_name image")
-        .lean()
         .populate("category", " _id name")
+        .populate("plans", "name price description hotmartCheckoutCode hotmartCheckoutUrl")
         .lean();
 
       let response = existingData.map(data => ({
@@ -102,6 +103,8 @@ export const getIdea = async (req, res) => {
         description: data.description,
         exits: data.exits,
         pips: data.pips,
+        accessType: data.accessType || "PUBLIC",
+        plans: data.plans || [],
         createdAt: data.createdAt
       }));
 
@@ -121,7 +124,8 @@ export const getIdea = async (req, res) => {
       // .limit(limit) // Limit the number of items per page
       .sort({ createdAt: -1 })
       .populate("educatorId", "first_name last_name image")
-      .populate("category", " _id name");
+      .populate("category", " _id name")
+      .populate("plans", "name price description hotmartCheckoutCode hotmartCheckoutUrl");
 
     // Prepare the response data
     let response = existingData.map(data => ({
@@ -137,9 +141,11 @@ export const getIdea = async (req, res) => {
       entry: data.entry,
       invalidation: data.invalidation,
       description: data.description,
-      exits: data.exits,
-      pips: data.pips,
-      createdAt: data.createdAt
+        exits: data.exits,
+        pips: data.pips,
+        accessType: data.accessType,
+        plans: data.plans || [],
+        createdAt: data.createdAt
     }));
 
     return res.status(200).json(ApiResponse(200, response, "Records fetched successfully"));
@@ -154,6 +160,23 @@ export const getIdea = async (req, res) => {
 export const createIdea = async (req, res) => {
   try {
     await itemValidationSchema.validate(req.body);
+    
+    // Handle plans array from FormData (can come as req.body['plans[]'] or req.body.plans)
+    let plansArray = [];
+    if (req.body['plans[]']) {
+      // Multer sends arrays as 'plans[]'
+      plansArray = Array.isArray(req.body['plans[]']) 
+        ? req.body['plans[]'] 
+        : [req.body['plans[]']];
+    } else if (req.body.plans) {
+      plansArray = Array.isArray(req.body.plans) ? req.body.plans : [req.body.plans];
+    }
+    
+    // Filter and validate plan IDs
+    const validPlans = plansArray
+      .filter(p => p && p !== "null" && p !== "undefined" && /^[0-9a-fA-F]{24}$/.test(String(p)))
+      .map(p => new mongoose.Types.ObjectId(p));
+    
     const {
       name,
       type,
@@ -166,7 +189,8 @@ export const createIdea = async (req, res) => {
       invalidation,
       description,
       exits,
-      pips
+      pips,
+      accessType
     } = req.body;
 
     const educatorUser = req.user;
@@ -198,7 +222,10 @@ export const createIdea = async (req, res) => {
       invalidation,
       description,
       exits,
-      pips
+      pips,
+      accessType,
+      // Only add plans if PRO tier and valid plans exist
+      plans: accessType === "PRO" && validPlans.length > 0 ? validPlans : []
     });
 
     await newIdea.save();
@@ -243,6 +270,23 @@ export const createIdea = async (req, res) => {
 export const updateIdea = async (req, res) => {
   try {
     await itemValidationSchema.validate(req.body);
+    
+    // Handle plans array from FormData (can come as req.body['plans[]'] or req.body.plans)
+    let plansArray = [];
+    if (req.body['plans[]']) {
+      // Multer sends arrays as 'plans[]'
+      plansArray = Array.isArray(req.body['plans[]']) 
+        ? req.body['plans[]'] 
+        : [req.body['plans[]']];
+    } else if (req.body.plans) {
+      plansArray = Array.isArray(req.body.plans) ? req.body.plans : [req.body.plans];
+    }
+    
+    // Filter and validate plan IDs
+    const validPlans = plansArray
+      .filter(p => p && p !== "null" && p !== "undefined" && /^[0-9a-fA-F]{24}$/.test(String(p)))
+      .map(p => new mongoose.Types.ObjectId(p));
+    
     const {
       name,
       type,
@@ -253,7 +297,8 @@ export const updateIdea = async (req, res) => {
       invalidation,
       exits,
       description,
-      pips = 0
+      pips = 0,
+      accessType
     } = req.body;
     const { id } = req.params;
     const idea = await IdeaModel.findById(id);
@@ -286,6 +331,13 @@ export const updateIdea = async (req, res) => {
     idea.description = description;
     idea.image = updatedImageUrls;
     idea.pips = pips;
+    idea.accessType = accessType;
+    // Update plans: only set if PRO tier, otherwise clear
+    if (accessType === "PRO" && validPlans.length > 0) {
+      idea.plans = validPlans;
+    } else {
+      idea.plans = [];
+    }
 
     await idea.save();
 

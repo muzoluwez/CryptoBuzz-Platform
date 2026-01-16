@@ -20,7 +20,7 @@ const Support = () => {
                 <div className="mb-6 sm:mb-8">
                     <img
                         src={logo}
-                        alt="CryptoBuzz Logo"
+                        alt="Cripto Buzz Logo"
                         className="mx-auto h-auto max-h-[50px] w-auto max-w-[120px] object-contain brightness-110 sm:max-h-[60px] sm:max-w-[150px] md:max-h-[80px] md:max-w-[200px]"
                     />
                 </div>
@@ -31,7 +31,7 @@ const Support = () => {
                 </h1>
 
                 <h2 className="mb-6 text-2xl font-semibold tracking-tight text-slate-200 sm:mb-8 sm:text-3xl md:mb-10 md:text-4xl">
-                    CryptoBuzz Support
+                    Cripto Buzz Support
                 </h2>
 
                 <p className="mb-8 text-base leading-relaxed text-slate-300 sm:mb-10 sm:text-lg md:mb-12">
@@ -40,7 +40,7 @@ const Support = () => {
 
                 {/* Send Email Button */}
                 <a
-                    href="mailto:Support@CryptoBuzz.space?subject=Support%20Request&body=Hello%20CryptoBuzz%20Support%20Team%2C%0A%0AI%20need%20assistance%20with%3A%0A%0A%5BPlease%20describe%20your%20issue%20here%5D%0A%0AThank%20you%21"
+                    href="mailto:Support@CriptoBuzz.space?subject=Support%20Request&body=Hello%CriptoBuzz%20Support%20Team%2C%0A%0AI%20need%20assistance%20with%3A%0A%0A%5BPlease%20describe%20your%20issue%20here%5D%0A%0AThank%20you%21"
                     className="inline-flex w-full max-w-72 cursor-pointer items-center justify-center gap-2 rounded-xl border border-slate-600/50 bg-slate-700/90 px-8 py-4 text-base font-medium text-slate-200 no-underline backdrop-blur-lg transition-all duration-200 ease-in-out hover:border-slate-500/70 hover:bg-slate-600/90 active:scale-95"
                 >
                     {/* SVG Icon embedded directly */}

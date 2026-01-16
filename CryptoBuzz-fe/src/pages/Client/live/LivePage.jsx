@@ -381,11 +381,10 @@ export default function LivePage() {
                       setActiveCategory(category.name);
                       setActiveCategoryId(category._id);
                     }}
-                    className={`px-4 py-2 text-sm font-medium cursor-pointer transition-colors ${
-                      activeCategory === category.name
-                        ? 'bg-[#FFF9E2] dark:bg-[#fff9e224] text-primary rounded-lg'
-                        : 'text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white'
-                    }`}
+                    className={`px-4 py-2 text-sm font-medium cursor-pointer transition-colors ${activeCategory === category.name
+                      ? 'bg-[#FFF9E2] dark:bg-[#fff9e224] text-primary rounded-lg'
+                      : 'text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white'
+                      }`}
                   >
                     {category.name}
                   </button>
@@ -400,11 +399,10 @@ export default function LivePage() {
               <button
                 key={week}
                 onClick={() => setActiveWeek(week)}
-                className={`pb-3 text-sm font-medium transition-colors border-b-2 cursor-pointer ${
-                  activeWeek === week
-                    ? 'border-yellow-400 text-yellow-600'
-                    : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
-                }`}
+                className={`pb-3 text-sm font-medium transition-colors border-b-2 cursor-pointer ${activeWeek === week
+                  ? 'border-yellow-400 text-yellow-600'
+                  : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
+                  }`}
               >
                 {week}
               </button>
@@ -437,11 +435,10 @@ export default function LivePage() {
                         className="flex flex-col items-center cursor-pointer select-none"
                       >
                         <div
-                          className={`w-20 h-20 rounded-full p-[4px] transition-all ${
-                            activeEducatorId === educator.id
-                              ? 'bg-[#ffcd0b]'
-                              : 'bg-gray-300 dark:bg-gray-600'
-                          }`}
+                          className={`w-20 h-20 rounded-full p-[4px] transition-all ${activeEducatorId === educator.id
+                            ? 'bg-[#ffcd0b]'
+                            : 'bg-gray-300 dark:bg-gray-600'
+                            }`}
                         >
                           {educator?.avatar ? (
                             <img
@@ -451,11 +448,10 @@ export default function LivePage() {
                             />
                           ) : (
                             <div
-                              className={`w-full h-full rounded-full overflow-hidden flex items-center justify-center text-white font-bold text-xl ${
-                                educator?.image === 'plaid'
-                                  ? 'bg-gradient-to-br from-red-900 via-red-800 to-gray-800'
-                                  : 'bg-gradient-to-br from-blue-900 via-blue-800 to-slate-700'
-                              }`}
+                              className={`w-full h-full rounded-full overflow-hidden flex items-center justify-center text-white font-bold text-xl ${educator?.image === 'plaid'
+                                ? 'bg-gradient-to-br from-red-900 via-red-800 to-gray-800'
+                                : 'bg-gradient-to-br from-blue-900 via-blue-800 to-slate-700'
+                                }`}
                             >
                               {educator?.name?.[0] || 'E'}
                             </div>
@@ -483,11 +479,10 @@ export default function LivePage() {
                     />
                   ) : (
                     <div
-                      className={`w-12 h-12 rounded-full flex items-center justify-center text-white font-bold ${
-                        activeEducator?.image === 'plaid'
-                          ? 'bg-gradient-to-br from-red-900 via-red-800 to-gray-800'
-                          : 'bg-gradient-to-br from-blue-900 via-blue-800 to-slate-700'
-                      }`}
+                      className={`w-12 h-12 rounded-full flex items-center justify-center text-white font-bold ${activeEducator?.image === 'plaid'
+                        ? 'bg-gradient-to-br from-red-900 via-red-800 to-gray-800'
+                        : 'bg-gradient-to-br from-blue-900 via-blue-800 to-slate-700'
+                        }`}
                     >
                       {activeEducator?.name?.[0] || 'E'}
                     </div>
@@ -513,11 +508,10 @@ export default function LivePage() {
                             onClick={() =>
                               navigate(`/client/view-profile/${activeEducator?.id}`)
                             }
-                            className={`p-3 rounded-xl flex flex-col gap-2 cursor-pointer transition-all ${
-                              isSessionToday
-                                ? 'bg-[#ffcd0b] text-white shadow-lg'
-                                : 'bg-yellow-100 dark:bg-[#fff9e224] text-gray-900 dark:text-gray-100'
-                            }`}
+                            className={`p-3 rounded-xl flex flex-col gap-2 cursor-pointer transition-all ${isSessionToday
+                              ? 'bg-[#ffcd0b] text-white shadow-lg'
+                              : 'bg-yellow-100 dark:bg-[#fff9e224] text-gray-900 dark:text-gray-100'
+                              }`}
                           >
                             <span className="text-sm font-semibold">
                               {session?.title || 'Session'}
@@ -539,130 +533,128 @@ export default function LivePage() {
           </div>
           {/* Desktop Schedule Grid */}
           <div className="hidden md:block">
-          {!activeCategoryId ? (
-            <Card className="rounded-lg shadow-sm p-8">
-              <div className="text-center text-gray-500">
-                <p>Please select a category to view schedules</p>
-              </div>
-            </Card>
-          ) : educators.length === 0 ? (
-            <Card className="rounded-lg shadow-sm p-8">
-              <div className="text-center text-gray-500">
-                <p>
-                  No schedules available for {activeCategory} in {activeWeek}
-                </p>
-              </div>
-            </Card>
-          ) : (
-            <Card className="rounded-lg shadow-sm overflow-hidden">
-              {/* Days Header */}
-              <div className="grid grid-cols-8 bg-gradient-to-r from-yellow-600 to-yellow-700">
-                <div className="p-4 font-semibold text-center text-white border-r border-yellow-600">
-                  Educators
+            {!activeCategoryId ? (
+              <Card className="rounded-lg shadow-sm p-8">
+                <div className="text-center text-gray-500">
+                  <p>Please select a category to view schedules</p>
                 </div>
-                {weekDays.map((day, index) => (
-                  <div
-                    key={index}
-                    className="p-4 text-center font-semibold text-white border-r border-yellow-600 last:border-r-0"
-                  >
-                    <div className="text-sm">
-                      {day.toLocaleDateString('en-US', { weekday: 'short' })}
-                    </div>
-                    <div className="text-xs mt-1">{day.getDate()}</div>
+              </Card>
+            ) : educators.length === 0 ? (
+              <Card className="rounded-lg shadow-sm p-8">
+                <div className="text-center text-gray-500">
+                  <p>
+                    No schedules available for {activeCategory} in {activeWeek}
+                  </p>
+                </div>
+              </Card>
+            ) : (
+              <Card className="rounded-lg shadow-sm overflow-hidden">
+                {/* Days Header */}
+                <div className="grid grid-cols-8 bg-gradient-to-r from-yellow-600 to-yellow-700">
+                  <div className="p-4 font-semibold text-center text-white border-r border-yellow-600">
+                    Educators
                   </div>
-                ))}
-              </div>
+                  {weekDays.map((day, index) => (
+                    <div
+                      key={index}
+                      className="p-4 text-center font-semibold text-white border-r border-yellow-600 last:border-r-0"
+                    >
+                      <div className="text-sm">
+                        {day.toLocaleDateString('en-US', { weekday: 'short' })}
+                      </div>
+                      <div className="text-xs mt-1">{day.getDate()}</div>
+                    </div>
+                  ))}
+                </div>
 
-              {/* Educators and Sessions */}
-              {educators.map((educator, index) => (
-                <div
-                  key={educator.id}
-                  className={`grid grid-cols-8 border-t border-gray-200 dark:border-gray-700 ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}`}
-                >
-                  {/* Educator Profile */}
-                  <div className="p-4 border-r border-gray-200 bg-white dark:bg-[#1f2227] dark:border-gray-700 flex items-center justify-center">
-                    <div className="flex flex-col items-center">
-                      {educator?.avatar ? (
-                        <img
-                          src={educator.avatar}
-                          alt={educator?.name || 'Educator'}
-                          className="w-16 h-16 rounded-lg object-cover mb-2 cursor-pointer"
-                          onClick={() =>
-                            navigate(
-                              `/client/view-profile/${educator?._id || educator?.id}`,
-                              {
-                                state: { educatorId: educator?._id || educator?.id },
-                              },
-                            )
-                          }
-                        />
-                      ) : (
-                        <div
-                          className={`w-16 h-16 rounded-lg overflow-hidden mb-2 ${
-                            educator?.image === 'plaid'
+                {/* Educators and Sessions */}
+                {educators.map((educator, index) => (
+                  <div
+                    key={educator.id}
+                    className={`grid grid-cols-8 border-t border-gray-200 dark:border-gray-700 ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}`}
+                  >
+                    {/* Educator Profile */}
+                    <div className="p-4 border-r border-gray-200 bg-white dark:bg-[#1f2227] dark:border-gray-700 flex items-center justify-center">
+                      <div className="flex flex-col items-center">
+                        {educator?.avatar ? (
+                          <img
+                            src={educator.avatar}
+                            alt={educator?.name || 'Educator'}
+                            className="w-16 h-16 rounded-lg object-cover mb-2 cursor-pointer"
+                            onClick={() =>
+                              navigate(
+                                `/client/view-profile/${educator?._id || educator?.id}`,
+                                {
+                                  state: { educatorId: educator?._id || educator?.id },
+                                },
+                              )
+                            }
+                          />
+                        ) : (
+                          <div
+                            className={`w-16 h-16 rounded-lg overflow-hidden mb-2 ${educator?.image === 'plaid'
                               ? 'bg-gradient-to-br from-red-900 via-red-800 to-gray-800'
                               : 'bg-gradient-to-br from-blue-900 via-blue-800 to-slate-700'
-                          }`}
-                        >
-                          <div className="w-full h-full flex items-center justify-center text-white font-bold text-xl">
-                            {educator?.name?.[0] || 'E'}
-                          </div>
-                        </div>
-                      )}
-                      <p className="text-xs font-medium text-center text-gray-700 dark:text-gray-300 mt-1">
-                        {educator?.name || 'Educator'}
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* Sessions for each day */}
-                  {weekDays.map((day, dayIndex) => {
-                    const dayKey = dayIndex.toString();
-                    const daySessions = educator?.sessions?.[dayKey] || [];
-                    const isToday = isSameDay(day, new Date());
-
-                    return (
-                      <div
-                        key={dayIndex}
-                        className="p-3 border-r border-gray-200 bg-white dark:bg-[#1f2227] dark:border-gray-700 last:border-r-0 min-h-[120px]"
-                      >
-                        {daySessions.length > 0 ? (
-                          daySessions.map((session, idx) => (
-                            <div
-                              key={session?._id || idx}
-                              className={`rounded-md p-2 mb-2 last:mb-0 cursor-pointer transition-all ${
-                                isToday
-                                  ? 'bg-[#ffcd0b] text-white shadow-lg'
-                                  : 'bg-yellow-100 border-yellow-300 text-gray-900'
                               }`}
-                              onClick={() =>
-                                navigate(`/client/view-profile/${educator?.id}`)
-                              }
-                            >
-                              <p
-                                className={`text-xs font-semibold mb-1 ${isToday ? 'text-white' : 'text-gray-900'}`}
-                              >
-                                {session?.title || 'Session'}
-                              </p>
-                              <p
-                                className={`text-xs ${isToday ? 'text-white' : 'text-gray-600'}`}
-                              >
-                                {session?.time || ''}
-                              </p>
+                          >
+                            <div className="w-full h-full flex items-center justify-center text-white font-bold text-xl">
+                              {educator?.name?.[0] || 'E'}
                             </div>
-                          ))
-                        ) : (
-                          <div className="text-xs text-gray-400 text-center">
-                            –
                           </div>
                         )}
+                        <p className="text-xs font-medium text-center text-gray-700 dark:text-gray-300 mt-1">
+                          {educator?.name || 'Educator'}
+                        </p>
                       </div>
-                    );
-                  })}
-                </div>
-              ))}
-            </Card>
-          )}
+                    </div>
+
+                    {/* Sessions for each day */}
+                    {weekDays.map((day, dayIndex) => {
+                      const dayKey = dayIndex.toString();
+                      const daySessions = educator?.sessions?.[dayKey] || [];
+                      const isToday = isSameDay(day, new Date());
+
+                      return (
+                        <div
+                          key={dayIndex}
+                          className="p-3 border-r border-gray-200 bg-white dark:bg-[#1f2227] dark:border-gray-700 last:border-r-0 min-h-[120px]"
+                        >
+                          {daySessions.length > 0 ? (
+                            daySessions.map((session, idx) => (
+                              <div
+                                key={session?._id || idx}
+                                className={`rounded-md p-2 mb-2 last:mb-0 cursor-pointer transition-all ${isToday
+                                  ? 'bg-[#ffcd0b] text-white shadow-lg'
+                                  : 'bg-yellow-100 border-yellow-300 text-gray-900'
+                                  }`}
+                                onClick={() =>
+                                  navigate(`/client/view-profile/${educator?.id}`)
+                                }
+                              >
+                                <p
+                                  className={`text-xs font-semibold mb-1 ${isToday ? 'text-white' : 'text-gray-900'}`}
+                                >
+                                  {session?.title || 'Session'}
+                                </p>
+                                <p
+                                  className={`text-xs ${isToday ? 'text-white' : 'text-gray-600'}`}
+                                >
+                                  {session?.time || ''}
+                                </p>
+                              </div>
+                            ))
+                          ) : (
+                            <div className="text-xs text-gray-400 text-center">
+                              –
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                ))}
+              </Card>
+            )}
           </div>
 
           {/* Educator Cards */}
@@ -671,11 +663,10 @@ export default function LivePage() {
               {educators.map((educator) => (
                 <div
                   key={educator?.id}
-                  className={`rounded-lg overflow-hidden shadow-lg relative h-96 ${
-                    educator?.image === 'plaid'
-                      ? 'bg-gradient-to-br from-gray-400 via-gray-500 to-gray-600'
-                      : 'bg-gradient-to-br from-slate-500 via-slate-600 to-slate-700'
-                  }`}
+                  className={`rounded-lg overflow-hidden shadow-lg relative h-96 ${educator?.image === 'plaid'
+                    ? 'bg-gradient-to-br from-gray-400 via-gray-500 to-gray-600'
+                    : 'bg-gradient-to-br from-slate-500 via-slate-600 to-slate-700'
+                    }`}
                 >
                   <img
                     src={

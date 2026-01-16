@@ -72,20 +72,56 @@ const CreateCourseModal = forwardRef(
           instructor: auth?.user?._id,
         };
 
+        // Handle plans array (new approach - multiple plans)
+        const plansArray = [];
+        // FormData sends plans[] as multiple entries, collect them all
+        for (const [key, value] of formData.entries()) {
+          if (key === "plans[]" && value && value !== "" && value !== "null" && value !== "undefined") {
+            plansArray.push(value);
+          }
+        }
+        
+        // Add plans array if any plans were selected
+        if (plansArray.length > 0) {
+          payload.plans = plansArray;
+        }
+        
+        // Also add single plan field for backward compatibility (first plan)
+        const planField = formData.get("plan");
+        if (planField && planField !== "" && planField !== "null" && planField !== "undefined") {
+          payload.plan = planField;
+        }
+
+        // Add price field if present (from plan)
+        const priceField = formData.get("price");
+        if (priceField !== null) {
+          payload.price = priceField;
+        }
+
         let requestData;
 
         // 2. If a new file is uploaded, use FormData
         if (isImageAFile) {
           const uploadFormData = new FormData();
           Object.entries(payload).forEach(([key, value]) => {
-            uploadFormData.append(key, value);
+            if (value !== null && value !== undefined) {
+              // Handle plans array specially - send as JSON string for FormData
+              if (key === "plans" && Array.isArray(value)) {
+                uploadFormData.append("plans", JSON.stringify(value));
+              } else {
+                uploadFormData.append(key, value);
+              }
+            }
           });
           uploadFormData.append("image", imageFile); // append file with correct key
 
           requestData = uploadFormData;
         } else {
           // 3. If no file, send as regular JSON object
-          payload.imageUrl = formData.get("imageUrl");
+          const imageUrl = formData.get("imageUrl");
+          if (imageUrl) {
+            payload.imageUrl = imageUrl;
+          }
           requestData = payload;
         }
 

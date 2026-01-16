@@ -7,6 +7,7 @@ import { Toaster } from '@/components/ui/sonner';
 
 import { AuthProvider } from '@/context/AuthContext';
 import { GrantAccessProvider } from '@/context/GrantAccessContext';
+import { PaymentStatusHandler } from '@/components/payment/PaymentStatusHandler';
 
 const { BASE_URL } = import.meta.env;
 
@@ -26,6 +27,7 @@ export function App() {
             <AuthProvider>
               <GrantAccessProvider>
                 <Toaster />
+                <PaymentStatusHandler />
                 <AppRouting />
               </GrantAccessProvider>
             </AuthProvider>

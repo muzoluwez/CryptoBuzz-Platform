@@ -6,7 +6,7 @@ export function Layout7() {
   return (
     <>
       <Helmet>
-        <title>CryptoBuzz</title>
+        <title>Cripto Buzz</title>
       </Helmet>
 
       <LayoutProvider>

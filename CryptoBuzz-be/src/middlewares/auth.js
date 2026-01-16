@@ -107,4 +107,144 @@ export const AdminAuth = asyncHandler(async (req, res, next) => {
   }
 });
 
-export default { CommonAuth, verifyJWT, AdminAuth };
+/**
+ * UserAuth - Allows all authenticated users (students, educators, admins)
+ * Used for endpoints that should be accessible to all authenticated users
+ */
+export const UserAuth = asyncHandler(async (req, res, next) => {
+  try {
+    const authHeader = req.headers.authorization;
+    const token = authHeader?.split(" ")[1] || authHeader?.replace("Bearer ", "").trim();
+
+    // Debug logging
+    console.log("🔐 UserAuth middleware:", {
+      hasAuthHeader: !!authHeader,
+      authHeaderFormat: authHeader ? (authHeader.startsWith('Bearer ') ? 'Bearer format' : 'No Bearer prefix') : 'missing',
+      hasToken: !!token,
+      tokenLength: token?.length || 0,
+      path: req.path,
+      method: req.method
+    });
+
+    if (!token) {
+      console.warn("❌ UserAuth: No token provided for", req.path);
+      return res.status(401).json({ message: "No token provided" });
+    }
+
+    let decodedToken;
+    try {
+      decodedToken = jwt.verify(token, process.env.JWT_SECRET);
+    } catch (err) {
+      return res.status(401).json({ message: "Invalid or expired token" });
+    }
+
+    if (!decodedToken._id) {
+      return res.status(401).json({ message: "Invalid token: missing user ID" });
+    }
+
+    // Try to find user in User model first (most common for authenticated endpoints)
+    let user = await User.findById(decodedToken._id);
+
+    // If not found in User model, try UserCredential model
+    // (tokens can be created from either model depending on login endpoint)
+    if (!user) {
+      const userCredential = await UserCredential.findById(decodedToken._id).select("-password");
+      if (userCredential) {
+        // Convert UserCredential to a format compatible with User model
+        // Map UserCredential fields to User model structure
+        user = {
+          _id: userCredential._id,
+          email: userCredential.email,
+          first_name: userCredential.first_name,
+          last_name: userCredential.last_name,
+          name: userCredential.name,
+          role: userCredential.role || 'student',
+          image: userCredential.image,
+          // Add any other common fields you need
+        };
+      }
+    }
+
+    if (!user) {
+      console.error("UserAuth: User not found for ID:", decodedToken._id);
+      return res.status(400).json({ message: "User not found" });
+    }
+
+    // Attach the user object to the request for use in the next middleware/handler
+    req.user = user;
+
+    // Proceed to the next middleware or route handler
+    next();
+  } catch (error) {
+    console.error("UserAuth error:", error);
+    return res.status(500).json({
+      message: "Internal Server Error",
+      error: error.errors || error.message
+    });
+  }
+});
+
+/**
+ * OptionalUserAuth - Optionally authenticates users
+ * If a token is provided and valid, sets req.user
+ * If no token or invalid token, continues without req.user (allows public access)
+ * Used for endpoints that should work both with and without authentication
+ */
+export const OptionalUserAuth = asyncHandler(async (req, res, next) => {
+  try {
+    const authHeader = req.headers.authorization;
+    const token = authHeader?.split(" ")[1] || authHeader?.replace("Bearer ", "").trim();
+
+    // If no token, proceed without authentication
+    if (!token) {
+      req.user = null;
+      return next();
+    }
+
+    let decodedToken;
+    try {
+      decodedToken = jwt.verify(token, process.env.JWT_SECRET);
+    } catch (err) {
+      // Invalid token - proceed without authentication
+      req.user = null;
+      return next();
+    }
+
+    if (!decodedToken._id) {
+      // Invalid token format - proceed without authentication
+      req.user = null;
+      return next();
+    }
+
+    // Try to find user in User model first
+    let user = await User.findById(decodedToken._id);
+
+    // If not found in User model, try UserCredential model
+    if (!user) {
+      const userCredential = await UserCredential.findById(decodedToken._id).select("-password");
+      if (userCredential) {
+        user = {
+          _id: userCredential._id,
+          email: userCredential.email,
+          first_name: userCredential.first_name,
+          last_name: userCredential.last_name,
+          name: userCredential.name,
+          role: userCredential.role || 'student',
+          image: userCredential.image,
+        };
+      }
+    }
+
+    // Attach user if found, otherwise null
+    req.user = user || null;
+
+    // Proceed to the next middleware or route handler
+    next();
+  } catch (error) {
+    // On error, proceed without authentication
+    req.user = null;
+    next();
+  }
+});
+
+export default { CommonAuth, verifyJWT, AdminAuth, UserAuth, OptionalUserAuth };

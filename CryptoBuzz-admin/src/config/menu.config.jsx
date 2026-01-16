@@ -21,6 +21,7 @@ import {
   ListTodo,
   Star,
   BadgeCent,
+  Wallet,
 } from "lucide-react";
 import { useAuthContext } from "../auth/useAuthContext";
 
@@ -1340,6 +1341,16 @@ export const sideMenus = {
       icon: <BookOpen />,
       path: "/admin/courses",
     },
+    {
+      title: "Payment Plans",
+      icon: <Wallet />,
+      path: "/admin/plan",
+    },
+    {
+      title: "Purchases",
+      icon: <BadgeCent />,
+      path: "/admin/purchase",
+    },
 
     {
       title: "Live Stream",
@@ -1380,9 +1391,9 @@ export const sideMenus = {
       path: "/admin/trade-analysis",
     },
     {
-      title: "Crypto Projects",
+      title: "Cripto Projects",
       icon: <BadgeCent />,
-      path: "/admin/iq-crypto",
+      path: "/admin/cripto",
     },
     {
       title: "Trade Ideas",
@@ -1436,7 +1447,7 @@ export const sideMenus = {
     {
       title: "Social Buzz",
       icon: <MessageCircleMore />,
-      path: "/admin/iq-social",
+      path: "/admin/cripto-social",
     },
     {
       title: "Tickets",

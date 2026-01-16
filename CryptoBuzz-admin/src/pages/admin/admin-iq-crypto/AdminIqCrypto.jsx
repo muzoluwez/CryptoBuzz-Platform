@@ -26,7 +26,7 @@ import DeleteAdminIqCrypto from "./DeleteAdminIqCrypto";
 import CreateAdminIqCrypto from "./CreateAdminIqCrypto";
 import ViewAdminIqCrypto from "./ViewAdminIqCrypto";
 
-const AdminIqCrypto = ({ title = "Crypto Projects" }) => {
+const AdminIqCrypto = ({ title = "Cripto Projects" }) => {
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [selectedRow, setSelectedRow] = useState({});
@@ -267,7 +267,7 @@ const AdminIqCrypto = ({ title = "Crypto Projects" }) => {
       <>
         <Toolbar>
           <ToolbarHeading>
-            <ToolbarPageTitle text="Crypto Projects" />
+            <ToolbarPageTitle text="Cripto Projects" />
             <ToolbarDescription>
               Generate, analyze, and execute profitable trading opportunities
               with smart insights, market trends, and data-driven strategies
@@ -276,7 +276,7 @@ const AdminIqCrypto = ({ title = "Crypto Projects" }) => {
           <ToolbarActions>
             <div className="text-end ">
               <button className="btn btn-primary" onClick={handleClickOpen}>
-                Create Crypto Project
+                Create Cripto Project
               </button>
             </div>
           </ToolbarActions>

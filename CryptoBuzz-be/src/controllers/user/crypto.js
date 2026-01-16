@@ -54,9 +54,23 @@ export const getCryptos = asyncHandler(async (req, res) => {
             .limit(limitNum)
             .populate("category", "_id name")
             .populate("createdBy", "_id first_name last_name image")
+            .populate("plans", "name price description hotmartCheckoutCode hotmartCheckoutUrl")
             .lean(),
         Crypto.countDocuments(query)
     ]);
+
+    const formattedCryptos = cryptos.map(crypto => ({
+        _id: crypto._id,
+        title: crypto.title,
+        description: crypto.description,
+        url: crypto.url,
+        photos: crypto.photos,
+        accessType: crypto.accessType,
+        plans: crypto.plans || [], // Include populated plans
+        createdAt: crypto.createdAt,
+        category: crypto.category,
+        createdBy: crypto.createdBy
+    }));
 
     const pagination = {
         totalRecords,
@@ -65,7 +79,7 @@ export const getCryptos = asyncHandler(async (req, res) => {
         limit: limitNum
     };
 
-    return res.status(200).json(GetApiResponse(200, cryptos, pagination, "Crypto analysis fetched successfully"));
+    return res.status(200).json(GetApiResponse(200, formattedCryptos, pagination, "Crypto analysis fetched successfully"));
 });
 
 export default { getCryptos };

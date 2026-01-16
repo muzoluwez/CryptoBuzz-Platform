@@ -10,6 +10,8 @@ import EducatorRoute from "./educator.routes.js";
 import KpiRoute from "./kpi.routes.js";
 import TicketRoute from "./ticket.routes.js";
 import RatingRoute from "./rating.routes.js";
+import PlanRoute from "./plan.routes.js";
+import PurchaseRoute from "./purchase.routes.js";
 
 
 router.use("/auth", AuthRoute);
@@ -21,6 +23,8 @@ router.use("/educator", EducatorRoute);
 router.use("/kpi", KpiRoute);
 router.use("/ticket", TicketRoute);
 router.use("/rating", RatingRoute);
+router.use("/plan", PlanRoute);
+router.use("/purchase", PurchaseRoute);
 
 export default router;
 

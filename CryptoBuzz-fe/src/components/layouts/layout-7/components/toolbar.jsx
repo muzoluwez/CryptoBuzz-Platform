@@ -80,8 +80,8 @@ function ToolbarHeading({ title = '', description = '' }) {
 
   // Update document title so browser tab shows the page name instead of URL
   useEffect(() => {
-    const pageTitle = title || item?.title || 'CryptoBuzz';
-    document.title = `${pageTitle} - CryptoBuzz`;
+    const pageTitle = title || item?.title || 'Cripto Buzz';
+    document.title = `${pageTitle} - Cripto Buzz`;
   }, [title, item?.title]);
 
   return (

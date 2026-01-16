@@ -3,17 +3,24 @@ import ImageViewer from '@/components/common/ImageViewer';
 import ImageCarousel from '@/components/common/ImageCarousel';
 import { useGetTradeAnalysisQuery } from '@/store/client/clientTradeAnalysisApiSlice';
 import { Lock } from 'lucide-react';
+import { toast } from 'sonner';
 import {
   convertRtkEditorToDisplayFormat,
   convertRtkEditorToFormattedPlainText,
 } from '@/lib/rtkEditorUtils';
-import { useAccessControl } from '@/hooks/use-access-control';
+import { useNavigate } from 'react-router-dom';
+import { checkAccess } from '@/utils/accessControl';
+import { CourseLockOverlay } from '@/components/payment/CourseLockOverlay';
+import { PlanSelectionModal } from '@/components/payment/PlanSelectionModal';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
-import { AccessGate } from '@/components/common/AccessGate';
 import ViewInsightModel from '@/components/models/ViewInsightModel';
+import { useSelector } from 'react-redux';
+import { selectCurrentUser, selectIsAuthenticated } from '@/store/authSlice';
+import { useGetPurchasedPlanIdsQuery } from '@/store/client/clientPaymentApiSlice';
+
 import {
   Toolbar,
   ToolbarHeading,
@@ -22,12 +29,31 @@ import useDocumentTitle from '../../../hooks/use-document-title';
 
 export default function InsightPage() {
   useDocumentTitle('Insights');
-  const { checkAccess } = useAccessControl();
-
-  // ------------------- STATE -------------------
+  const [hoveredInsightId, setHoveredInsightId] = useState(null);
   const [selectedInsight, setSelectedInsight] = useState(null);
   const [selectedImage, setSelectedImage] = useState(null);
   const [activeTab, setActiveTab] = useState('All');
+  const [showPlanModal, setShowPlanModal] = useState(false);
+  const [selectedContentForPurchase, setSelectedContentForPurchase] = useState(null);
+  const navigate = useNavigate();
+
+  // Access control hooks - called at component level
+  const isAuthenticated = useSelector(selectIsAuthenticated);
+  const user = useSelector(selectCurrentUser);
+  const { data: purchasedPlansData } = useGetPurchasedPlanIdsQuery(undefined, {
+    skip: !isAuthenticated,
+  });
+
+  const purchasedPlanIds = useMemo(() => {
+    if (!purchasedPlansData?.data?.planIds) return new Set();
+    return new Set(purchasedPlansData.data.planIds);
+  }, [purchasedPlansData]);
+
+  const userUid = useMemo(() => {
+    if (!user) return null;
+    return user.uid || user.credential?.uid || null;
+  }, [user]);
+
 
   // ------------------- API CALL -------------------
   const { data, isLoading, error } = useGetTradeAnalysisQuery({
@@ -51,21 +77,21 @@ export default function InsightPage() {
       // Format date
       const date = insight?.createdAt
         ? new Date(insight.createdAt).toLocaleString('en-US', {
-            month: 'short',
-            day: '2-digit',
-            year: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit',
-            hour12: true,
-          })
+          month: 'short',
+          day: '2-digit',
+          year: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit',
+          hour12: true,
+        })
         : new Date().toLocaleString('en-US', {
-            month: 'short',
-            day: '2-digit',
-            year: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit',
-            hour12: true,
-          });
+          month: 'short',
+          day: '2-digit',
+          year: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit',
+          hour12: true,
+        });
 
       // Get formatted plain text - converts HTML and \r\n to proper plain text
       const plainTextDescription = insight?.description
@@ -112,7 +138,9 @@ export default function InsightPage() {
         image: image,
         avatar: avatar,
         accessType: insight.accessType || 'PUBLIC',
-        allowedPlans: insight.allowedPlans || [],
+        tier: insight.accessType || 'PUBLIC', // Use tier for unified access control
+        plans: insight.plans || insight.allowedPlans || [], // Support both new (plans) and old (allowedPlans) format
+        allowedPlans: insight.allowedPlans || [], // Keep for backward compatibility
         url: insight.url,
         data: insight.data,
         photos: insight.photos || [],
@@ -186,10 +214,9 @@ export default function InsightPage() {
                 className={`
                   px-4 py-2 text-sm font-medium rounded-lg
                   transition cursor-pointer
-                  ${
-                    activeTab === tab
-                      ? 'bg-yellow-500 text-white shadow'
-                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700'
+                  ${activeTab === tab
+                    ? 'bg-yellow-500 text-white shadow'
+                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700'
                   }
                 `}
               >
@@ -211,98 +238,228 @@ export default function InsightPage() {
             )}
 
             {filteredInsights.map((insight) => {
-              const { hasAccess } = checkAccess({
-                accessType: insight.accessType,
-                allowedPlans: insight.allowedPlans,
+              // Compute access control using utility function (not hook) inside map
+              const tier = insight?.tier || insight?.accessType || "PUBLIC";
+              const contentPlans = (insight?.plans || insight?.allowedPlans || []).map(p => (p?._id || p)?.toString()).filter(Boolean);
+
+              // Check if user has purchased any plan associated with this content
+              const hasPurchase = tier === "PRO" && contentPlans.length > 0 && purchasedPlanIds.size > 0
+                ? contentPlans.some(planId => purchasedPlanIds.has(planId))
+                : false;
+
+              // Use checkAccess utility function (not hook)
+              const { hasAccess, showLock, lockReason, lockMessage } = checkAccess({
+                tier,
+                isAuthenticated,
+                userUid,
+                hasPurchase,
+                isPremium: tier === "PRO",
               });
 
-              return (
-                <Card
-                  key={insight?._id || insight?.id}
-                  className="bg-card border border-border overflow-hidden"
-                >
-                  {/* image */}
-                  <div className="w-full h-44 overflow-hidden relative">
-                    {!hasAccess && (
-                      <div className="absolute inset-0 bg-black/40 backdrop-blur-[2px] flex items-center justify-center z-30 pointer-events-none">
-                        <Lock className="w-8 h-8 text-white/80" />
-                      </div>
-                    )}
-                    <ImageCarousel
-                      images={
-                        insight?.photos && Array.isArray(insight.photos) && insight.photos.length > 0
-                          ? insight.photos
-                          : insight?.image
-                          ? [insight.image]
-                          : []
+              const isLocked = showLock && !hasAccess;
+
+              // Handle purchase action (only called when user is authenticated)
+              const handlePurchase = () => {
+                if (tier === 'PRO' && isAuthenticated) {
+                  // Debug: Log the insight object to see what we're working with
+                  console.log('Insight object for purchase:', insight);
+                  console.log('Plans from insight:', insight.plans);
+
+                  // Get plans from the content item
+                  // Plans can come as an array of objects (populated) or array of IDs (not populated)
+                  const rawPlans = insight?.plans || insight?.allowedPlans || [];
+                  console.log('Raw plans array:', rawPlans);
+
+                  // Filter out null/undefined and map to proper format
+                  const contentPlans = rawPlans
+                    .filter(p => p && (p._id || p))
+                    .map(p => {
+                      // If p is just an ID string, return null (we'd need to fetch it, but for now skip)
+                      if (typeof p === 'string') {
+                        console.warn('Plan is a string ID, not populated:', p);
+                        return null;
                       }
-                      alt={insight?.title || "Trade insight"}
-                      height="h-44"
-                      showViewButton={hasAccess}
-                      className={!hasAccess ? "blur-sm pointer-events-none" : ""}
-                    />
-                  </div>
+                      // If p is an object with _id, it's populated
+                      return {
+                        _id: p._id || p,
+                        name: p.name || 'Plan',
+                        description: p.description || '',
+                        price: p.price || 0,
+                        hotmartCheckoutUrl: p.hotmartCheckoutUrl || '',
+                      };
+                    })
+                    .filter(Boolean); // Remove null entries
 
-                  <CardContent className="p-4">
-                    {/* Author */}
-                    <div className="flex items-center gap-3">
-                      <Avatar className="h-10 w-10">
-                        <AvatarImage
-                          src={insight?.avatar}
-                          alt={insight?.author || "Author"}
+                  console.log('Processed content plans:', contentPlans);
+
+                  if (contentPlans.length === 0) {
+                    toast.error('No plans available for this content');
+                    console.error('No valid plans found. Raw plans:', rawPlans);
+                    return;
+                  }
+
+                  // If multiple plans, show selection modal
+                  if (contentPlans.length > 1) {
+                    setSelectedContentForPurchase({
+                      id: insight?._id,
+                      title: insight?.title,
+                      plans: contentPlans,
+                      contentType: 'insight',
+                    });
+                    setShowPlanModal(true);
+                  } else {
+                    // Single plan - redirect directly to checkout
+                    const plan = contentPlans[0];
+                    if (plan.hotmartCheckoutUrl) {
+                      window.location.href = plan.hotmartCheckoutUrl;
+                    } else {
+                      toast.error('Checkout URL not available for this plan');
+                    }
+                  }
+                }
+              };
+
+              return (
+                <div
+                  className="relative h-full"
+                  key={insight?._id || insight?.id}
+                >
+                  <Card
+                    className="bg-card border border-border overflow-hidden h-full"
+                  >
+
+                    {/* image */}
+                    <div className="w-full h-44 overflow-hidden relative">
+                      <div className={isLocked ? 'blur-md' : ''}>
+                        <ImageCarousel
+                          images={
+                            insight?.photos && Array.isArray(insight.photos) && insight.photos.length > 0
+                              ? insight.photos
+                              : insight?.image
+                                ? [insight.image]
+                                : []
+                          }
+                          alt={insight?.title || "Trade insight"}
+                          height="h-44"
+                          showViewButton={hasAccess}
                         />
-                        <AvatarFallback>{insight?.author?.[0] || "A"}</AvatarFallback>
-                      </Avatar>
+                      </div>
+                    </div>
 
-                      <div className="flex-1">
-                        <div className="flex items-center justify-between">
-                          <div>
-                            <p className="text-sm font-medium truncate">
-                              {insight?.author || "Unknown"}
-                            </p>
-                            <p className="text-xs text-muted-foreground">
-                              {insight?.date || ""}
-                            </p>
+                    <CardContent className="p-4">
+                      {/* Author */}
+                      <div className="flex items-center gap-3">
+                        <Avatar className="h-10 w-10">
+                          <AvatarImage
+                            src={insight?.avatar}
+                            alt={insight?.author || "Author"}
+                          />
+                          <AvatarFallback>{insight?.author?.[0] || "A"}</AvatarFallback>
+                        </Avatar>
+
+                        <div className="flex-1">
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <p className="text-sm font-medium truncate">
+                                {insight?.author || "Unknown"}
+                              </p>
+                              <p className="text-xs text-muted-foreground">
+                                {insight?.date || ""}
+                              </p>
+                            </div>
+                            <Badge>{insight?.category || ""}</Badge>
                           </div>
-                          <Badge>{insight?.category || ""}</Badge>
                         </div>
                       </div>
+
+                      {/* Title */}
+                      <h3 className="mt-4 text-lg font-bold text-primary">
+                        {insight?.title || "Untitled"}
+                      </h3>
+
+                      {/* Preview - 2 lines max */}
+                      <p className="mt-2 text-sm text-muted-foreground line-clamp-2">
+                        {isLocked ? `${(insight?.preview || "").substring(0, 8)}******` : (insight?.preview || "")}
+                      </p>
+
+                      {/* Button - Only show when not locked */}
+                      {!isLocked && (
+                        <div className="mt-4">
+                          <Button
+                            onClick={() => setSelectedInsight(insight)}
+                            className="w-full bg-yellow-600 text-white hover:bg-yellow-700"
+                          >
+                            View Details
+                          </Button>
+                        </div>
+                      )}
+                    </CardContent>
+
+                    {!isLocked && (
+                      <CardFooter className="p-4">
+                        <div className="text-sm text-muted-foreground">
+                          Published • {insight?.date?.split(',')?.[0] || ""}
+                        </div>
+                      </CardFooter>
+                    )}
+                  </Card>
+
+                  {/* Full Card Lock Overlay */}
+                  {isLocked && (
+                    <div className="absolute inset-0 z-40 rounded-lg overflow-hidden">
+                      <CourseLockOverlay
+                        tier={tier}
+                        lockReason={lockReason}
+                        lockMessage={lockMessage}
+                        onPurchase={handlePurchase}
+                        contentType="Insight"
+                      />
                     </div>
+                  )}
 
-                    {/* Title */}
-                    <h3 className="mt-4 text-lg font-bold text-primary">
-                      {insight?.title || "Untitled"}
-                    </h3>
-
-                    {/* Preview - 2 lines max */}
-                    <p className="mt-2 text-sm text-muted-foreground line-clamp-2">
-                      {hasAccess
-                        ? insight?.preview || ""
-                        : 'This content is locked. Upgrade your plan or log in to view full insights.'}
-                    </p>
-
-                    {/* Button */}
-                    <div className="mt-4">
-                      <Button
-                        onClick={() => setSelectedInsight(insight)}
-                        className="w-full bg-yellow-600 text-white hover:bg-yellow-700"
-                      >
-                        {hasAccess ? 'View Details' : 'Unlock Insight'}
-                      </Button>
+                  {/* Hover Overlay with Message */}
+                  {!hasAccess && hoveredInsightId === insight._id && (
+                    <div
+                      className="absolute inset-0 bg-black/70 flex items-center justify-center z-50 rounded-xl cursor-pointer transition-opacity animate-in fade-in duration-200"
+                      onClick={() => navigate('/login')}
+                    >
+                      <div className="text-center text-white p-6">
+                        <Lock className="w-12 h-12 mx-auto mb-4" />
+                        <h3 className="text-xl font-semibold mb-2">
+                          Login Required
+                        </h3>
+                        <p className="text-sm opacity-90">
+                          Please login to view insights
+                        </p>
+                      </div>
                     </div>
-                  </CardContent>
+                  )}
+                </div>
 
-                  <CardFooter className="p-4">
-                    <div className="text-sm text-muted-foreground">
-                      Published • {insight?.date?.split(',')?.[0] || ""}
-                    </div>
-                  </CardFooter>
-                </Card>
               );
             })}
           </div>
         )}
       </div>
+
+      {/* Plan Selection Modal */}
+      {selectedContentForPurchase && (
+        <PlanSelectionModal
+          open={showPlanModal}
+          onOpenChange={setShowPlanModal}
+          courseId={selectedContentForPurchase.id} // Reusing courseId prop name for compatibility
+          courseTitle={selectedContentForPurchase.title}
+          plans={selectedContentForPurchase.plans}
+          useDirectPlanCheckout={true} // Use plan's checkout URL directly (non-course content)
+          onPurchaseSuccess={() => {
+            setShowPlanModal(false);
+            setSelectedContentForPurchase(null);
+          }}
+          onPurchaseError={() => {
+            setShowPlanModal(false);
+          }}
+        />
+      )}
 
       {/* ------------------- MODAL ------------------- */}
       <ViewInsightModel
@@ -318,10 +475,10 @@ export default function InsightPage() {
           selectedInsight?.photos && Array.isArray(selectedInsight.photos) && selectedInsight.photos.length > 0
             ? selectedInsight.photos
             : selectedInsight?.image
-            ? [selectedInsight.image]
-            : selectedImage
-            ? [selectedImage]
-            : []
+              ? [selectedInsight.image]
+              : selectedImage
+                ? [selectedImage]
+                : []
         }
         isOpen={!!selectedImage}
         onClose={() => setSelectedImage(null)}

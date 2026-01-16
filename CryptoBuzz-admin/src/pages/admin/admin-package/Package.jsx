@@ -146,7 +146,7 @@ const Package = () => {
             </span>
           );
         },
-        meta: { headerClassName: "min-w-[220px]" },
+        meta: { headerClassName: "min-w-[310px]" },
       },
       {
         accessorKey: "allowedSideBar",

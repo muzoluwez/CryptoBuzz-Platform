@@ -11,7 +11,7 @@ import {
   MoveLeft,
 } from 'lucide-react';
 import { useDispatch, useSelector } from 'react-redux';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 // import { KeenIcon } from "components";
 
 import { toast } from 'sonner';
@@ -27,14 +27,18 @@ export default function Login() {
 
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const location = useLocation();
   const user = useSelector(selectCurrentUser);
-
+  
+  // Get the 'from' location from state, or default to home
+  const from = location.state?.from?.pathname || location.state?.from || '/client/home';
+  
   // Redirect if already logged in
   useEffect(() => {
     if (user) {
-      navigate('/client/home', { replace: true });
+      navigate(from, { replace: true });
     }
-  }, [user, navigate]);
+  }, [user, navigate, from]);
 
   const formik = useFormik({
     initialValues: {
@@ -62,7 +66,8 @@ export default function Login() {
           localStorage.setItem('user', JSON.stringify(userObj));
 
           toast.success('Login successful');
-          navigate('/client/home', { replace: true });
+          // Redirect to the page user was trying to access, or home if no 'from' state
+          navigate(from, { replace: true });
         } else {
           toast.error('Login successful but no token received');
         }

@@ -9,6 +9,7 @@ import categoryRoutes from "./category.routes.js"
 import educatorRoutes from "./educator.routes.js"
 import ratingRoutes from "./rating.routes.js"
 import courseRoutes from "./course.routes.js"
+import languageRoutes from "./language.routes.js"
 
 const router = express.Router();
 
@@ -23,5 +24,6 @@ router.use("/category", categoryRoutes);
 router.use("/educator", educatorRoutes);
 router.use("/rating", ratingRoutes);
 router.use("/course", courseRoutes);
+router.use("/language", languageRoutes);
 
 export default router;

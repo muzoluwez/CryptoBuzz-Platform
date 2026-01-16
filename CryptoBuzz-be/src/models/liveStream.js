@@ -53,6 +53,19 @@ const LiveStreamSchema = new mongoose.Schema(
       type: Date,
       default: null,
     },
+
+    // Access control - same tier system as other modules
+    tier: {
+      type: String,
+      enum: ["PUBLIC", "LOGGED_IN", "UID_ONLY", "PRO"],
+      default: "PUBLIC",
+    },
+
+    // Plans array - Live Stream can belong to multiple plans (same as Courses)
+    plans: [{
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Plan",
+    }],
   },
   { timestamps: true }
 );

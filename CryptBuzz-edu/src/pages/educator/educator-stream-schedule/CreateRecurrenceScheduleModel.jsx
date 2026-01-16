@@ -20,8 +20,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-
+import { Checkbox } from "@/components/ui/checkbox";
 import { useAuthContext } from "../../../auth/useAuthContext";
+import { useFetchPlansQuery } from "../../../store/api/educator/educatorPlanApiSlice";
 import { useCreateRecurrenceScheduleMutation, useUpdateRecurrenceScheduleMutation } from "../../../store/api/educator/educatorStreamScheduleApiSlice";
 import { useGetLanguagesQuery } from "../../../store/api/educator/educatorLanguageApiSlice";
 import { useFetchCategoriesQuery } from "../../../store/api/educator/educatorAcademyCategoryApiSlice";
@@ -39,6 +40,7 @@ const CreateRecurrenceScheduleModel = forwardRef(
 
     const { data: categoryList } = useFetchCategoriesQuery();
     const { data: languagesList } = useGetLanguagesQuery();
+    const { data: plans } = useFetchPlansQuery();
 
     const [createRecurrenceSchedule] = useCreateRecurrenceScheduleMutation();
     const [updateRecurrenceSchedule] = useUpdateRecurrenceScheduleMutation();
@@ -50,7 +52,8 @@ const CreateRecurrenceScheduleModel = forwardRef(
       tags: [],
       category: "",
       language: "",
-      accessType: "PUBLIC",
+      tier: "PUBLIC",
+      plans: [],
       recurrenceRule: {
         frequency: "NONE",
         interval: 1,
@@ -63,16 +66,25 @@ const CreateRecurrenceScheduleModel = forwardRef(
 
     };
 
+    // Dynamic validation schema - allow past dates when editing
+    const isEditMode = !!selectedRow?._id;
     const createSchema = Yup.object().shape({
       title: Yup.string().required("Title is required"),
       description: Yup.string().required("Description is required"),
-      datetime: Yup.date()
-        .required("Start date is required")
-        .min(new Date(), "Start date must be in the future"),
+      datetime: isEditMode 
+        ? Yup.date().required("Start date is required") // Allow past dates when editing
+        : Yup.date()
+            .required("Start date is required")
+            .min(new Date(), "Start date must be in the future"),
       category: Yup.string().required("Category is required"),
       language: Yup.string().required("Language is required"),
       tags: Yup.array().min(1, "At least one tag is required"),
-      accessType: Yup.string().required("Access type is required"),
+      tier: Yup.string().oneOf(["PUBLIC", "LOGGED_IN", "UID_ONLY", "PRO"]).default("PUBLIC").required("Access Tier is required"),
+      plans: Yup.array().of(Yup.string()).when("tier", {
+        is: "PRO",
+        then: (schema) => schema.min(1, "At least one plan is required for PRO tier"),
+        otherwise: (schema) => schema,
+      }),
       recurrenceRule: Yup.object().shape({
         frequency: Yup.string().required(),
         interval: Yup.number()
@@ -91,23 +103,9 @@ const CreateRecurrenceScheduleModel = forwardRef(
         }),
         endDateTime: Yup.date()
           .nullable()
-          .when("endType", {
-            is: "DATE",
-            then: (schema) =>
-              schema
-                .required("End date is required")
-                .test(
-                  "is-after-start",
-                  "End date must be after start",
-                  function (value) {
-                    const { datetime } = this.options.context || {};
-                    return (
-                      !value ||
-                      !datetime ||
-                      new Date(value) > new Date(datetime)
-                    );
-                  }
-                ),
+          .when(["endType", "hasEndLimit"], {
+            is: (endType, hasEndLimit) => endType === "DATE" && hasEndLimit === true,
+            then: (schema) => schema.required("End date is required"),
             otherwise: (schema) => schema.nullable(),
           }),
       }),
@@ -117,11 +115,8 @@ const CreateRecurrenceScheduleModel = forwardRef(
       initialValues,
       enableReinitialize: true,
       validationSchema: createSchema,
-      validateOnMount: true,
-      context: {
-        datetime: initialValues.datetime,
-      },
-      onSubmit: async (values) => {
+      validateOnMount: false, // Don't validate on mount to avoid false errors
+      onSubmit: async (values, { setSubmitting, setStatus }) => {
         try {
           const { recurrenceRule } = values;
 
@@ -157,7 +152,13 @@ const CreateRecurrenceScheduleModel = forwardRef(
           formData.append("category", values.category);
           formData.append("language", values.language);
           formData.append("educator", educatorId);
-          formData.append("accessType", values.accessType || "PUBLIC");
+          formData.append("tier", values.tier || "PUBLIC");
+          // Add plans if PRO tier
+          if (values.tier === "PRO" && values.plans && values.plans.length > 0) {
+            values.plans.forEach((planId) => {
+              formData.append("plans[]", planId);
+            });
+          }
 
           values.tags.forEach((tag) => {
             formData.append("tags[]", tag);
@@ -206,8 +207,11 @@ const CreateRecurrenceScheduleModel = forwardRef(
         } catch (err) {
           console.error("API Error:", err);
           const errorMessage =
-            err?.data?.message || "An unexpected error occurred.";
+            err?.data?.message || err?.message || "An unexpected error occurred.";
+          setStatus(errorMessage);
           toast.error(errorMessage);
+        } finally {
+          setSubmitting(false);
         }
       },
     });
@@ -223,18 +227,22 @@ const CreateRecurrenceScheduleModel = forwardRef(
           tags: selectedRow?.tags || [],
           category: selectedRow?.category?._id,
           language: selectedRow?.language,
-          accessType: selectedRow?.accessType || "PUBLIC",
+          tier: selectedRow?.tier || selectedRow?.accessType || "PUBLIC", // Support both tier and accessType for compatibility
+          plans: selectedRow?.plans?.map(p => (p?._id || p)?.toString()) || [],
           recurrenceRule: {
             frequency: selectedRow?.recurrenceRuleId?.frequency || "NONE",
             interval: selectedRow?.recurrenceRuleId?.interval || 1,
             byWeekday: selectedRow?.recurrenceRuleId?.byWeekday || [],
+            // Determine hasEndLimit and endType based on what data exists
             hasEndLimit: !!(
               selectedRow?.recurrenceRuleId?.occurrences ||
               selectedRow?.recurrenceRuleId?.endDateTime
             ),
-            endType: selectedRow?.recurrenceRuleId?.endType
-              ? "OCCURRENCES"
-              : "DATE",
+            // Determine endType: prefer backend endType, or infer from data
+            // If occurrences exists, use OCCURRENCES; if endDateTime exists, use DATE
+            endType: selectedRow?.recurrenceRuleId?.endType 
+              || (selectedRow?.recurrenceRuleId?.occurrences ? "OCCURRENCES" : (selectedRow?.recurrenceRuleId?.endDateTime ? "DATE" : "OCCURRENCES"))
+              || "OCCURRENCES", // Default fallback
             occurrences: selectedRow?.recurrenceRuleId?.occurrences || 10,
             endDateTime: selectedRow?.recurrenceRuleId?.endDateTime
               ? new Date(selectedRow?.recurrenceRuleId?.endDateTime)
@@ -242,13 +250,11 @@ const CreateRecurrenceScheduleModel = forwardRef(
           },
         };
         formik.setValues(initData);
-      }
-    }, [selectedRow?._id, isOpen]);
-    useEffect(() => {
-      if (!selectedRow) {
+      } else {
+        // Reset form when switching back to create mode
         formik.resetForm();
       }
-    }, [selectedRow]);
+    }, [selectedRow?._id]);
     return (
       <Dialog
         open={isOpen}
@@ -259,7 +265,7 @@ const CreateRecurrenceScheduleModel = forwardRef(
         }}
       >
         {formik.status && <Alert variant="danger">{formik.status}</Alert>}
-        <DialogContent className="p-5 max-w-[500px]" ref={ref}>
+        <DialogContent className="p-5 max-w-[500px] max-h-[90vh] overflow-y-auto" ref={ref}>
           <DialogHeader className="pb-5 pt-0 px-0">
             <DialogTitle>
               {selectedRow?._id
@@ -439,18 +445,24 @@ const CreateRecurrenceScheduleModel = forwardRef(
               <div className="col-span-12">
                 <div className="flex flex-col gap-2">
                   <label className="form-label text-gray-900">
-                    Access Type<span className="text-danger">*</span>
+                    Access Tier<span className="text-danger">*</span>
                   </label>
 
-                  <div className="flex gap-6">
-                    {["PUBLIC", "LOGGED_IN", "UID_ONLY"].map((type) => (
+                  <div className="flex flex-wrap gap-6">
+                    {["PUBLIC", "LOGGED_IN", "UID_ONLY", "PRO"].map((type) => (
                       <label key={type} className="flex items-center gap-2 cursor-pointer">
                         <input
                           type="radio"
-                          name="accessType"
+                          name="tier"
                           value={type}
-                          checked={formik.values.accessType === type}
-                          onChange={() => formik.setFieldValue("accessType", type)}
+                          checked={formik.values.tier === type}
+                          onChange={() => {
+                            formik.setFieldValue("tier", type);
+                            // Clear plans if switching away from PRO
+                            if (type !== "PRO") {
+                              formik.setFieldValue("plans", []);
+                            }
+                          }}
                           className="radio radio-primary"
                         />
                         <span className="text-sm">{type.replace("_", " ")}</span>
@@ -458,13 +470,80 @@ const CreateRecurrenceScheduleModel = forwardRef(
                     ))}
                   </div>
 
-                  {formik.touched.accessType && formik.errors.accessType && (
+                  {formik.touched.tier && formik.errors.tier && (
                     <span role="alert" className="text-danger text-xs">
-                      {formik.errors.accessType}
+                      {formik.errors.tier}
                     </span>
                   )}
                 </div>
               </div>
+
+              {formik.values.tier === "PRO" && (
+                <div className="col-span-12">
+                  <label className="form-label text-gray-900">
+                    Payment Plans<span className="text-danger">*</span>
+                  </label>
+                  <div className={`space-y-3 p-4 border rounded-md mt-2 ${formik.errors.plans ? "border-danger" : "border-gray-300"}`}>
+                    {plans?.data?.length > 0 ? (
+                      plans.data.map((plan) => {
+                        const isSelected = formik.values.plans?.includes(plan._id);
+                        return (
+                          <div
+                            key={plan._id}
+                            className="flex items-start space-x-3 p-3 rounded-md hover:bg-gray-50 dark:hover:bg-gray-200  border border-transparent hover:border-gray-200 transition-colors"
+                          >
+                            <Checkbox
+                              id={`plan-${plan._id}`}
+                              checked={isSelected}
+                              onCheckedChange={(checked) => {
+                                const currentPlans = formik.values.plans || [];
+                                const newPlans = checked
+                                  ? [...currentPlans, plan._id]
+                                  : currentPlans.filter(id => id !== plan._id);
+                                formik.setFieldValue("plans", newPlans);
+                              }}
+                              className="mt-1"
+                            />
+                            <label
+                              htmlFor={`plan-${plan._id}`}
+                              className="flex-1 cursor-pointer"
+                            >
+                              <div className="font-medium text-gray-900">
+                                {plan.name}
+                              </div>
+                              <div className="text-sm text-gray-500">
+                                ${plan.price?.toFixed(2) || "0.00"} • {plan.hotmartCheckoutCode || "N/A"}
+                              </div>
+                              {plan.description && (
+                                <div className="text-xs text-gray-400 dark:text-gray-600 mt-1">
+                                  {plan.description}
+                                </div>
+                              )}
+                            </label>
+                          </div>
+                        );
+                      })
+                    ) : (
+                      <div className="text-sm text-gray-500 py-2">
+                        No plans found. Please contact admin to create plans.
+                      </div>
+                    )}
+                    {formik.values.plans?.length > 0 && (
+                      <div className="mt-3 pt-3 border-t text-sm text-gray-600">
+                        {formik.values.plans.length} plan{formik.values.plans.length !== 1 ? 's' : ''} selected
+                      </div>
+                    )}
+                  </div>
+                  {formik.touched.plans && formik.errors.plans && (
+                    <span className="text-danger text-xs mt-1 block">
+                      {formik.errors.plans}
+                    </span>
+                  )}
+                  <p className="text-xs text-gray-500 mt-1">
+                    Select one or more payment plans. Users who purchase any of these plans will get access to this recurring schedule.
+                  </p>
+                </div>
+              )}
               <div className="col-span-12">
                 <div className="col-span-6">
                   <div className="flex flex-col gap-1">
@@ -802,11 +881,25 @@ const CreateRecurrenceScheduleModel = forwardRef(
             </button>
             <button
               disabled={formik.isSubmitting}
-              type="submit"
-              onClick={formik.handleSubmit}
+              type="button"
+              onClick={async (e) => {
+                e.preventDefault();
+                // Validate form before submission
+                const errors = await formik.validateForm();
+                if (Object.keys(errors).length > 0) {
+                  console.error("Validation errors:", errors);
+                  // Mark all fields as touched to show errors
+                  Object.keys(errors).forEach((key) => {
+                    formik.setFieldTouched(key, true);
+                  });
+                  toast.error("Please fix the validation errors before submitting");
+                  return;
+                }
+                formik.handleSubmit(e);
+              }}
               className="btn btn-primary"
             >
-              Submit
+              {formik.isSubmitting ? "Submitting..." : "Submit"}
             </button>
           </div>
         </DialogContent>

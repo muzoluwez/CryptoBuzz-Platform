@@ -49,9 +49,23 @@ export const getInsights = asyncHandler(async (req, res) => {
             .limit(limitNum)
             .populate("category", "_id name")
             .populate("createdBy", "_id first_name last_name image")
+            .populate("plans", "name price description hotmartCheckoutCode hotmartCheckoutUrl")
             .lean(),
         TradeAnalysisModel.countDocuments(query)
     ]);
+
+    const formattedInsights = insights.map(insight => ({
+        _id: insight._id,
+        title: insight.title,
+        description: insight.description,
+        url: insight.url,
+        photos: insight.photos,
+        accessType: insight.accessType,
+        plans: insight.plans || [], // Include populated plans
+        createdAt: insight.createdAt,
+        category: insight.category,
+        createdBy: insight.createdBy
+    }));
 
     const pagination = {
         totalRecords,
@@ -60,7 +74,7 @@ export const getInsights = asyncHandler(async (req, res) => {
         limit: limitNum
     };
 
-    return res.status(200).json(GetApiResponse(200, insights, pagination, "Insights fetched successfully"));
+    return res.status(200).json(GetApiResponse(200, formattedInsights, pagination, "Insights fetched successfully"));
 });
 
 export default { getInsights };

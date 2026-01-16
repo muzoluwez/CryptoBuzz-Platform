@@ -1,14 +1,23 @@
 import React, { useMemo, useState } from 'react';
+import { useGrantAccess } from '@/context/GrantAccessContext';
 import { formatDistanceToNow } from 'date-fns';
-import { Calendar, Loader2, Lock, Play, Share2, Volume2, VolumeX  } from 'lucide-react';
+import {
+  Calendar,
+  Loader2,
+  Lock,
+  Play,
+  Share2,
+  Volume2,
+  VolumeX,
+} from 'lucide-react';
 import { useParams } from 'react-router';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
+import { LoginRequired } from '@/components/common/access-states/LoginRequired';
 import ViewCryptoModel from '../../../components/models/ViewCryptoModel';
 import ViewIdeaModel from '../../../components/models/ViewIdeaModel';
 import ViewInsightModel from '../../../components/models/ViewInsightModel';
 import { Button } from '../../../components/ui/button';
-import { useGrantAccess } from '@/context/GrantAccessContext';
 import { Card } from '../../../components/ui/card';
 import { useAuthContext } from '../../../context/AuthContext';
 import useDocumentTitle from '../../../hooks/use-document-title';
@@ -20,7 +29,12 @@ import { useGetEducatorDetailsQuery } from '../../../store/client/clientEducator
 import EducatorLiveStreamView from './EducatorLiveStreamView';
 import RatingModal from './RatingModel';
 import VideoPlayerModal from './VideoPlayerModal';
-import { LoginRequired } from '@/components/common/access-states/LoginRequired';
+import { useSelector } from 'react-redux';
+import { selectCurrentUser, selectIsAuthenticated } from '@/store/authSlice';
+import { useGetPurchasedPlanIdsQuery } from '@/store/client/clientPaymentApiSlice';
+import { checkAccess } from '@/utils/accessControl';
+import { CourseLockOverlay } from '@/components/payment/CourseLockOverlay';
+import { PlanSelectionModal } from '@/components/payment/PlanSelectionModal';
 
 export default function ViewProfile() {
   useDocumentTitle('Educator Profile');
@@ -30,7 +44,6 @@ export default function ViewProfile() {
   const [isRatingModalOpen, setIsRatingModalOpen] = useState(false);
   const [selectedRecording, setSelectedRecording] = useState(null);
   const [isVideoModalOpen, setIsVideoModalOpen] = useState(false);
-  const [showHoverMessage, setShowHoverMessage] = useState(false);
   const [isIdeaModalOpen, setIsIdeaModalOpen] = useState(false);
   const [showLoginRequired, setShowLoginRequired] = useState(false);
   const [selectedIdea, setSelectedIdea] = useState(null);
@@ -67,6 +80,32 @@ export default function ViewProfile() {
     liveFeed = [], // General Updates posts (category: "General Updates")
     analysisUpdates = [], // Analysis Updates posts (category: "Analysis Updates")
   } = educatorData;
+
+  // Access control hooks
+  const isAuthenticatedRedux = useSelector(selectIsAuthenticated);
+  const user = useSelector(selectCurrentUser);
+  const { data: purchasedPlansData } = useGetPurchasedPlanIdsQuery(
+    undefined,
+    {
+      skip: !isAuthenticatedRedux,
+      refetchOnMountOrArgChange: true,
+      refetchOnFocus: true,
+    }
+  );
+
+  const purchasedPlanIds = useMemo(() => {
+    if (!purchasedPlansData?.data?.planIds) return new Set();
+    return new Set(purchasedPlansData.data.planIds);
+  }, [purchasedPlansData]);
+
+  const userUid = useMemo(() => {
+    if (!user) return null;
+    return user.uid || user.credential?.uid || null;
+  }, [user]);
+
+  // Plan selection modal state
+  const [showPlanModal, setShowPlanModal] = useState(false);
+  const [selectedContentForPurchase, setSelectedContentForPurchase] = useState(null);
 
   // Filter to ensure correct categories are displayed in the right sections
   // Live Feed should show only "General Updates"
@@ -126,6 +165,147 @@ export default function ViewProfile() {
     }
     return educator?.name || educator?.email?.split('@')?.[0] || 'Educator';
   }, [educator]);
+
+  // Purchase handlers
+  const handleCoursePurchase = (course) => {
+    console.log('handleCoursePurchase called', { course, plans: course?.plans });
+    
+    if (!isAuthenticatedRedux) {
+      navigate('/login', { state: { from: window.location.pathname } });
+      return;
+    }
+
+    const rawPlans = course?.plans || [];
+    console.log('Raw plans from course:', rawPlans);
+    
+    const contentPlans = rawPlans
+      .filter(p => p && (p._id || p))
+      .map(p => {
+        if (typeof p === 'string') return null;
+        return {
+          _id: p._id || p,
+          name: p.name || 'Plan',
+          description: p.description || '',
+          price: p.price || 0,
+          hotmartCheckoutUrl: p.hotmartCheckoutUrl || '',
+        };
+      })
+      .filter(Boolean);
+
+    console.log('Processed content plans:', contentPlans);
+
+    if (contentPlans.length === 0) {
+      toast.error('No plans available for this content. Please assign plans in the admin panel.');
+      return;
+    }
+
+    if (contentPlans.length > 1) {
+      console.log('Multiple plans - opening plan selection modal');
+      setSelectedContentForPurchase({
+        id: course._id,
+        title: course.title,
+        plans: contentPlans,
+        contentType: 'course',
+      });
+      setShowPlanModal(true);
+    } else {
+      console.log('Single plan - redirecting to checkout');
+      const plan = contentPlans[0];
+      if (plan.hotmartCheckoutUrl) {
+        window.location.href = plan.hotmartCheckoutUrl;
+      } else {
+        toast.error('Checkout URL not available for this plan');
+      }
+    }
+  };
+
+  const handleIdeaPurchase = (idea) => {
+    if (!isAuthenticatedRedux) {
+      navigate('/login', { state: { from: window.location.pathname } });
+      return;
+    }
+
+    const rawPlans = idea?.plans || idea?.allowedPlans || [];
+    const contentPlans = rawPlans
+      .filter(p => p && (p._id || p))
+      .map(p => {
+        if (typeof p === 'string') return null;
+        return {
+          _id: p._id || p,
+          name: p.name || 'Plan',
+          description: p.description || '',
+          price: p.price || 0,
+          hotmartCheckoutUrl: p.hotmartCheckoutUrl || '',
+        };
+      })
+      .filter(Boolean);
+
+    if (contentPlans.length === 0) {
+      toast.error('No plans available for this content. Please assign plans in the admin panel.');
+      return;
+    }
+
+    if (contentPlans.length > 1) {
+      setSelectedContentForPurchase({
+        id: idea._id,
+        title: idea.name,
+        plans: contentPlans,
+        contentType: 'idea',
+      });
+      setShowPlanModal(true);
+    } else {
+      const plan = contentPlans[0];
+      if (plan.hotmartCheckoutUrl) {
+        window.location.href = plan.hotmartCheckoutUrl;
+      } else {
+        toast.error('Checkout URL not available for this plan');
+      }
+    }
+  };
+
+  const handleInsightPurchase = (insight) => {
+    if (!isAuthenticatedRedux) {
+      navigate('/login', { state: { from: window.location.pathname } });
+      return;
+    }
+
+    const rawPlans = insight?.plans || insight?.allowedPlans || [];
+    const contentPlans = rawPlans
+      .filter(p => p && (p._id || p))
+      .map(p => {
+        if (typeof p === 'string') return null;
+        return {
+          _id: p._id || p,
+          name: p.name || 'Plan',
+          description: p.description || '',
+          price: p.price || 0,
+          hotmartCheckoutUrl: p.hotmartCheckoutUrl || '',
+        };
+      })
+      .filter(Boolean);
+
+    if (contentPlans.length === 0) {
+      toast.error('No plans available for this content. Please assign plans in the admin panel.');
+      return;
+    }
+
+    if (contentPlans.length > 1) {
+      setSelectedContentForPurchase({
+        id: insight._id,
+        title: insight.title,
+        plans: contentPlans,
+        contentType: 'insight',
+      });
+      setShowPlanModal(true);
+    } else {
+      const plan = contentPlans[0];
+      if (plan.hotmartCheckoutUrl) {
+        window.location.href = plan.hotmartCheckoutUrl;
+      } else {
+        toast.error('Checkout URL not available for this plan');
+      }
+    }
+  };
 
   // Transform insight data for modal (convert objects to strings)
   const transformedSelectedInsight = useMemo(() => {
@@ -320,34 +500,7 @@ export default function ViewProfile() {
       {/* Live Stream Section */}
       <div className="grid grid-cols-12 gap-y-8 md:gap-x-8">
         <div className="col-span-12 xl:col-span-12 space-y-8 mb-8">
-          {isAuthenticated ? (
-            <EducatorLiveStreamView />
-          ) : (
-            <div
-              className="relative"
-              onMouseEnter={() => setShowHoverMessage(true)}
-              onMouseLeave={() => setShowHoverMessage(false)}
-              onClick={() => navigate('/login')}
-            >
-              {/* Banner Image and About Section */}
-              <EducatorLiveStreamView />
-
-              {/* Hover Overlay with Message */}
-              {showHoverMessage && (
-                <div className="absolute inset-0 bg-black/70 flex items-center justify-center z-10 rounded-xl cursor-pointer transition-opacity">
-                  <div className="text-center text-white p-6">
-                    <Lock className="w-12 h-12 mx-auto mb-4" />
-                    <h3 className="text-xl font-semibold mb-2">
-                      Login Required
-                    </h3>
-                    <p className="text-sm opacity-90">
-                      Please login to watch live streaming
-                    </p>
-                  </div>
-                </div>
-              )}
-            </div>
-          )}
+          <EducatorLiveStreamView />
         </div>
       </div>
 
@@ -368,44 +521,76 @@ export default function ViewProfile() {
             </div>
             <div className="grid grid-col-12 sm:grid-cols-2 gap-4">
               {courses.length > 0 ? (
-                courses.slice(0, 2).map((course) => (
-                  <div
-                    key={course?._id || course?.id}
-                    className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden hover:shadow-lg transition-shadow cursor-pointer"
-                    onClick={() => navigate('/client/academy')}
-                  >
-                    {course?.imageUrl ? (
-                      <div className="h-32 relative">
-                        <img
-                          src={course?.imageUrl}
-                          alt={course?.title || 'Course'}
-                          className="w-full h-full object-cover"
-                        />
-                      </div>
-                    ) : (
-                      <div
-                        className={`h-32 relative bg-gradient-to-br from-yellow-400 to-yellow-600`}
-                      >
-                        <div className="absolute left-0 top-0 bottom-0 w-1/2 overflow-hidden">
-                          <div className="absolute left-0 top-1/2 -translate-y-1/2 w-32 h-32 rounded-full opacity-40 -translate-x-1/2 bg-yellow-300"></div>
+                courses.slice(0, 2).map((course) => {
+                  const tier = course?.tier || 'PUBLIC';
+                  const contentPlans = (course?.plans || []).map(p => (p?._id || p)?.toString()).filter(Boolean);
+                  
+                  // Check if user has purchased any plan associated with this content
+                  const hasPurchase = tier === "PRO" && contentPlans.length > 0 && purchasedPlanIds.size > 0
+                    ? contentPlans.some(planId => purchasedPlanIds.has(planId))
+                    : false;
+                  
+                  const accessResult = checkAccess({
+                    tier,
+                    isAuthenticated: isAuthenticatedRedux,
+                    userUid,
+                    hasPurchase,
+                    isPremium: tier === "PRO",
+                  });
+
+                  return (
+                    <div
+                      key={course?._id || course?.id}
+                      className={`bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden hover:shadow-lg transition-shadow relative ${accessResult.showLock && !accessResult.hasAccess ? 'cursor-default' : 'cursor-pointer'}`}
+                      onClick={() => {
+                        if (accessResult.showLock && !accessResult.hasAccess) {
+                          return; // Don't navigate if locked
+                        }
+                        navigate('/client/academy', { state: { selectedCourse: course } });
+                      }}
+                    >
+                      {course?.imageUrl ? (
+                        <div className={`h-[250px] relative ${accessResult.showLock && !accessResult.hasAccess ? 'blur-[2px] opacity-85' : ''}`}>
+                          <img
+                            src={course?.imageUrl}
+                            alt={course?.title || 'Course'}
+                            className="w-full h-full object-cover"
+                          />
                         </div>
-                        <div className="absolute inset-0 flex items-center justify-center">
-                          <div className="text-center text-white">
-                            <p className="text-xs tracking-wider mb-1 font-semibold">
-                              {course?.category?.name || 'COURSE'}
-                            </p>
-                            <p className="text-2xl font-bold">COURSE</p>
+                      ) : (
+                        <div
+                          className={`h-32 relative bg-gradient-to-br from-yellow-400 to-yellow-600 ${accessResult.showLock && !accessResult.hasAccess ? 'blur-[2px] opacity-85' : ''}`}
+                        >
+                          <div className="absolute left-0 top-0 bottom-0 w-1/2 overflow-hidden">
+                            <div className="absolute left-0 top-1/2 -translate-y-1/2 w-32 h-32 rounded-full opacity-40 -translate-x-1/2 bg-yellow-300"></div>
+                          </div>
+                          <div className="absolute inset-0 flex items-center justify-center">
+                            <div className="text-center text-white">
+                              <p className="text-xs tracking-wider mb-1 font-semibold">
+                                {course?.category?.name || 'COURSE'}
+                              </p>
+                              <p className="text-2xl font-bold">COURSE</p>
+                            </div>
                           </div>
                         </div>
+                      )}
+                      <div className={`p-4 ${accessResult.showLock && !accessResult.hasAccess ? 'opacity-85' : ''}`}>
+                        <p className="text-sm text-gray-700 font-medium dark:text-white">
+                          {course?.title || 'Course'}
+                        </p>
                       </div>
-                    )}
-                    <div className="p-4">
-                      <p className="text-sm text-gray-700 font-medium dark:text-white">
-                        {course?.title || 'Course'}
-                      </p>
+                      {accessResult.showLock && !accessResult.hasAccess && (
+                        <CourseLockOverlay
+                          course={course}
+                          tier={tier}
+                          lockReason={accessResult.lockReason}
+                          lockMessage={accessResult.lockMessage}
+                          onPurchase={() => handleCoursePurchase(course)}
+                        />
+                      )}
                     </div>
-                  </div>
-                ))
+                  );
+                })
               ) : (
                 <p className="text-gray-500 dark:text-gray-400 col-span-2">
                   No courses available
@@ -426,63 +611,95 @@ export default function ViewProfile() {
             </div>
             <div className="grid grid-col-12 sm:grid-cols-3 gap-4">
               {ideas.length > 0 ? (
-                ideas.slice(0, 3).map((idea, index) => (
-                  <div
-                    key={idea?._id || idea?.id}
-                    className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden hover:shadow-lg transition-shadow cursor-pointer"
-                    onClick={() => {
-                      setSelectedIdea(idea);
-                      setIsIdeaModalOpen(true);
-                    }}
-                  >
-                    {idea?.image_Url ||
-                    (idea?.image && idea.image?.length > 0) ? (
-                      <div className="h-32 relative">
-                        <img
-                          src={idea?.image_Url || idea?.image?.[0]}
-                          alt={idea?.name || 'Idea'}
-                          className="w-full h-full object-cover"
-                        />
-                      </div>
-                    ) : (
-                      <div className="h-32 bg-gray-900 relative">
-                        <div className="absolute inset-0 bg-gradient-to-br from-green-500/10 to-red-500/10">
-                          <svg
-                            className="w-full h-full"
-                            viewBox="0 0 100 100"
-                            preserveAspectRatio="none"
-                          >
-                            <polyline
-                              points="0,80 20,60 40,70 60,40 80,50 100,30"
-                              fill="none"
-                              stroke={
-                                idea?.type === 'buy' ? '#22c55e' : '#ef4444'
-                              }
-                              strokeWidth="2"
-                            />
-                            <polyline
-                              points="0,70 25,55 50,60 75,35 100,40"
-                              fill="none"
-                              stroke="#ffcd0b"
-                              strokeWidth="1.5"
-                              opacity="0.5"
-                            />
-                          </svg>
+                ideas.slice(0, 3).map((idea, index) => {
+                  const tier = idea?.accessType || idea?.tier || 'PUBLIC';
+                  const contentPlans = (idea?.plans || idea?.allowedPlans || []).map(p => (p?._id || p)?.toString()).filter(Boolean);
+                  
+                  // Check if user has purchased any plan associated with this content
+                  const hasPurchase = tier === "PRO" && contentPlans.length > 0 && purchasedPlanIds.size > 0
+                    ? contentPlans.some(planId => purchasedPlanIds.has(planId))
+                    : false;
+                  
+                  const accessResult = checkAccess({
+                    tier,
+                    isAuthenticated: isAuthenticatedRedux,
+                    userUid,
+                    hasPurchase,
+                    isPremium: tier === "PRO",
+                  });
+
+                  return (
+                    <div
+                      key={idea?._id || idea?.id}
+                      className={`bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden hover:shadow-lg transition-shadow relative ${accessResult.showLock && !accessResult.hasAccess ? 'cursor-default' : 'cursor-pointer'}`}
+                      onClick={() => {
+                        if (accessResult.showLock && !accessResult.hasAccess) {
+                          return; // Don't open modal if locked
+                        }
+                        setSelectedIdea(idea);
+                        setIsIdeaModalOpen(true);
+                      }}
+                    >
+                      {idea?.image_Url ||
+                      (idea?.image && idea.image?.length > 0) ? (
+                        <div className={`h-[228px] relative ${accessResult.showLock && !accessResult.hasAccess ? 'blur-[2px] opacity-85' : ''}`}>
+                          <img
+                            src={idea?.image_Url || idea?.image?.[0]}
+                            alt={idea?.name || 'Idea'}
+                            className="w-full h-full object-cover"
+                          />
                         </div>
+                      ) : (
+                        <div className={`h-32 bg-gray-900 relative ${accessResult.showLock && !accessResult.hasAccess ? 'blur-[2px] opacity-85' : ''}`}>
+                          <div className="absolute inset-0 bg-gradient-to-br from-green-500/10 to-red-500/10">
+                            <svg
+                              className="w-full h-full"
+                              viewBox="0 0 100 100"
+                              preserveAspectRatio="none"
+                            >
+                              <polyline
+                                points="0,80 20,60 40,70 60,40 80,50 100,30"
+                                fill="none"
+                                stroke={
+                                  idea?.type === 'buy' ? '#22c55e' : '#ef4444'
+                                }
+                                strokeWidth="2"
+                              />
+                              <polyline
+                                points="0,70 25,55 50,60 75,35 100,40"
+                                fill="none"
+                                stroke="#ffcd0b"
+                                strokeWidth="1.5"
+                                opacity="0.5"
+                              />
+                            </svg>
+                          </div>
+                        </div>
+                      )}
+                      <div className={`p-4 ${accessResult.showLock && !accessResult.hasAccess ? 'opacity-85' : ''}`}>
+                        <p className="font-bold text-gray-900 dark:text-white">
+                          {idea?.name || 'Idea'}
+                        </p>
+                        <p className="text-xs text-gray-600 mt-1 dark:text-gray-300">
+                          {idea?.type ||
+                            convertRtkEditorToFormattedPlainText(
+                              idea?.description?.substring(0, 50),
+                            ) ||
+                            ''}<br />
+                        </p>
                       </div>
-                    )}
-                    <div className="p-4">
-                      <p className="font-bold text-gray-900 dark:text-white">
-                        {idea?.name || 'Idea'}
-                      </p>
-                      <p className="text-xs text-gray-600 mt-1 dark:text-gray-300">
-                        {idea?.type ||
-                          idea?.description?.substring(0, 50) ||
-                          ''}
-                      </p>
+                      {accessResult.showLock && !accessResult.hasAccess && (
+                        <CourseLockOverlay
+                          course={idea}
+                          tier={tier}
+                          lockReason={accessResult.lockReason}
+                          lockMessage={accessResult.lockMessage}
+                          onPurchase={() => handleIdeaPurchase(idea)}
+                        />
+                      )}
                     </div>
-                  </div>
-                ))
+                  );
+                })
               ) : (
                 <p className="text-gray-500 dark:text-gray-400 col-span-3">
                   No ideas available
@@ -503,58 +720,88 @@ export default function ViewProfile() {
             </div>
             <div className="grid grid-col-12 sm:grid-cols-3 gap-4">
               {insights.length > 0 ? (
-                insights.slice(0, 3).map((insight) => (
-                  <div
-                    key={insight?._id || insight?.id}
-                    className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden hover:shadow-lg transition-shadow cursor-pointer"
-                    onClick={() => {
-                      setSelectedInsight(insight);
-                      setIsInsightModalOpen(true);
-                    }}
-                  >
-                    {insight?.photos && insight.photos?.length > 0 ? (
-                      <div className="h-32 relative">
-                        <img
-                          src={insight?.photos?.[0]}
-                          alt={insight?.title || 'Insight'}
-                          className="w-full h-full object-cover"
-                        />
-                      </div>
-                    ) : (
-                      <div className="h-32 bg-gray-900 relative">
-                        <div className="absolute inset-0">
-                          <svg
-                            className="w-full h-full"
-                            viewBox="0 0 100 100"
-                            preserveAspectRatio="none"
-                          >
-                            <polyline
-                              points="0,50 20,45 40,55 60,35 80,40 100,25"
-                              fill="none"
-                              stroke="#ef4444"
-                              strokeWidth="2"
-                            />
-                            <polyline
-                              points="10,60 30,50 50,65 70,45 90,50"
-                              fill="none"
-                              stroke="#ffcd0b"
-                              strokeWidth="1.5"
-                              opacity="0.6"
-                            />
-                          </svg>
+                insights.slice(0, 3).map((insight) => {
+                  const tier = insight?.accessType || insight?.tier || 'PUBLIC';
+                  const contentPlans = (insight?.plans || insight?.allowedPlans || []).map(p => (p?._id || p)?.toString()).filter(Boolean);
+                  
+                  // Check if user has purchased any plan associated with this content
+                  const hasPurchase = tier === "PRO" && contentPlans.length > 0 && purchasedPlanIds.size > 0
+                    ? contentPlans.some(planId => purchasedPlanIds.has(planId))
+                    : false;
+                  
+                  const accessResult = checkAccess({
+                    tier,
+                    isAuthenticated: isAuthenticatedRedux,
+                    userUid,
+                    hasPurchase,
+                    isPremium: tier === "PRO",
+                  });
+
+                  return (
+                    <div
+                      key={insight?._id || insight?.id}
+                      className={`bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden hover:shadow-lg transition-shadow relative ${accessResult.showLock && !accessResult.hasAccess ? 'cursor-default' : 'cursor-pointer'}`}
+                      onClick={() => {
+                        if (accessResult.showLock && !accessResult.hasAccess) {
+                          return; // Don't open modal if locked
+                        }
+                        setSelectedInsight(insight);
+                        setIsInsightModalOpen(true);
+                      }}
+                    >
+                      {insight?.photos && insight.photos?.length > 0 ? (
+                        <div className={`h-[228px] relative ${accessResult.showLock && !accessResult.hasAccess ? 'blur-[2px] opacity-85' : ''}`}>
+                          <img
+                            src={insight?.photos?.[0]}
+                            alt={insight?.title || 'Insight'}
+                            className="w-full h-full object-cover"
+                          />
                         </div>
+                      ) : (
+                        <div className={`h-32 bg-gray-900 relative ${accessResult.showLock && !accessResult.hasAccess ? 'blur-[2px] opacity-85' : ''}`}>
+                          <div className="absolute inset-0">
+                            <svg
+                              className="w-full h-full"
+                              viewBox="0 0 100 100"
+                              preserveAspectRatio="none"
+                            >
+                              <polyline
+                                points="0,50 20,45 40,55 60,35 80,40 100,25"
+                                fill="none"
+                                stroke="#ef4444"
+                                strokeWidth="2"
+                              />
+                              <polyline
+                                points="10,60 30,50 50,65 70,45 90,50"
+                                fill="none"
+                                stroke="#ffcd0b"
+                                strokeWidth="1.5"
+                                opacity="0.6"
+                              />
+                            </svg>
+                          </div>
+                        </div>
+                      )}
+                      <div className={`p-4 ${accessResult.showLock && !accessResult.hasAccess ? 'opacity-85' : ''}`}>
+                        <p className="font-bold text-gray-900 text-sm dark:text-white">
+                          {insight?.title || 'Insight'}
+                        </p>
+                        <p className="text-xs text-gray-600 mt-2 line-clamp-2 dark:text-gray-300">
+                          {convertRtkEditorToFormattedPlainText(insight?.description?.substring(0, 50)) || ''}
+                        </p>
                       </div>
-                    )}
-                    <div className="p-4">
-                      <p className="font-bold text-gray-900 text-sm dark:text-white">
-                        {insight?.title || 'Insight'}
-                      </p>
-                      <p className="text-xs text-gray-600 mt-2 line-clamp-2 dark:text-gray-300">
-                        {insight?.description?.substring(0, 100) || ''}
-                      </p>
+                      {accessResult.showLock && !accessResult.hasAccess && (
+                        <CourseLockOverlay
+                          course={insight}
+                          tier={tier}
+                          lockReason={accessResult.lockReason}
+                          lockMessage={accessResult.lockMessage}
+                          onPurchase={() => handleInsightPurchase(insight)}
+                        />
+                      )}
                     </div>
-                  </div>
-                ))
+                  );
+                })
               ) : (
                 <p className="text-gray-500 dark:text-gray-400 col-span-3">
                   No insights available
@@ -813,6 +1060,23 @@ export default function ViewProfile() {
             />
           </div>
         </div>
+      )}
+
+      {/* Plan Selection Modal */}
+      {selectedContentForPurchase && (
+        <PlanSelectionModal
+          open={showPlanModal}
+          onOpenChange={(open) => {
+            setShowPlanModal(open);
+            if (!open) {
+              setSelectedContentForPurchase(null);
+            }
+          }}
+          plans={selectedContentForPurchase.plans}
+          courseId={selectedContentForPurchase.id}
+          courseTitle={selectedContentForPurchase.title}
+          useDirectPlanCheckout={true}
+        />
       )}
     </div>
   );

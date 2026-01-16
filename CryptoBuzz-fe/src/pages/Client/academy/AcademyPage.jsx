@@ -1,10 +1,22 @@
-import React, { useEffect, useState } from 'react';
-import { ChevronDown, Play } from 'lucide-react';
-import { useLocation } from 'react-router';
+import React, { useEffect, useState, useRef } from 'react';
+import { ChevronDown, Play, Lock } from 'lucide-react';
+import { useLocation, useNavigate } from 'react-router';
+import { useSelector } from 'react-redux';
 import { Card, CardContent } from '../../../components/ui/card';
 import useDocumentTitle from '../../../hooks/use-document-title';
 import { convertRtkEditorToFormattedPlainText } from '../../../lib/rtkEditorUtils';
 import { useGetAcademyCategoryByMainSectionQuery } from '../../../store/client/clientAcademyCategoryApiSlice';
+import { useCourseAccessFromMap } from '../../../hooks/use-batch-course-access';
+import { useBatchCourseAccess } from '../../../hooks/use-batch-course-access';
+import { CourseLockOverlay } from '../../../components/payment/CourseLockOverlay';
+import { PurchaseButton } from '../../../components/payment/PurchaseButton';
+import { PlanSelectionModal } from '../../../components/payment/PlanSelectionModal';
+import { RecommendedCourseCard } from '../../../components/payment/RecommendedCourseCard';
+import { useCreatePaymentLinkMutation, useLazyGetCoursePlansQuery } from '../../../store/client/clientPaymentApiSlice';
+import { selectCurrentToken, selectIsAuthenticated } from '../../../store/authSlice';
+import { toast } from 'sonner';
+import { selectSelectedLanguage } from '../../../store/languageSlice';
+
 
 
 // Helper function to convert video URLs to embeddable formats
@@ -62,13 +74,13 @@ const getEmbedUrl = (url) => {
   return url;
 };
 
-function CourseUI({ 
-  activeTab, 
-  setActiveTab, 
-  toggle, 
-  open, 
-  introLessons, 
-  sections, 
+function CourseUI({
+  activeTab,
+  setActiveTab,
+  toggle,
+  open,
+  introLessons,
+  sections,
   courses,
   categories = [],
   currentCourse = [],
@@ -80,7 +92,8 @@ function CourseUI({
   onCourseClick,
   onBackToVault,
   academyCourseLoading = false,
-  academyCourseFetching = false
+  academyCourseFetching = false,
+  courseAccessMap = {}
 }) {
 
   // console.log("CourseUI Rendered with lecture:", lecture, "and currentCourse:", currentCourse);
@@ -94,7 +107,165 @@ function CourseUI({
   // Video player state - sync with parent lecture state
   const [selectedVideo, setSelectedVideo] = useState(null);
   const [isVideoPlaying, setIsVideoPlaying] = useState(false);
-  
+
+  // Payment state
+  const [showPlanModal, setShowPlanModal] = useState(false);
+  const [modalPlans, setModalPlans] = useState([]); // Plans to show in modal (from query or checkout response)
+  const [createPaymentLink, { isLoading: isPurchasing }] = useCreatePaymentLinkMutation();
+
+  // Get token at component level (hooks must be at top level)
+  const authToken = useSelector(selectCurrentToken) || localStorage.getItem('token') || '';
+
+  // Get current course for access check
+  // Note: currentCourse[0] is a section, the actual course ID is in currentCourse[0].course
+  const currentCourseSection = currentCourse?.[0] || null;
+  const currentCourseId = currentCourseSection?.course || currentCourseSection?._id || null;
+
+  // Use lazy query to fetch plans only when needed
+  // This ensures we always get fresh data when purchase is clicked
+  const [triggerGetPlans, { data: plansData, isLoading: isLoadingPlans, isFetching: isFetchingPlans }] = useLazyGetCoursePlansQuery();
+
+  const plans = plansData?.data?.plans || [];
+
+  // Update modal plans when plans data changes
+  useEffect(() => {
+    if (plans.length > 0) {
+      setModalPlans(plans);
+    }
+  }, [plans]);
+
+  // Use batch access map for access checking (no individual API calls)
+  const { hasAccess, isPremium, coursePrice, courseTier, lockReason, lockMessage, showLock } = useCourseAccessFromMap(
+    currentCourseId,
+    courseAccessMap, // Use batch access map
+    currentCourseSection // Pass course section if available
+  );
+
+  // Get authentication state
+  const isAuthenticated = useSelector(selectIsAuthenticated);
+  const navigate = useNavigate();
+
+  // Handle purchase - Check authentication first, then fetch plans
+  const handlePurchase = async () => {
+    console.log('🚨🚨🚨 handlePurchase CALLED! 🚨🚨🚨');
+    console.log('Current courseId:', currentCourseId);
+
+    if (!currentCourseId) {
+      console.error('❌ No courseId!');
+      toast.error('Course ID is required');
+      return;
+    }
+
+    // For PRO courses, check authentication first
+    // If not authenticated, redirect to login
+    if (courseTier === 'PRO' && !isAuthenticated) {
+      console.log('⚠️ User not authenticated - redirecting to login');
+      navigate('/login', { state: { from: window.location.pathname } });
+      return;
+    }
+
+    console.log('✅ Purchase clicked - Fetching plans for course:', currentCourseId);
+
+    // Show loading state
+    toast.info('Loading plans...', { duration: 2000 });
+
+    // CRITICAL: Fetch plans FIRST before doing anything else
+    console.log('🔄 STEP 1: Starting plans fetch for course:', currentCourseId);
+
+    try {
+      // Use native fetch to ensure we wait for the response
+      // Use full API URL (same as RTK Query uses)
+      const apiBaseUrl = `${import.meta.env.VITE_APP_API_URL || 'http://localhost:8000'}/api/v1`;
+      const plansApiUrl = `${apiBaseUrl}/common/payment/course/${currentCourseId}/plans`;
+      console.log('📡 STEP 2: Calling plans API:', plansApiUrl, 'with token:', authToken ? 'YES' : 'NO');
+
+      const plansResponse = await fetch(plansApiUrl, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(authToken && { 'Authorization': `Bearer ${authToken}` })
+        },
+      });
+
+      console.log('📥 STEP 3: Plans API response received, status:', plansResponse.status);
+
+      if (!plansResponse.ok) {
+        const errorText = await plansResponse.text();
+        console.error('❌ Plans API failed:', plansResponse.status, errorText);
+        throw new Error(`Plans API failed: ${plansResponse.status}`);
+      }
+
+      const plansResult = await plansResponse.json();
+      console.log('📦 STEP 4: Plans API response parsed:', plansResult);
+
+      // Extract plans from the response
+      let fetchedPlans = [];
+      if (plansResult?.data?.plans) {
+        fetchedPlans = plansResult.data.plans;
+      } else if (plansResult?.plans) {
+        fetchedPlans = plansResult.plans;
+      } else if (Array.isArray(plansResult?.data)) {
+        fetchedPlans = plansResult.data;
+      }
+
+      console.log('✅ Plans extracted:', { fetchedPlans, count: fetchedPlans.length });
+
+      // Check if multiple plans
+      if (fetchedPlans.length > 1) {
+        // Multiple plans - show modal
+        console.log('✅ Multiple plans detected, opening modal', { plansCount: fetchedPlans.length, plans: fetchedPlans });
+        setModalPlans(fetchedPlans);
+        setShowPlanModal(true);
+        return; // Exit early - don't call checkout
+      }
+
+      // Even if single plan, log it
+      console.log('Single plan or no plans:', { plansCount: fetchedPlans.length, plans: fetchedPlans });
+
+      // Single plan or no plans - proceed with checkout
+      const planId = fetchedPlans.length === 1 ? fetchedPlans[0]._id : undefined;
+      const payload = planId ? { courseId: currentCourseId, planId } : currentCourseId;
+
+      console.log('💰 STEP 5: Proceeding to checkout with payload:', payload);
+      console.log('⚠️ CHECKOUT API WILL BE CALLED NOW');
+      const response = await createPaymentLink(payload).unwrap();
+
+      if (response?.data?.checkoutUrl) {
+        window.location.href = response.data.checkoutUrl;
+      } else {
+        throw new Error('Checkout URL not received');
+      }
+    } catch (error) {
+      console.error('❌ Purchase error:', error);
+      console.error('Error details:', {
+        message: error?.message,
+        data: error?.data,
+        stack: error?.stack
+      });
+
+      // If error is from plans fetch, don't proceed to checkout
+      if (error?.message?.includes('Plans API failed')) {
+        toast.error('Failed to load payment plans. Please try again.');
+        return; // Exit - don't call checkout
+      }
+
+      // If error says plan selection needed, try to get plans from error response
+      if (error?.data?.data?.requiresPlanSelection || error?.data?.data?.plans) {
+        const errorPlans = error.data.data.plans || [];
+        if (errorPlans.length > 1) {
+          setModalPlans(errorPlans);
+          setShowPlanModal(true);
+          return;
+        }
+      }
+
+      // Only show error if we haven't already handled it
+      if (!error?.message?.includes('Plans API failed')) {
+        toast.error(error?.data?.message || error?.message || 'Failed to create payment link');
+      }
+    }
+  };
+
   // Check if current category has no courses
   // Show "Coming Soon" if:
   // 1. We have an active tab
@@ -102,17 +273,17 @@ function CourseUI({
   // 3. The active tab matches the ActiveCategory from API (meaning we've fetched for this category)
   // 4. The API returned empty course array for this category
   const activeCategoryId = data?.ActiveCategory?.[0]?.categoryId;
-  const tabMatchesActiveCategory = activeTab && activeCategoryId && 
+  const tabMatchesActiveCategory = activeTab && activeCategoryId &&
     (activeTab === `${activeCategoryId}` || activeTab === activeCategoryId);
-  const hasNoCourses = tabMatchesActiveCategory && 
-    currentCourse?.length === 0 && 
+  const hasNoCourses = tabMatchesActiveCategory &&
+    currentCourse?.length === 0 &&
     (!data?.course || data?.course?.length === 0);
-  
+
   // Get video URL from lecture (prefer videoUrl, fallback to content)
   const getVideoUrl = (lecture) => {
     return lecture?.videoUrl || lecture?.content || null;
   };
-  
+
   // Reset video when switching to category with no courses
   useEffect(() => {
     if (hasNoCourses) {
@@ -129,7 +300,7 @@ function CourseUI({
       setIsVideoPlaying(false);
       return;
     }
-    
+
     const videoUrl = getVideoUrl(lecture);
     if (videoUrl) {
       setSelectedVideo({ id: lecture?._id, url: videoUrl });
@@ -140,9 +311,15 @@ function CourseUI({
       setIsVideoPlaying(false);
     }
   }, [lecture, hasNoCourses]);
-  
+
   // Handle video selection
   const handleVideoSelect = (lessonId, videoUrl) => {
+    // Prevent video selection if course is locked
+    if (showLock && !hasAccess) {
+      toast.error('Please purchase this course to access the lessons');
+      return;
+    }
+
     if (videoUrl) {
       setSelectedVideo({ id: lessonId, url: videoUrl });
       setIsVideoPlaying(true);
@@ -152,9 +329,15 @@ function CourseUI({
       }
     }
   };
-  
+
   // Handle play button click on main video area
   const handleMainVideoPlay = () => {
+    // Prevent play if course is locked
+    if (showLock && !hasAccess) {
+      toast.error('Please purchase this course to access the lessons');
+      return;
+    }
+
     // Set first lesson video as default
     const firstLesson = introLessons?.[0];
     const videoUrl = getVideoUrl(firstLesson);
@@ -162,7 +345,7 @@ function CourseUI({
       handleVideoSelect(firstLesson?.id || firstLesson?._id, videoUrl);
     }
   };
-  
+
   // Auto-select first video on mount
   useEffect(() => {
     if (!selectedVideo && introLessons?.length > 0) {
@@ -176,7 +359,7 @@ function CourseUI({
 
   return (
     <>
-      <div className="container my-6">
+      <div className="">
 
         <h1 className="text-2xl font-bold">Courses</h1>
         <p className="text-sm text-gray-500">Home / Courses / Crypto</p>
@@ -220,36 +403,64 @@ function CourseUI({
             ) : (
               <>
                 {/* Main Video Area */}
-                {isVideoPlaying && selectedVideo ? (
-                  <div className="aspect-video w-full border border-gray-200 rounded-lg overflow-hidden shadow-lg bg-black ">
-                    <iframe
-                      src={getEmbedUrl(selectedVideo?.url)}
-                      className="w-full h-full rounded-lg"
-                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                      allowFullScreen
-                      title="Video Player"
-                    />
-                  </div>
-                ) : (
-                  <div className="relative bg-gradient-to-br from-yellow-600 via-yellow-700 to-gray-800 rounded-lg overflow-hidden aspect-video shadow-lg">
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <button 
-                        onClick={handleMainVideoPlay}
-                        className="bg-white/20 backdrop-blur-sm hover:bg-white/30 transition-all rounded-xl p-6"
-                      >
-                        <Play className="w-12 h-12 text-white fill-white" />
-                      </button>
+                <div className="relative">
+                  {isVideoPlaying && selectedVideo && hasAccess ? (
+                    <div className="aspect-video w-full border border-gray-200 rounded-lg overflow-hidden shadow-lg bg-black ">
+                      <iframe
+                        src={getEmbedUrl(selectedVideo?.url)}
+                        className="w-full h-full rounded-lg"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                        allowFullScreen
+                        title="Video Player"
+                      />
                     </div>
-                    <div className="absolute inset-0 bg-black/20"></div>
-                  </div>
-                )}
+                  ) : (
+                    <div className="relative bg-gradient-to-br from-yellow-600 via-yellow-700 to-gray-800 rounded-lg overflow-hidden aspect-video shadow-lg">
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <button
+                          onClick={handleMainVideoPlay}
+                          disabled={showLock && !hasAccess}
+                          className="bg-white/20 backdrop-blur-sm hover:bg-white/30 transition-all rounded-xl p-6 disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                          <Play className="w-12 h-12 text-white fill-white" />
+                        </button>
+                      </div>
+                      <div className="absolute inset-0 bg-black/20"></div>
+
+                      {/* Show lock overlay if course is premium and not purchased */}
+                      {showLock && !hasAccess && (
+                        <CourseLockOverlay
+                          course={currentCourseSection}
+                          onPurchase={handlePurchase}
+                          isPurchasing={isPurchasing || isLoadingPlans}
+                          price={coursePrice}
+                          tier={courseTier}
+                          lockReason={lockReason}
+                          lockMessage={lockMessage}
+                          contentType="course"
+                        />
+                      )}
+                    </div>
+                  )}
+
+                  {/* Show lock overlay over video player if course is locked */}
+                  {isVideoPlaying && selectedVideo && showLock && !hasAccess && (
+                    <CourseLockOverlay
+                      course={currentCourseSection}
+                      onPurchase={handlePurchase}
+                      isPurchasing={isPurchasing || isLoadingPlans}
+                      price={coursePrice}
+                      contentType="course"
+                    />
+                  )}
+                </div>
 
                 <div className="flex items-center justify-between flex-wrap gap-4 mt-6">
                   <h2 className="text-3xl font-bold text-gray-900 dark:text-gray-200">
-                    {lecture?.title || selectedVideo 
-                      ? (introLessons?.find(l => (l?.id === selectedVideo?.id || l?._id === selectedVideo?.id))?.title || 
-                         currentCourse?.flatMap(c => c?.lectures || [])?.find(l => l?._id === selectedVideo?.id)?.title ||
-                         "Lesson Title")
+                    {lecture?.title || selectedVideo
+                      ? (introLessons?.find(l => (l?.id === selectedVideo?.id || l?._id === selectedVideo?.id))?.title ||
+                        currentCourse?.flatMap(c => c?.lectures || [])?.find(l => l?._id === selectedVideo?.id)?.title ||
+                        "Lesson Title")
                       : "Select a lesson to begin"}
                   </h2>
                   {selectedVideo && (
@@ -295,122 +506,139 @@ function CourseUI({
                 <>
                   {/* First Section (Intro Series) */}
                   {currentCourse?.length > 0 && currentCourse?.[0]?.title && (
-                <div className="mb-2">
-                  <button
-                    onClick={() => toggle(currentCourse?.[0]?.title || "Intro Series")}
-                    className="w-full flex items-center gap-3 p-3 rounded-lg transition-colors justify-between hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer"
-                  >
-                    <h3 className="font-bold text-gray-900 dark:text-gray-200">
-                      {currentCourse?.[0]?.title || "Intro Series"}
-                    </h3>
-                    <ChevronDown
-                      className={`w-5 h-5 text-gray-600 dark:text-gray-400 transition-transform
+                    <div className="mb-2">
+                      <button
+                        onClick={() => toggle(currentCourse?.[0]?.title || "Intro Series")}
+                        className="w-full flex items-center gap-3 p-3 rounded-lg transition-colors justify-between hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer"
+                      >
+                        <h3 className="font-bold text-gray-900 dark:text-gray-200">
+                          {currentCourse?.[0]?.title || "Intro Series"}
+                        </h3>
+                        <ChevronDown
+                          className={`w-5 h-5 text-gray-600 dark:text-gray-400 transition-transform
                 ${open === (currentCourse?.[0]?.title || "Intro Series") ? "rotate-180" : ""}
               `}
-                    />
-                  </button>
+                        />
+                      </button>
 
-                  {open === (currentCourse?.[0]?.title || "Intro Series") && (
-                  <div className="space-y-2">
-                    {introLessons?.map((lesson) => {
-                      const lessonId = lesson?._id || lesson?.id;
-                      const isSelected = activeLectureId === lessonId || selectedVideo?.id === lessonId;
-                      const videoUrl = lesson?.videoUrl || lesson?.content;
-                      
-                      return (
-                        <button
-                          key={lessonId}
-                          onClick={() => {
-                            if (videoUrl) {
-                              handleVideoSelect(lessonId, videoUrl);
-                            }
-                          }}
-                          className={`w-full flex items-center gap-3 p-3 rounded-lg transition-colors mt-2 ${
-                            isSelected
-                              ? "bg-yellow-400 hover:bg-yellow-500"
-                              : "bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 "
-                          }`}
-                        >
-                          <div className="w-8 h-8 rounded-full flex items-center justify-center bg-gray-900">
-                            <Play className="w-4 h-4 text-white fill-white" />
-                          </div>
+                      {open === (currentCourse?.[0]?.title || "Intro Series") && (
+                        <div className="space-y-2">
+                          {introLessons?.map((lesson) => {
+                            const lessonId = lesson?._id || lesson?.id;
+                            const isSelected = activeLectureId === lessonId || selectedVideo?.id === lessonId;
+                            const videoUrl = lesson?.videoUrl || lesson?.content;
+                            const isLocked = showLock && !hasAccess;
 
-                          <span
-                            className={`text-sm font-medium ${
-                              isSelected
-                                ? "text-gray-900"
-                                : "text-gray-700 dark:text-gray-300"
-                            }`}
-                          >
-                            {lesson?.title}
-                          </span>
-                        </button>
-                      );
-                    })}
-                  </div>
-                  )}
-                </div>
-              )}
+                            return (
+                              <button
+                                key={lessonId}
+                                onClick={() => {
+                                  if (isLocked) {
+                                    toast.error('Please purchase this course to access the lessons');
+                                    return;
+                                  }
+                                  if (videoUrl) {
+                                    handleVideoSelect(lessonId, videoUrl);
+                                  }
+                                }}
+                                disabled={isLocked}
+                                className={`w-full flex items-center gap-3 p-3 rounded-lg transition-colors mt-2 relative ${isSelected
+                                  ? "bg-yellow-400 hover:bg-yellow-500"
+                                  : "bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 "
+                                  } ${isLocked ? "opacity-60 cursor-not-allowed" : ""}`}
+                              >
+                                {isLocked && (
+                                  <div className="absolute right-2 top-2">
+                                    <Lock className="w-4 h-4 text-gray-500" />
+                                  </div>
+                                )}
+                                <div className="w-8 h-8 rounded-full flex items-center justify-center bg-gray-900">
+                                  <Play className="w-4 h-4 text-white fill-white" />
+                                </div>
 
-              {/* ----------------- OTHER ACCORDIONS ----------------- */}
-              {Object.keys(sections).map((section) => (
-                <div key={section} className="mb-2">
-
-                  {/* HEADER */}
-                  <button
-                    onClick={() => toggle(section)}
-                    className="w-full flex items-center justify-between p-3 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg transition-colors"
-                  >
-                    <span className="font-bold text-gray-900 dark:text-gray-200">
-                      {section}
-                    </span>
-
-                    <ChevronDown
-                      className={`w-5 h-5 text-gray-600 dark:text-gray-400 transition-transform ${open === section ? "rotate-180" : ""
-                        }`}
-                    />
-                  </button>
-
-                  {/* CONTENT */}
-                  {open === section && (
-                    <div className="mt-2 space-y-2">
-                      {sections?.[section]?.map((lectureItem, index) => {
-                        const lectureId = lectureItem?._id || index;
-                        const isSelected = activeLectureId === lectureId;
-                        const videoUrl = lectureItem?.videoUrl || lectureItem?.content;
-                        
-                        return (
-                          <button
-                            key={lectureId}
-                            onClick={() => {
-                              if (videoUrl) {
-                                handleVideoSelect(lectureId, videoUrl);
-                              }
-                            }}
-                            className={`w-full flex items-center gap-3 p-3 rounded-lg transition-colors ${
-                              isSelected
-                                ? "bg-yellow-400 hover:bg-yellow-500"
-                                : "bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700"
-                            }`}
-                          >
-                            <div className="w-8 h-8 rounded-full flex items-center justify-center bg-gray-900">
-                              <Play className="w-4 h-4 text-white fill-white" />
-                            </div>
-
-                            <span className={`text-sm font-medium ${
-                              isSelected
-                                ? "text-gray-900"
-                                : "text-gray-700 dark:text-gray-300"
-                            }`}>
-                              {lectureItem?.title || `Lesson ${index + 1}`}
-                            </span>
-                          </button>
-                        );
-                      })}
+                                <span
+                                  className={`text-sm font-medium flex-1 text-left ${isSelected
+                                    ? "text-gray-900"
+                                    : "text-gray-700 dark:text-gray-300"
+                                    }`}
+                                >
+                                  {lesson?.title}
+                                </span>
+                              </button>
+                            );
+                          })}
+                        </div>
+                      )}
                     </div>
                   )}
-                </div>
-              ))}
+
+                  {/* ----------------- OTHER ACCORDIONS ----------------- */}
+                  {Object.keys(sections).map((section) => (
+                    <div key={section} className="mb-2">
+
+                      {/* HEADER */}
+                      <button
+                        onClick={() => toggle(section)}
+                        className="w-full flex items-center justify-between p-3 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg transition-colors"
+                      >
+                        <span className="font-bold text-gray-900 dark:text-gray-200">
+                          {section}
+                        </span>
+
+                        <ChevronDown
+                          className={`w-5 h-5 text-gray-600 dark:text-gray-400 transition-transform ${open === section ? "rotate-180" : ""
+                            }`}
+                        />
+                      </button>
+
+                      {/* CONTENT */}
+                      {open === section && (
+                        <div className="mt-2 space-y-2">
+                          {sections?.[section]?.map((lectureItem, index) => {
+                            const lectureId = lectureItem?._id || index;
+                            const isSelected = activeLectureId === lectureId;
+                            const videoUrl = lectureItem?.videoUrl || lectureItem?.content;
+                            const isLocked = showLock && !hasAccess;
+
+                            return (
+                              <button
+                                key={lectureId}
+                                onClick={() => {
+                                  if (isLocked) {
+                                    toast.error('Please purchase this course to access the lessons');
+                                    return;
+                                  }
+                                  if (videoUrl) {
+                                    handleVideoSelect(lectureId, videoUrl);
+                                  }
+                                }}
+                                disabled={isLocked}
+                                className={`w-full flex items-center gap-3 p-3 rounded-lg transition-colors relative ${isSelected
+                                  ? "bg-yellow-400 hover:bg-yellow-500"
+                                  : "bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700"
+                                  } ${isLocked ? "opacity-60 cursor-not-allowed" : ""}`}
+                              >
+                                {isLocked && (
+                                  <div className="absolute right-2 top-2">
+                                    <Lock className="w-4 h-4 text-gray-500" />
+                                  </div>
+                                )}
+                                <div className="w-8 h-8 rounded-full flex items-center justify-center bg-gray-900">
+                                  <Play className="w-4 h-4 text-white fill-white" />
+                                </div>
+                                <span className={`text-sm font-medium flex-1 text-left ${isSelected
+                                  ? "text-gray-900"
+                                  : "text-gray-700 dark:text-gray-300"
+                                  }`}>
+                                  {lectureItem?.title || `Lesson ${index + 1}`}
+                                </span>
+                              </button>
+                            );
+                          })}
+                        </div>
+                      )}
+                    </div>
+                  ))}
                 </>
               )}
             </Card>
@@ -431,7 +659,7 @@ function CourseUI({
               </div> */}
             </div>
 
-            { (academyCourseLoading || academyCourseFetching) ? (
+            {(academyCourseLoading || academyCourseFetching) ? (
               <div className="mt-6">
                 <Card className="rounded-lg p-6 shadow-md text-center">
                   <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
@@ -439,39 +667,18 @@ function CourseUI({
                 </Card>
               </div>
             ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {courses.map((course) => {
-                return (
-                  <Card 
-                    key={course?.id || course?._id} 
-                    className="relative bg-black text-white h-[438px] p-0 overflow-hidden group cursor-pointer transition-all"
-                    onClick={() => onCourseClick?.(course)}
-                  >
-                    <CardContent className="p-0">
-                      <div className="relative h-full">
-                        <img
-                          src={course?.imageUrl || "https://images.unsplash.com/photo-1559526324-593bc073d938?q=80&w=800&auto=format&fit=crop"}
-                          alt={course?.title || "course"}
-                          className="w-full h-full object-cover transition-all duration-300"
-                          onError={(e) => {
-                            e.target.onerror = null;
-                            e.target.src = "https://placehold.co/400x225/E0BBE4/957DAD?text=Image+Error";
-                          }}
-                        />
-                        <div className="absolute left-4 bottom-4 text-white z-10">
-                          <h4 className="text-2xl font-bold">{course?.title}</h4>
-                          <p className="text-md mt-3 text-gray-200">{course?.description ? convertRtkEditorToFormattedPlainText(course.description, true) : ''}</p>
-                          <button className="text-yellow-600 hover:text-yellow-700 text-sm font-medium cursor-pointer">
-                            {course?.link || "Show more"}
-                          </button>
-                        </div>
-                      </div>
-                    </CardContent>
-                    <div className='absolute bg-gradient-black inset-0 bg-gradient-green z-0'></div>
-                  </Card>
-                )
-              })}
-            </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {courses.map((course) => {
+                  return (
+                    <RecommendedCourseCard
+                      key={course?.id || course?._id}
+                      course={course}
+                      onCourseClick={onCourseClick}
+                      accessMap={courseAccessMap}
+                    />
+                  )
+                })}
+              </div>
             )}
           </div>
         )}
@@ -488,13 +695,22 @@ function CourseUI({
           </div>
         )}
       </div>
+
+      {/* Plan Selection Modal - Always render when showPlanModal is true */}
+      <PlanSelectionModal
+        open={showPlanModal}
+        onOpenChange={setShowPlanModal}
+        courseId={currentCourseId}
+        courseTitle={currentCourseSection?.title || 'this course'}
+        plans={modalPlans.length > 0 ? modalPlans : plans}
+      />
     </>
   );
 }
 
 
 export default function AcademyPage() {
-    useDocumentTitle('Courses');
+  useDocumentTitle('Courses');
   const [activeTab, setActiveTab] = useState('');
   const [open, setOpen] = useState('');
   const [currentCourse, setCurrentCourse] = useState([]);
@@ -503,15 +719,41 @@ export default function AcademyPage() {
   const [selectedCourseId, setSelectedCourseId] = useState(null); // For API id parameter
   const [hideVault, setHideVault] = useState(false); // Hide Recommended Courses when course is clicked
   const [recommendedCourses, setRecommendedCourses] = useState([]); // Store recommended courses separately to persist across category changes
+  const [courseAccessMap, setCourseAccessMap] = useState({}); // Batch access map for all courses
+  const isCheckingAccessRef = useRef(false); // Prevent duplicate API calls
+
+  // Get token from Redux state (primary) or localStorage (fallback)
+  const tokenFromRedux = useSelector(selectCurrentToken);
 
   // URL parameter handling
-  const { search } = useLocation();
+  const { search, state } = useLocation();
   const params = new URLSearchParams(search);
   console.log("URL Params:", Object.fromEntries(params.entries()));
-  const mainSection = params.get("mainSection");
-  const language = params.get("language");
-  const categoryName = params.get("categoryId");
-  const courseId = params.get("courseId");
+  const mainSection = params?.get?.("mainSection");
+  const languageFromUrl = params?.get?.("language");
+  const categoryName = params?.get?.("categoryId");
+  const courseId = params?.get?.("courseId");
+
+  // Get selected language from Redux store
+  const selectedLanguage = useSelector(selectSelectedLanguage);
+  // Use URL language first, then Redux store language, then default to 'English'
+  const language = languageFromUrl || selectedLanguage?.name || 'English';
+
+  // Handle course passed from navigation state (from ViewProfilePage)
+  useEffect(() => {
+    if (state?.selectedCourse) {
+      const course = state?.selectedCourse;
+      const courseIdFromState = course?._id || course?.id;
+      if (courseIdFromState) {
+        // Set the course ID to trigger API call
+        setSelectedCourseId(courseIdFromState);
+        // Hide vault to show course content
+        setHideVault(true);
+        // Clear state to prevent re-triggering on re-render
+        window?.history?.replaceState?.({}, document?.title);
+      }
+    }
+  }, [state?.selectedCourse]);
 
   // API call with category and id parameters - refetches when activeTab or selectedCourseId changes
   const {
@@ -523,7 +765,7 @@ export default function AcademyPage() {
   } = useGetAcademyCategoryByMainSectionQuery(
     {
       mainSection: mainSection ? mainSection : 'Academy',
-      language: language ? language : 'English',
+      language: language,
       category: activeTab ? activeTab : activeTab || undefined,
       id: courseId ? courseId : selectedCourseId || undefined,
     },
@@ -534,7 +776,7 @@ export default function AcademyPage() {
     },
   );
 
-  console.log(academyCourseData , "academyCourseData");
+  console.log(academyCourseData, "academyCourseData");
   console.log("selectedCourseId:", selectedCourseId, "activeTab:", activeTab);
 
   // Extract data from API response
@@ -548,11 +790,11 @@ export default function AcademyPage() {
     if (data?.categories?.length > 0 && !activeTab) {
       // Priority 1: Try to select from ActiveCategory
       if (data?.ActiveCategory?.length > 0) {
-        setActiveTab(`${data.ActiveCategory[0]?.categoryId}`);
+        setActiveTab(`${data?.ActiveCategory?.[0]?.categoryId}`);
       }
       // Priority 2: Try to select from categories
       else {
-        setActiveTab(`${data.categories[0]?._id}`);
+        setActiveTab(`${data?.categories?.[0]?._id}`);
       }
     }
   }, [data?.categories, data?.ActiveCategory]);
@@ -563,7 +805,7 @@ export default function AcademyPage() {
     if (selectedCourseId && data?.course && Array.isArray(data?.course) && data?.course?.length > 0) {
       // Display the course data from API response
       setCurrentCourse(data?.course);
-      
+
       // Auto-select first lecture
       const firstCourse = data?.course?.[0];
       if (firstCourse?.lectures?.length > 0) {
@@ -571,7 +813,7 @@ export default function AcademyPage() {
         setActiveLectureId(firstLecture?._id);
         setLecture(firstLecture);
       }
-      
+
       // Set activeTab to match the course's category from API response
       // Always update activeTab based on API response when course is clicked
       const activeCategoryId = data?.ActiveCategory?.[0]?.categoryId;
@@ -660,16 +902,16 @@ export default function AcademyPage() {
   useEffect(() => {
     // Listen for visibility change to refetch when user returns to page
     const handleVisibilityChange = () => {
-      if (!document.hidden && activeTab) {
+      if (!document?.hidden && activeTab) {
         refetch();
       }
     };
 
-    document.addEventListener("visibilitychange", handleVisibilityChange);
+    document?.addEventListener?.("visibilitychange", handleVisibilityChange);
 
     // Cleanup listener on unmount
     return () => {
-      document.removeEventListener("visibilitychange", handleVisibilityChange);
+      document?.removeEventListener?.("visibilitychange", handleVisibilityChange);
     };
   }, [refetch, activeTab]);
 
@@ -726,7 +968,7 @@ export default function AcademyPage() {
   // Transform API data to match UI component expectations
   const transformIntroLessons = (courseData) => {
     if (!courseData || courseData?.length === 0) return [];
-    
+
     // Get first section's lectures as intro lessons
     const firstSection = courseData?.[0];
     if (!firstSection?.lectures || firstSection?.lectures?.length === 0) return [];
@@ -744,7 +986,7 @@ export default function AcademyPage() {
   // Transform sections data
   const transformSections = (courseData) => {
     if (!courseData || courseData?.length === 0) return {};
-    
+
     const sectionsObj = {};
     // Skip first section (it's used for intro lessons)
     courseData?.slice(1)?.forEach((section) => {
@@ -757,14 +999,14 @@ export default function AcademyPage() {
         })) || [];
       }
     });
-    
+
     return sectionsObj;
   };
 
   // Get category name for display
   const getCategoryName = (categoryId) => {
     if (!categoryId || !data) return '';
-    const category = data?.categories?.find(cat => `${cat?._id}` === `${categoryId}`);
+    const category = data?.categories?.find?.(cat => `${cat?._id}` === `${categoryId}`);
     return category?.name || categoryId;
   };
 
@@ -787,14 +1029,14 @@ export default function AcademyPage() {
 
   // Store recommended courses from initial load (don't overwrite on category change)
   useEffect(() => {
-    const newCourses = (data?.upcomingCourse && data?.upcomingCourse?.length > 0) 
-      ? data.upcomingCourse 
-      : (data?.AllCourse && data?.AllCourse?.length > 0) 
-        ? data.AllCourse 
+    const newCourses = (data?.upcomingCourse && data?.upcomingCourse?.length > 0)
+      ? data.upcomingCourse
+      : (data?.AllCourse && data?.AllCourse?.length > 0)
+        ? data.AllCourse
         : [];
 
     // Always update recommended courses when API returns new course lists (initial load or category selection)
-    if (newCourses.length > 0) {
+    if (newCourses?.length > 0) {
       setRecommendedCourses(newCourses);
     } else {
       setRecommendedCourses([]);
@@ -802,30 +1044,115 @@ export default function AcademyPage() {
   }, [data?.upcomingCourse, data?.AllCourse, activeTab]);
 
   // Get recommended courses - use stored courses or current data
-  const courses = recommendedCourses.length > 0 
-    ? recommendedCourses 
-    : (data?.upcomingCourse && data?.upcomingCourse?.length > 0) 
-      ? data.upcomingCourse 
-      : (data?.AllCourse && data?.AllCourse?.length > 0) 
-        ? data.AllCourse 
+  const courses = recommendedCourses?.length > 0
+    ? recommendedCourses
+    : (data?.upcomingCourse && data?.upcomingCourse?.length > 0)
+      ? data?.upcomingCourse
+      : (data?.AllCourse && data?.AllCourse?.length > 0)
+        ? data?.AllCourse
         : [];
+
+  // Combine recommended courses with current course for batch access check
+  const currentCourseForBatch = React.useMemo(() => {
+    const currentSection = currentCourse?.[0] || null;
+    const currentId = currentSection?.course || currentSection?._id || null;
+    return currentId ? { _id: currentId, ...currentSection } : null;
+  }, [currentCourse]);
+
+  const allCoursesForBatchCheck = React.useMemo(() => {
+    const allCourses = [...courses];
+    // Add current course if it's not already in the list
+    if (currentCourseForBatch && !allCourses.find(c => (c?._id || c?.id) === currentCourseForBatch._id)) {
+      allCourses.push(currentCourseForBatch);
+    }
+
+    // Debug logging
+    console.log('📚 All Courses for Batch Check:', {
+      recommendedCoursesCount: courses.length,
+      allCoursesCount: allCourses.length,
+      courses: allCourses.map(c => ({
+        id: c?._id || c?.id,
+        title: c?.title,
+        tier: c?.tier,
+        price: c?.price
+      }))
+    });
+
+    return allCourses;
+  }, [courses, currentCourseForBatch]);
+
+  // Batch access hook for all courses (recommended + current)
+  const { checkAccess: checkBatchAccess, courseIds } = useBatchCourseAccess(allCoursesForBatchCheck);
+
+  // Create a stable string key from courseIds for comparison
+  const courseIdsKey = React.useMemo(() => {
+    return courseIds.length > 0 ? courseIds.sort().join(',') : '';
+  }, [courseIds]);
+
+  // Batch check access when courseIds change (only when courses actually change)
+  useEffect(() => {
+    // Check token from Redux state OR localStorage/sessionStorage
+    const token = tokenFromRedux || localStorage.getItem('token') || sessionStorage.getItem('token');
+
+    // Debug logging
+    console.log('🔍 Batch Access Check Effect:', {
+      courseIds,
+      courseIdsKey,
+      coursesCount: courses.length,
+      allCoursesForBatchCheck: allCoursesForBatchCheck.length,
+      isCheckingAccessRef: isCheckingAccessRef.current,
+      hasToken: !!token,
+      tokenSource: tokenFromRedux ? 'Redux' : (localStorage.getItem('token') ? 'localStorage' : 'none')
+    });
+
+    // Prevent duplicate calls
+    if (isCheckingAccessRef.current) {
+      console.log('⏸️ Skipping batch access check - already checking');
+      return;
+    }
+
+    if (courseIds.length > 0) {
+      // Always call API - RTK Query will handle token automatically via baseQuery
+      // The API will return proper access data even if user is not authenticated (just all courses will show as locked)
+      console.log('✅ Calling batch access API with courseIds:', courseIds);
+      isCheckingAccessRef.current = true;
+      checkBatchAccess().then((accessMap) => {
+        console.log('✅ Batch access API response:', accessMap);
+        if (accessMap && Object.keys(accessMap).length > 0) {
+          setCourseAccessMap(accessMap);
+        } else {
+          console.warn('⚠️ Batch access API returned empty or invalid response');
+        }
+        isCheckingAccessRef.current = false;
+      }).catch((error) => {
+        console.error('❌ Error fetching batch access:', error);
+        isCheckingAccessRef.current = false;
+      });
+    } else {
+      console.log('⚠️ No courseIds available - clearing access map');
+      // Clear access map if no courses
+      setCourseAccessMap({});
+      isCheckingAccessRef.current = false;
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [courseIdsKey, tokenFromRedux]); // Use stable courseIdsKey instead of courseIds array
 
   // Handle course click from Recommended Courses (IQ Vault behavior)
   const handleCourseClick = (course) => {
     const courseId = course?._id || course?.id;
-    
+
     // Set the course ID for API - this will trigger API call with course ID
     // The API will return the course data and category information
     setSelectedCourseId(courseId);
-    
+
     // Hide the Vault section
     setHideVault(true);
-    
+
     // Reset course and lecture state - will be populated when API response arrives
     setCurrentCourse([]);
     setLecture(null);
     setActiveLectureId(null);
-    
+
     // Don't manually set activeTab - let the API response determine it
     // The useEffect will handle setting activeTab based on API response's ActiveCategory
   };
@@ -836,9 +1163,9 @@ export default function AcademyPage() {
     setSelectedCourseId(null);
     // Optionally reset to first category
     if (data?.ActiveCategory?.length > 0) {
-      setActiveTab(`${data.ActiveCategory[0]?.categoryId}`);
+      setActiveTab(`${data?.ActiveCategory?.[0]?.categoryId}`);
     } else if (data?.categories?.length > 0) {
-      setActiveTab(`${data.categories[0]?._id}`);
+      setActiveTab(`${data?.categories?.[0]?._id}`);
     }
     setCurrentCourse([]);
     setLecture(null);
@@ -904,6 +1231,7 @@ export default function AcademyPage() {
         hideVault={hideVault}
         academyCourseLoading={academyCourseLoading}
         academyCourseFetching={academyCourseFetching}
+        courseAccessMap={courseAccessMap}
         onCourseClick={handleCourseClick}
         onBackToVault={handleBackToVault}
         onLectureSelect={(lectureId) => {

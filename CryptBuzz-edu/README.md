@@ -1,12 +1,12 @@
-# CryptoBuzz Admin Dashboard
+# Cripto Buzz Admin Dashboard
 
-![CryptoBuzz Admin](https://placehold.co/1200x400?text=CryptoBuzz+Admin+Panel)
+![Cripto Buzz Admin](https://placehold.co/1200x400?text=CriptoBuzz+Admin+Panel)
 
-> A robust, production-ready admin dashboard for the CryptoBuzz platform, built with React, Vite, and a modern tech stack. This application manages users, educators, community feeds, and platform settings with a sleek, responsive interface.
+> A robust, production-ready admin dashboard for the Cripto Buzz platform, built with React, Vite, and a modern tech stack. This application manages users, educators, community feeds, and platform settings with a sleek, responsive interface.
 
 ## 🚀 Overview
 
-CryptoBuzz Admin is the command center for the CryptoBuzz educational platform. It provides administrators with powerful tools to oversee platform operations, manage content, and interact with the user community. Designed for performance and scalability, it leverages the latest web technologies to deliver a seamless experience.
+Cripto Buzz Admin is the command center for the Cripto Buzz educational platform. It provides administrators with powerful tools to oversee platform operations, manage content, and interact with the user community. Designed for performance and scalability, it leverages the latest web technologies to deliver a seamless experience.
 
 ## ✨ Key Features
 
@@ -58,8 +58,8 @@ Ensure you have the following installed on your machine:
 
 1.  **Clone the repository**
     ```bash
-    git clone https://github.com/your-org/CryptoBuzz-admin.git
-    cd CryptoBuzz-admin
+    git clone https://github.com/your-org/CriptoBuzz-admin.git
+    cd CriptoBuzz-admin
     ```
 
 2.  **Install dependencies**
@@ -145,4 +145,4 @@ The application uses a custom JWT (JSON Web Token) authentication provider (`JWT
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ---
-*Generated for CryptoBuzz Technologies LLP*
+*Generated for Cripto Buzz Technologies LLP*

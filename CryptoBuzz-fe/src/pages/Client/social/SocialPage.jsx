@@ -1,32 +1,55 @@
 import { useMemo, useState } from 'react';
 import { useGetSocialsQuery } from '@/store/client/clientSocialApiSlice';
 import { Button } from 'react-aria-components';
-import { Link } from 'react-router';
-import { useAccessControl } from '@/hooks/use-access-control';
+import { Link, useNavigate } from 'react-router';
+import { toast } from 'sonner';
+import { checkAccess } from '@/utils/accessControl';
+import { CourseLockOverlay } from '@/components/payment/CourseLockOverlay';
+import { PlanSelectionModal } from '@/components/payment/PlanSelectionModal';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuLabel, DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { AccessGate } from '@/components/common/AccessGate';
 import ImageCarousel from '@/components/common/ImageCarousel';
 import ImageViewer from '@/components/common/ImageViewer';
 import ShowMoreLess from '@/components/common/ShowMoreLess';
 import { Toolbar, ToolbarHeading } from '@/components/layouts/layout-7/components/toolbar';
 import { Card, CardContent, CardFooter, CardHeader, CardHeading, CardTitle, CardToolbar } from '../../../components/ui/card';
 import useDocumentTitle from '../../../hooks/use-document-title';
+import { useSelector } from 'react-redux';
+import { selectCurrentUser, selectIsAuthenticated } from '@/store/authSlice';
+import { useGetPurchasedPlanIdsQuery } from '@/store/client/clientPaymentApiSlice';
 
 
 export default function SocialPage() {
   useDocumentTitle('Social');
+  const navigate = useNavigate();
   const [sortValue, setSortValue] = useState('latest');
   const [selectedImage, setSelectedImage] = useState(null);
   const [selectedImages, setSelectedImages] = useState([]);
+  const [showPlanModal, setShowPlanModal] = useState(false);
+  const [selectedContentForPurchase, setSelectedContentForPurchase] = useState(null);
   const [filters, setFilters] = useState({
     images: false,
     videos: false,
     textPosts: false,
   });
 
-  const { checkAccess } = useAccessControl();
+  // Access control hooks - called at component level
+  const isAuthenticated = useSelector(selectIsAuthenticated);
+  const user = useSelector(selectCurrentUser);
+  const { data: purchasedPlansData } = useGetPurchasedPlanIdsQuery(undefined, {
+    skip: !isAuthenticated,
+  });
+
+  const purchasedPlanIds = useMemo(() => {
+    if (!purchasedPlansData?.data?.planIds) return new Set();
+    return new Set(purchasedPlansData.data.planIds);
+  }, [purchasedPlansData]);
+
+  const userUid = useMemo(() => {
+    if (!user) return null;
+    return user.uid || user.credential?.uid || null;
+  }, [user]);
 
   // Fetch social posts from API
   const { data, isLoading, isError, error } = useGetSocialsQuery({
@@ -79,7 +102,7 @@ export default function SocialPage() {
       const imageUrls = post?.images && Array.isArray(post.images) && post.images.length > 0
         ? post.images.map(img => img?.url || img).filter(Boolean)
         : [];
-      
+
       // Get first image for backward compatibility
       const image = imageUrls?.length > 0 ? imageUrls[0] : null;
 
@@ -105,8 +128,8 @@ export default function SocialPage() {
         (post?.shares?.length || 0);
       const views = totalViews > 0 ? formatViews(totalViews) : '0';
 
-      // Make all posts PUBLIC (free access)
-      const accessType = 'PUBLIC';
+      // Get access type from post (can be PUBLIC, LOGGED_IN, UID_ONLY, PRO)
+      const accessType = post?.tier || post?.accessType || 'PUBLIC';
 
       // Get category for host name
       const category = post?.category || 'Event';
@@ -131,7 +154,9 @@ export default function SocialPage() {
         },
         views: views,
         accessType: accessType,
-        allowedPlans: post?.allowedPlans || [],
+        tier: post?.tier || post?.accessType || 'PUBLIC', // Use tier for unified access control
+        plans: post?.plans || post?.allowedPlans || [], // Support both new (plans) and old (allowedPlans) format
+        allowedPlans: post?.allowedPlans || [], // Keep for backward compatibility
         category: category,
         hashtags: post?.hashtags || [],
         mentions: post?.mentions || [],
@@ -265,184 +290,221 @@ export default function SocialPage() {
           </DropdownMenu> */}
         </div>
         <div>
-          {posts?.map((post) => (
-            <AccessGate
-              key={post?.id || post?._id}
-              accessType={post?.accessType}
-              allowedPlans={post?.allowedPlans || []}
-              fallback={
-                <Card className="max-w-full overflow-hidden rounded-xl shadow-md mb-5 opacity-75">
-                  <CardHeader className="p-4 justify-between blur-[2px]">
-                    {/* Masked Header */}
-                    <div className="flex items-start gap-3">
-                      <Avatar className="h-10 w-10">
-                        <AvatarFallback>?</AvatarFallback>
-                      </Avatar>
-                      <div className="flex-1">
-                        <div className="h-4 w-32 bg-gray-200 rounded animate-pulse mb-2"></div>
-                        <div className="h-3 w-24 bg-gray-100 rounded animate-pulse"></div>
-                      </div>
-                    </div>
-                  </CardHeader>
-                  <CardContent className="p-4 pt-2 flex flex-col items-center justify-center min-h-[200px] gap-3">
-                    <span className="text-lg font-semibold text-gray-500">
-                      {post.accessType === 'LOGIN_REQUIRED'
-                        ? 'Login to view this post'
-                        : 'Upgrade to view this post'}
-                    </span>
-                    <Button className="bg-primary text-white" disabled>
-                      Locked Content
-                    </Button>
-                  </CardContent>
-                </Card>
+          {posts?.map((post) => {
+            // Compute access control using utility function (not hook) inside map
+            const tier = post?.tier || post?.accessType || "PUBLIC";
+            const contentPlans = (post?.plans || post?.allowedPlans || []).map(p => (p?._id || p)?.toString()).filter(Boolean);
+
+            // Check if user has purchased any plan associated with this content
+            const hasPurchase = tier === "PRO" && contentPlans.length > 0 && purchasedPlanIds.size > 0
+              ? contentPlans.some(planId => purchasedPlanIds.has(planId))
+              : false;
+
+            // Use checkAccess utility function (not hook)
+            const { hasAccess, showLock, lockReason, lockMessage } = checkAccess({
+              tier,
+              isAuthenticated,
+              userUid,
+              hasPurchase,
+              isPremium: tier === "PRO",
+            });
+
+            const isLocked = showLock && !hasAccess;
+
+            // Handle purchase action (only called when user is authenticated)
+            const handlePurchase = () => {
+              if (tier === 'PRO' && isAuthenticated) {
+                // Debug: Log the post object to see what we're working with
+                console.log('Post object for purchase:', post);
+                console.log('Plans from post:', post?.plans);
+
+                // Get plans from the content item
+                // Plans can come as an array of objects (populated) or array of IDs (not populated)
+                const rawPlans = post?.plans || [];
+                console.log('Raw plans array:', rawPlans);
+
+                // Filter out null/undefined and map to proper format
+                const contentPlans = rawPlans
+                  .filter(p => p && (p?._id || p))
+                  .map(p => {
+                    // If p is just an ID string, return null (we'd need to fetch it, but for now skip)
+                    if (typeof p === 'string') {
+                      console.warn('Plan is a string ID, not populated:', p);
+                      return null;
+                    }
+                    // If p is an object with _id, it's populated
+                    return {
+                      _id: p?._id || p,
+                      name: p?.name || 'Plan',
+                      description: p?.description || '',
+                      price: p?.price || 0,
+                      hotmartCheckoutUrl: p?.hotmartCheckoutUrl || '',
+                    };
+                  })
+                  .filter(Boolean); // Remove null entries
+
+                console.log('Processed content plans:', contentPlans);
+
+                if (contentPlans.length === 0) {
+                  toast.error('No plans available for this content');
+                  console.error('No valid plans found. Raw plans:', rawPlans);
+                  return;
+                }
+
+                // If multiple plans, show selection modal
+                if (contentPlans.length > 1) {
+                  setSelectedContentForPurchase({
+                    id: post?._id || post?.id,
+                    title: post?.content?.substring(0, 50) || 'Social Post',
+                    plans: contentPlans,
+                    contentType: 'post',
+                  });
+                  setShowPlanModal(true);
+                } else {
+                  // Single plan - redirect directly to checkout
+                  const plan = contentPlans[0];
+                  if (plan.hotmartCheckoutUrl) {
+                    window.location.href = plan.hotmartCheckoutUrl;
+                  } else {
+                    toast.error('Checkout URL not available for this plan');
+                  }
+                }
               }
-            >
-              <Card className="max-w-full overflow-hidden rounded-xl shadow-md mb-5">
-                <CardHeader className="p-4 justify-between">
-                  <div className="flex items-center gap-3">
-                    <Avatar className="h-10 w-10">
-                      <AvatarImage
-                        src={post?.author?.image}
-                        alt={post?.author?.name || 'Author'}
-                      />
-                      <AvatarFallback>
-                        {post?.author?.fallback || 'U'}
-                      </AvatarFallback>
-                    </Avatar>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center justify-between gap-3">
-                        <div className="min-w-0">
-                          <div className="text-sm font-semibold truncate">
-                            {`${post?.author?.first_name || ''} ${post?.author?.last_name || ''}`.trim() ||
-                              'Unknown Author'}{' '}
-                            <span className="text-xs font-normal text-gray-400">
-                              • {post?.author?.role || 'Educator'}
-                            </span>
-                          </div>
-                          <div className="text-xs text-gray-400 truncate">
-                            {/* {post?.time || ''} */}
+            };
+
+            return (
+              <div
+                className="relative h-full"
+                key={post?.id || post?._id}
+              >
+                <Card className={`max-w-full overflow-hidden rounded-xl shadow-md mb-5 min-h-[250px] h-full `}>
+                  <CardHeader className="p-4 justify-between">
+                    <div className="flex items-center gap-3">
+                      <Avatar className="h-10 w-10">
+                        <AvatarImage
+                          src={post?.author?.image}
+                          alt={post?.author?.name || 'Author'}
+                        />
+                        <AvatarFallback>
+                          {post?.author?.fallback || 'U'}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center justify-between gap-3">
+                          <div className="min-w-0">
+                            <div className="text-sm font-semibold truncate">
+                              {`${post?.author?.first_name || ''} ${post?.author?.last_name || ''}`.trim() ||
+                                'Unknown Author'}{' '}
+                              <span className="text-xs font-normal text-gray-400">
+                                • {post?.author?.role || 'Educator'}
+                              </span>
+                            </div>
+                            <div className="text-xs text-gray-400 truncate">
+                              {/* {post?.time || ''} */}
+                            </div>
                           </div>
                         </div>
                       </div>
                     </div>
-                  </div>
-                  {/* <CardToolbar>
-                    <Button
-                      mode="icon"
-                      variant="outline"
-                      size="sm"
-                      className="opacity-80"
-                    >
-                      <Settings />
-                    </Button>
-                  </CardToolbar> */}
-                </CardHeader>
+                  </CardHeader>
 
-                <CardContent className="p-4 pt-2">
-                  <div className="">
-                    <div className="text-sm text-gray-600 dark:text-gray-300 mt-2">
-                      {post?.content ? (
-                        <ShowMoreLess text={post.content} limit={100} />
-                      ) : (
-                        <p className="line-clamp-3">No content available.</p>
-                      )}
+                  <CardContent className={`p-4 pt-2 ${isLocked ? 'blur-md opacity-85' : ''}`}>
+                    <div className="">
+                      <div className="text-sm text-gray-600 dark:text-gray-300 mt-2">
+                        {post?.content ? (
+                          isLocked ? (
+                            <p className="line-clamp-3">{`${(post?.content || "").substring(0, 8)}******`}</p>
+                          ) : (
+                            <ShowMoreLess text={post.content} limit={100} />
+                          )
+                        ) : (
+                          <p className="line-clamp-3">No content available.</p>
+                        )}
+                      </div>
                     </div>
-                  </div>
-                  {/* Images */}
-                  {post?.images &&
-                    Array.isArray(post.images) &&
-                    post.images.length > 0 && (
-                      <div className="rounded-xl overflow-hidden h-72 relative mt-5 mb-4">
-                        <ImageCarousel
-                          images={post.images}
-                          alt={post?.content || 'Social post'}
-                          height="h-72"
-                          showViewButton={true}
-                          className="rounded-xl"
-                        />
-                        {/* <Link
-                          to="/client/viewprofile"
-                          className="absolute inset-0 z-10"
-                          onClick={(e) => e?.stopPropagation()}
-                        /> */}
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent pointer-events-none" />
-                        {/* <div className="absolute left-4 bottom-4 text-white z-20">
-                          <div className="text-xs uppercase opacity-80 tracking-wider">
-                            Hosted by
+                    {/* Images */}
+                    {post?.images &&
+                      Array.isArray(post.images) &&
+                      post.images.length > 0 && (
+                        <div className="rounded-xl overflow-hidden h-72 relative mt-5 mb-4">
+                          <div className={isLocked ? 'blur-md' : ''}>
+                            <ImageCarousel
+                              images={post.images}
+                              alt={post?.content || 'Social post'}
+                              height="h-72"
+                              showViewButton={hasAccess}
+                              className="rounded-xl"
+                            />
                           </div>
-                          <div className="text-lg font-bold text-primary">
-                            {post?.host?.name || post?.category || ''}
-                          </div>
-                          <div className="text-sm opacity-90">
-                            {post?.host?.desc || 'Social Post'}
-                          </div>
-                        </div> */}
-                      </div>
-                    )}
-                  {/* Videos */}
-                  {post?.videos &&
-                    Array.isArray(post.videos) &&
-                    post.videos.length > 0 && (
-                      <div className="rounded-xl overflow-hidden space-y-4 mb-4">
-                        {post.videos.map((video, idx) => (
-                          <div
-                            key={idx}
-                            className="relative w-full h-72 rounded-xl overflow-hidden bg-black"
-                          >
-                            <video
-                              src={video}
-                              controls
-                              className="w-full h-full object-contain"
-                              onError={(e) => {
-                                if (e?.target) {
-                                  e.target.style.display = 'none';
-                                }
-                              }}
+                          <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent pointer-events-none" />
+                        </div>
+                      )}
+                    {/* Videos */}
+                    {post?.videos &&
+                      Array.isArray(post.videos) &&
+                      post.videos.length > 0 && (
+                        <div className={`rounded-xl overflow-hidden space-y-4 mb-4 ${isLocked ? 'blur-md' : ''}`}>
+                          {post.videos.map((video, idx) => (
+                            <div
+                              key={idx}
+                              className="relative w-full h-72 rounded-xl overflow-hidden bg-black"
                             >
-                              Your browser does not support the video tag.
-                            </video>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                </CardContent>
+                              <video
+                                src={video}
+                                controls
+                                className="w-full h-full object-contain"
+                                onError={(e) => {
+                                  if (e?.target) {
+                                    e.target.style.display = 'none';
+                                  }
+                                }}
+                              >
+                                Your browser does not support the video tag.
+                              </video>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                  </CardContent>
+                </Card>
 
-                {/* <CardFooter className="p-4 pt-2 flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <Button
-                      mode="icon"
-                      variant="ghost"
-                      size="sm"
-                      className="text-gray-600 cursor-pointer hover:text-primary"
-                    >
-                      <ThumbsUpIcon />
-                    </Button>
-                    <Button
-                      mode="icon"
-                      variant="ghost"
-                      size="sm"
-                      className="text-gray-600 cursor-pointer hover:text-primary"
-                    >
-                      <MessageCircle />
-                    </Button>
-                    <Button
-                      mode="icon"
-                      variant="ghost"
-                      size="sm"
-                      className="text-gray-600 cursor-pointer hover:text-primary"
-                    >
-                      <Forward />
-                    </Button>
+                {/* Full Card Lock Overlay */}
+                {isLocked && (
+                  <div className="absolute inset-0 z-40 rounded-xl overflow-hidden">
+                    <CourseLockOverlay
+                      tier={tier}
+                      lockReason={lockReason}
+                      lockMessage={lockMessage}
+                      onPurchase={handlePurchase}
+                      contentType="Social"
+                      className="h-full"
+                    />
                   </div>
-                  <div className="text-xs text-gray-700">
-                    {post.views} views
-                  </div>
-                </CardFooter> */}
-              </Card>
-            </AccessGate>
-          ))}
+                )}
+              </div>
+            );
+          })}
         </div>
       </div>
+
+      {/* Plan Selection Modal */}
+      {selectedContentForPurchase && (
+        <PlanSelectionModal
+          open={showPlanModal}
+          onOpenChange={setShowPlanModal}
+          courseId={selectedContentForPurchase.id} // Reusing courseId prop name for compatibility
+          courseTitle={selectedContentForPurchase.title}
+          plans={selectedContentForPurchase.plans}
+          useDirectPlanCheckout={true} // Use plan's checkout URL directly (non-course content)
+          onPurchaseSuccess={() => {
+            setShowPlanModal(false);
+            setSelectedContentForPurchase(null);
+          }}
+          onPurchaseError={() => {
+            setShowPlanModal(false);
+          }}
+        />
+      )}
 
       {/* Image Viewer Modal */}
       <ImageViewer

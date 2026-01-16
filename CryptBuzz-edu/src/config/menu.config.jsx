@@ -1380,9 +1380,9 @@ export const sideMenus = {
     },
 
     {
-      title: "Crypto Projects",
+      title: "Cripto Projects",
       icon: <BadgeCent />,
-      path: "/admin/iq-crypto",
+      path: "/admin/cripto",
     },
     {
       title: "Trade Ideas",
@@ -1442,7 +1442,7 @@ export const sideMenus = {
     {
       title: "Social Buzz",
       icon: <MessageCircleMore />,
-      path: "/admin/iq-social",
+      path: "/admin/cripto-social",
     },
     {
       title: "Logs",
@@ -1510,9 +1510,9 @@ export const sideMenus = {
       path: "/educator/trade-analysis",
     },
     {
-      title: "Crypto Projects",
+      title: "Cripto Projects",
       icon: <BadgeCent />,
-      path: "/educator/iq-crypto",
+      path: "/educator/cripto",
     },
     {
       title: "Trade Ideas",
@@ -1522,7 +1522,7 @@ export const sideMenus = {
     {
       title: "Social Buzz",
       icon: <MessageCircleMore />,
-      path: "/educator/iq-social",
+      path: "/educator/cripto-social",
     },
     {
       title: "Educator Ratings",

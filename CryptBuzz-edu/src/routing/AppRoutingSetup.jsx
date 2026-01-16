@@ -97,11 +97,11 @@ const routes = {
 
     // Social Buzz - Manage community feed and social interactions
 
-    { path: "/educator/iq-social", element: <EducatorCommunityFeed /> },
+    { path: "/educator/cripto-social", element: <EducatorCommunityFeed /> },
 
     { path: "/educator/rating", element: <EducatorRating /> },
 
-    { path: "/educator/iq-crypto", element: <EducatorIqCrypto /> },
+    { path: "/educator/cripto", element: <EducatorIqCrypto /> },
 
 
 
@@ -135,7 +135,7 @@ const routes = {
 /**
  * AppRoutingSetup Component
  * 
- * Main routing configuration for the CryptoBuzz Educator application.
+ * Main routing configuration for the Cripto Buzz Educator application.
  * 
  * Features:
  * - Educator-only routes with Demo1Layout wrapper

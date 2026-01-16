@@ -25,6 +25,8 @@ const AdminRecordingSession = lazy(() => import("../pages/admin/recording/AdminR
 // Course & Academy Pages
 const Courses = lazy(() => import("../pages/admin/courses/Courses"));
 const AdminAcademyCategory = lazy(() => import("../pages/admin/academy-category/AdminAcademyCategory"));
+const AdminPlan = lazy(() => import("../pages/admin/plan/AdminPlan"));
+const AdminPurchase = lazy(() => import("../pages/admin/purchase/AdminPurchase"));
 
 // Educator Management Pages
 const Educators = lazy(() => import("../pages/admin/educators/Educators"));
@@ -102,6 +104,12 @@ const routes = {
     // Courses Category - Manage course categories
     { path: "/admin/academy-category", element: <AdminAcademyCategory /> },
 
+    // Payment Plans - Manage payment plans for courses
+    { path: "/admin/plan", element: <AdminPlan /> },
+
+    // Purchases - View all course purchase records
+    { path: "/admin/purchase", element: <AdminPurchase /> },
+
     // Stream Schedule - View and manage streaming schedules
     { path: "/admin/stream-schedule", element: <AdminStreamSchedule /> },
 
@@ -115,7 +123,7 @@ const routes = {
     { path: "admin/general-setting", element: <GeneralSetting /> },
 
     // Social Buzz - Manage community feed and social interactions
-    { path: "/admin/iq-social", element: <IqSocial /> },
+    { path: "/admin/cripto-social", element: <IqSocial /> },
 
     // KPIs - View educator performance metrics
     { path: "/admin/kpis", element: <EducatorKpi /> },
@@ -145,7 +153,7 @@ const routes = {
     },
 
     // Crypto Project - Cryptocurrency analysis and insights
-    { path: "/admin/iq-crypto", element: <AdminIqCrypto /> },
+    { path: "/admin/cripto", element: <AdminIqCrypto /> },
   ],
 };
 
@@ -156,7 +164,7 @@ const routes = {
 /**
  * AppRoutingSetup Component
  * 
- * Main routing configuration for the CryptoBuzz Admin application.
+ * Main routing configuration for the Cripto Buzz Admin application.
  * 
  * Features:
  * - Admin-only routes with Demo1Layout wrapper

@@ -8,6 +8,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Dialog,
   DialogContent,
@@ -23,6 +24,7 @@ import {
   useCreateEducatorIqCryptoMutation,
   useUpdateEducatorIqCryptoMutation,
 } from "../../../store/api/educator/educatorIqCryptoApiSlice";
+import { useFetchPlansQuery } from "../../../store/api/educator/educatorPlanApiSlice";
 const CreateEducatorIqCrypto = forwardRef(
   (
     { setSelectedRow, isCreateOpen, handleCloseCreate, selectedRow, refetch },
@@ -32,6 +34,7 @@ const CreateEducatorIqCrypto = forwardRef(
     const [createEducatorIqCrypto] = useCreateEducatorIqCryptoMutation();
     const [updateEducatorIqCrypto] = useUpdateEducatorIqCryptoMutation();
     const createdBy = auth?.user?._id ?? null;
+    const { data: plans } = useFetchPlansQuery();
 
     const initialValues = {
       title: "",
@@ -40,6 +43,7 @@ const CreateEducatorIqCrypto = forwardRef(
       description: "",
       url: "",
       accessType: "PUBLIC",
+      plans: [],
     };
 
     const createSchema = Yup.object().shape({
@@ -50,7 +54,12 @@ const CreateEducatorIqCrypto = forwardRef(
       url: Yup.string()
         .url("Please enter a valid URL")
         .optional("URL is required"),
-      accessType: Yup.string().required("Access type is required"),
+      accessType: Yup.string().oneOf(["PUBLIC", "LOGGED_IN", "UID_ONLY", "PRO"]).required("Access type is required"),
+      plans: Yup.array().of(Yup.string()).when("accessType", {
+        is: "PRO",
+        then: (schema) => schema.min(1, "At least one plan is required for PRO tier"),
+        otherwise: (schema) => schema,
+      }),
     });
 
     const formik = useFormik({
@@ -68,6 +77,12 @@ const CreateEducatorIqCrypto = forwardRef(
         formData.append("description", values.description);
         formData.append("url", values.url);
         formData.append("accessType", values.accessType ?? "PUBLIC");
+        // Add plans if PRO tier
+        if (values.accessType === "PRO" && values.plans && values.plans.length > 0) {
+          values.plans.forEach((planId) => {
+            formData.append("plans[]", planId);
+          });
+        }
         if (selectedRow?._id) {
           formData.append("id", selectedRow?._id);
         }
@@ -77,11 +92,11 @@ const CreateEducatorIqCrypto = forwardRef(
             let a = await updateEducatorIqCrypto({ id: selectedRow?._id, formData }).unwrap();
 
             refetch();
-            toast.success("Crypto Project updated successfully!");
+            toast.success("Cripto Project updated successfully!");
           } else {
             await createEducatorIqCrypto(formData).unwrap();
             refetch();
-            toast.success("Crypto Project created successfully!");
+            toast.success("Cripto Project created successfully!");
           }
           formik.resetForm();
           setSelectedRow({});
@@ -118,6 +133,7 @@ const CreateEducatorIqCrypto = forwardRef(
           url: selectedRow.url ?? "",
           createdBy: selectedRow.createdBy?._id ?? "",
           accessType: selectedRow.accessType ?? "PUBLIC",
+          plans: selectedRow?.plans?.map(p => (p?._id || p)?.toString()) || [],
         });
       } else {
         // reset when switching back to create mode
@@ -159,7 +175,7 @@ const CreateEducatorIqCrypto = forwardRef(
           <DialogContent className="p-5 max-w-[600px]" ref={ref}>
             <DialogHeader className="pb-5 pt-0 px-0">
               <DialogTitle>
-                {selectedRow?._id ? "Update Crypto Project" : " Create Crypto Project"}
+                {selectedRow?._id ? "Update Cripto Project" : " Create Cripto Project"}
               </DialogTitle>
             </DialogHeader>
             <div className="grid gap-5 px-0 pb-5">
@@ -240,15 +256,21 @@ const CreateEducatorIqCrypto = forwardRef(
                       Access Type<span className="text-danger">*</span>
                     </label>
 
-                    <div className="flex gap-6">
-                      {["PUBLIC", "LOGGED_IN", "UID_ONLY"].map((type) => (
+                    <div className="flex flex-wrap gap-6">
+                      {["PUBLIC", "LOGGED_IN", "UID_ONLY", "PRO"].map((type) => (
                         <label key={type} className="flex items-center gap-2 cursor-pointer">
                           <input
                             type="radio"
                             name="accessType"
                             value={type}
                             checked={formik.values.accessType === type}
-                            onChange={() => formik.setFieldValue("accessType", type)}
+                            onChange={() => {
+                              formik.setFieldValue("accessType", type);
+                              // Clear plans if switching away from PRO
+                              if (type !== "PRO") {
+                                formik.setFieldValue("plans", []);
+                              }
+                            }}
                             className="radio radio-primary"
                           />
                           <span className="text-sm">{type.replace("_", " ")}</span>
@@ -263,6 +285,73 @@ const CreateEducatorIqCrypto = forwardRef(
                     )}
                   </div>
                 </div>
+
+                {formik.values.accessType === "PRO" && (
+                  <div className="col-span-12">
+                    <label className="form-label text-gray-900">
+                      Payment Plans<span className="text-danger">*</span>
+                    </label>
+                    <div className={`space-y-3 p-4 border rounded-md mt-2 ${formik.errors.plans ? "border-danger" : "border-gray-300"}`}>
+                      {plans?.data?.length > 0 ? (
+                        plans.data.map((plan) => {
+                          const isSelected = formik.values.plans?.includes(plan._id);
+                          return (
+                            <div
+                              key={plan._id}
+                              className="flex items-start space-x-3 p-3 rounded-md hover:bg-gray-50 dark:hover:bg-gray-200  border border-transparent hover:border-gray-200 transition-colors"
+                            >
+                              <Checkbox
+                                id={`plan-${plan._id}`}
+                                checked={isSelected}
+                                onCheckedChange={(checked) => {
+                                  const currentPlans = formik.values.plans || [];
+                                  const newPlans = checked
+                                    ? [...currentPlans, plan._id]
+                                    : currentPlans.filter(id => id !== plan._id);
+                                  formik.setFieldValue("plans", newPlans);
+                                }}
+                                className="mt-1"
+                              />
+                              <label
+                                htmlFor={`plan-${plan._id}`}
+                                className="flex-1 cursor-pointer"
+                              >
+                                <div className="font-medium text-gray-900">
+                                  {plan.name}
+                                </div>
+                                <div className="text-sm text-gray-500">
+                                  ${plan.price?.toFixed(2) || "0.00"} • {plan.hotmartCheckoutCode || "N/A"}
+                                </div>
+                                {plan.description && (
+                                  <div className="text-xs text-gray-400 dark:text-gray-600 mt-1">
+                                    {plan.description}
+                                  </div>
+                                )}
+                              </label>
+                            </div>
+                          );
+                        })
+                      ) : (
+                        <div className="text-sm text-gray-500 py-2">
+                          No plans found. Please contact admin to create plans.
+                        </div>
+                      )}
+                      {formik.values.plans?.length > 0 && (
+                        <div className="mt-3 pt-3 border-t text-sm text-gray-600">
+                          {formik.values.plans.length} plan{formik.values.plans.length !== 1 ? 's' : ''} selected
+                        </div>
+                      )}
+                    </div>
+                    {formik.touched.plans && formik.errors.plans && (
+                      <span className="text-danger text-xs mt-1 block">
+                        {formik.errors.plans}
+                      </span>
+                    )}
+                    <p className="text-xs text-gray-500 mt-1">
+                      Select one or more payment plans. Users who purchase any of these plans will get access to this content.
+                    </p>
+                  </div>
+                )}
 
 
 
