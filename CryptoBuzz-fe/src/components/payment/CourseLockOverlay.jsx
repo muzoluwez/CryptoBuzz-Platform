@@ -69,13 +69,13 @@ export function CourseLockOverlay({
   return (
     <div
       className={cn(
-        "absolute inset-0 bg-black/25 rounded-xl z-10",
+        "absolute inset-0 bg-black/25 rounded-xl z-10 h-[305px]",
         "flex flex-col items-center justify-center",
         className
       )}
     >
       {/* Lock Icon */}
-      <div className="flex flex-col items-center justify-center space-y-4 mb-6">
+      <div className="flex flex-col items-center justify-center space-y-4 mb-6 h-[250px]">
         <div className="bg-white/10 p-3 rounded-full">
           <Lock className="w-6 h-6 text-white" />
         </div>
@@ -85,7 +85,7 @@ export function CourseLockOverlay({
           <h3 className="text-xl font-semibold text-white mb-2">
             {effectiveTier === 'PRO' ? `${contentType} Locked` : effectiveTier === 'LOGIN_REQUIRED' || effectiveTier === 'LOGGED_IN' ? 'Login Required' : effectiveTier === 'UID_ONLY' ? 'Access Restricted' : `${contentType} Locked`}
           </h3>
-          <p className="text-sm text-white/90">
+          <p className="text-sm text-white/90 line-clamp-1">
             {effectiveLockReason === 'LOGIN_REQUIRED' && tier === 'PRO'
               ? 'Please log in to purchase this course and access the content.'
               : lockMessage || (effectiveTier === 'PRO'

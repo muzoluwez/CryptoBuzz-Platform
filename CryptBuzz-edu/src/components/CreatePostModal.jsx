@@ -550,7 +550,7 @@ const CreatePostModal = ({ isOpen, onClose, editingPost = null }) => {
                           return (
                             <div
                               key={plan._id}
-                              className="flex items-center gap-3 p-2 hover:bg-gray-50 rounded cursor-pointer"
+                              className="flex items-center gap-3 p-2 hover:bg-gray-50 dark:hover:bg-gray-200 rounded cursor-pointer"
                             >
                               <Checkbox
                                 checked={isSelected}

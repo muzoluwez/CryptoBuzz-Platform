@@ -60,7 +60,8 @@ export const getCryptoAnalysis = async (req, res) => {
       createdBy: data.createdBy,
       url: data.url,
       image: Array.isArray(data.photos) ? data.photos.map(img => `${img}`) : `${data.photos}`,
-      accessType: data.accessType
+      accessType: data.accessType,
+      plans: data.plans || [] // Include populated plans
     }));
 
     const pagination = {
@@ -88,6 +89,22 @@ export const createCryptoAnalysis = async (req, res) => {
 
     const { title, description, createdBy, url, accessType } = req.body;
 
+    // Handle plans array from FormData (can come as req.body['plans[]'] or req.body.plans)
+    let plansArray = [];
+    if (req.body['plans[]']) {
+      // Multer sends arrays as 'plans[]'
+      plansArray = Array.isArray(req.body['plans[]']) 
+        ? req.body['plans[]'] 
+        : [req.body['plans[]']];
+    } else if (req.body.plans) {
+      plansArray = Array.isArray(req.body.plans) ? req.body.plans : [req.body.plans];
+    }
+    
+    // Filter and validate plan IDs
+    const validPlans = plansArray
+      .filter(p => p && p !== "null" && p !== "undefined" && /^[0-9a-fA-F]{24}$/.test(String(p)))
+      .map(p => new mongoose.Types.ObjectId(p));
+
     if (!req.files || req.files.length === 0) return res.status(400).json({ message: "Images are required." });
 
     const imageUrls = await Promise.all(
@@ -109,8 +126,13 @@ export const createCryptoAnalysis = async (req, res) => {
       category: cryptoCategory ? cryptoCategory._id : "",
       url,
       photos: imageUrls,
-      accessType
+      accessType,
+      // Only add plans if PRO tier and valid plans exist
+      plans: accessType === "PRO" && validPlans.length > 0 ? validPlans : []
     });
+
+    // Populate plans before returning
+    await newCryptoAnalysis.populate("plans", "name price description hotmartCheckoutCode hotmartCheckoutUrl");
 
     // await notifyFollowersOfEducator(
     //   createdBy,
@@ -138,6 +160,22 @@ export const updateCryptoAnalysis = async (req, res) => {
   try {
     const { title, description, url, accessType } = req.body;
 
+    // Handle plans array from FormData (can come as req.body['plans[]'] or req.body.plans)
+    let plansArray = [];
+    if (req.body['plans[]']) {
+      // Multer sends arrays as 'plans[]'
+      plansArray = Array.isArray(req.body['plans[]']) 
+        ? req.body['plans[]'] 
+        : [req.body['plans[]']];
+    } else if (req.body.plans) {
+      plansArray = Array.isArray(req.body.plans) ? req.body.plans : [req.body.plans];
+    }
+    
+    // Filter and validate plan IDs
+    const validPlans = plansArray
+      .filter(p => p && p !== "null" && p !== "undefined" && /^[0-9a-fA-F]{24}$/.test(String(p)))
+      .map(p => new mongoose.Types.ObjectId(p));
+
     const record = await CryptoAnalysisModel.findById(req.params.id);
     if (!record) return res.status(404).json({ error: "Not found" });
 
@@ -164,8 +202,14 @@ export const updateCryptoAnalysis = async (req, res) => {
     record.url = url || record.url;
     record.photos = updatedImages;
     record.accessType = accessType ?? record.accessType;
+    // Update plans: if PRO tier, set valid plans; if not PRO, clear plans
+    record.plans = (accessType === "PRO" && validPlans.length > 0) ? validPlans : (accessType !== "PRO" ? [] : record.plans);
 
     await record.save();
+    
+    // Populate plans before returning
+    await record.populate("plans", "name price description hotmartCheckoutCode hotmartCheckoutUrl");
+    
     return res.status(200).json(ApiResponse(200, record, "Record updated successfully"));
   } catch (err) {
     res.status(500).json({ error: err.message });

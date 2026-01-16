@@ -64,6 +64,12 @@ export default function CryptoPage() {
   const cryptos = useMemo(() => {
     if (!data?.data) return [];
 
+    // Debug: Log the raw API response to see if plans are present
+    if (data?.data?.length > 0) {
+      console.log('Raw API response for cryptos:', data.data);
+      console.log('First crypto plans from API:', data.data[0]?.plans);
+    }
+
     return data.data.map((crypto) => {
       const createdBy = crypto.createdBy || {};
       const authorName = createdBy.first_name && createdBy.last_name
@@ -122,7 +128,20 @@ export default function CryptoPage() {
       // Get avatar from createdBy
       const avatar = createdBy?.image || '/media/avatars/1.png';
 
-      return {
+      // Ensure plans are preserved correctly BEFORE spread (to avoid overwriting)
+      const plansFromApi = crypto?.plans || crypto?.allowedPlans || [];
+      
+      // Debug: Log plans for each crypto item
+      if (crypto?.accessType === 'PRO' || crypto?.tier === 'PRO') {
+        console.log(`Crypto ${crypto?._id} (PRO tier) - Plans from API:`, plansFromApi);
+        console.log(`Crypto ${crypto?._id} - Plans type:`, Array.isArray(plansFromApi) ? 'array' : typeof plansFromApi);
+        console.log(`Crypto ${crypto?._id} - Plans length:`, Array.isArray(plansFromApi) ? plansFromApi.length : 'not array');
+      }
+
+      // Extract category object to avoid spreading it
+      const { category: categoryObj, plans: plansFromSpread, ...restOfCrypto } = crypto || {};
+
+      const transformedCrypto = {
         id: crypto?._id,
         _id: crypto?._id,
         title: crypto?.title || "Untitled Crypto Analysis",
@@ -136,14 +155,17 @@ export default function CryptoPage() {
         avatar: avatar,
         accessType: crypto?.accessType || "PUBLIC",
         tier: crypto?.accessType || "PUBLIC", // Use tier for unified access control
-        plans: crypto?.plans || crypto?.allowedPlans || [], // Support both new (plans) and old (allowedPlans) format
-        allowedPlans: crypto?.allowedPlans || [], // Keep for backward compatibility
         url: crypto?.url,
         data: crypto?.data,
         photos: crypto?.photos || [],
-        ...crypto, // Include all other properties
-        category: categoryName, // Override category with string name after spread
+        ...restOfCrypto, // Include all other properties (excluding category and plans)
+        // Override specific properties after spread to ensure correct format
+        category: categoryName, // Always use string category name, not object
+        plans: plansFromApi, // Use plans from BEFORE spread (preserve original API response)
+        allowedPlans: crypto?.allowedPlans || [], // Keep for backward compatibility
       };
+
+      return transformedCrypto;
     });
   }, [data]);
 
@@ -152,12 +174,29 @@ export default function CryptoPage() {
     if (activeTab === "All") {
       return cryptos;
     }
-    return cryptos.filter((item) => item.category === activeTab);
+    return cryptos.filter((item) => {
+      // Ensure category is compared as string (in case it's still an object somehow)
+      const categoryValue = typeof item.category === 'object' && item.category?.name
+        ? item.category.name
+        : item.category;
+      return categoryValue === activeTab;
+    });
   }, [cryptos, activeTab]);
 
   // ------------------- GET UNIQUE CATEGORIES -------------------
   const categories = useMemo(() => {
-    const uniqueCategories = new Set(cryptos.map(crypto => crypto.category));
+    // Extract category names (handle both string and object formats)
+    const uniqueCategories = new Set(
+      cryptos
+        .map(crypto => {
+          // If category is an object, get the name; otherwise use the string
+          const categoryValue = typeof crypto.category === 'object' && crypto.category?.name
+            ? crypto.category.name
+            : crypto.category;
+          return categoryValue;
+        })
+        .filter(Boolean)
+    );
     return ["All", ...Array.from(uniqueCategories).filter(Boolean)];
   }, [cryptos]);
 
@@ -278,8 +317,14 @@ export default function CryptoPage() {
                   console.log('Processed content plans:', contentPlans);
 
                   if (contentPlans.length === 0) {
-                    toast.error('No plans available for this content');
+                    toast.error('This PRO content has no plans assigned. Please contact support or check admin settings.');
                     console.error('No valid plans found. Raw plans:', rawPlans);
+                    console.error('Crypto item details:', {
+                      id: crypto._id,
+                      title: crypto.title,
+                      tier: tier,
+                      accessType: crypto.accessType,
+                    });
                     return;
                   }
 
@@ -305,7 +350,7 @@ export default function CryptoPage() {
               };
 
               return (
-                <Card key={crypto?._id || crypto?.id} className="bg-card border border-border overflow-hidden">
+                <Card key={crypto?._id || crypto?.id} className={`bg-card border border-border overflow-hidden ${isLocked ? 'relative' : ''}`}>
 
                   {/* image */}
                   <div className="w-full h-44 overflow-hidden relative">

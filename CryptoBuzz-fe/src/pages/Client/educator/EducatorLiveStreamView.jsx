@@ -1,20 +1,28 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState, useMemo } from "react";
 import { StreamTheme, StreamVideoClient } from "@stream-io/video-react-sdk";
 import "@stream-io/video-react-sdk/dist/css/styles.css";
 import { Loader2 } from "lucide-react";
-import { useParams } from "react-router";
+import { useParams, useNavigate } from "react-router";
 import { useAuthContext } from "../../../context/AuthContext";
 import { toAbsoluteUrl } from "../../../lib/helpers";
 import { useGetActiveLiveStreamByEducatorQuery, useGetTokenMutation } from "../../../store/client/clientScheduleApiSlice";
 import { EventProvider } from "../client-live-session/chat-room/context/EventContext";
 import ClientLiveSessionWrapper from "../client-live-session/ClientLiveSessionWrapper";
 import StreamWrapper from "../client-live-session/StreamWrapper";
+import { useSelector } from "react-redux";
+import { selectCurrentUser, selectIsAuthenticated } from "@/store/authSlice";
+import { useGetPurchasedPlanIdsQuery } from "@/store/client/clientPaymentApiSlice";
+import { checkAccess } from "@/utils/accessControl";
+import { CourseLockOverlay } from "@/components/payment/CourseLockOverlay";
+import { PlanSelectionModal } from "@/components/payment/PlanSelectionModal";
+import { toast } from "sonner";
 
 
 const apiKey = import.meta.env.VITE_APP_STREAM_API_KEY;
 
 const EducatorLiveStreamView = () => {
   const { id: educatorId } = useParams();
+  const navigate = useNavigate();
   const { user, isAuthenticated } = useAuthContext();
   const userId = user?._id ?? null;
 
@@ -22,6 +30,32 @@ const EducatorLiveStreamView = () => {
   const [call, setCall] = useState(null);
   const [token, setToken] = useState(null);
   const isInitializing = useRef(false);
+
+  // Access control hooks
+  const isAuthenticatedRedux = useSelector(selectIsAuthenticated);
+  const userRedux = useSelector(selectCurrentUser);
+  const { data: purchasedPlansData } = useGetPurchasedPlanIdsQuery(
+    undefined,
+    {
+      skip: !isAuthenticatedRedux,
+      refetchOnMountOrArgChange: true,
+      refetchOnFocus: true,
+    }
+  );
+
+  const purchasedPlanIds = useMemo(() => {
+    if (!purchasedPlansData?.data?.planIds) return new Set();
+    return new Set(purchasedPlansData.data.planIds);
+  }, [purchasedPlansData]);
+
+  const userUid = useMemo(() => {
+    if (!userRedux) return null;
+    return userRedux.uid || userRedux.credential?.uid || null;
+  }, [userRedux]);
+
+  // Plan selection modal state
+  const [showPlanModal, setShowPlanModal] = useState(false);
+  const [selectedContentForPurchase, setSelectedContentForPurchase] = useState(null);
 
   // Fetch active live stream for educator
   const {
@@ -46,6 +80,81 @@ const EducatorLiveStreamView = () => {
   const educator = liveStreamResponse?.educator || activeLiveStream?.educator;
   const bannerImage = educator?.bannerImage || activeLiveStream?.schedule?.image;
   const educatorData = educator?.description || activeLiveStream?.schedule?.description;
+
+  // Access control for live stream
+  // Check both LiveStream model and Schedule model for tier/plans
+  const schedule = activeLiveStream?.schedule;
+  const tier = activeLiveStream?.accessType || activeLiveStream?.tier || schedule?.tier || schedule?.accessType || 'PUBLIC';
+  const contentPlans = useMemo(() => {
+    // Check both LiveStream plans and Schedule plans
+    const liveStreamPlans = (activeLiveStream?.plans || []).map(p => (p?._id || p)?.toString()).filter(Boolean);
+    const schedulePlans = (schedule?.plans || []).map(p => (p?._id || p)?.toString()).filter(Boolean);
+    // Combine and deduplicate
+    return [...new Set([...liveStreamPlans, ...schedulePlans])];
+  }, [activeLiveStream?.plans, schedule?.plans]);
+  
+  const hasPurchase = useMemo(() => {
+    if (contentPlans.length === 0) return false;
+    return contentPlans.some(planId => purchasedPlanIds.has(planId));
+  }, [contentPlans, purchasedPlanIds]);
+
+  const accessResult = useMemo(() => {
+    if (!isLive || !activeLiveStream) {
+      // If stream is not live, no access check needed
+      return { hasAccess: true, showLock: false, lockReason: null, lockMessage: '' };
+    }
+    return checkAccess({
+      tier,
+      isAuthenticated: isAuthenticatedRedux,
+      userUid,
+      hasPurchase,
+    });
+  }, [isLive, activeLiveStream, tier, isAuthenticatedRedux, userUid, hasPurchase]);
+
+  // Purchase handler for live stream
+  const handleLiveStreamPurchase = () => {
+    if (!isAuthenticatedRedux) {
+      navigate('/login', { state: { from: window.location.pathname } });
+      return;
+    }
+
+    const rawPlans = schedule?.plans || [];
+    const plans = rawPlans
+      .filter(p => p && (p._id || p))
+      .map(p => {
+        if (typeof p === 'string') return null;
+        return {
+          _id: p._id || p,
+          name: p.name || 'Plan',
+          description: p.description || '',
+          price: p.price || 0,
+          hotmartCheckoutUrl: p.hotmartCheckoutUrl || '',
+        };
+      })
+      .filter(Boolean);
+
+    if (plans.length === 0) {
+      toast.error('No plans available for this live stream. Please assign plans in the admin panel.');
+      return;
+    }
+
+    if (plans.length > 1) {
+      setSelectedContentForPurchase({
+        id: activeLiveStream?._id || schedule?._id,
+        title: schedule?.title || 'Live Stream',
+        plans: plans,
+        contentType: 'liveStream',
+      });
+      setShowPlanModal(true);
+    } else {
+      const plan = plans[0];
+      if (plan.hotmartCheckoutUrl) {
+        window.location.href = plan.hotmartCheckoutUrl;
+      } else {
+        toast.error('Checkout URL not available for this plan');
+      }
+    }
+  };
 
   // Cleanup when stream stops (isLive becomes false)
   useEffect(() => {
@@ -226,10 +335,52 @@ const EducatorLiveStreamView = () => {
     );
   }
 
+  // Check if live stream is locked (PRO tier without purchase)
+  // If locked, show lock overlay instead of stream content
+  if (isLive && activeLiveStream && accessResult.showLock && !accessResult.hasAccess) {
+    return (
+      <div className="relative w-full h-[600px] bg-gray-900 rounded-xl overflow-hidden">
+        {/* Show banner image with blur */}
+        {bannerImage && (
+          <div className="absolute inset-0 blur-[2px] opacity-85">
+            <img
+              src={bannerImage}
+              alt="Live Stream"
+              className="w-full h-full object-cover"
+            />
+          </div>
+        )}
+        {/* Lock overlay */}
+        <CourseLockOverlay
+          course={schedule}
+          tier={tier}
+          lockReason={accessResult.lockReason}
+          lockMessage={accessResult.lockMessage}
+          onPurchase={handleLiveStreamPurchase}
+        />
+        {/* Plan Selection Modal */}
+        {showPlanModal && selectedContentForPurchase && (
+          <PlanSelectionModal
+            isOpen={showPlanModal}
+            onClose={() => {
+              setShowPlanModal(false);
+              setSelectedContentForPurchase(null);
+            }}
+            plans={selectedContentForPurchase.plans}
+            contentId={selectedContentForPurchase.id}
+            contentTitle={selectedContentForPurchase.title}
+            contentType={selectedContentForPurchase.contentType}
+            useDirectPlanCheckout={true}
+          />
+        )}
+      </div>
+    );
+  }
+
   // Active live stream - show live stream component with chat (no About section)
-  // Only show when stream is live AND all required components are ready AND user is authenticated
+  // Only show when stream is live AND all required components are ready AND user is authenticated AND has access
   // console.log("Rendering live stream view", { isLive, activeLiveStream, callId, token, client, call });
-  if (isLive && activeLiveStream && callId && token && client && call && isAuthenticated) {
+  if (isLive && activeLiveStream && callId && token && client && call && isAuthenticated && accessResult.hasAccess) {
     return (
       <EventProvider>
         <StreamWrapper

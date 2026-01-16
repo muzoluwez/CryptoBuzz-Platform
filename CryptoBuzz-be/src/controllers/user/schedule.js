@@ -97,7 +97,15 @@ export const getActiveLiveStreamByEducator = asyncHandler(async (req, res) => {
     status: { $in: ["active", "pending"] } // Can be active or pending but isLive must be true
   })
     .populate("educator", "_id first_name last_name image email bannerImage description")
-    .populate("schedule", "_id title description image tags")
+    .populate({
+      path: "schedule",
+      select: "_id title description image tags tier accessType",
+      populate: {
+        path: "plans",
+        select: "name price description hotmartCheckoutCode hotmartCheckoutUrl"
+      }
+    })
+    .populate("plans", "name price description hotmartCheckoutCode hotmartCheckoutUrl")
     .lean();
 
   if (!activeLiveStream) {
@@ -127,7 +135,15 @@ export const getAllActiveLiveStreams = asyncHandler(async (req, res) => {
       isDeleted: false,
     })
       .populate("educator", "_id first_name last_name image email bannerImage description")
-      .populate("schedule", "_id title description image tags")
+      .populate({
+        path: "schedule",
+        select: "_id title description image tags tier accessType",
+        populate: {
+          path: "plans",
+          select: "name price description hotmartCheckoutCode hotmartCheckoutUrl"
+        }
+      })
+      .populate("plans", "name price description hotmartCheckoutCode hotmartCheckoutUrl")
       .sort({ createdAt: -1 })
       .lean();
 

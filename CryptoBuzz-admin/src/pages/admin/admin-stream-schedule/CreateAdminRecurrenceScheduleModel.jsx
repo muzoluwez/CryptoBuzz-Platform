@@ -543,7 +543,7 @@ const CreateAdminRecurrenceScheduleModel = forwardRef(
                         return (
                           <div
                             key={plan._id}
-                            className="flex items-start space-x-3 p-3 rounded-md hover:bg-gray-50 border border-transparent hover:border-gray-200 transition-colors"
+                            className="flex items-start space-x-3 p-3 rounded-md hover:bg-gray-50 dark:hover:bg-gray-200  border border-transparent hover:border-gray-200 transition-colors"
                           >
                             <Checkbox
                               id={`plan-${plan._id}`}
@@ -568,7 +568,7 @@ const CreateAdminRecurrenceScheduleModel = forwardRef(
                                 ${plan.price?.toFixed(2) || "0.00"} • {plan.hotmartCheckoutCode || "N/A"}
                               </div>
                               {plan.description && (
-                                <div className="text-xs text-gray-400 mt-1">
+                                <div className="text-xs text-gray-400 dark:text-gray-600 mt-1">
                                   {plan.description}
                                 </div>
                               )}
