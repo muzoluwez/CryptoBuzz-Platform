@@ -66,10 +66,14 @@ export function CourseLockOverlay({
     return null;
   }
 
+  // Remove fixed height if className contains height override
+  const hasHeightOverride = className?.includes('h-');
+  
   return (
     <div
       className={cn(
-        "absolute inset-0 bg-black/25 rounded-xl z-10 h-[305px]",
+        "absolute inset-0 bg-black/25 rounded-xl z-10",
+        !hasHeightOverride && "h-[305px]",
         "flex flex-col items-center justify-center",
         className
       )}

@@ -477,6 +477,7 @@ export default function SocialPage() {
                       lockMessage={lockMessage}
                       onPurchase={handlePurchase}
                       contentType="Social"
+                      className="h-full"
                     />
                   </div>
                 )}
