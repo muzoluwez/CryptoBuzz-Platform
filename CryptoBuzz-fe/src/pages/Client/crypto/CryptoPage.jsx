@@ -31,19 +31,19 @@ export default function CryptoPage() {
   const [showPlanModal, setShowPlanModal] = useState(false);
   const [selectedContentForPurchase, setSelectedContentForPurchase] = useState(null);
   const navigate = useNavigate();
-  
+
   // Access control hooks - called at component level
   const isAuthenticated = useSelector(selectIsAuthenticated);
   const user = useSelector(selectCurrentUser);
   const { data: purchasedPlansData } = useGetPurchasedPlanIdsQuery(undefined, {
     skip: !isAuthenticated,
   });
-  
+
   const purchasedPlanIds = useMemo(() => {
     if (!purchasedPlansData?.data?.planIds) return new Set();
     return new Set(purchasedPlansData.data.planIds);
   }, [purchasedPlansData]);
-  
+
   const userUid = useMemo(() => {
     if (!user) return null;
     return user.uid || user.credential?.uid || null;
@@ -69,49 +69,49 @@ export default function CryptoPage() {
       const authorName = createdBy.first_name && createdBy.last_name
         ? `${createdBy.first_name} ${createdBy.last_name}`
         : createdBy.first_name || createdBy.last_name || "Unknown Author";
-      
+
       const categoryName = crypto.category?.name || "Uncategorized";
-      
+
       // Format date
       const date = crypto.createdAt
         ? new Date(crypto.createdAt).toLocaleString('en-US', {
-            month: 'short',
-            day: '2-digit',
-            year: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit',
-            hour12: true
-          })
+          month: 'short',
+          day: '2-digit',
+          year: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit',
+          hour12: true
+        })
         : new Date().toLocaleString('en-US', {
-            month: 'short',
-            day: '2-digit',
-            year: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit',
-            hour12: true
-          });
+          month: 'short',
+          day: '2-digit',
+          year: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit',
+          hour12: true
+        });
 
       // Get formatted plain text - converts HTML and \r\n to proper plain text
-      const plainTextDescription = crypto.description 
+      const plainTextDescription = crypto.description
         ? convertRtkEditorToFormattedPlainText(crypto.description, true)
         : "";
-      
+
       // Get display format with clickable links for full view
       const fullDisplayHtml = crypto.description
         ? convertRtkEditorToDisplayFormat(crypto.description, true, true)
         : "";
-      
+
       // For preview: get single line version (no line breaks) and limit to 2 lines worth
       const singleLineText = crypto.description
         ? convertRtkEditorToFormattedPlainText(crypto.description, false)
         : "";
-      
+
       // Calculate approximate characters for 2 lines (assuming ~50 chars per line)
       const maxChars = 100;
       const preview = singleLineText
         ? (singleLineText.length > maxChars
-            ? singleLineText.substring(0, maxChars) + "..."
-            : singleLineText)
+          ? singleLineText.substring(0, maxChars) + "..."
+          : singleLineText)
         : "No description available.";
 
       // Get image from photos array or use placeholder
@@ -226,12 +226,12 @@ export default function CryptoPage() {
               // Compute access control using utility function (not hook) inside map
               const tier = crypto.tier || crypto.accessType || "PUBLIC";
               const contentPlans = (crypto.plans || crypto.allowedPlans || []).map(p => (p?._id || p)?.toString()).filter(Boolean);
-              
+
               // Check if user has purchased any plan associated with this content
               const hasPurchase = tier === "PRO" && contentPlans.length > 0 && purchasedPlanIds.size > 0
                 ? contentPlans.some(planId => purchasedPlanIds.has(planId))
                 : false;
-              
+
               // Use checkAccess utility function (not hook)
               const { hasAccess, showLock, lockReason, lockMessage } = checkAccess({
                 tier,
@@ -240,7 +240,7 @@ export default function CryptoPage() {
                 hasPurchase,
                 isPremium: tier === "PRO",
               });
-              
+
               const isLocked = showLock && !hasAccess;
 
               // Handle purchase action (only called when user is authenticated)
@@ -249,12 +249,12 @@ export default function CryptoPage() {
                   // Debug: Log the crypto object to see what we're working with
                   console.log('Crypto object for purchase:', crypto);
                   console.log('Plans from crypto:', crypto.plans);
-                  
+
                   // Get plans from the content item
                   // Plans can come as an array of objects (populated) or array of IDs (not populated)
                   const rawPlans = crypto.plans || [];
                   console.log('Raw plans array:', rawPlans);
-                  
+
                   // Filter out null/undefined and map to proper format
                   const contentPlans = rawPlans
                     .filter(p => p && (p._id || p))
@@ -274,15 +274,15 @@ export default function CryptoPage() {
                       };
                     })
                     .filter(Boolean); // Remove null entries
-                  
+
                   console.log('Processed content plans:', contentPlans);
-                  
+
                   if (contentPlans.length === 0) {
                     toast.error('No plans available for this content');
                     console.error('No valid plans found. Raw plans:', rawPlans);
                     return;
                   }
-                  
+
                   // If multiple plans, show selection modal
                   if (contentPlans.length > 1) {
                     setSelectedContentForPurchase({
@@ -307,79 +307,80 @@ export default function CryptoPage() {
               return (
                 <Card key={crypto?._id || crypto?.id} className="bg-card border border-border overflow-hidden">
 
-                {/* image */}
-                <div className="w-full h-44 overflow-hidden relative">
-                  <div className={isLocked ? 'blur-[2px]' : ''}>
-                    <ImageCarousel
-                      images={
-                        crypto?.photos && Array.isArray(crypto.photos) && crypto.photos.length > 0
-                          ? crypto.photos
-                          : crypto?.image
-                          ? [crypto.image]
-                          : []
-                      }
-                      alt={crypto?.title || "Crypto analysis"}
-                      height="h-44"
-                      showViewButton={hasAccess}
-                    />
+                  {/* image */}
+                  <div className="w-full h-44 overflow-hidden relative">
+                    <div className={isLocked ? 'blur-[2px]' : ''}>
+                      <ImageCarousel
+                        images={
+                          crypto?.photos && Array.isArray(crypto.photos) && crypto.photos.length > 0
+                            ? crypto.photos
+                            : crypto?.image
+                              ? [crypto.image]
+                              : []
+                        }
+                        alt={crypto?.title || "Crypto analysis"}
+                        height="h-44"
+                        showViewButton={hasAccess}
+                      />
+                    </div>
+                    {isLocked && (
+                      <CourseLockOverlay
+                        tier={tier}
+                        lockReason={lockReason}
+                        lockMessage={lockMessage}
+                        onPurchase={handlePurchase}
+                        contentType="Crypto"
+                      />
+                    )}
                   </div>
-                  {isLocked && (
-                    <CourseLockOverlay
-                      tier={tier}
-                      lockReason={lockReason}
-                      lockMessage={lockMessage}
-                      onPurchase={handlePurchase}
-                    />
-                  )}
-                </div>
 
-                <CardContent className="p-4">
+                  <CardContent className="p-4">
 
-                  {/* Author */}
-                  <div className="flex items-center gap-3">
-                    <Avatar className="h-10 w-10">
-                      <AvatarImage src={crypto?.avatar} alt={crypto?.author || "Author"} />
-                      <AvatarFallback>{crypto?.author?.[0] || "A"}</AvatarFallback>
-                    </Avatar>
+                    {/* Author */}
+                    <div className="flex items-center gap-3">
+                      <Avatar className="h-10 w-10">
+                        <AvatarImage src={crypto?.avatar} alt={crypto?.author || "Author"} />
+                        <AvatarFallback>{crypto?.author?.[0] || "A"}</AvatarFallback>
+                      </Avatar>
 
-                    <div className="flex-1">
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <p className="text-sm font-medium truncate">{crypto?.author || "Unknown"}</p>
-                          <p className="text-xs text-muted-foreground">{crypto?.date || ""}</p>
+                      <div className="flex-1">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="text-sm font-medium truncate">{crypto?.author || "Unknown"}</p>
+                            <p className="text-xs text-muted-foreground">{crypto?.date || ""}</p>
+                          </div>
+                          <Badge>{crypto?.category || ""}</Badge>
                         </div>
-                        <Badge>{crypto?.category || ""}</Badge>
                       </div>
                     </div>
-                  </div>
 
-                  {/* Title */}
-                  <h3 className="mt-4 text-lg font-bold text-primary">{crypto?.title || "Untitled"}</h3>
+                    {/* Title */}
+                    <h3 className="mt-4 text-lg font-bold text-primary">{crypto?.title || "Untitled"}</h3>
 
-                  {/* Preview - 2 lines max */}
-                  <p className="mt-2 text-sm text-muted-foreground line-clamp-2">
-                    {hasAccess ? crypto?.preview || "" : "This content is locked. Upgrade your plan or log in to view full analysis."}
-                  </p>
+                    {/* Preview - 2 lines max */}
+                    <p className="mt-2 text-sm text-muted-foreground line-clamp-2">
+                      {hasAccess ? crypto?.preview || "" : "This content is locked. Upgrade your plan or log in to view full analysis."}
+                    </p>
 
-                  {/* Button */}
-                  <div className="mt-4">
-                    <Button
-                      onClick={() => setSelectedCrypto(crypto)}
-                      className="w-full bg-yellow-600 text-white hover:bg-yellow-700"
-                    >
-                      {hasAccess ? "View Details" : "Unlock Analysis"}
-                    </Button>
-                  </div>
+                    {/* Button */}
+                    <div className="mt-4">
+                      <Button
+                        onClick={() => setSelectedCrypto(crypto)}
+                        className="w-full bg-yellow-600 text-white hover:bg-yellow-700"
+                      >
+                        {hasAccess ? "View Details" : "Unlock Analysis"}
+                      </Button>
+                    </div>
 
-                </CardContent>
+                  </CardContent>
 
-                <CardFooter className="p-4">
-                  <div className="text-sm text-muted-foreground">
-                    Published • {crypto?.date?.split(',')?.[0] || ""}
-                  </div>
-                </CardFooter>
+                  <CardFooter className="p-4">
+                    <div className="text-sm text-muted-foreground">
+                      Published • {crypto?.date?.split(',')?.[0] || ""}
+                    </div>
+                  </CardFooter>
 
-              </Card>
+                </Card>
               )
             })}
           </div>
@@ -420,10 +421,10 @@ export default function CryptoPage() {
           selectedCrypto?.photos && Array.isArray(selectedCrypto.photos) && selectedCrypto.photos.length > 0
             ? selectedCrypto.photos
             : selectedCrypto?.image
-            ? [selectedCrypto.image]
-            : selectedImage
-            ? [selectedImage]
-            : []
+              ? [selectedCrypto.image]
+              : selectedImage
+                ? [selectedImage]
+                : []
         }
         isOpen={!!selectedImage}
         onClose={() => setSelectedImage(null)}

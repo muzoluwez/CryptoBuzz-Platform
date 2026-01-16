@@ -27,19 +27,19 @@ export default function IdeaPage() {
   const [showPlanModal, setShowPlanModal] = useState(false);
   const [selectedContentForPurchase, setSelectedContentForPurchase] = useState(null);
   const navigate = useNavigate();
-  
+
   // Access control hooks - called at component level
   const isAuthenticated = useSelector(selectIsAuthenticated);
   const user = useSelector(selectCurrentUser);
   const { data: purchasedPlansData } = useGetPurchasedPlanIdsQuery(undefined, {
     skip: !isAuthenticated,
   });
-  
+
   const purchasedPlanIds = useMemo(() => {
     if (!purchasedPlansData?.data?.planIds) return new Set();
     return new Set(purchasedPlansData.data.planIds);
   }, [purchasedPlansData]);
-  
+
   const userUid = useMemo(() => {
     if (!user) return null;
     return user.uid || user.credential?.uid || null;
@@ -185,12 +185,12 @@ export default function IdeaPage() {
               // Compute access control using utility function (not hook) inside map
               const tier = c.tier || c.accessType || "PUBLIC";
               const contentPlans = (c.plans || c.allowedPlans || []).map(p => (p?._id || p)?.toString()).filter(Boolean);
-              
+
               // Check if user has purchased any plan associated with this content
               const hasPurchase = tier === "PRO" && contentPlans.length > 0 && purchasedPlanIds.size > 0
                 ? contentPlans.some(planId => purchasedPlanIds.has(planId))
                 : false;
-              
+
               // Use checkAccess utility function (not hook)
               const { hasAccess, showLock, lockReason, lockMessage } = checkAccess({
                 tier,
@@ -199,7 +199,7 @@ export default function IdeaPage() {
                 hasPurchase,
                 isPremium: tier === "PRO",
               });
-              
+
               const isLocked = showLock && !hasAccess;
 
               // Handle purchase action (only called when user is authenticated)
@@ -209,12 +209,12 @@ export default function IdeaPage() {
                   console.log('Idea object for purchase:', c);
                   console.log('Plans from idea:', c.plans);
                   console.log('Allowed plans from idea:', c.allowedPlans);
-                  
+
                   // Get plans from the content item
                   // Plans can come as an array of objects (populated) or array of IDs (not populated)
                   const rawPlans = c.plans || c.allowedPlans || [];
                   console.log('Raw plans array:', rawPlans);
-                  
+
                   // Filter out null/undefined and map to proper format
                   const contentPlans = rawPlans
                     .filter(p => p && (p._id || p))
@@ -234,15 +234,15 @@ export default function IdeaPage() {
                       };
                     })
                     .filter(Boolean); // Remove null entries
-                  
+
                   console.log('Processed content plans:', contentPlans);
-                  
+
                   if (contentPlans.length === 0) {
                     toast.error('No plans available for this content');
                     console.error('No valid plans found. Raw plans:', rawPlans);
                     return;
                   }
-                  
+
                   // If multiple plans, show selection modal
                   if (contentPlans.length > 1) {
                     setSelectedContentForPurchase({
@@ -304,14 +304,6 @@ export default function IdeaPage() {
                           showViewButton={hasAccess}
                         />
                       </div>
-                      {isLocked && (
-                        <CourseLockOverlay
-                          tier={tier}
-                          lockReason={lockReason}
-                          lockMessage={lockMessage}
-                          onPurchase={handlePurchase}
-                        />
-                      )}
 
                       {/* TAGS */}
                       <div className="absolute top-3 left-3 flex flex-wrap gap-2">
@@ -473,22 +465,31 @@ export default function IdeaPage() {
                       </div>
                     </CardContent>
 
-                    {/* FOOTER */}
-                    <CardFooter className="p-5 pt-0">
-                      <button
-                        onClick={() => setSelectedCard(c)}
-                        className="btn bg-primary text-black w-full flex! items-center justify-center gap-2 mt-4 hover:scale-up transition-all duration-300"
-                      >
-                        {isLocked ? (
-                          'Unlock Content'
-                        ) : (
-                          <>
-                            <Eye size={18} /> View Details
-                          </>
-                        )}
-                      </button>
-                    </CardFooter>
+                    {/* FOOTER - Only show when not locked */}
+                    {!isLocked && (
+                      <CardFooter className="p-5 pt-0">
+                        <button
+                          onClick={() => setSelectedCard(c)}
+                          className="btn bg-primary text-black w-full flex! items-center justify-center gap-2 mt-4 hover:scale-up transition-all duration-300"
+                        >
+                          <Eye size={18} /> View Details
+                        </button>
+                      </CardFooter>
+                    )}
                   </Card>
+
+                  {/* Full Card Lock Overlay */}
+                  {isLocked && (
+                    <div className="absolute inset-0 z-40 rounded-2xl overflow-hidden">
+                      <CourseLockOverlay
+                        tier={tier}
+                        lockReason={lockReason}
+                        lockMessage={lockMessage}
+                        onPurchase={handlePurchase}
+                        contentType="Idea"
+                      />
+                    </div>
+                  )}
 
                   {/* Hover Overlay with Message */}
                   {isLocked && hoveredCardId === c._id && (

@@ -36,19 +36,19 @@ export default function InsightPage() {
   const [showPlanModal, setShowPlanModal] = useState(false);
   const [selectedContentForPurchase, setSelectedContentForPurchase] = useState(null);
   const navigate = useNavigate();
-  
+
   // Access control hooks - called at component level
   const isAuthenticated = useSelector(selectIsAuthenticated);
   const user = useSelector(selectCurrentUser);
   const { data: purchasedPlansData } = useGetPurchasedPlanIdsQuery(undefined, {
     skip: !isAuthenticated,
   });
-  
+
   const purchasedPlanIds = useMemo(() => {
     if (!purchasedPlansData?.data?.planIds) return new Set();
     return new Set(purchasedPlansData.data.planIds);
   }, [purchasedPlansData]);
-  
+
   const userUid = useMemo(() => {
     if (!user) return null;
     return user.uid || user.credential?.uid || null;
@@ -239,14 +239,14 @@ export default function InsightPage() {
 
             {filteredInsights.map((insight) => {
               // Compute access control using utility function (not hook) inside map
-              const tier = insight.tier || insight.accessType || "PUBLIC";
-              const contentPlans = (insight.plans || insight.allowedPlans || []).map(p => (p?._id || p)?.toString()).filter(Boolean);
-              
+              const tier = insight?.tier || insight?.accessType || "PUBLIC";
+              const contentPlans = (insight?.plans || insight?.allowedPlans || []).map(p => (p?._id || p)?.toString()).filter(Boolean);
+
               // Check if user has purchased any plan associated with this content
               const hasPurchase = tier === "PRO" && contentPlans.length > 0 && purchasedPlanIds.size > 0
                 ? contentPlans.some(planId => purchasedPlanIds.has(planId))
                 : false;
-              
+
               // Use checkAccess utility function (not hook)
               const { hasAccess, showLock, lockReason, lockMessage } = checkAccess({
                 tier,
@@ -255,7 +255,7 @@ export default function InsightPage() {
                 hasPurchase,
                 isPremium: tier === "PRO",
               });
-              
+
               const isLocked = showLock && !hasAccess;
 
               // Handle purchase action (only called when user is authenticated)
@@ -264,12 +264,12 @@ export default function InsightPage() {
                   // Debug: Log the insight object to see what we're working with
                   console.log('Insight object for purchase:', insight);
                   console.log('Plans from insight:', insight.plans);
-                  
+
                   // Get plans from the content item
                   // Plans can come as an array of objects (populated) or array of IDs (not populated)
-                  const rawPlans = insight.plans || insight.allowedPlans || [];
+                  const rawPlans = insight?.plans || insight?.allowedPlans || [];
                   console.log('Raw plans array:', rawPlans);
-                  
+
                   // Filter out null/undefined and map to proper format
                   const contentPlans = rawPlans
                     .filter(p => p && (p._id || p))
@@ -289,20 +289,20 @@ export default function InsightPage() {
                       };
                     })
                     .filter(Boolean); // Remove null entries
-                  
+
                   console.log('Processed content plans:', contentPlans);
-                  
+
                   if (contentPlans.length === 0) {
                     toast.error('No plans available for this content');
                     console.error('No valid plans found. Raw plans:', rawPlans);
                     return;
                   }
-                  
+
                   // If multiple plans, show selection modal
                   if (contentPlans.length > 1) {
                     setSelectedContentForPurchase({
-                      id: insight._id,
-                      title: insight.title,
+                      id: insight?._id,
+                      title: insight?.title,
                       plans: contentPlans,
                       contentType: 'insight',
                     });
@@ -330,7 +330,7 @@ export default function InsightPage() {
 
                     {/* image */}
                     <div className="w-full h-44 overflow-hidden relative">
-                      <div className={isLocked ? 'blur-[2px]' : ''}>
+                      <div className={isLocked ? 'blur-md' : ''}>
                         <ImageCarousel
                           images={
                             insight?.photos && Array.isArray(insight.photos) && insight.photos.length > 0
@@ -344,14 +344,6 @@ export default function InsightPage() {
                           showViewButton={hasAccess}
                         />
                       </div>
-                      {isLocked && (
-                        <CourseLockOverlay
-                          tier={tier}
-                          lockReason={lockReason}
-                          lockMessage={lockMessage}
-                          onPurchase={handlePurchase}
-                        />
-                      )}
                     </div>
 
                     <CardContent className="p-4">
@@ -387,28 +379,43 @@ export default function InsightPage() {
 
                       {/* Preview - 2 lines max */}
                       <p className="mt-2 text-sm text-muted-foreground line-clamp-2">
-                        {hasAccess
-                          ? insight?.preview || ""
-                          : 'This content is locked. Upgrade your plan or log in to view full insights.'}
+                        {isLocked ? `${(insight?.preview || "").substring(0, 8)}******` : (insight?.preview || "")}
                       </p>
 
-                      {/* Button */}
-                      <div className="mt-4">
-                        <Button
-                          onClick={() => setSelectedInsight(insight)}
-                          className="w-full bg-yellow-600 text-white hover:bg-yellow-700"
-                        >
-                          {hasAccess ? 'View Details' : 'Unlock Insight'}
-                        </Button>
-                      </div>
+                      {/* Button - Only show when not locked */}
+                      {!isLocked && (
+                        <div className="mt-4">
+                          <Button
+                            onClick={() => setSelectedInsight(insight)}
+                            className="w-full bg-yellow-600 text-white hover:bg-yellow-700"
+                          >
+                            View Details
+                          </Button>
+                        </div>
+                      )}
                     </CardContent>
 
-                    <CardFooter className="p-4">
-                      <div className="text-sm text-muted-foreground">
-                        Published • {insight?.date?.split(',')?.[0] || ""}
-                      </div>
-                    </CardFooter>
+                    {!isLocked && (
+                      <CardFooter className="p-4">
+                        <div className="text-sm text-muted-foreground">
+                          Published • {insight?.date?.split(',')?.[0] || ""}
+                        </div>
+                      </CardFooter>
+                    )}
                   </Card>
+
+                  {/* Full Card Lock Overlay */}
+                  {isLocked && (
+                    <div className="absolute inset-0 z-40 rounded-lg overflow-hidden">
+                      <CourseLockOverlay
+                        tier={tier}
+                        lockReason={lockReason}
+                        lockMessage={lockMessage}
+                        onPurchase={handlePurchase}
+                        contentType="Insight"
+                      />
+                    </div>
+                  )}
 
                   {/* Hover Overlay with Message */}
                   {!hasAccess && hoveredInsightId === insight._id && (

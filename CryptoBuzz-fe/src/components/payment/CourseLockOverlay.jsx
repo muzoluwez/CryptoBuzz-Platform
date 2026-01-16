@@ -12,25 +12,26 @@ import { selectIsAuthenticated } from '@/store/authSlice';
  * CourseLockOverlay Component
  * Displays a locked state overlay based on course tier
  */
-export function CourseLockOverlay({ 
-  course, 
-  onPurchase, 
+export function CourseLockOverlay({
+  course,
+  onPurchase,
   isPurchasing = false,
   price,
   className,
   tier = 'PUBLIC',
   lockReason = null,
   lockMessage = '',
+  contentType = 'Content', // New prop: 'Idea', 'Course', 'Insight', 'Social', etc.
 }) {
   const navigate = useNavigate();
   const isAuthenticated = useSelector(selectIsAuthenticated);
   const displayPrice = price || course?.price || 0;
-  
+
   // For PRO courses, check authentication first
   // If not authenticated, treat it as LOGIN_REQUIRED
   const effectiveTier = tier === 'PRO' && !isAuthenticated ? 'LOGIN_REQUIRED' : tier;
   const effectiveLockReason = tier === 'PRO' && !isAuthenticated ? 'LOGIN_REQUIRED' : lockReason;
-  
+
   // Determine lock icon and message based on effective tier
   const lockIcon = getLockIcon(effectiveTier);
   const buttonText = getLockButtonText(effectiveTier, false);
@@ -66,7 +67,7 @@ export function CourseLockOverlay({
   }
 
   return (
-    <div 
+    <div
       className={cn(
         "absolute inset-0 bg-black/25 rounded-xl z-10",
         "flex flex-col items-center justify-center",
@@ -82,18 +83,18 @@ export function CourseLockOverlay({
         {/* Title */}
         <div className="text-center px-4">
           <h3 className="text-xl font-semibold text-white mb-2">
-            {effectiveTier === 'PRO' ? 'Course Locked' : effectiveTier === 'LOGIN_REQUIRED' || effectiveTier === 'LOGGED_IN' ? 'Login Required' : effectiveTier === 'UID_ONLY' ? 'Access Restricted' : 'Course Locked'}
+            {effectiveTier === 'PRO' ? `${contentType} Locked` : effectiveTier === 'LOGIN_REQUIRED' || effectiveTier === 'LOGGED_IN' ? 'Login Required' : effectiveTier === 'UID_ONLY' ? 'Access Restricted' : `${contentType} Locked`}
           </h3>
           <p className="text-sm text-white/90">
             {effectiveLockReason === 'LOGIN_REQUIRED' && tier === 'PRO'
               ? 'Please log in to purchase this course and access the content.'
-              : lockMessage || (effectiveTier === 'PRO' 
+              : lockMessage || (effectiveTier === 'PRO'
                 ? 'Please login to view details'
                 : effectiveTier === 'LOGIN_REQUIRED' || effectiveTier === 'LOGGED_IN'
-                ? 'Please log in to access this content.'
-                : effectiveTier === 'UID_ONLY'
-                ? 'This content requires special access. Please contact support.'
-                : 'This content is currently locked.')}
+                  ? 'Please log in to access this content.'
+                  : effectiveTier === 'UID_ONLY'
+                    ? 'This content requires special access. Please contact support.'
+                    : 'This content is currently locked.')}
           </p>
         </div>
 
@@ -125,8 +126,8 @@ export function CourseLockOverlay({
           {isPurchasing ? (
             <>
               <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-              {isPurchasing && typeof isPurchasing === 'object' && isPurchasing?.loadingPlans 
-                ? 'Loading Plans...' 
+              {isPurchasing && typeof isPurchasing === 'object' && isPurchasing?.loadingPlans
+                ? 'Loading Plans...'
                 : 'Processing...'}
             </>
           ) : (
@@ -140,11 +141,11 @@ export function CourseLockOverlay({
               ) : (
                 <Lock className="w-4 h-4 mr-2" />
               )}
-              {effectiveTier === 'LOGIN_REQUIRED' && tier === 'PRO' 
-                ? 'Login to Purchase' 
+              {effectiveTier === 'LOGIN_REQUIRED' && tier === 'PRO'
+                ? 'Login to Purchase'
                 : effectiveTier === 'PRO' && isAuthenticated
-                ? 'Unlock Content'
-                : buttonText}
+                  ? 'Unlock Content'
+                  : buttonText}
             </>
           )}
         </Button>

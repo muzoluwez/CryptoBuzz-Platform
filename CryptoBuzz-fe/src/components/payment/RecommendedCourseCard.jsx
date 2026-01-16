@@ -61,9 +61,9 @@ export function RecommendedCourseCard({ course, onCourseClick, accessMap = {} })
       const apiBaseUrl = `${import.meta.env.VITE_APP_API_URL || 'http://localhost:8000'}/api/v1`;
       const plansApiUrl = `${apiBaseUrl}/common/payment/course/${courseId}/plans`;
       const authToken = localStorage.getItem('token') || '';
-      
+
       console.log('📡 RecommendedCourseCard: Calling plans API:', plansApiUrl);
-      
+
       const plansResponse = await fetch(plansApiUrl, {
         method: 'GET',
         headers: {
@@ -79,41 +79,41 @@ export function RecommendedCourseCard({ course, onCourseClick, accessMap = {} })
       const plansResult = await plansResponse.json();
       const fetchedPlans = plansResult?.data?.plans || plansResult?.plans || [];
 
-      console.log('✅ Plans fetched:', { 
-        fetchedPlans, 
+      console.log('✅ Plans fetched:', {
+        fetchedPlans,
         count: fetchedPlans.length,
         plansResult,
-        courseId 
+        courseId
       });
 
       // Check if multiple plans - show modal
       if (fetchedPlans.length > 1) {
-        console.log('✅ Multiple plans detected - opening modal', { 
-          plansCount: fetchedPlans.length, 
-          plans: fetchedPlans 
+        console.log('✅ Multiple plans detected - opening modal', {
+          plansCount: fetchedPlans.length,
+          plans: fetchedPlans
         });
         setModalPlans(fetchedPlans);
         setShowPlanModal(true);
         return; // Exit early - modal will handle purchase
       }
-      
+
       // If single plan, log it for debugging
       if (fetchedPlans.length === 1) {
-        console.log('⚠️ Single plan detected - proceeding to checkout directly', { 
-          plan: fetchedPlans[0] 
+        console.log('⚠️ Single plan detected - proceeding to checkout directly', {
+          plan: fetchedPlans[0]
         });
       } else {
-        console.warn('⚠️ No plans found for course - proceeding to checkout without planId', { 
-          courseId 
+        console.warn('⚠️ No plans found for course - proceeding to checkout without planId', {
+          courseId
         });
       }
 
       // Single plan or no plans - proceed with checkout
       const planId = fetchedPlans.length === 1 ? fetchedPlans[0]._id : undefined;
       const payload = planId ? { courseId, planId } : courseId;
-      
+
       const response = await createPaymentLink(payload).unwrap();
-      
+
       if (response?.data?.checkoutUrl) {
         window.location.href = response.data.checkoutUrl;
       } else {
@@ -141,14 +141,14 @@ export function RecommendedCourseCard({ course, onCourseClick, accessMap = {} })
 
   // Show lock if: course has a lock requirement AND no access
   const isLocked = showLock && !hasAccess;
-  
+
   // Debug logging for all courses to help identify issues
   useEffect(() => {
-    console.log('🎴 RecommendedCourseCard:', { 
+    console.log('🎴 RecommendedCourseCard:', {
       courseId,
       courseTitle: course?.title,
-      hasAccess, 
-      isPremium, 
+      hasAccess,
+      isPremium,
       isLocked,
       coursePrice,
       courseTier: courseTier || course?.tier,
@@ -176,10 +176,9 @@ export function RecommendedCourseCard({ course, onCourseClick, accessMap = {} })
   }, [showPlanModal, modalPlans.length, courseId, course?.title]);
 
   return (
-    <Card 
-      className={`relative bg-black text-white h-[438px] p-0 overflow-hidden group transition-all ${
-        isLocked ? 'cursor-default' : 'cursor-pointer hover:scale-[1.02]'
-      }`}
+    <Card
+      className={`relative bg-black text-white h-[438px] p-0 overflow-hidden group transition-all ${isLocked ? 'cursor-default' : 'cursor-pointer hover:scale-[1.02]'
+        }`}
       onClick={handleCardClick}
     >
       <CardContent className="p-0">
@@ -196,7 +195,7 @@ export function RecommendedCourseCard({ course, onCourseClick, accessMap = {} })
               e.target.src = "https://placehold.co/400x225/E0BBE4/957DAD?text=Image+Error";
             }}
           />
-          
+
           {/* Course content - visible but slightly faded when locked */}
           <div className={cn(
             "absolute left-4 bottom-4 text-white z-10 transition-opacity",
@@ -207,7 +206,7 @@ export function RecommendedCourseCard({ course, onCourseClick, accessMap = {} })
               {course?.description ? convertRtkEditorToFormattedPlainText(course.description, true) : ''}
             </p>
             {!isLocked && (
-              <button 
+              <button
                 className="text-sm font-medium mt-2 text-yellow-600 hover:text-yellow-700 cursor-pointer transition-colors"
                 onClick={(e) => {
                   e.stopPropagation();
@@ -222,7 +221,7 @@ export function RecommendedCourseCard({ course, onCourseClick, accessMap = {} })
           </div>
         </div>
       </CardContent>
-      
+
       {/* Gradient overlay */}
       <div className='absolute bg-gradient-black inset-0 bg-gradient-green z-0'></div>
 
@@ -237,9 +236,10 @@ export function RecommendedCourseCard({ course, onCourseClick, accessMap = {} })
           lockReason={lockReason}
           lockMessage={lockMessage}
           className="rounded-lg"
+          contentType="course"
         />
       )}
-      
+
       {/* Plan Selection Modal */}
       <PlanSelectionModal
         open={showPlanModal}
