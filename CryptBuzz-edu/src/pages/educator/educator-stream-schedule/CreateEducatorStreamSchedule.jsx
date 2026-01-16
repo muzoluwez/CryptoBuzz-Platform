@@ -107,7 +107,7 @@ const CreateEducatorStreamSchedule = forwardRef(
         formData.append("description", values.description);
         formData.append("datetime", values.datetime);
         formData.append("language", values.language);
-        formData.append("accessType", values.accessType || "PUBLIC");
+        formData.append("accessType", values.accessType || "LOGGED_IN");
         values.tags.forEach((tag) => {
           formData.append(`tags[]`, tag);
         });
@@ -541,7 +541,7 @@ const CreateEducatorStreamSchedule = forwardRef(
                 </label>
 
                 <div className="flex flex-wrap gap-4 mt-2">
-                  {["PUBLIC", "LOGGED_IN", "UID_ONLY"].map((type) => (
+                  {["LOGGED_IN", "UID_ONLY"].map((type) => (
                     <label key={type} className="flex items-center gap-2 cursor-pointer">
                       <input
                         type="radio"

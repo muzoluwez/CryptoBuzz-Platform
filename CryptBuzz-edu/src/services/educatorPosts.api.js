@@ -66,6 +66,10 @@ export const createEducatorPost = async (postData) => {
         formData.append('category', postData.category);
     }
 
+    if (postData.accessType) {
+        formData.append('accessType', postData.accessType);
+    }
+
     // Add images array
     if (postData.images && postData.images.length > 0) {
         postData.images.forEach((image, index) => {
@@ -109,6 +113,10 @@ export const updateEducatorPost = async (id, postData) => {
     // Add category (matches backend field)
     if (postData.category) {
         formData.append('category', postData.category);
+    }
+
+    if (postData.accessType) {
+        formData.append('accessType', postData.accessType);
     }
 
     // Add images array

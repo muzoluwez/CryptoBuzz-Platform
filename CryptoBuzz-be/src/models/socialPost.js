@@ -78,6 +78,11 @@ const postSchema = new mongoose.Schema(
       enum: ["public", "followers", "private"],
       default: "public",
     },
+    accessType: {
+      type: String,
+      enum: ["PUBLIC", "LOGGED_IN", "UID_ONLY", "PLAN_BASED"],
+      default: "PUBLIC",
+    },
   },
   {
     timestamps: true,

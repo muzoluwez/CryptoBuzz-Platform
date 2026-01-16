@@ -27,7 +27,6 @@ export const getToken = async (req, res) => {
 
 export const createLiveStreamForSchedule = async (schedule) => {
   try {
-
     const callId = `${schedule.callId}`
       ? `${schedule.callId}`
       : `callId-${uuidv4()}`;
@@ -76,7 +75,7 @@ export const createLiveStreamForSchedule = async (schedule) => {
     let rtmp_URl = response?.call?.ingress?.rtmp?.address || null;
 
     // stable token generate karo (1 year valid)
-    const token = streamClient.generateUserToken({
+    let token = streamClient.generateUserToken({
       user_id: schedule.educator,
       validity_in_seconds: 31536000,
       video: {
@@ -99,21 +98,9 @@ export const createLiveStreamForSchedule = async (schedule) => {
       callId,
       token,
       rtmp_URl,
+      accessType: schedule.accessType || "LOGGED_IN",
     });
-    // }
 
-    // // 2. Har baar nayi schedule entry create karo (not update)
-    // const newScheduleEntry = await LiveStreamModel.create({
-    //   title: schedule.title,
-    //   educator: schedule.educator,
-    //   datetime: schedule.datetime,
-    //   callId, // same callId
-    //   token, // same token
-    //   rtmp_URl, // same RTMP URL
-    //   flag: false, // ye schedule record hai
-    // });
-
-    // 3. Agar schedule model bhi hai → usko update kar do
     schedule.generateToken = true;
     schedule.callId = callId;
     schedule.status = "pending";
@@ -142,10 +129,10 @@ export const updateLiveStreamForSchedule = async (schedule) => {
 
     const response = await call.getOrCreate({
       data: {
-        created_by_id: schedule.educator,
+        created_by_id: schedule.educator.id,
         members: [
           {
-            user_id: schedule.educator,
+            user_id: schedule.educator.id,
             role: "admin",
           },
         ],
@@ -211,6 +198,7 @@ export const updateLiveStreamForSchedule = async (schedule) => {
       existingSchedule.callId = schedule.callId ? schedule.callId : callId;
       existingSchedule.token = token;
       existingSchedule.rtmp_URl = rtmp_URl;
+      existingSchedule.accessType = schedule.accessType || "LOGGED_IN";
 
       await existingSchedule.save();
     }

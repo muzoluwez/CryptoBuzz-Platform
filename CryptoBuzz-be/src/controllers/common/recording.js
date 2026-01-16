@@ -57,11 +57,11 @@ export const createPermanentRecording = async (req, res) => {
 
     if (!session) return res.status(404).json({ message: "Session not found" });
 
-    const educator_name = `${session.educator?.first_name || ""} ${session.educator?.last_name || ""}`.trim();
+    const educator_name = `${session.educator?.first_name || "Unknown"} ${session.educator?.last_name || ""}`.trim();
     const category_name = session.category?.name || call_category || "General";
     const language = session.language || "English";
 
-    const projectId = session.educator?.projectId || "IcryHgzSpkys2tRtl3M8FQ";
+    const projectId = "IcryHgzSpkys2tRtl3M8FQ";
 
     const exists = await recordingModel.findOne({
       streamio_filename: filename
@@ -119,7 +119,10 @@ export const createPermanentRecording = async (req, res) => {
     });
     return res.status(200).json(ApiResponse(200, newRecording, "Permanent Recording uploaded"));
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    if (axios.isAxiosError(err)) {
+      console.error("Dyntube Error:", err.response?.data);
+    }
+    res.status(500).json({ message: err.message, details: err.response?.data });
   }
 };
 
@@ -142,6 +145,7 @@ export const createTemporaryRecording = async (req, res) => {
       call_tags
     } = req.body;
 
+
     const session = await Schedule.findOne({
       educator: educator_id,
       callId: call_id
@@ -149,16 +153,18 @@ export const createTemporaryRecording = async (req, res) => {
       .populate("educator", "first_name last_name projectId")
       .populate("category", "name");
 
+
     if (!session) return res.status(404).json({ message: "Session not found" });
 
-    const educator_name = `${session.educator?.first_name || ""} ${session.educator?.last_name || ""}`.trim();
+    const educator_name = `${session.educator?.first_name || "Unknown"} ${session.educator?.last_name || ""}`.trim();
     const category_name = session.category?.name || call_category || "General";
     const language = session.language || "English";
-    const projectId = session.educator?.projectId || "IcryHgzSpkys2tRtl3M8FQ";
+    const projectId = "IcryHgzSpkys2tRtl3M8FQ";
 
     const exists = await recordingModel.findOne({
       streamio_filename: filename
     });
+
 
     if (exists) return res.status(400).json({ message: "Recording already exist" });
 
@@ -185,6 +191,7 @@ export const createTemporaryRecording = async (req, res) => {
 
     const data = dyntubeResponse.data;
 
+
     const newRecording = await recordingModel.create({
       educator_id,
       session_id,
@@ -208,7 +215,11 @@ export const createTemporaryRecording = async (req, res) => {
 
     return res.status(200).json(ApiResponse(200, newRecording, "Temporary recording uploaded"));
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.log("ERROR", err);
+    if (axios.isAxiosError(err)) {
+      console.error("Dyntube Error Response:", err.response?.data);
+    }
+    res.status(500).json({ error: err.message, details: err.response?.data });
   }
 };
 

@@ -285,6 +285,7 @@ const educatorPostSlice = createSlice({
           likeCount: post?.likeCount || 0,
           commentCount: post?.commentCount || 0,
           shareCount: post?.shareCount || 0,
+          accessType: post?.accessType || "PUBLIC",
         }));
         if (action.payload.append) {
           state.posts = [...state.posts, ...postsToAdd];
@@ -354,6 +355,7 @@ const educatorPostSlice = createSlice({
           likeCount: postData.likeCount || 0,
           commentCount: postData.commentCount || 0,
           shareCount: postData.shareCount || 0,
+          accessType: postData.accessType || "PUBLIC",
         };
 
         state.posts.unshift(newPost);
@@ -406,6 +408,7 @@ const educatorPostSlice = createSlice({
           likeCount: postData.likeCount || 0,
           commentCount: postData.commentCount || 0,
           shareCount: postData.shareCount || 0,
+          accessType: postData.accessType || "PUBLIC",
         };
         const index = state.posts.findIndex(
           (post) => post.id === updatedPost.id

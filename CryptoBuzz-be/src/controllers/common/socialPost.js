@@ -92,7 +92,7 @@ export const getPosts = async (req, res) => {
 // -------------------------------------------
 export const createPost = async (req, res) => {
   try {
-    const { content, visibility, category } = req.body;
+    const { content, visibility, category, accessType = "PUBLIC" } = req.body;
 
     if (!req.user) {
       return res.status(400).json({ status: false, message: "Id is required" });
@@ -120,7 +120,8 @@ export const createPost = async (req, res) => {
       images,
       videos,
       category: category || "General Updates",
-      visibility: visibility || "public"
+      visibility: visibility || "public",
+      accessType: accessType || "PUBLIC"
     });
 
     await post.save();
@@ -148,7 +149,7 @@ export const createPost = async (req, res) => {
 export const updatePost = async (req, res) => {
   try {
     const { postId } = req.params;
-    const { content, visibility, category } = req.body;
+    const { content, visibility, category, accessType = "PUBLIC" } = req.body;
 
     const post = await PostModel.findById(postId);
     if (!post) return res.status(404).json({ message: "Post not found" });
@@ -160,11 +161,12 @@ export const updatePost = async (req, res) => {
     if (content) post.content = content;
     if (visibility) post.visibility = visibility;
     if (category) post.category = category;
+    if (accessType) post.accessType = accessType;
 
     // Replace images
     if (req.files?.images) {
       for (const img of post.images) {
-        if (img.url) await deleteImageFromAzure(img.url).catch(() => {});
+        if (img.url) await deleteImageFromAzure(img.url).catch(() => { });
       }
 
       const newImages = [];
@@ -179,7 +181,7 @@ export const updatePost = async (req, res) => {
     // Replace videos
     if (req.files?.videos) {
       for (const vid of post.videos) {
-        if (vid.url) await deleteVideoFromAzure(vid.url).catch(() => {});
+        if (vid.url) await deleteVideoFromAzure(vid.url).catch(() => { });
       }
 
       const newVideos = [];
@@ -216,11 +218,11 @@ export const deletePost = async (req, res) => {
     }
 
     for (const img of post.images) {
-      if (img.url) await deleteImageFromAzure(img.url).catch(() => {});
+      if (img.url) await deleteImageFromAzure(img.url).catch(() => { });
     }
 
     for (const vid of post.videos) {
-      if (vid.url) await deleteVideoFromAzure(vid.url).catch(() => {});
+      if (vid.url) await deleteVideoFromAzure(vid.url).catch(() => { });
     }
 
     await PostModel.findByIdAndDelete(req.params.id);

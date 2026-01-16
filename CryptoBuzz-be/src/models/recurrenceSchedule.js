@@ -34,6 +34,11 @@ const RecurrenceScheduleSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "RecurrenceRule",
     },
+    accessType: {
+      type: String,
+      enum: ["PUBLIC", "LOGGED_IN", "UID_ONLY", "PLAN_BASED"],
+      default: "LOGGED_IN",
+    },
 
     datetime: {
       type: Date,

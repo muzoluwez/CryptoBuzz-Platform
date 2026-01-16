@@ -82,7 +82,7 @@ const CreatePostModal = ({ isOpen, onClose, editingPost = null }) => {
       setDocuments(editingPost.documents || []);
       setVisibility(editingPost.visibility || "public");
       setCategory(editingPost.category || "General Updates");
-      setAccessType(editingPost.access_type || "PUBLIC");
+      setAccessType(editingPost.accessType || "PUBLIC");
 
       // Set initialization flag after a short delay to prevent immediate closure
       setTimeout(() => {
@@ -289,8 +289,6 @@ const CreatePostModal = ({ isOpen, onClose, editingPost = null }) => {
         accessType: accessType || "PUBLIC",
       };
 
-      console.log("Post Data:", postData);
-
       // Only include files in the API call if they've actually changed
       if (hasFilesChanged()) {
         postData.images = processFiles(images);
@@ -479,27 +477,27 @@ const CreatePostModal = ({ isOpen, onClose, editingPost = null }) => {
               </div>
             </div>
 
-           <div className="flex flex-col gap-2">
-                  <label className="font-medium text-gray-700">
-                    Access Type<span className="text-danger">*</span>
-                  </label>
+            <div className="flex flex-col gap-2">
+              <label className="font-medium text-gray-700">
+                Access Type<span className="text-danger">*</span>
+              </label>
 
-                  <div className="flex items-center gap-6">
-                    {["PUBLIC", "LOGGED_IN", "UID_ONLY"].map((type) => (
-                      <label key={type} className="flex items-center gap-2 cursor-pointer">
-                        <input
-                          type="radio"
-                          name="accessType"
-                          value={type}
-                          checked={accessType === type}
-                          onChange={() => setAccessType(type)}
-                          className="radio radio-primary"
-                        />
-                        <span className="text-sm">{type.replace("_", " ")}</span>
-                      </label>
-                    ))}
-                  </div>
-                </div>
+              <div className="flex items-center gap-6">
+                {["PUBLIC", "LOGGED_IN", "UID_ONLY"].map((type) => (
+                  <label key={type} className="flex items-center gap-2 cursor-pointer">
+                    <input
+                      type="radio"
+                      name="accessType"
+                      value={type}
+                      checked={accessType === type}
+                      onChange={() => setAccessType(type)}
+                      className="radio radio-primary"
+                    />
+                    <span className="text-sm">{type.replace("_", " ")}</span>
+                  </label>
+                ))}
+              </div>
+            </div>
 
             {/* Selected Files Preview */}
             {(images.length > 0 ||

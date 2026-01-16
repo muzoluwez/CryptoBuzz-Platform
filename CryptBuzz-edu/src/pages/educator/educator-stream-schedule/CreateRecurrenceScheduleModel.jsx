@@ -50,7 +50,7 @@ const CreateRecurrenceScheduleModel = forwardRef(
       tags: [],
       category: "",
       language: "",
-      accessType: "PUBLIC",
+      accessType: "LOGGED_IN",
       recurrenceRule: {
         frequency: "NONE",
         interval: 1,
@@ -157,7 +157,7 @@ const CreateRecurrenceScheduleModel = forwardRef(
           formData.append("category", values.category);
           formData.append("language", values.language);
           formData.append("educator", educatorId);
-          formData.append("accessType", values.accessType || "PUBLIC");
+          formData.append("accessType", values.accessType || "LOGGED_IN");
 
           values.tags.forEach((tag) => {
             formData.append("tags[]", tag);
@@ -223,7 +223,7 @@ const CreateRecurrenceScheduleModel = forwardRef(
           tags: selectedRow?.tags || [],
           category: selectedRow?.category?._id,
           language: selectedRow?.language,
-          accessType: selectedRow?.accessType || "PUBLIC",
+          accessType: selectedRow?.accessType || "LOGGED_IN",
           recurrenceRule: {
             frequency: selectedRow?.recurrenceRuleId?.frequency || "NONE",
             interval: selectedRow?.recurrenceRuleId?.interval || 1,
@@ -443,7 +443,7 @@ const CreateRecurrenceScheduleModel = forwardRef(
                   </label>
 
                   <div className="flex gap-6">
-                    {["PUBLIC", "LOGGED_IN", "UID_ONLY"].map((type) => (
+                    {["LOGGED_IN", "UID_ONLY"].map((type) => (
                       <label key={type} className="flex items-center gap-2 cursor-pointer">
                         <input
                           type="radio"

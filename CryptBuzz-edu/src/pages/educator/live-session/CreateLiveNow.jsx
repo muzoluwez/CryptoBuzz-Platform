@@ -46,7 +46,7 @@ const CreateLiveStream = forwardRef(
       tags: [],
       category: "",
       language: "",
-      accessType: "PUBLIC",
+      accessType: "LOGGED_IN",
     };
 
     const createSchema = Yup.object().shape({
@@ -58,7 +58,7 @@ const CreateLiveStream = forwardRef(
         .of(Yup.string().required("Tag cannot be empty")),
 
       language: Yup.string().required("Language is required"),
-      accessType: Yup.string().required("Access type is required"),
+      accessType: Yup.string().required("Access type is required").default("LOGGED_IN"),
     });
 
 
@@ -77,7 +77,7 @@ const CreateLiveStream = forwardRef(
             category: values.category, // category _id
             tags: values.tags,
             language: values.language,
-            accessType: values.accessType || "PUBLIC",
+            accessType: values.accessType || "LOGGED_IN",
           };
 
 
@@ -262,7 +262,7 @@ const CreateLiveStream = forwardRef(
                   </label>
 
                   <div className="flex gap-6">
-                    {["PUBLIC", "LOGGED_IN", "UID_ONLY"].map((type) => (
+                    {["LOGGED_IN", "UID_ONLY"].map((type) => (
                       <label key={type} className="flex items-center gap-2 cursor-pointer">
                         <input
                           type="radio"

@@ -36,6 +36,12 @@ const ScheduleSchema = new mongoose.Schema(
       default: "pending",
     },
 
+    accessType: {
+      type: String,
+      enum: ["PUBLIC", "LOGGED_IN", "UID_ONLY", "PLAN_BASED"],
+      default: "LOGGED_IN",
+    },
+
     educator: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "user",
