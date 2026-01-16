@@ -3,17 +3,23 @@ import ImageViewer from '@/components/common/ImageViewer';
 import ImageCarousel from '@/components/common/ImageCarousel';
 import { useGetTradeAnalysisQuery } from '@/store/client/clientTradeAnalysisApiSlice';
 import { Lock } from 'lucide-react';
+import { toast } from 'sonner';
 import {
   convertRtkEditorToDisplayFormat,
   convertRtkEditorToFormattedPlainText,
 } from '@/lib/rtkEditorUtils';
 import { useNavigate } from 'react-router-dom';
-import { useGrantAccess } from '@/context/GrantAccessContext';
+import { checkAccess } from '@/utils/accessControl';
+import { CourseLockOverlay } from '@/components/payment/CourseLockOverlay';
+import { PlanSelectionModal } from '@/components/payment/PlanSelectionModal';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import ViewInsightModel from '@/components/models/ViewInsightModel';
+import { useSelector } from 'react-redux';
+import { selectCurrentUser, selectIsAuthenticated } from '@/store/authSlice';
+import { useGetPurchasedPlanIdsQuery } from '@/store/client/clientPaymentApiSlice';
 
 import {
   Toolbar,
@@ -27,8 +33,26 @@ export default function InsightPage() {
   const [selectedInsight, setSelectedInsight] = useState(null);
   const [selectedImage, setSelectedImage] = useState(null);
   const [activeTab, setActiveTab] = useState('All');
-  const { checkAccess } = useGrantAccess();
+  const [showPlanModal, setShowPlanModal] = useState(false);
+  const [selectedContentForPurchase, setSelectedContentForPurchase] = useState(null);
   const navigate = useNavigate();
+  
+  // Access control hooks - called at component level
+  const isAuthenticated = useSelector(selectIsAuthenticated);
+  const user = useSelector(selectCurrentUser);
+  const { data: purchasedPlansData } = useGetPurchasedPlanIdsQuery(undefined, {
+    skip: !isAuthenticated,
+  });
+  
+  const purchasedPlanIds = useMemo(() => {
+    if (!purchasedPlansData?.data?.planIds) return new Set();
+    return new Set(purchasedPlansData.data.planIds);
+  }, [purchasedPlansData]);
+  
+  const userUid = useMemo(() => {
+    if (!user) return null;
+    return user.uid || user.credential?.uid || null;
+  }, [user]);
 
 
   // ------------------- API CALL -------------------
@@ -114,7 +138,9 @@ export default function InsightPage() {
         image: image,
         avatar: avatar,
         accessType: insight.accessType || 'PUBLIC',
-        allowedPlans: insight.allowedPlans || [],
+        tier: insight.accessType || 'PUBLIC', // Use tier for unified access control
+        plans: insight.plans || insight.allowedPlans || [], // Support both new (plans) and old (allowedPlans) format
+        allowedPlans: insight.allowedPlans || [], // Keep for backward compatibility
         url: insight.url,
         data: insight.data,
         photos: insight.photos || [],
@@ -212,42 +238,120 @@ export default function InsightPage() {
             )}
 
             {filteredInsights.map((insight) => {
-              const { hasAccess } = checkAccess({
-                accessType: insight.accessType,
-                allowedPlans: insight.allowedPlans,
+              // Compute access control using utility function (not hook) inside map
+              const tier = insight.tier || insight.accessType || "PUBLIC";
+              const contentPlans = (insight.plans || insight.allowedPlans || []).map(p => (p?._id || p)?.toString()).filter(Boolean);
+              
+              // Check if user has purchased any plan associated with this content
+              const hasPurchase = tier === "PRO" && contentPlans.length > 0 && purchasedPlanIds.size > 0
+                ? contentPlans.some(planId => purchasedPlanIds.has(planId))
+                : false;
+              
+              // Use checkAccess utility function (not hook)
+              const { hasAccess, showLock, lockReason, lockMessage } = checkAccess({
+                tier,
+                isAuthenticated,
+                userUid,
+                hasPurchase,
+                isPremium: tier === "PRO",
               });
+              
+              const isLocked = showLock && !hasAccess;
+
+              // Handle purchase action (only called when user is authenticated)
+              const handlePurchase = () => {
+                if (tier === 'PRO' && isAuthenticated) {
+                  // Debug: Log the insight object to see what we're working with
+                  console.log('Insight object for purchase:', insight);
+                  console.log('Plans from insight:', insight.plans);
+                  
+                  // Get plans from the content item
+                  // Plans can come as an array of objects (populated) or array of IDs (not populated)
+                  const rawPlans = insight.plans || insight.allowedPlans || [];
+                  console.log('Raw plans array:', rawPlans);
+                  
+                  // Filter out null/undefined and map to proper format
+                  const contentPlans = rawPlans
+                    .filter(p => p && (p._id || p))
+                    .map(p => {
+                      // If p is just an ID string, return null (we'd need to fetch it, but for now skip)
+                      if (typeof p === 'string') {
+                        console.warn('Plan is a string ID, not populated:', p);
+                        return null;
+                      }
+                      // If p is an object with _id, it's populated
+                      return {
+                        _id: p._id || p,
+                        name: p.name || 'Plan',
+                        description: p.description || '',
+                        price: p.price || 0,
+                        hotmartCheckoutUrl: p.hotmartCheckoutUrl || '',
+                      };
+                    })
+                    .filter(Boolean); // Remove null entries
+                  
+                  console.log('Processed content plans:', contentPlans);
+                  
+                  if (contentPlans.length === 0) {
+                    toast.error('No plans available for this content');
+                    console.error('No valid plans found. Raw plans:', rawPlans);
+                    return;
+                  }
+                  
+                  // If multiple plans, show selection modal
+                  if (contentPlans.length > 1) {
+                    setSelectedContentForPurchase({
+                      id: insight._id,
+                      title: insight.title,
+                      plans: contentPlans,
+                      contentType: 'insight',
+                    });
+                    setShowPlanModal(true);
+                  } else {
+                    // Single plan - redirect directly to checkout
+                    const plan = contentPlans[0];
+                    if (plan.hotmartCheckoutUrl) {
+                      window.location.href = plan.hotmartCheckoutUrl;
+                    } else {
+                      toast.error('Checkout URL not available for this plan');
+                    }
+                  }
+                }
+              };
 
               return (
                 <div
                   className="relative h-full"
-                  onMouseEnter={() => !hasAccess && setHoveredInsightId(insight._id)}
-                  onMouseLeave={() => setHoveredInsightId(null)}
+                  key={insight?._id || insight?.id}
                 >
                   <Card
-                    key={insight?._id || insight?.id}
                     className="bg-card border border-border overflow-hidden h-full"
                   >
 
                     {/* image */}
                     <div className="w-full h-44 overflow-hidden relative">
-                      {!hasAccess && (
-                        <div className="absolute inset-0 bg-black/40 backdrop-blur-[2px] flex items-center justify-center z-30 pointer-events-none">
-                          <Lock className="w-8 h-8 text-white/80" />
-                        </div>
+                      <div className={isLocked ? 'blur-[2px]' : ''}>
+                        <ImageCarousel
+                          images={
+                            insight?.photos && Array.isArray(insight.photos) && insight.photos.length > 0
+                              ? insight.photos
+                              : insight?.image
+                                ? [insight.image]
+                                : []
+                          }
+                          alt={insight?.title || "Trade insight"}
+                          height="h-44"
+                          showViewButton={hasAccess}
+                        />
+                      </div>
+                      {isLocked && (
+                        <CourseLockOverlay
+                          tier={tier}
+                          lockReason={lockReason}
+                          lockMessage={lockMessage}
+                          onPurchase={handlePurchase}
+                        />
                       )}
-                      <ImageCarousel
-                        images={
-                          insight?.photos && Array.isArray(insight.photos) && insight.photos.length > 0
-                            ? insight.photos
-                            : insight?.image
-                              ? [insight.image]
-                              : []
-                        }
-                        alt={insight?.title || "Trade insight"}
-                        height="h-44"
-                        showViewButton={hasAccess}
-                        className={!hasAccess ? "blur-sm pointer-events-none" : ""}
-                      />
                     </div>
 
                     <CardContent className="p-4">
@@ -330,6 +434,25 @@ export default function InsightPage() {
           </div>
         )}
       </div>
+
+      {/* Plan Selection Modal */}
+      {selectedContentForPurchase && (
+        <PlanSelectionModal
+          open={showPlanModal}
+          onOpenChange={setShowPlanModal}
+          courseId={selectedContentForPurchase.id} // Reusing courseId prop name for compatibility
+          courseTitle={selectedContentForPurchase.title}
+          plans={selectedContentForPurchase.plans}
+          useDirectPlanCheckout={true} // Use plan's checkout URL directly (non-course content)
+          onPurchaseSuccess={() => {
+            setShowPlanModal(false);
+            setSelectedContentForPurchase(null);
+          }}
+          onPurchaseError={() => {
+            setShowPlanModal(false);
+          }}
+        />
+      )}
 
       {/* ------------------- MODAL ------------------- */}
       <ViewInsightModel

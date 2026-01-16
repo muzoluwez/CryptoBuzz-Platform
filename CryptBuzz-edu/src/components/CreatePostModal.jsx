@@ -37,6 +37,8 @@ import { Alert } from "@/components/alert/Alert";
 import { toast } from "sonner";
 import { useAuthContext } from "@/auth/useAuthContext";
 import { isJwtExpiredError, handleJwtExpired } from "@/utils/authUtils";
+import { Checkbox } from "@/components/ui/checkbox";
+import { useFetchPlansQuery } from "@/store/api/educator/educatorPlanApiSlice";
 
 const CreatePostModal = ({ isOpen, onClose, editingPost = null }) => {
   const dispatch = useDispatch();
@@ -56,6 +58,10 @@ const CreatePostModal = ({ isOpen, onClose, editingPost = null }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [hasInitialized, setHasInitialized] = useState(false);
   const [accessType, setAccessType] = useState("PUBLIC");
+  const [plans, setPlans] = useState([]);
+
+  const { data: plansData } = useFetchPlansQuery();
+  const availablePlans = plansData?.data || [];
 
   const imageInputRef = useRef(null);
   const videoInputRef = useRef(null);
@@ -82,7 +88,27 @@ const CreatePostModal = ({ isOpen, onClose, editingPost = null }) => {
       setDocuments(editingPost.documents || []);
       setVisibility(editingPost.visibility || "public");
       setCategory(editingPost.category || "General Updates");
-      setAccessType(editingPost.access_type || "PUBLIC");
+      // Try multiple field names: access_type, accessType, tier (for compatibility)
+      const accessTypeValue = editingPost.access_type || editingPost.accessType || editingPost.tier || "PUBLIC";
+      setAccessType(accessTypeValue);
+      
+      // Plans can be an array of objects (with _id) or an array of strings (IDs)
+      const plansData = editingPost.plans || [];
+      const planIds = plansData.map(p => {
+        if (typeof p === 'string') return p;
+        if (p?._id) return p._id.toString();
+        if (p?.toString) return p.toString();
+        return null;
+      }).filter(Boolean);
+      setPlans(planIds);
+      
+      // Debug logging
+      console.log('Edit Post Data:', {
+        accessType: accessTypeValue,
+        plans: planIds,
+        rawPlans: plansData,
+        rawPost: editingPost
+      });
 
       // Set initialization flag after a short delay to prevent immediate closure
       setTimeout(() => {
@@ -134,6 +160,7 @@ const CreatePostModal = ({ isOpen, onClose, editingPost = null }) => {
     setVisibility("public");
     setCategory("General Updates");
     setAccessType("PUBLIC");
+    setPlans([]);
     setIsSubmitting(false);
     setIsEditing(false);
     setHasInitialized(false);
@@ -287,6 +314,7 @@ const CreatePostModal = ({ isOpen, onClose, editingPost = null }) => {
         visibility,
         category,
         accessType: accessType || "PUBLIC",
+        plans: accessType === "PRO" ? plans : [],
       };
 
       // Only include files in the API call if they've actually changed
@@ -298,7 +326,7 @@ const CreatePostModal = ({ isOpen, onClose, editingPost = null }) => {
 
       if (editingPost) {
         await dispatch(
-          updateEducatorPost({ id: editingPost.id, postData })
+          updateEducatorPost({ id: editingPost.id || editingPost._id, postData })
         ).unwrap();
         toast.success("Post updated successfully!");
         // Close modal after a short delay so user can see the success message
@@ -483,14 +511,19 @@ const CreatePostModal = ({ isOpen, onClose, editingPost = null }) => {
                   </label>
 
                   <div className="flex items-center gap-6">
-                    {["PUBLIC", "LOGGED_IN", "UID_ONLY"].map((type) => (
+                    {["PUBLIC", "LOGGED_IN", "UID_ONLY", "PRO"].map((type) => (
                       <label key={type} className="flex items-center gap-2 cursor-pointer">
                         <input
                           type="radio"
                           name="accessType"
                           value={type}
                           checked={accessType === type}
-                          onChange={() => setAccessType(type)}
+                          onChange={() => {
+                            setAccessType(type);
+                            if (type !== "PRO") {
+                              setPlans([]);
+                            }
+                          }}
                           className="radio radio-primary"
                         />
                         <span className="text-sm">{type.replace("_", " ")}</span>
@@ -498,6 +531,64 @@ const CreatePostModal = ({ isOpen, onClose, editingPost = null }) => {
                     ))}
                   </div>
                 </div>
+
+                {/* Payment Plans Section - Only show when PRO is selected */}
+                {accessType === "PRO" && (
+                  <div className="flex flex-col gap-2">
+                    <label className="font-medium text-gray-700">
+                      Payment Plans<span className="text-danger">*</span>
+                    </label>
+                    <p className="text-sm text-gray-500 mb-2">
+                      Select payment plan(s) for this premium post.
+                    </p>
+                    <div className="flex flex-col gap-3 p-4 border border-gray-200 rounded-lg max-h-48 overflow-y-auto">
+                      {availablePlans.length === 0 ? (
+                        <p className="text-sm text-gray-500">No plans available</p>
+                      ) : (
+                        availablePlans.map((plan) => {
+                          const isSelected = plans.includes(plan._id);
+                          return (
+                            <div
+                              key={plan._id}
+                              className="flex items-center gap-3 p-2 hover:bg-gray-50 rounded cursor-pointer"
+                            >
+                              <Checkbox
+                                checked={isSelected}
+                                onCheckedChange={(checked) => {
+                                  const currentPlans = plans || [];
+                                  const newPlans = checked
+                                    ? [...currentPlans, plan._id]
+                                    : currentPlans.filter((id) => id !== plan._id);
+                                  setPlans(newPlans);
+                                }}
+                              />
+                              <div className="flex-1">
+                                <label className="text-sm font-medium text-gray-700 cursor-pointer">
+                                  {plan.name}
+                                </label>
+                                {plan.description && (
+                                  <p className="text-xs text-gray-500 mt-1">
+                                    {plan.description}
+                                  </p>
+                                )}
+                                {plan.price !== undefined && (
+                                  <p className="text-xs text-gray-600 mt-1">
+                                    ${plan.price?.toFixed(2) || "0.00"}
+                                  </p>
+                                )}
+                              </div>
+                            </div>
+                          );
+                        })
+                      )}
+                    </div>
+                    {plans.length > 0 && (
+                      <div className="mt-2 text-sm text-gray-600">
+                        {plans.length} plan{plans.length !== 1 ? "s" : ""} selected
+                      </div>
+                    )}
+                  </div>
+                )}
 
             {/* Selected Files Preview */}
             {(images.length > 0 ||

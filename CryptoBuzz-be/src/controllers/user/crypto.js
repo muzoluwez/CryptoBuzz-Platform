@@ -54,6 +54,7 @@ export const getCryptos = asyncHandler(async (req, res) => {
             .limit(limitNum)
             .populate("category", "_id name")
             .populate("createdBy", "_id first_name last_name image")
+            .populate("plans", "name price description hotmartCheckoutCode hotmartCheckoutUrl")
             .lean(),
         Crypto.countDocuments(query)
     ]);
@@ -65,6 +66,7 @@ export const getCryptos = asyncHandler(async (req, res) => {
         url: crypto.url,
         photos: crypto.photos,
         accessType: crypto.accessType,
+        plans: crypto.plans || [], // Include populated plans
         createdAt: crypto.createdAt,
         category: crypto.category,
         createdBy: crypto.createdBy

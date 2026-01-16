@@ -1,32 +1,55 @@
 import { useMemo, useState } from 'react';
 import { useGetSocialsQuery } from '@/store/client/clientSocialApiSlice';
 import { Button } from 'react-aria-components';
-import { Link } from 'react-router';
-import { useAccessControl } from '@/hooks/use-access-control';
+import { Link, useNavigate } from 'react-router';
+import { toast } from 'sonner';
+import { checkAccess } from '@/utils/accessControl';
+import { CourseLockOverlay } from '@/components/payment/CourseLockOverlay';
+import { PlanSelectionModal } from '@/components/payment/PlanSelectionModal';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuLabel, DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { AccessGate } from '@/components/common/AccessGate';
 import ImageCarousel from '@/components/common/ImageCarousel';
 import ImageViewer from '@/components/common/ImageViewer';
 import ShowMoreLess from '@/components/common/ShowMoreLess';
 import { Toolbar, ToolbarHeading } from '@/components/layouts/layout-7/components/toolbar';
 import { Card, CardContent, CardFooter, CardHeader, CardHeading, CardTitle, CardToolbar } from '../../../components/ui/card';
 import useDocumentTitle from '../../../hooks/use-document-title';
+import { useSelector } from 'react-redux';
+import { selectCurrentUser, selectIsAuthenticated } from '@/store/authSlice';
+import { useGetPurchasedPlanIdsQuery } from '@/store/client/clientPaymentApiSlice';
 
 
 export default function SocialPage() {
   useDocumentTitle('Social');
+  const navigate = useNavigate();
   const [sortValue, setSortValue] = useState('latest');
   const [selectedImage, setSelectedImage] = useState(null);
   const [selectedImages, setSelectedImages] = useState([]);
+  const [showPlanModal, setShowPlanModal] = useState(false);
+  const [selectedContentForPurchase, setSelectedContentForPurchase] = useState(null);
   const [filters, setFilters] = useState({
     images: false,
     videos: false,
     textPosts: false,
   });
-
-  const { checkAccess } = useAccessControl();
+  
+  // Access control hooks - called at component level
+  const isAuthenticated = useSelector(selectIsAuthenticated);
+  const user = useSelector(selectCurrentUser);
+  const { data: purchasedPlansData } = useGetPurchasedPlanIdsQuery(undefined, {
+    skip: !isAuthenticated,
+  });
+  
+  const purchasedPlanIds = useMemo(() => {
+    if (!purchasedPlansData?.data?.planIds) return new Set();
+    return new Set(purchasedPlansData.data.planIds);
+  }, [purchasedPlansData]);
+  
+  const userUid = useMemo(() => {
+    if (!user) return null;
+    return user.uid || user.credential?.uid || null;
+  }, [user]);
 
   // Fetch social posts from API
   const { data, isLoading, isError, error } = useGetSocialsQuery({
@@ -105,8 +128,8 @@ export default function SocialPage() {
         (post?.shares?.length || 0);
       const views = totalViews > 0 ? formatViews(totalViews) : '0';
 
-      // Make all posts PUBLIC (free access)
-      const accessType = 'PUBLIC';
+      // Get access type from post (can be PUBLIC, LOGGED_IN, UID_ONLY, PRO)
+      const accessType = post?.tier || post?.accessType || 'PUBLIC';
 
       // Get category for host name
       const category = post?.category || 'Event';
@@ -131,7 +154,9 @@ export default function SocialPage() {
         },
         views: views,
         accessType: accessType,
-        allowedPlans: post?.allowedPlans || [],
+        tier: post?.tier || post?.accessType || 'PUBLIC', // Use tier for unified access control
+        plans: post?.plans || post?.allowedPlans || [], // Support both new (plans) and old (allowedPlans) format
+        allowedPlans: post?.allowedPlans || [], // Keep for backward compatibility
         category: category,
         hashtags: post?.hashtags || [],
         mentions: post?.mentions || [],
@@ -265,39 +290,90 @@ export default function SocialPage() {
           </DropdownMenu> */}
         </div>
         <div>
-          {posts?.map((post) => (
-            <AccessGate
-              key={post?.id || post?._id}
-              accessType={post?.accessType}
-              allowedPlans={post?.allowedPlans || []}
-              fallback={
-                <Card className="max-w-full overflow-hidden rounded-xl shadow-md mb-5 opacity-75">
-                  <CardHeader className="p-4 justify-between blur-[2px]">
-                    {/* Masked Header */}
-                    <div className="flex items-start gap-3">
-                      <Avatar className="h-10 w-10">
-                        <AvatarFallback>?</AvatarFallback>
-                      </Avatar>
-                      <div className="flex-1">
-                        <div className="h-4 w-32 bg-gray-200 rounded animate-pulse mb-2"></div>
-                        <div className="h-3 w-24 bg-gray-100 rounded animate-pulse"></div>
-                      </div>
-                    </div>
-                  </CardHeader>
-                  <CardContent className="p-4 pt-2 flex flex-col items-center justify-center min-h-[200px] gap-3">
-                    <span className="text-lg font-semibold text-gray-500">
-                      {post.accessType === 'LOGIN_REQUIRED'
-                        ? 'Login to view this post'
-                        : 'Upgrade to view this post'}
-                    </span>
-                    <Button className="bg-primary text-white" disabled>
-                      Locked Content
-                    </Button>
-                  </CardContent>
-                </Card>
+          {posts?.map((post) => {
+            // Compute access control using utility function (not hook) inside map
+            const tier = post.tier || post.accessType || "PUBLIC";
+            const contentPlans = (post.plans || post.allowedPlans || []).map(p => (p?._id || p)?.toString()).filter(Boolean);
+            
+            // Check if user has purchased any plan associated with this content
+            const hasPurchase = tier === "PRO" && contentPlans.length > 0 && purchasedPlanIds.size > 0
+              ? contentPlans.some(planId => purchasedPlanIds.has(planId))
+              : false;
+            
+            // Use checkAccess utility function (not hook)
+            const { hasAccess, showLock, lockReason, lockMessage } = checkAccess({
+              tier,
+              isAuthenticated,
+              userUid,
+              hasPurchase,
+              isPremium: tier === "PRO",
+            });
+            
+            const isLocked = showLock && !hasAccess;
+
+            // Handle purchase action (only called when user is authenticated)
+            const handlePurchase = () => {
+              if (tier === 'PRO' && isAuthenticated) {
+                // Debug: Log the post object to see what we're working with
+                console.log('Post object for purchase:', post);
+                console.log('Plans from post:', post.plans);
+                
+                // Get plans from the content item
+                // Plans can come as an array of objects (populated) or array of IDs (not populated)
+                const rawPlans = post.plans || [];
+                console.log('Raw plans array:', rawPlans);
+                
+                // Filter out null/undefined and map to proper format
+                const contentPlans = rawPlans
+                  .filter(p => p && (p._id || p))
+                  .map(p => {
+                    // If p is just an ID string, return null (we'd need to fetch it, but for now skip)
+                    if (typeof p === 'string') {
+                      console.warn('Plan is a string ID, not populated:', p);
+                      return null;
+                    }
+                    // If p is an object with _id, it's populated
+                    return {
+                      _id: p._id || p,
+                      name: p.name || 'Plan',
+                      description: p.description || '',
+                      price: p.price || 0,
+                      hotmartCheckoutUrl: p.hotmartCheckoutUrl || '',
+                    };
+                  })
+                  .filter(Boolean); // Remove null entries
+                
+                console.log('Processed content plans:', contentPlans);
+                
+                if (contentPlans.length === 0) {
+                  toast.error('No plans available for this content');
+                  console.error('No valid plans found. Raw plans:', rawPlans);
+                  return;
+                }
+                
+                // If multiple plans, show selection modal
+                if (contentPlans.length > 1) {
+                  setSelectedContentForPurchase({
+                    id: post._id || post.id,
+                    title: post.content?.substring(0, 50) || 'Social Post',
+                    plans: contentPlans,
+                    contentType: 'post',
+                  });
+                  setShowPlanModal(true);
+                } else {
+                  // Single plan - redirect directly to checkout
+                  const plan = contentPlans[0];
+                  if (plan.hotmartCheckoutUrl) {
+                    window.location.href = plan.hotmartCheckoutUrl;
+                  } else {
+                    toast.error('Checkout URL not available for this plan');
+                  }
+                }
               }
-            >
-              <Card className="max-w-full overflow-hidden rounded-xl shadow-md mb-5">
+            };
+
+            return (
+              <Card key={post?.id || post?._id} className={`max-w-full overflow-hidden rounded-xl shadow-md mb-5 relative ${isLocked ? 'opacity-90' : ''}`}>
                 <CardHeader className="p-4 justify-between">
                   <div className="flex items-center gap-3">
                     <Avatar className="h-10 w-10">
@@ -338,7 +414,7 @@ export default function SocialPage() {
                   </CardToolbar> */}
                 </CardHeader>
 
-                <CardContent className="p-4 pt-2">
+                <CardContent className={`p-4 pt-2 relative ${isLocked ? 'blur-[2px] opacity-85' : ''}`}>
                   <div className="">
                     <div className="text-sm text-gray-600 dark:text-gray-300 mt-2">
                       {post?.content ? (
@@ -353,13 +429,15 @@ export default function SocialPage() {
                     Array.isArray(post.images) &&
                     post.images.length > 0 && (
                       <div className="rounded-xl overflow-hidden h-72 relative mt-5 mb-4">
-                        <ImageCarousel
-                          images={post.images}
-                          alt={post?.content || 'Social post'}
-                          height="h-72"
-                          showViewButton={true}
-                          className="rounded-xl"
-                        />
+                        <div className={isLocked ? 'blur-[2px]' : ''}>
+                          <ImageCarousel
+                            images={post.images}
+                            alt={post?.content || 'Social post'}
+                            height="h-72"
+                            showViewButton={hasAccess}
+                            className="rounded-xl"
+                          />
+                        </div>
                         {/* <Link
                           to="/client/viewprofile"
                           className="absolute inset-0 z-10"
@@ -405,6 +483,14 @@ export default function SocialPage() {
                         ))}
                       </div>
                     )}
+                  {isLocked && (
+                    <CourseLockOverlay
+                      tier={tier}
+                      lockReason={lockReason}
+                      lockMessage={lockMessage}
+                      onPurchase={handlePurchase}
+                    />
+                  )}
                 </CardContent>
 
                 {/* <CardFooter className="p-4 pt-2 flex items-center justify-between">
@@ -439,10 +525,29 @@ export default function SocialPage() {
                   </div>
                 </CardFooter> */}
               </Card>
-            </AccessGate>
-          ))}
+            );
+          })}
         </div>
       </div>
+
+      {/* Plan Selection Modal */}
+      {selectedContentForPurchase && (
+        <PlanSelectionModal
+          open={showPlanModal}
+          onOpenChange={setShowPlanModal}
+          courseId={selectedContentForPurchase.id} // Reusing courseId prop name for compatibility
+          courseTitle={selectedContentForPurchase.title}
+          plans={selectedContentForPurchase.plans}
+          useDirectPlanCheckout={true} // Use plan's checkout URL directly (non-course content)
+          onPurchaseSuccess={() => {
+            setShowPlanModal(false);
+            setSelectedContentForPurchase(null);
+          }}
+          onPurchaseError={() => {
+            setShowPlanModal(false);
+          }}
+        />
+      )}
 
       {/* Image Viewer Modal */}
       <ImageViewer

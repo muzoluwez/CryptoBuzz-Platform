@@ -1,5 +1,8 @@
 import { useMemo, useCallback } from 'react';
 import { useBatchCheckCourseAccessMutation } from '@/store/client/clientPaymentApiSlice';
+import { useSelector } from 'react-redux';
+import { selectCurrentUser, selectIsAuthenticated } from '@/store/authSlice';
+import { checkAccess } from '@/utils/accessControl';
 
 /**
  * Hook to batch check access for multiple courses (efficient - single API call)
@@ -83,6 +86,15 @@ export function useBatchCourseAccess(courses = []) {
  * @returns {Object} { hasAccess: boolean, isPremium: boolean, purchase: Object|null, coursePrice: number, courseTier: string }
  */
 export function useCourseAccessFromMap(courseId, accessMap = {}, course = null) {
+  const isAuthenticated = useSelector(selectIsAuthenticated);
+  const user = useSelector(selectCurrentUser);
+
+  // Get user UID
+  const userUid = useMemo(() => {
+    if (!user) return null;
+    return user.uid || user.credential?.uid || null;
+  }, [user]);
+
   return useMemo(() => {
     if (!courseId) {
       return {
@@ -90,48 +102,60 @@ export function useCourseAccessFromMap(courseId, accessMap = {}, course = null) 
         isPremium: false,
         purchase: null,
         coursePrice: 0,
-        courseTier: 'FREE',
+        courseTier: 'PUBLIC',
+        lockReason: null,
+        lockMessage: '',
+        showLock: false,
       };
     }
 
     // Check if we have access data from batch API
     const accessData = accessMap[courseId];
 
+    // Get tier from accessData or course object
+    const tier = accessData?.courseTier || course?.tier || 'PUBLIC';
+
     if (accessData) {
-      // We have batch API data - use it
+      // We have batch API data - use access control utility to determine lock messages
+      const accessResult = checkAccess({
+        tier,
+        isAuthenticated,
+        userUid,
+        hasPurchase: accessData.hasAccess === true && !!accessData.purchase,
+        isPremium: accessData.isPremium || false,
+      });
+
       return {
-        hasAccess: accessData.hasAccess === true,
-        isPremium: accessData.isPremium === true,
+        hasAccess: accessResult.hasAccess,
+        isPremium: accessResult.isPremium,
         purchase: accessData.purchase || null,
         coursePrice: accessData.coursePrice ?? (course?.price || 0),
-        courseTier: accessData.courseTier ?? (course?.tier || 'FREE'),
+        courseTier: tier,
+        lockReason: accessResult.lockReason,
+        lockMessage: accessResult.lockMessage,
+        showLock: accessResult.showLock,
       };
     }
 
-    // No batch data yet - try to determine from course object
-    const isPremiumFromObject = course 
-      ? (course.tier === 'PREMIUM' || (course.price && course.price > 0))
-      : false;
+    // No batch data yet - use access control utility with course object data
+    const accessResult = checkAccess({
+      tier,
+      isAuthenticated,
+      userUid,
+      hasPurchase: false,
+      isPremium: tier === 'PRO' || (course?.price && course.price > 0),
+    });
 
-    // If course object says it's free, grant access
-    if (isPremiumFromObject === false) {
-      return {
-        hasAccess: true,
-        isPremium: false,
-        purchase: null,
-        coursePrice: course?.price || 0,
-        courseTier: course?.tier || 'FREE',
-      };
-    }
-
-    // Unknown status - assume locked if premium, or default to accessible
     return {
-      hasAccess: !isPremiumFromObject,
-      isPremium: isPremiumFromObject,
+      hasAccess: accessResult.hasAccess,
+      isPremium: accessResult.isPremium,
       purchase: null,
       coursePrice: course?.price || 0,
-      courseTier: course?.tier || 'FREE',
+      courseTier: tier,
+      lockReason: accessResult.lockReason,
+      lockMessage: accessResult.lockMessage,
+      showLock: accessResult.showLock,
     };
-  }, [courseId, accessMap, course]);
+  }, [courseId, accessMap, course, isAuthenticated, userUid]);
 }
 

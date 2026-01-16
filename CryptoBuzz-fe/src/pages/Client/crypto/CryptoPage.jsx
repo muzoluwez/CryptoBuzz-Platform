@@ -10,21 +10,44 @@ import {
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { toast } from 'sonner';
 import { useState, useMemo } from "react";
-import { AccessGate } from "@/components/common/AccessGate";
-import { useAccessControl } from "@/hooks/use-access-control";
-import { Lock } from "lucide-react";
+import { checkAccess } from "@/utils/accessControl";
+import { CourseLockOverlay } from "@/components/payment/CourseLockOverlay";
+import { PlanSelectionModal } from "@/components/payment/PlanSelectionModal";
 import { useGetCryptosQuery } from "@/store/client/clientCryptoApiSlice";
 import { convertRtkEditorToFormattedPlainText, convertRtkEditorToDisplayFormat } from "@/lib/rtkEditorUtils";
 import ImageViewer from "@/components/common/ImageViewer";
 import ImageCarousel from "@/components/common/ImageCarousel";
 import ViewCryptoModel from "@/components/models/ViewCryptoModel";
 import useDocumentTitle from '../../../hooks/use-document-title';
+import { useNavigate } from 'react-router-dom';
+import { useSelector } from 'react-redux';
+import { selectCurrentUser, selectIsAuthenticated } from '@/store/authSlice';
+import { useGetPurchasedPlanIdsQuery } from '@/store/client/clientPaymentApiSlice';
 
 export default function CryptoPage() {
   useDocumentTitle('Crypto Analysis');
+  const [showPlanModal, setShowPlanModal] = useState(false);
+  const [selectedContentForPurchase, setSelectedContentForPurchase] = useState(null);
+  const navigate = useNavigate();
   
-  const { checkAccess } = useAccessControl();
+  // Access control hooks - called at component level
+  const isAuthenticated = useSelector(selectIsAuthenticated);
+  const user = useSelector(selectCurrentUser);
+  const { data: purchasedPlansData } = useGetPurchasedPlanIdsQuery(undefined, {
+    skip: !isAuthenticated,
+  });
+  
+  const purchasedPlanIds = useMemo(() => {
+    if (!purchasedPlansData?.data?.planIds) return new Set();
+    return new Set(purchasedPlansData.data.planIds);
+  }, [purchasedPlansData]);
+  
+  const userUid = useMemo(() => {
+    if (!user) return null;
+    return user.uid || user.credential?.uid || null;
+  }, [user]);
 
   // ------------------- STATE -------------------
   const [selectedCrypto, setSelectedCrypto] = useState(null);
@@ -112,7 +135,9 @@ export default function CryptoPage() {
         image: image,
         avatar: avatar,
         accessType: crypto?.accessType || "PUBLIC",
-        allowedPlans: crypto?.allowedPlans || [],
+        tier: crypto?.accessType || "PUBLIC", // Use tier for unified access control
+        plans: crypto?.plans || crypto?.allowedPlans || [], // Support both new (plans) and old (allowedPlans) format
+        allowedPlans: crypto?.allowedPlans || [], // Keep for backward compatibility
         url: crypto?.url,
         data: crypto?.data,
         photos: crypto?.photos || [],
@@ -198,34 +223,114 @@ export default function CryptoPage() {
             )}
 
             {filteredCryptos.map((crypto) => {
-              const { hasAccess } = checkAccess({
-                accessType: crypto.accessType,
-                allowedPlans: crypto.allowedPlans
+              // Compute access control using utility function (not hook) inside map
+              const tier = crypto.tier || crypto.accessType || "PUBLIC";
+              const contentPlans = (crypto.plans || crypto.allowedPlans || []).map(p => (p?._id || p)?.toString()).filter(Boolean);
+              
+              // Check if user has purchased any plan associated with this content
+              const hasPurchase = tier === "PRO" && contentPlans.length > 0 && purchasedPlanIds.size > 0
+                ? contentPlans.some(planId => purchasedPlanIds.has(planId))
+                : false;
+              
+              // Use checkAccess utility function (not hook)
+              const { hasAccess, showLock, lockReason, lockMessage } = checkAccess({
+                tier,
+                isAuthenticated,
+                userUid,
+                hasPurchase,
+                isPremium: tier === "PRO",
               });
+              
+              const isLocked = showLock && !hasAccess;
+
+              // Handle purchase action (only called when user is authenticated)
+              const handlePurchase = () => {
+                if (tier === 'PRO' && isAuthenticated) {
+                  // Debug: Log the crypto object to see what we're working with
+                  console.log('Crypto object for purchase:', crypto);
+                  console.log('Plans from crypto:', crypto.plans);
+                  
+                  // Get plans from the content item
+                  // Plans can come as an array of objects (populated) or array of IDs (not populated)
+                  const rawPlans = crypto.plans || [];
+                  console.log('Raw plans array:', rawPlans);
+                  
+                  // Filter out null/undefined and map to proper format
+                  const contentPlans = rawPlans
+                    .filter(p => p && (p._id || p))
+                    .map(p => {
+                      // If p is just an ID string, return null (we'd need to fetch it, but for now skip)
+                      if (typeof p === 'string') {
+                        console.warn('Plan is a string ID, not populated:', p);
+                        return null;
+                      }
+                      // If p is an object with _id, it's populated
+                      return {
+                        _id: p._id || p,
+                        name: p.name || 'Plan',
+                        description: p.description || '',
+                        price: p.price || 0,
+                        hotmartCheckoutUrl: p.hotmartCheckoutUrl || '',
+                      };
+                    })
+                    .filter(Boolean); // Remove null entries
+                  
+                  console.log('Processed content plans:', contentPlans);
+                  
+                  if (contentPlans.length === 0) {
+                    toast.error('No plans available for this content');
+                    console.error('No valid plans found. Raw plans:', rawPlans);
+                    return;
+                  }
+                  
+                  // If multiple plans, show selection modal
+                  if (contentPlans.length > 1) {
+                    setSelectedContentForPurchase({
+                      id: crypto._id,
+                      title: crypto.title,
+                      plans: contentPlans,
+                      contentType: 'crypto',
+                    });
+                    setShowPlanModal(true);
+                  } else {
+                    // Single plan - redirect directly to checkout
+                    const plan = contentPlans[0];
+                    if (plan.hotmartCheckoutUrl) {
+                      window.location.href = plan.hotmartCheckoutUrl;
+                    } else {
+                      toast.error('Checkout URL not available for this plan');
+                    }
+                  }
+                }
+              };
 
               return (
                 <Card key={crypto?._id || crypto?.id} className="bg-card border border-border overflow-hidden">
 
                 {/* image */}
                 <div className="w-full h-44 overflow-hidden relative">
-                  {!hasAccess && (
-                    <div className="absolute inset-0 bg-black/40 backdrop-blur-[2px] flex items-center justify-center z-30 pointer-events-none">
-                      <Lock className="w-8 h-8 text-white/80" />
-                    </div>
+                  <div className={isLocked ? 'blur-[2px]' : ''}>
+                    <ImageCarousel
+                      images={
+                        crypto?.photos && Array.isArray(crypto.photos) && crypto.photos.length > 0
+                          ? crypto.photos
+                          : crypto?.image
+                          ? [crypto.image]
+                          : []
+                      }
+                      alt={crypto?.title || "Crypto analysis"}
+                      height="h-44"
+                      showViewButton={hasAccess}
+                    />
+                  </div>
+                  {isLocked && (
+                    <CourseLockOverlay
+                      tier={tier}
+                      lockReason={lockReason}
+                      lockMessage={lockMessage}
+                      onPurchase={handlePurchase}
+                    />
                   )}
-                  <ImageCarousel
-                    images={
-                      crypto?.photos && Array.isArray(crypto.photos) && crypto.photos.length > 0
-                        ? crypto.photos
-                        : crypto?.image
-                        ? [crypto.image]
-                        : []
-                    }
-                    alt={crypto?.title || "Crypto analysis"}
-                    height="h-44"
-                    showViewButton={hasAccess}
-                    className={!hasAccess ? "blur-sm pointer-events-none" : ""}
-                  />
                 </div>
 
                 <CardContent className="p-4">
@@ -281,6 +386,25 @@ export default function CryptoPage() {
         )}
 
       </div>
+
+      {/* Plan Selection Modal */}
+      {selectedContentForPurchase && (
+        <PlanSelectionModal
+          open={showPlanModal}
+          onOpenChange={setShowPlanModal}
+          courseId={selectedContentForPurchase.id} // Reusing courseId prop name for compatibility
+          courseTitle={selectedContentForPurchase.title}
+          plans={selectedContentForPurchase.plans}
+          useDirectPlanCheckout={true} // Use plan's checkout URL directly (non-course content)
+          onPurchaseSuccess={() => {
+            setShowPlanModal(false);
+            setSelectedContentForPurchase(null);
+          }}
+          onPurchaseError={() => {
+            setShowPlanModal(false);
+          }}
+        />
+      )}
 
       {/* ------------------- MODAL ------------------- */}
       <ViewCryptoModel

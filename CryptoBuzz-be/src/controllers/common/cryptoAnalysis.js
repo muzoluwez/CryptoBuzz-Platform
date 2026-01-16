@@ -49,6 +49,7 @@ export const getCryptoAnalysis = async (req, res) => {
       .sort({ createdAt: -1 })
       .populate("createdBy", "first_name last_name image")
       .populate("category", "_id name")
+      .populate("plans", "name price description hotmartCheckoutCode hotmartCheckoutUrl")
       .lean();
 
     const formatted = records.map(data => ({

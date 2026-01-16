@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { ChevronDown, Play, Lock } from 'lucide-react';
-import { useLocation } from 'react-router';
+import { useLocation, useNavigate } from 'react-router';
 import { useSelector } from 'react-redux';
 import { Card, CardContent } from '../../../components/ui/card';
 import useDocumentTitle from '../../../hooks/use-document-title';
@@ -13,7 +13,7 @@ import { PurchaseButton } from '../../../components/payment/PurchaseButton';
 import { PlanSelectionModal } from '../../../components/payment/PlanSelectionModal';
 import { RecommendedCourseCard } from '../../../components/payment/RecommendedCourseCard';
 import { useCreatePaymentLinkMutation, useLazyGetCoursePlansQuery } from '../../../store/client/clientPaymentApiSlice';
-import { selectCurrentToken } from '../../../store/authSlice';
+import { selectCurrentToken, selectIsAuthenticated } from '../../../store/authSlice';
 import { toast } from 'sonner';
 import { selectSelectedLanguage } from '../../../store/languageSlice';
 
@@ -135,13 +135,17 @@ function CourseUI({
   }, [plans]);
   
   // Use batch access map for access checking (no individual API calls)
-  const { hasAccess, isPremium, coursePrice } = useCourseAccessFromMap(
+  const { hasAccess, isPremium, coursePrice, courseTier, lockReason, lockMessage, showLock } = useCourseAccessFromMap(
     currentCourseId,
     courseAccessMap, // Use batch access map
     currentCourseSection // Pass course section if available
   );
   
-  // Handle purchase - Fetch plans first, then decide
+  // Get authentication state
+  const isAuthenticated = useSelector(selectIsAuthenticated);
+  const navigate = useNavigate();
+
+  // Handle purchase - Check authentication first, then fetch plans
   const handlePurchase = async () => {
     console.log('🚨🚨🚨 handlePurchase CALLED! 🚨🚨🚨');
     console.log('Current courseId:', currentCourseId);
@@ -149,6 +153,14 @@ function CourseUI({
     if (!currentCourseId) {
       console.error('❌ No courseId!');
       toast.error('Course ID is required');
+      return;
+    }
+
+    // For PRO courses, check authentication first
+    // If not authenticated, redirect to login
+    if (courseTier === 'PRO' && !isAuthenticated) {
+      console.log('⚠️ User not authenticated - redirecting to login');
+      navigate('/login', { state: { from: window.location.pathname } });
       return;
     }
 
@@ -303,7 +315,7 @@ function CourseUI({
   // Handle video selection
   const handleVideoSelect = (lessonId, videoUrl) => {
     // Prevent video selection if course is locked
-    if (isPremium && !hasAccess) {
+    if (showLock && !hasAccess) {
       toast.error('Please purchase this course to access the lessons');
       return;
     }
@@ -321,7 +333,7 @@ function CourseUI({
   // Handle play button click on main video area
   const handleMainVideoPlay = () => {
     // Prevent play if course is locked
-    if (isPremium && !hasAccess) {
+    if (showLock && !hasAccess) {
       toast.error('Please purchase this course to access the lessons');
       return;
     }
@@ -407,7 +419,7 @@ function CourseUI({
                       <div className="absolute inset-0 flex items-center justify-center">
                         <button 
                           onClick={handleMainVideoPlay}
-                          disabled={isPremium && !hasAccess}
+                          disabled={showLock && !hasAccess}
                           className="bg-white/20 backdrop-blur-sm hover:bg-white/30 transition-all rounded-xl p-6 disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                           <Play className="w-12 h-12 text-white fill-white" />
@@ -416,19 +428,22 @@ function CourseUI({
                       <div className="absolute inset-0 bg-black/20"></div>
                       
                       {/* Show lock overlay if course is premium and not purchased */}
-                      {isPremium && !hasAccess && (
+                      {showLock && !hasAccess && (
                         <CourseLockOverlay
                           course={currentCourseSection}
                           onPurchase={handlePurchase}
                           isPurchasing={isPurchasing || isLoadingPlans}
                           price={coursePrice}
+                          tier={courseTier}
+                          lockReason={lockReason}
+                          lockMessage={lockMessage}
                         />
                       )}
                     </div>
                   )}
                   
                       {/* Show lock overlay over video player if course is locked */}
-                      {isVideoPlaying && selectedVideo && isPremium && !hasAccess && (
+                      {isVideoPlaying && selectedVideo && showLock && !hasAccess && (
                         <CourseLockOverlay
                           course={currentCourseSection}
                           onPurchase={handlePurchase}
@@ -510,7 +525,7 @@ function CourseUI({
                       const lessonId = lesson?._id || lesson?.id;
                       const isSelected = activeLectureId === lessonId || selectedVideo?.id === lessonId;
                       const videoUrl = lesson?.videoUrl || lesson?.content;
-                      const isLocked = isPremium && !hasAccess;
+                      const isLocked = showLock && !hasAccess;
                       
                       return (
                         <button
@@ -583,7 +598,7 @@ function CourseUI({
                         const lectureId = lectureItem?._id || index;
                         const isSelected = activeLectureId === lectureId;
                         const videoUrl = lectureItem?.videoUrl || lectureItem?.content;
-                        const isLocked = isPremium && !hasAccess;
+                        const isLocked = showLock && !hasAccess;
                         
                         return (
                           <button

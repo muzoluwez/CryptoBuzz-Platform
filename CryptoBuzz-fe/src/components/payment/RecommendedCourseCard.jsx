@@ -7,6 +7,10 @@ import { useCreatePaymentLinkMutation, useLazyGetCoursePlansQuery } from '@/stor
 import { PlanSelectionModal } from './PlanSelectionModal';
 import { toast } from 'sonner';
 import { convertRtkEditorToFormattedPlainText } from '@/lib/rtkEditorUtils';
+import { useSelector } from 'react-redux';
+import { cn } from '@/lib/utils';
+import { selectIsAuthenticated } from '@/store/authSlice';
+import { useNavigate } from 'react-router-dom';
 
 /**
  * RecommendedCourseCard Component
@@ -17,23 +21,35 @@ import { convertRtkEditorToFormattedPlainText } from '@/lib/rtkEditorUtils';
  */
 export function RecommendedCourseCard({ course, onCourseClick, accessMap = {} }) {
   const courseId = course?._id || course?.id;
+  const navigate = useNavigate();
+  const isAuthenticated = useSelector(selectIsAuthenticated);
   const [createPaymentLink, { isLoading: isPurchasing }] = useCreatePaymentLinkMutation();
   const [showPlanModal, setShowPlanModal] = useState(false);
   const [modalPlans, setModalPlans] = useState([]);
 
   // Get course access from batch access map (efficient)
-  const { hasAccess, isPremium, coursePrice } = useCourseAccessFromMap(
+  const { hasAccess, isPremium, coursePrice, courseTier, lockReason, lockMessage, showLock } = useCourseAccessFromMap(
     courseId,
     accessMap,
     course
   );
 
-  // Handle purchase - Fetch plans first, then decide
+  // Handle purchase - Check authentication first, then fetch plans
   const handlePurchase = async (e) => {
-    e.stopPropagation(); // Prevent course click
+    // Stop propagation if event is provided (from button click)
+    if (e && e.stopPropagation) {
+      e.stopPropagation(); // Prevent course click
+    }
 
     if (!courseId) {
       toast.error('Course ID is required');
+      return;
+    }
+
+    // For PRO courses, check authentication first
+    // If not authenticated, redirect to login
+    if (courseTier === 'PRO' && !isAuthenticated) {
+      navigate('/login', { state: { from: window.location.pathname } });
       return;
     }
 
@@ -61,16 +77,35 @@ export function RecommendedCourseCard({ course, onCourseClick, accessMap = {} })
       }
 
       const plansResult = await plansResponse.json();
-      const fetchedPlans = plansResult?.data?.plans || [];
+      const fetchedPlans = plansResult?.data?.plans || plansResult?.plans || [];
 
-      console.log('✅ Plans fetched:', { fetchedPlans, count: fetchedPlans.length });
+      console.log('✅ Plans fetched:', { 
+        fetchedPlans, 
+        count: fetchedPlans.length,
+        plansResult,
+        courseId 
+      });
 
-      // Check if multiple plans
+      // Check if multiple plans - show modal
       if (fetchedPlans.length > 1) {
-        console.log('✅ Multiple plans - opening modal');
+        console.log('✅ Multiple plans detected - opening modal', { 
+          plansCount: fetchedPlans.length, 
+          plans: fetchedPlans 
+        });
         setModalPlans(fetchedPlans);
         setShowPlanModal(true);
-        return;
+        return; // Exit early - modal will handle purchase
+      }
+      
+      // If single plan, log it for debugging
+      if (fetchedPlans.length === 1) {
+        console.log('⚠️ Single plan detected - proceeding to checkout directly', { 
+          plan: fetchedPlans[0] 
+        });
+      } else {
+        console.warn('⚠️ No plans found for course - proceeding to checkout without planId', { 
+          courseId 
+        });
       }
 
       // Single plan or no plans - proceed with checkout
@@ -93,8 +128,8 @@ export function RecommendedCourseCard({ course, onCourseClick, accessMap = {} })
 
   // Handle card click
   const handleCardClick = () => {
-    if (isPremium && !hasAccess) {
-      // Show purchase option instead of navigating
+    if (showLock && !hasAccess) {
+      // Show lock overlay or login/purchase option instead of navigating
       return;
     }
 
@@ -104,8 +139,8 @@ export function RecommendedCourseCard({ course, onCourseClick, accessMap = {} })
     }
   };
 
-  // Show lock if: premium course AND no access
-  const isLocked = isPremium && !hasAccess;
+  // Show lock if: course has a lock requirement AND no access
+  const isLocked = showLock && !hasAccess;
   
   // Debug logging for all courses to help identify issues
   useEffect(() => {
@@ -116,7 +151,10 @@ export function RecommendedCourseCard({ course, onCourseClick, accessMap = {} })
       isPremium, 
       isLocked,
       coursePrice,
-      courseTier: course?.tier,
+      courseTier: courseTier || course?.tier,
+      lockReason,
+      lockMessage,
+      showLock,
       coursePriceFromObj: course?.price,
       accessMapData: accessMap[courseId],
       courseObject: {
@@ -125,7 +163,17 @@ export function RecommendedCourseCard({ course, onCourseClick, accessMap = {} })
         hotmartProductId: course?.hotmartProductId
       }
     });
-  }, [courseId, course?.title, hasAccess, isPremium, isLocked, coursePrice, course?.tier, course?.price, accessMap]);
+  }, [courseId, course?.title, hasAccess, isPremium, isLocked, coursePrice, courseTier, lockReason, lockMessage, showLock, course?.tier, course?.price, accessMap]);
+
+  // Debug: Log modal state changes
+  useEffect(() => {
+    console.log('🔔 RecommendedCourseCard Modal State:', {
+      showPlanModal,
+      modalPlansCount: modalPlans.length,
+      courseId,
+      courseTitle: course?.title
+    });
+  }, [showPlanModal, modalPlans.length, courseId, course?.title]);
 
   return (
     <Card 
@@ -139,40 +187,38 @@ export function RecommendedCourseCard({ course, onCourseClick, accessMap = {} })
           <img
             src={course?.imageUrl || "https://images.unsplash.com/photo-1559526324-593bc073d938?q=80&w=800&auto=format&fit=crop"}
             alt={course?.title || "course"}
-            className="w-full h-full object-cover transition-all duration-300"
+            className={cn(
+              "w-full h-full object-cover transition-all duration-300",
+              isLocked && "blur-[2px]"
+            )}
             onError={(e) => {
               e.target.onerror = null;
               e.target.src = "https://placehold.co/400x225/E0BBE4/957DAD?text=Image+Error";
             }}
           />
           
-          {/* Lock Icon Badge - Show on top right if locked */}
-          {isLocked && (
-            <div className="absolute top-4 right-4 z-20 bg-black/70 backdrop-blur-sm rounded-full p-2">
-              <Lock className="w-5 h-5 text-white" />
-            </div>
-          )}
-
-          <div className="absolute left-4 bottom-4 text-white z-10">
+          {/* Course content - visible but slightly faded when locked */}
+          <div className={cn(
+            "absolute left-4 bottom-4 text-white z-10 transition-opacity",
+            isLocked ? "opacity-85" : "opacity-100"
+          )}>
             <h4 className="text-2xl font-bold">{course?.title}</h4>
             <p className="text-md mt-3 text-gray-200 line-clamp-2">
               {course?.description ? convertRtkEditorToFormattedPlainText(course.description, true) : ''}
             </p>
-            <button 
-              className={`text-sm font-medium mt-2 transition-colors ${
-                isLocked 
-                  ? 'text-gray-400 cursor-not-allowed' 
-                  : 'text-yellow-600 hover:text-yellow-700 cursor-pointer'
-              }`}
-              onClick={(e) => {
-                e.stopPropagation();
-                if (!isLocked && onCourseClick) {
-                  onCourseClick(course);
-                }
-              }}
-            >
-              {isLocked ? 'Purchase to unlock' : (course?.link || "Show more")}
-            </button>
+            {!isLocked && (
+              <button 
+                className="text-sm font-medium mt-2 text-yellow-600 hover:text-yellow-700 cursor-pointer transition-colors"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  if (onCourseClick) {
+                    onCourseClick(course);
+                  }
+                }}
+              >
+                {course?.link || "Show more"}
+              </button>
+            )}
           </div>
         </div>
       </CardContent>
@@ -180,13 +226,16 @@ export function RecommendedCourseCard({ course, onCourseClick, accessMap = {} })
       {/* Gradient overlay */}
       <div className='absolute bg-gradient-black inset-0 bg-gradient-green z-0'></div>
 
-      {/* Lock overlay - Show if course is premium and not purchased */}
+      {/* Lock overlay - Show if course has lock requirement and no access */}
       {isLocked && (
         <CourseLockOverlay
           course={course}
           onPurchase={handlePurchase}
           isPurchasing={isPurchasing}
           price={coursePrice}
+          tier={courseTier || course?.tier || 'PUBLIC'}
+          lockReason={lockReason}
+          lockMessage={lockMessage}
           className="rounded-lg"
         />
       )}
@@ -194,7 +243,10 @@ export function RecommendedCourseCard({ course, onCourseClick, accessMap = {} })
       {/* Plan Selection Modal */}
       <PlanSelectionModal
         open={showPlanModal}
-        onOpenChange={setShowPlanModal}
+        onOpenChange={(open) => {
+          console.log('🔔 PlanSelectionModal onOpenChange:', { open, modalPlans: modalPlans.length });
+          setShowPlanModal(open);
+        }}
         courseId={courseId}
         courseTitle={course?.title || 'this course'}
         plans={modalPlans}

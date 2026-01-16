@@ -10,17 +10,20 @@ import { cn } from '@/lib/utils';
 /**
  * PlanSelectionModal Component
  * Modal to display available plans for a course and handle plan selection
+ * Also supports direct plan checkout (for non-course content types)
  */
-export function PlanSelectionModal({ 
-  open, 
-  onOpenChange, 
-  courseId, 
+export function PlanSelectionModal({
+  open,
+  onOpenChange,
+  courseId,
   courseTitle,
   plans = [],
   onPurchaseSuccess,
   onPurchaseError,
+  useDirectPlanCheckout = false, // If true, use plan.hotmartCheckoutUrl directly instead of API
 }) {
   const [selectedPlanId, setSelectedPlanId] = useState(null);
+  const [isProcessing, setIsProcessing] = useState(false);
   const [createPaymentLink, { isLoading }] = useCreatePaymentLinkMutation();
 
   const handlePlanSelect = (planId) => {
@@ -33,43 +36,72 @@ export function PlanSelectionModal({
       return;
     }
 
-    if (!courseId) {
-      toast.error('Course ID is required');
-      return;
-    }
+    setIsProcessing(true);
 
     try {
-      const response = await createPaymentLink({ 
-        courseId, 
-        planId: selectedPlanId 
-      }).unwrap();
-      
-      if (response?.data?.checkoutUrl) {
-        // Redirect to Hotmart checkout
-        window.location.href = response.data.checkoutUrl;
-        
-        // Call success callback if provided
-        if (onPurchaseSuccess) {
-          onPurchaseSuccess(response.data);
+      // Find the selected plan
+      const selectedPlan = plans.find(p => (p._id || p)?.toString() === selectedPlanId.toString());
+
+      if (!selectedPlan) {
+        throw new Error('Selected plan not found');
+      }
+
+      // If using direct plan checkout (for non-course content types)
+      if (useDirectPlanCheckout) {
+        if (selectedPlan.hotmartCheckoutUrl) {
+          // Redirect directly to the plan's checkout URL
+          window.location.href = selectedPlan.hotmartCheckoutUrl;
+
+          // Call success callback if provided
+          if (onPurchaseSuccess) {
+            onPurchaseSuccess({ checkoutUrl: selectedPlan.hotmartCheckoutUrl, planId: selectedPlanId });
+          }
+
+          // Close modal
+          onOpenChange(false);
+        } else {
+          throw new Error('Checkout URL not available for this plan');
         }
-        
-        // Close modal
-        onOpenChange(false);
-      } else if (response?.data?.requiresPlanSelection) {
-        // This shouldn't happen if planId is provided, but handle it
-        toast.error('Plan selection still required');
       } else {
-        throw new Error('Checkout URL not received');
+        // Course-specific flow - use API
+        if (!courseId) {
+          throw new Error('Course ID is required');
+        }
+
+        const response = await createPaymentLink({
+          courseId,
+          planId: selectedPlanId
+        }).unwrap();
+
+        if (response?.data?.checkoutUrl) {
+          // Redirect to Hotmart checkout
+          window.location.href = response.data.checkoutUrl;
+
+          // Call success callback if provided
+          if (onPurchaseSuccess) {
+            onPurchaseSuccess(response.data);
+          }
+
+          // Close modal
+          onOpenChange(false);
+        } else if (response?.data?.requiresPlanSelection) {
+          // This shouldn't happen if planId is provided, but handle it
+          toast.error('Plan selection still required');
+        } else {
+          throw new Error('Checkout URL not received');
+        }
       }
     } catch (error) {
       console.error('Purchase error:', error);
       const errorMessage = error?.data?.message || error?.message || 'Failed to create payment link';
       toast.error(errorMessage);
-      
+
       // Call error callback if provided
       if (onPurchaseError) {
         onPurchaseError(error);
       }
+    } finally {
+      setIsProcessing(false);
     }
   };
 
@@ -93,35 +125,39 @@ export function PlanSelectionModal({
             const formattedPrice = plan.price > 0 ? `$${plan.price.toFixed(2)}` : 'Free';
 
             return (
-              <Card
+              <div
                 key={plan._id}
-                className={cn(
-                  "cursor-pointer transition-all hover:border-primary",
-                  isSelected && "border-primary ring-2 ring-primary"
-                )}
                 onClick={() => handlePlanSelect(plan._id)}
+                className={cn(
+                  "cursor-pointer transition-all border rounded-md p-4",
+                  isSelected
+                    ? "border-yellow-500"
+                    : "border-gray-300 hover:border-yellow-500 !outline-none"
+                )}
               >
-                <CardHeader>
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1">
-                      <CardTitle className="text-lg">{plan.name}</CardTitle>
-                      {plan.description && (
-                        <CardDescription className="mt-2">
-                          {plan.description}
-                        </CardDescription>
-                      )}
+                <div className="flex items-start justify-between">
+                  <div className="flex-1">
+                    <div className="flex items-center justify-between">
+                      <h3 className="text-lg font-semibold">{plan.name}</h3>
+                      <div className="ml-4 flex items-center gap-2">
+                        {isSelected && (
+                          <Check className="w-5 h-5 text-primary" />
+                        )}
+                        <span className="text-2xl font-bold">
+                          {formattedPrice}
+                        </span>
+                      </div>
                     </div>
-                    <div className="ml-4 flex items-center gap-2">
-                      {isSelected && (
-                        <Check className="w-5 h-5 text-primary" />
-                      )}
-                      <span className="text-2xl font-bold">
-                        {formattedPrice}
-                      </span>
-                    </div>
+                    {plan.description && (
+                      <p className="mt-2 text-sm text-gray-600">
+                        {plan.description}
+                      </p>
+                    )}
                   </div>
-                </CardHeader>
-              </Card>
+
+                </div>
+              </div>
+
             );
           })}
         </div>
@@ -136,10 +172,10 @@ export function PlanSelectionModal({
           </Button>
           <Button
             onClick={handlePurchase}
-            disabled={isLoading || !selectedPlanId}
+            disabled={isLoading || isProcessing || !selectedPlanId}
             className="min-w-[120px]"
           >
-            {isLoading ? (
+            {isLoading || isProcessing ? (
               <>
                 <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                 Processing...

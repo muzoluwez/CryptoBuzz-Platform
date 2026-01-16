@@ -32,19 +32,19 @@ const createCourseSchema = z.object({
   category: z.string().min(1, "Please select a category"),
   published: z.boolean().default(false),
   isFeatured: z.boolean().default(false),
-  tier: z.enum(["FREE", "PREMIUM"], {
+  tier: z.enum(["PUBLIC", "LOGGED_IN", "UID_ONLY", "PRO"], {
     required_error: "Please select a tier",
   }),
   plans: z.array(z.string()).nullable().optional(),
   section: z.string().min(1, "Please select a course type"),
   language: z.string().min(1, "Please select a course language"),
 }).refine((data) => {
-  if (data.tier === "PREMIUM" && (!data.plans || data.plans.length === 0)) {
+  if (data.tier === "PRO" && (!data.plans || data.plans.length === 0)) {
     return false;
   }
   return true;
 }, {
-  message: "At least one payment plan is required for Premium courses",
+  message: "At least one payment plan is required for Pro (Paid) courses",
   path: ["plans"],
 });
 
@@ -68,19 +68,19 @@ const editCourseSchema = z.object({
   category: z.string().min(1, "Please select a category"),
   published: z.boolean().default(false),
   isFeatured: z.boolean().default(false),
-  tier: z.enum(["FREE", "PREMIUM"], {
+  tier: z.enum(["PUBLIC", "LOGGED_IN", "UID_ONLY", "PRO"], {
     required_error: "Please select a tier",
   }),
   plans: z.array(z.string()).nullable().optional(),
   section: z.string().min(1, "Please select a course type"),
   language: z.string().min(1, "Please select a course language"),
 }).refine((data) => {
-  if (data.tier === "PREMIUM" && (!data.plans || data.plans.length === 0)) {
+  if (data.tier === "PRO" && (!data.plans || data.plans.length === 0)) {
     return false;
   }
   return true;
 }, {
-  message: "At least one payment plan is required for Premium courses",
+  message: "At least one payment plan is required for Pro (Paid) courses",
   path: ["plans"],
 });
 
@@ -116,7 +116,7 @@ const CourseForm = ({ onSubmit, initialData, isLoading }) => {
       isFeatured: false,
       section: "",
       language: "",
-      tier: "FREE",
+      tier: "PUBLIC",
       plans: [],
     },
   });
@@ -161,9 +161,9 @@ const CourseForm = ({ onSubmit, initialData, isLoading }) => {
   const selectedSection = watch("section");
   const selectedLanguage = watch("language");
 
-  // Clear plans field when tier changes to FREE
+  // Clear plans field when tier changes to non-PRO tiers
   useEffect(() => {
-    if (selectedTier === "FREE") {
+    if (selectedTier !== "PRO") {
       setValue("plans", [], { shouldValidate: false });
     }
   }, [selectedTier, setValue]);
@@ -180,8 +180,8 @@ const CourseForm = ({ onSubmit, initialData, isLoading }) => {
     formData.append("section", data.section);
     formData.append("language", data.language);
 
-    // For premium courses, append selected plans
-    if (data.tier === "PREMIUM" && data.plans && Array.isArray(data.plans) && data.plans.length > 0) {
+    // For PRO (paid) courses, append selected plans
+    if (data.tier === "PRO" && data.plans && Array.isArray(data.plans) && data.plans.length > 0) {
       // Append each plan ID
       data.plans.forEach((planId) => {
         formData.append("plans[]", planId);
@@ -197,9 +197,9 @@ const CourseForm = ({ onSubmit, initialData, isLoading }) => {
         formData.append("price", 0);
       }
     } else {
-      // Free courses have price 0 and no plans
+      // Non-PRO courses have price 0 and no plans
       formData.append("price", 0);
-      // Explicitly do not append plans for free courses
+      // Explicitly do not append plans for non-PRO courses
     }
 
     // Handle image file - required for new courses, optional for edits with existing image
@@ -448,8 +448,10 @@ const CourseForm = ({ onSubmit, initialData, isLoading }) => {
               <SelectValue placeholder="Select" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="FREE">Free</SelectItem>
-              <SelectItem value="PREMIUM">Pro</SelectItem>
+              <SelectItem value="PUBLIC">Public</SelectItem>
+              <SelectItem value="LOGGED_IN">Logged-in User</SelectItem>
+              <SelectItem value="UID_ONLY">UID-based Access</SelectItem>
+              <SelectItem value="PRO">Pro (Paid)</SelectItem>
             </SelectContent>
           </Select>
           {errors.tier && (
@@ -458,7 +460,7 @@ const CourseForm = ({ onSubmit, initialData, isLoading }) => {
         </div>
       </div>
 
-      {selectedTier === "PREMIUM" && (
+      {selectedTier === "PRO" && (
         <div className="space-y-2">
           <label
             htmlFor="plans"
@@ -480,7 +482,7 @@ const CourseForm = ({ onSubmit, initialData, isLoading }) => {
                       return (
                         <div
                           key={plan._id}
-                          className="flex items-start space-x-3 p-3 rounded-md hover:bg-gray-50 border border-transparent hover:border-gray-200 transition-colors"
+                          className="flex items-start space-x-3 p-3 rounded-md hover:bg-gray-50 dark:hover:bg-gray-200 border border-transparent hover:border-gray-200 transition-colors"
                         >
                           <Checkbox
                             id={`plan-${plan._id}`}
@@ -504,7 +506,7 @@ const CourseForm = ({ onSubmit, initialData, isLoading }) => {
                               ${plan.price?.toFixed(2) || "0.00"} • {plan.hotmartCheckoutCode || "N/A"}
                             </div>
                             {plan.description && (
-                              <div className="text-xs text-gray-400 mt-1">
+                              <div className="text-xs text-gray-400 dark:text-gray-600 mt-1">
                                 {plan.description}
                               </div>
                             )}

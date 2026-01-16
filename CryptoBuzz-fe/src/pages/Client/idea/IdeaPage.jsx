@@ -1,9 +1,14 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { useGetIdeasQuery } from '@/store/client/clientIdeaApiSlice';
 import { CopyIcon, Eye, LockKeyhole } from "lucide-react";
 import { toast } from 'sonner';
-import { useGrantAccess } from '@/context/GrantAccessContext';
+import { checkAccess } from '@/utils/accessControl';
+import { CourseLockOverlay } from '@/components/payment/CourseLockOverlay';
+import { PlanSelectionModal } from '@/components/payment/PlanSelectionModal';
+import { useSelector } from 'react-redux';
+import { selectCurrentUser, selectIsAuthenticated } from '@/store/authSlice';
+import { useGetPurchasedPlanIdsQuery } from '@/store/client/clientPaymentApiSlice';
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -19,8 +24,26 @@ export default function IdeaPage() {
   const [hoveredCardId, setHoveredCardId] = useState(null);
   const [selectedImage, setSelectedImage] = useState(null);
   const [selectedCard, setSelectedCard] = useState(null);
-  const { checkAccess } = useGrantAccess();
+  const [showPlanModal, setShowPlanModal] = useState(false);
+  const [selectedContentForPurchase, setSelectedContentForPurchase] = useState(null);
   const navigate = useNavigate();
+  
+  // Access control hooks - called at component level
+  const isAuthenticated = useSelector(selectIsAuthenticated);
+  const user = useSelector(selectCurrentUser);
+  const { data: purchasedPlansData } = useGetPurchasedPlanIdsQuery(undefined, {
+    skip: !isAuthenticated,
+  });
+  
+  const purchasedPlanIds = useMemo(() => {
+    if (!purchasedPlansData?.data?.planIds) return new Set();
+    return new Set(purchasedPlansData.data.planIds);
+  }, [purchasedPlansData]);
+  
+  const userUid = useMemo(() => {
+    if (!user) return null;
+    return user.uid || user.credential?.uid || null;
+  }, [user]);
 
   // Set the browser tab title for this page
   useDocumentTitle('Trade Ideas');
@@ -100,7 +123,9 @@ export default function IdeaPage() {
         : ["0"],
       tags: tags,
       accessType: idea?.accessType || "PUBLIC",
-      allowedPlans: idea?.allowedPlans || [],
+      tier: idea?.accessType || "PUBLIC", // Use tier for unified access control
+      plans: idea?.plans || idea?.allowedPlans || [], // Support both new (plans) and old (allowedPlans) format
+      allowedPlans: idea?.allowedPlans || [], // Keep for backward compatibility
       uid: idea?._id,
       ...idea, // Include all other idea properties
     };
@@ -157,20 +182,94 @@ export default function IdeaPage() {
             )}
 
             {cards.map((c, i) => {
-              const access = checkAccess({
-                accessType: c.accessType,
-                allowedPlans: c.allowedPlans,
+              // Compute access control using utility function (not hook) inside map
+              const tier = c.tier || c.accessType || "PUBLIC";
+              const contentPlans = (c.plans || c.allowedPlans || []).map(p => (p?._id || p)?.toString()).filter(Boolean);
+              
+              // Check if user has purchased any plan associated with this content
+              const hasPurchase = tier === "PRO" && contentPlans.length > 0 && purchasedPlanIds.size > 0
+                ? contentPlans.some(planId => purchasedPlanIds.has(planId))
+                : false;
+              
+              // Use checkAccess utility function (not hook)
+              const { hasAccess, showLock, lockReason, lockMessage } = checkAccess({
+                tier,
+                isAuthenticated,
+                userUid,
+                hasPurchase,
+                isPremium: tier === "PRO",
               });
-              const isLocked = !access.hasAccess;
+              
+              const isLocked = showLock && !hasAccess;
+
+              // Handle purchase action (only called when user is authenticated)
+              const handlePurchase = () => {
+                if (tier === 'PRO' && isAuthenticated) {
+                  // Debug: Log the idea object to see what we're working with
+                  console.log('Idea object for purchase:', c);
+                  console.log('Plans from idea:', c.plans);
+                  console.log('Allowed plans from idea:', c.allowedPlans);
+                  
+                  // Get plans from the content item
+                  // Plans can come as an array of objects (populated) or array of IDs (not populated)
+                  const rawPlans = c.plans || c.allowedPlans || [];
+                  console.log('Raw plans array:', rawPlans);
+                  
+                  // Filter out null/undefined and map to proper format
+                  const contentPlans = rawPlans
+                    .filter(p => p && (p._id || p))
+                    .map(p => {
+                      // If p is just an ID string, return null (we'd need to fetch it, but for now skip)
+                      if (typeof p === 'string') {
+                        console.warn('Plan is a string ID, not populated:', p);
+                        return null;
+                      }
+                      // If p is an object with _id, it's populated
+                      return {
+                        _id: p._id || p,
+                        name: p.name || 'Plan',
+                        description: p.description || '',
+                        price: p.price || 0,
+                        hotmartCheckoutUrl: p.hotmartCheckoutUrl || '',
+                      };
+                    })
+                    .filter(Boolean); // Remove null entries
+                  
+                  console.log('Processed content plans:', contentPlans);
+                  
+                  if (contentPlans.length === 0) {
+                    toast.error('No plans available for this content');
+                    console.error('No valid plans found. Raw plans:', rawPlans);
+                    return;
+                  }
+                  
+                  // If multiple plans, show selection modal
+                  if (contentPlans.length > 1) {
+                    setSelectedContentForPurchase({
+                      id: c._id,
+                      title: c.name,
+                      plans: contentPlans,
+                      contentType: 'idea',
+                    });
+                    setShowPlanModal(true);
+                  } else {
+                    // Single plan - redirect directly to checkout
+                    const plan = contentPlans[0];
+                    if (plan.hotmartCheckoutUrl) {
+                      window.location.href = plan.hotmartCheckoutUrl;
+                    } else {
+                      toast.error('Checkout URL not available for this plan');
+                    }
+                  }
+                }
+              };
 
               return (
                 <div
                   className="relative h-full"
-                  onMouseEnter={() => isLocked && setHoveredCardId(c._id)}
-                  onMouseLeave={() => setHoveredCardId(null)}
+                  key={c._id || i}
                 >
                   <Card
-                    key={c._id || i}
                     className="rounded-2xl shadow-lg border border-gray-medium overflow-hidden animate-slideInUp h-full"
                     style={{ animationDelay: `${i * 0.1}s` }}
                   >
@@ -193,26 +292,7 @@ export default function IdeaPage() {
 
                     {/* TOP CHART IMAGE CAROUSEL */}
                     <div className="relative">
-                      {isLocked ? (
-                        <div className="relative">
-                          <ImageCarousel
-                            images={
-                              Array.isArray(c.image)
-                                ? c.image
-                                : [c.image || c.image_Url]
-                            }
-                            alt={c.name || 'Trading idea'}
-                            height="h-52"
-                            showViewButton={false}
-                            className={isLocked ? 'blur-md' : ''}
-                          />
-                          <div className="absolute inset-0 flex items-center justify-center bg-black/10 z-30 pointer-events-none">
-                            <div className="bg-black/60 p-2 rounded-full">
-                              <CopyIcon className="w-6 h-6 text-white" />
-                            </div>
-                          </div>
-                        </div>
-                      ) : (
+                      <div className={isLocked ? 'blur-[2px]' : ''}>
                         <ImageCarousel
                           images={
                             Array.isArray(c.image)
@@ -221,7 +301,15 @@ export default function IdeaPage() {
                           }
                           alt={c.name || 'Trading idea'}
                           height="h-52"
-                          showViewButton={true}
+                          showViewButton={hasAccess}
+                        />
+                      </div>
+                      {isLocked && (
+                        <CourseLockOverlay
+                          tier={tier}
+                          lockReason={lockReason}
+                          lockMessage={lockMessage}
+                          onPurchase={handlePurchase}
                         />
                       )}
 
@@ -311,7 +399,7 @@ export default function IdeaPage() {
                     </div>
 
                     {/* CONTENT */}
-                    <CardContent className="p-5">
+                    <CardContent className={`p-5 ${isLocked ? 'blur-[2px] opacity-85' : ''}`}>
                       {/* PRICE ROWS */}
                       <div className="space-y-2">
                         <div className="flex items-center justify-between">
@@ -425,6 +513,25 @@ export default function IdeaPage() {
           </div>
         )}
       </div>
+
+      {/* Plan Selection Modal */}
+      {selectedContentForPurchase && (
+        <PlanSelectionModal
+          open={showPlanModal}
+          onOpenChange={setShowPlanModal}
+          courseId={selectedContentForPurchase.id} // Reusing courseId prop name for compatibility
+          courseTitle={selectedContentForPurchase.title}
+          plans={selectedContentForPurchase.plans}
+          useDirectPlanCheckout={true} // Use plan's checkout URL directly (non-course content)
+          onPurchaseSuccess={() => {
+            setShowPlanModal(false);
+            setSelectedContentForPurchase(null);
+          }}
+          onPurchaseError={() => {
+            setShowPlanModal(false);
+          }}
+        />
+      )}
 
       {/* Image Viewer Modal */}
       <ImageViewer

@@ -1,4 +1,5 @@
 import * as yup from "yup";
+import mongoose from "mongoose";
 import PostModel from "../../models/socialPost.js";
 import User from "../../models/user.js";
 import path from "path";
@@ -56,6 +57,7 @@ export const getPosts = async (req, res) => {
       .populate("author", "first_name last_name image bio role")
       .populate("likes.user", "username")
       .populate("comments.user", "username avatar")
+      .populate("plans", "name price description hotmartCheckoutCode hotmartCheckoutUrl")
       .sort(sort)
       .limit(limit)
       .skip((page - 1) * limit)
@@ -66,7 +68,10 @@ export const getPosts = async (req, res) => {
       isLiked: req.user ? post.likes.some(like => like.user._id.toString() === req.user._id.toString()) : false,
       likeCount: post.likes.length,
       commentCount: post.comments.length,
-      shareCount: post.shares?.length || 0
+      shareCount: post.shares?.length || 0,
+      accessType: post.tier || "PUBLIC", // Map tier to accessType for frontend compatibility
+      tier: post.tier || "PUBLIC",
+      plans: post.plans || []
     }));
 
     const total = await PostModel.countDocuments(query);
@@ -92,11 +97,27 @@ export const getPosts = async (req, res) => {
 // -------------------------------------------
 export const createPost = async (req, res) => {
   try {
-    const { content, visibility, category } = req.body;
+    const { content, visibility, category, accessType } = req.body;
 
     if (!req.user) {
       return res.status(400).json({ status: false, message: "Id is required" });
     }
+
+    // Handle plans array from FormData (can come as req.body['plans[]'] or req.body.plans)
+    let plansArray = [];
+    if (req.body['plans[]']) {
+      // Multer sends arrays as 'plans[]'
+      plansArray = Array.isArray(req.body['plans[]']) 
+        ? req.body['plans[]'] 
+        : [req.body['plans[]']];
+    } else if (req.body.plans) {
+      plansArray = Array.isArray(req.body.plans) ? req.body.plans : [req.body.plans];
+    }
+    
+    // Filter and validate plan IDs
+    const validPlans = plansArray
+      .filter(p => p && p !== "null" && p !== "undefined" && /^[0-9a-fA-F]{24}$/.test(String(p)))
+      .map(p => new mongoose.Types.ObjectId(p));
 
     const images = [];
     if (req.files?.images) {
@@ -120,14 +141,23 @@ export const createPost = async (req, res) => {
       images,
       videos,
       category: category || "General Updates",
-      visibility: visibility || "public"
+      visibility: visibility || "public",
+      tier: accessType || "PUBLIC", // Map accessType to tier
+      // Only add plans if PRO tier and valid plans exist
+      plans: (accessType === "PRO" && validPlans.length > 0) ? validPlans : []
     });
 
     await post.save();
 
     await User.findByIdAndUpdate(req.user._id, { $inc: { postsCount: 1 } });
 
+    // Populate fields separately since chaining may not work
     await post.populate("author", "first_name last_name image bio role category");
+    await post.populate("plans", "name price description hotmartCheckoutCode hotmartCheckoutUrl");
+
+    // Map tier back to accessType for frontend compatibility
+    const postResponse = post.toObject();
+    postResponse.accessType = postResponse.tier || "PUBLIC";
 
     // await notifyFollowersOfEducator(
     //   req.user._id,
@@ -135,7 +165,7 @@ export const createPost = async (req, res) => {
     //   `${post.author.first_name} ${post.author.last_name} posted: ${content.slice(0, 50)}...`,
     //   { postId: post._id.toString(), screen: "IQSocialFeeds" }
     // );
-    return res.status(200).json(ApiResponse(200, post, "Post created successfully"));
+    return res.status(200).json(ApiResponse(200, postResponse, "Post created successfully"));
   } catch (error) {
     console.error("Create post error:", error);
     res.status(500).json({ message: "Server error creating post" });
@@ -148,7 +178,7 @@ export const createPost = async (req, res) => {
 export const updatePost = async (req, res) => {
   try {
     const { postId } = req.params;
-    const { content, visibility, category } = req.body;
+    const { content, visibility, category, accessType } = req.body;
 
     const post = await PostModel.findById(postId);
     if (!post) return res.status(404).json({ message: "Post not found" });
@@ -157,9 +187,32 @@ export const updatePost = async (req, res) => {
       return res.status(403).json({ message: "Not authorized" });
     }
 
+    // Handle plans array from FormData (can come as req.body['plans[]'] or req.body.plans)
+    let plansArray = [];
+    if (req.body['plans[]']) {
+      plansArray = Array.isArray(req.body['plans[]']) 
+        ? req.body['plans[]'] 
+        : [req.body['plans[]']];
+    } else if (req.body.plans) {
+      plansArray = Array.isArray(req.body.plans) ? req.body.plans : [req.body.plans];
+    }
+    
+    // Filter and validate plan IDs
+    const validPlans = plansArray
+      .filter(p => p && p !== "null" && p !== "undefined" && /^[0-9a-fA-F]{24}$/.test(String(p)))
+      .map(p => new mongoose.Types.ObjectId(p));
+
     if (content) post.content = content;
     if (visibility) post.visibility = visibility;
     if (category) post.category = category;
+    if (accessType) post.tier = accessType; // Map accessType to tier
+    
+    // Update plans: only set if PRO tier, otherwise clear
+    if (accessType === "PRO" && validPlans.length > 0) {
+      post.plans = validPlans;
+    } else if (accessType !== "PRO") {
+      post.plans = [];
+    }
 
     // Replace images
     if (req.files?.images) {
@@ -195,8 +248,16 @@ export const updatePost = async (req, res) => {
     post.editedAt = new Date();
 
     await post.save();
+    
+    // Populate fields separately since chaining may not work
     await post.populate("author", "first_name last_name image bio role category");
-    return res.status(200).json(ApiResponse(200, post, "Post updated successfully"));
+    await post.populate("plans", "name price description hotmartCheckoutCode hotmartCheckoutUrl");
+    
+    // Map tier back to accessType for frontend compatibility
+    const postResponse = post.toObject();
+    postResponse.accessType = postResponse.tier || "PUBLIC";
+    
+    return res.status(200).json(ApiResponse(200, postResponse, "Post updated successfully"));
   } catch (error) {
     console.error("Update post error:", error);
     res.status(500).json({ message: "Server error updating post" });

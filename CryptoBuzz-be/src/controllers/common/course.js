@@ -23,7 +23,7 @@ const courseValidationSchema = yup.object().shape({
   price: yup.number().min(0).optional(),
   published: yup.boolean().default(false),
   isFeatured: yup.boolean().default(false),
-  tier: yup.string().oneOf(["FREE", "PREMIUM"]).default("FREE"),
+  tier: yup.string().oneOf(["PUBLIC", "LOGGED_IN", "UID_ONLY", "PRO"]).default("PUBLIC"),
   order: yup.number().integer().min(0).optional(),
   category: yup
     .string()

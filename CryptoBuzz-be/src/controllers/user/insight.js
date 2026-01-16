@@ -49,6 +49,7 @@ export const getInsights = asyncHandler(async (req, res) => {
             .limit(limitNum)
             .populate("category", "_id name")
             .populate("createdBy", "_id first_name last_name image")
+            .populate("plans", "name price description hotmartCheckoutCode hotmartCheckoutUrl")
             .lean(),
         TradeAnalysisModel.countDocuments(query)
     ]);
@@ -60,6 +61,7 @@ export const getInsights = asyncHandler(async (req, res) => {
         url: insight.url,
         photos: insight.photos,
         accessType: insight.accessType,
+        plans: insight.plans || [], // Include populated plans
         createdAt: insight.createdAt,
         category: insight.category,
         createdBy: insight.createdBy

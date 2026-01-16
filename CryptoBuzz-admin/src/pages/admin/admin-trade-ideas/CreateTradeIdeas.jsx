@@ -8,6 +8,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Dialog,
   DialogContent,
@@ -25,6 +26,7 @@ import {
 } from "../../../store/api/admin/adminTradeIdeasApiSlice";
 import RichTextEditor from "../../../components/ui/rich-editor";
 import { useGetCommonCategoryQuery } from "../../../store/api/admin/adminTradeIdeasApiSlice";
+import { useFetchPlansQuery } from "../../../store/api/admin/adminPlanApiSlice";
 
 const CreateTradeIdeas = forwardRef(
   (
@@ -35,7 +37,8 @@ const CreateTradeIdeas = forwardRef(
     const [createIdea] = useCreateIdeaMutation();
     const [updateIdea] = useUpdateIdeaMutation();
     const educatorId = auth?.user?._id;
-    const { data: categories } = useGetCommonCategoryQuery()
+    const { data: categories } = useGetCommonCategoryQuery();
+    const { data: plans } = useFetchPlansQuery();
 
     const initialValues = {
       name: "",
@@ -50,8 +53,8 @@ const CreateTradeIdeas = forwardRef(
       description: "",
       category: "",
       pips: 0,
-      accessType: "PUBLIC"
-
+      accessType: "PUBLIC",
+      plans: [],
     };
 
     const numberField = () =>
@@ -90,7 +93,12 @@ const CreateTradeIdeas = forwardRef(
       description: Yup.string().required("Description is required"),
       category: Yup.string().required("Category is required"),
       pips: numberField(),
-      accessType: Yup.string().required("Access Type is required"),
+      accessType: Yup.string().oneOf(["PUBLIC", "LOGGED_IN", "UID_ONLY", "PRO"]).required("Access Type is required"),
+      plans: Yup.array().of(Yup.string()).when("accessType", {
+        is: "PRO",
+        then: (schema) => schema.min(1, "At least one plan is required for PRO tier"),
+        otherwise: (schema) => schema,
+      }),
     });
 
     const formik = useFormik({
@@ -119,6 +127,12 @@ const CreateTradeIdeas = forwardRef(
         formData.append("description", values.description);
         formData.append("category", values.category);
         formData.append("accessType", values.accessType);
+        // Add plans if PRO tier
+        if (values.accessType === "PRO" && values.plans && values.plans.length > 0) {
+          values.plans.forEach((planId) => {
+            formData.append("plans[]", planId);
+          });
+        }
         exitsValues.forEach((exit) => formData.append("exits[]", exit));
         if (selectedRow?._id) {
           formData.append("id", selectedRow?._id);
@@ -173,6 +187,7 @@ const CreateTradeIdeas = forwardRef(
           exits: selectedRow?.exits,
           educatorId: selectedRow?.educatorDetails?._id,
           accessType: selectedRow?.accessType || "PUBLIC",
+          plans: selectedRow?.plans?.map(p => (p?._id || p)?.toString()) || [],
         };
         formik.setValues(initData);
       }
@@ -538,14 +553,20 @@ const CreateTradeIdeas = forwardRef(
                 </label>
 
                 <div className="flex flex-wrap gap-4 mt-2">
-                  {["PUBLIC", "LOGGED_IN", "UID_ONLY"].map((type) => (
+                  {["PUBLIC", "LOGGED_IN", "UID_ONLY", "PRO"].map((type) => (
                     <label key={type} className="flex items-center gap-2 cursor-pointer">
                       <input
                         type="radio"
                         name="accessType"
                         value={type}
                         checked={formik.values.accessType === type}
-                        onChange={() => formik.setFieldValue("accessType", type)}
+                        onChange={() => {
+                          formik.setFieldValue("accessType", type);
+                          // Clear plans if switching away from PRO
+                          if (type !== "PRO") {
+                            formik.setFieldValue("plans", []);
+                          }
+                        }}
                         className="radio radio-primary"
                       />
                       <span className="text-sm">{type.replace("_", " ")}</span>
@@ -559,6 +580,73 @@ const CreateTradeIdeas = forwardRef(
                   </span>
                 )}
               </div>
+
+              {formik.values.accessType === "PRO" && (
+                <div className="col-span-12">
+                  <label className="form-label text-gray-900">
+                    Payment Plans<span className="text-danger">*</span>
+                  </label>
+                  <div className={`space-y-3 p-4 border rounded-md mt-2 ${formik.errors.plans ? "border-danger" : "border-gray-300"}`}>
+                    {plans?.data?.length > 0 ? (
+                      plans.data.map((plan) => {
+                        const isSelected = formik.values.plans?.includes(plan._id);
+                        return (
+                          <div
+                            key={plan._id}
+                            className="flex items-start space-x-3 p-3 rounded-md hover:bg-gray-50 border border-transparent hover:border-gray-200 transition-colors"
+                          >
+                            <Checkbox
+                              id={`plan-${plan._id}`}
+                              checked={isSelected}
+                              onCheckedChange={(checked) => {
+                                const currentPlans = formik.values.plans || [];
+                                const newPlans = checked
+                                  ? [...currentPlans, plan._id]
+                                  : currentPlans.filter(id => id !== plan._id);
+                                formik.setFieldValue("plans", newPlans);
+                              }}
+                              className="mt-1"
+                            />
+                            <label
+                              htmlFor={`plan-${plan._id}`}
+                              className="flex-1 cursor-pointer"
+                            >
+                              <div className="font-medium text-gray-900">
+                                {plan.name}
+                              </div>
+                              <div className="text-sm text-gray-500">
+                                ${plan.price?.toFixed(2) || "0.00"} • {plan.hotmartCheckoutCode || "N/A"}
+                              </div>
+                              {plan.description && (
+                                <div className="text-xs text-gray-400 mt-1">
+                                  {plan.description}
+                                </div>
+                              )}
+                            </label>
+                          </div>
+                        );
+                      })
+                    ) : (
+                      <div className="text-sm text-gray-500 py-2">
+                        No plans found. Please create a plan first.
+                      </div>
+                    )}
+                    {formik.values.plans?.length > 0 && (
+                      <div className="mt-3 pt-3 border-t text-sm text-gray-600">
+                        {formik.values.plans.length} plan{formik.values.plans.length !== 1 ? 's' : ''} selected
+                      </div>
+                    )}
+                  </div>
+                  {formik.touched.plans && formik.errors.plans && (
+                    <span className="text-danger text-xs mt-1 block">
+                      {formik.errors.plans}
+                    </span>
+                  )}
+                  <p className="text-xs text-gray-500 mt-1">
+                    Select one or more payment plans. Users who purchase any of these plans will get access to this content.
+                  </p>
+                </div>
+              )}
               {/* <div className="col-span-6">
                 <div className="flex flex-col gap-1">
                   <label className="form-label text-gray-900 gap-1">

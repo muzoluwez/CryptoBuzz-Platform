@@ -136,7 +136,7 @@ const AdminPlan = ({ title = "Payment Plans" }) => {
             href={row?.original?.hotmartCheckoutUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="px-2 py-1 bg-gray-100 dark:bg-gray-800 rounded text-sm font-mono text-primary hover:underline break-all max-w-[300px] truncate"
+            className="px-2 py-1 bg-gray-100 dark:bg-gray-200 rounded text-sm font-mono text-primary hover:underline break-all max-w-[300px] truncate"
             title={row?.original?.hotmartCheckoutUrl}
           >
             {row?.original?.hotmartCheckoutUrl || 'N/A'}
@@ -284,7 +284,7 @@ const AdminPlan = ({ title = "Payment Plans" }) => {
   };
 
   return (
-    <div className='container-fluid p-0 mt-5'>
+    <div className='container-fluid mt-5'>
       <Toolbar>
         <ToolbarHeading>
           <ToolbarPageTitle text="Payment Plans" />

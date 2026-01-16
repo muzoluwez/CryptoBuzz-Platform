@@ -73,6 +73,7 @@ export const listSchedule = async (req, res) => {
       .populate("create_by", "first_name last_name")
       .populate("language", "name")
       .populate("recurrenceRuleId", "frequency interval byWeekday hasEndLimit occurrences endType endDateTime")
+      .populate("plans", "name price description hotmartCheckoutCode hotmartCheckoutUrl")
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit)
@@ -95,7 +96,9 @@ export const listSchedule = async (req, res) => {
       createdAt: item.createdAt,
       updatedAt: item.updatedAt,
       isRecurent: item.isRecurent || false,
-      recurrenceRuleId: item.recurrenceRuleId || ""
+      recurrenceRuleId: item.recurrenceRuleId || "",
+      tier: item.tier || "PUBLIC",
+      plans: item.plans || []
     }));
 
     const pagination = {
@@ -126,13 +129,32 @@ export const createSchedule = async (req, res) => {
 
     // await scheduleValidationSchema.validate(body, { abortEarly: false });
 
+    // Handle plans array from FormData (can come as req.body['plans[]'] or req.body.plans)
+    let plansArray = [];
+    if (body['plans[]']) {
+      // Multer sends arrays as 'plans[]'
+      plansArray = Array.isArray(body['plans[]']) 
+        ? body['plans[]'] 
+        : [body['plans[]']];
+    } else if (body.plans) {
+      plansArray = Array.isArray(body.plans) ? body.plans : [body.plans];
+    }
+    
+    // Filter and validate plan IDs
+    const validPlans = plansArray
+      .filter(p => p && p !== "null" && p !== "undefined" && /^[0-9a-fA-F]{24}$/.test(String(p)))
+      .map(p => new mongoose.Types.ObjectId(p));
+
     const scheduleData = {
       ...body,
       callId: `callId-${uuidv4()}`,
       tags: Array.isArray(body.tags) ? body.tags : body.tags.split(",").map(tag => tag.trim()),
       datetime: Date.now(),
       educator:  createdUser._id,
-      create_by: createdUser
+      create_by: createdUser,
+      tier: body.tier || "PUBLIC",
+      // Only add plans if PRO tier and valid plans exist
+      plans: (body.tier === "PRO" && validPlans.length > 0) ? validPlans : []
     };
 
     const schedule = await Schedule.create(scheduleData);
@@ -142,7 +164,8 @@ export const createSchedule = async (req, res) => {
     const populatedSchedule = await Schedule.findById(schedule._id)
       .populate("category", "name")
       .populate("educator", "first_name last_name image")
-      .populate("language", "name");
+      .populate("language", "name")
+      .populate("plans", "name price description hotmartCheckoutCode hotmartCheckoutUrl");
 
     res.status(201).json({
       success: true,
@@ -193,10 +216,28 @@ export const updateSchedule = async (req, res) => {
       });
     }
 
+    // Handle plans array from FormData (can come as req.body['plans[]'] or req.body.plans)
+    let plansArray = [];
+    if (body['plans[]']) {
+      plansArray = Array.isArray(body['plans[]']) 
+        ? body['plans[]'] 
+        : [body['plans[]']];
+    } else if (body.plans) {
+      plansArray = Array.isArray(body.plans) ? body.plans : [body.plans];
+    }
+    
+    // Filter and validate plan IDs
+    const validPlans = plansArray
+      .filter(p => p && p !== "null" && p !== "undefined" && /^[0-9a-fA-F]{24}$/.test(String(p)))
+      .map(p => new mongoose.Types.ObjectId(p));
+
     const updateData = {
       ...body,
       tags: Array.isArray(body.tags) ? body.tags : body.tags.split(",").map(t => t.trim()),
-      datetime: new Date(body.datetime)
+      datetime: new Date(body.datetime),
+      tier: body.tier || schedule.tier || "PUBLIC",
+      // Update plans: only set if PRO tier, otherwise clear
+      plans: (body.tier === "PRO" && validPlans.length > 0) ? validPlans : (body.tier !== "PRO" ? [] : schedule.plans || [])
     };
 
     const updated = await Schedule.findByIdAndUpdate(id, updateData, {
@@ -204,7 +245,8 @@ export const updateSchedule = async (req, res) => {
     })
       .populate("category", "name")
       .populate("language", "name")
-      .populate("educator", "first_name last_name image");
+      .populate("educator", "first_name last_name image")
+      .populate("plans", "name price description hotmartCheckoutCode hotmartCheckoutUrl");
 
     await updateLiveStreamForSchedule(updated);
 
@@ -349,6 +391,21 @@ export const createRecurringSessions = async (req, res) => {
       }
     }
 
+    // Handle plans array from FormData (can come as req.body['plans[]'] or req.body.plans)
+    let plansArray = [];
+    if (body['plans[]']) {
+      plansArray = Array.isArray(body['plans[]']) 
+        ? body['plans[]'] 
+        : [body['plans[]']];
+    } else if (body.plans) {
+      plansArray = Array.isArray(body.plans) ? body.plans : [body.plans];
+    }
+    
+    // Filter and validate plan IDs
+    const validPlans = plansArray
+      .filter(p => p && p !== "null" && p !== "undefined" && /^[0-9a-fA-F]{24}$/.test(String(p)))
+      .map(p => new mongoose.Types.ObjectId(p));
+
     const scheduleData = {
       title: body.title,
       category: body.category,
@@ -359,7 +416,10 @@ export const createRecurringSessions = async (req, res) => {
       tags: Array.isArray(body.tags) ? body.tags : body.tags.split(",").map(tag => tag.trim()),
       datetime: startDate,
       create_by: createdUser,
-      isRecurent: frequency !== "NONE"
+      isRecurent: frequency !== "NONE",
+      tier: body.tier || "PUBLIC",
+      // Only add plans if PRO tier and valid plans exist
+      plans: (body.tier === "PRO" && validPlans.length > 0) ? validPlans : []
     };
 
     const schedule = await Schedule.create(scheduleData);
@@ -367,7 +427,8 @@ export const createRecurringSessions = async (req, res) => {
     const populatedSchedule = await Schedule.findById(schedule._id)
       .populate("category", "name")
       .populate("educator", "first_name last_name image")
-      .populate("language", "name");
+      .populate("language", "name")
+      .populate("plans", "name price description hotmartCheckoutCode hotmartCheckoutUrl");
 
     await createLiveStreamForSchedule(schedule);
 
@@ -484,6 +545,21 @@ export const updateRecurringSessions = async (req, res) => {
       }
     }
 
+    // Handle plans array from FormData (can come as req.body['plans[]'] or req.body.plans)
+    let plansArray = [];
+    if (body['plans[]']) {
+      plansArray = Array.isArray(body['plans[]']) 
+        ? body['plans[]'] 
+        : [body['plans[]']];
+    } else if (body.plans) {
+      plansArray = Array.isArray(body.plans) ? body.plans : [body.plans];
+    }
+    
+    // Filter and validate plan IDs
+    const validPlans = plansArray
+      .filter(p => p && p !== "null" && p !== "undefined" && /^[0-9a-fA-F]{24}$/.test(String(p)))
+      .map(p => new mongoose.Types.ObjectId(p));
+
     // Update base schedule
     schedule.title = body.title;
     schedule.description = body.description;
@@ -493,9 +569,20 @@ export const updateRecurringSessions = async (req, res) => {
     schedule.datetime = startDate;
     schedule.tags = Array.isArray(body.tags) ? body.tags : body.tags?.split(",").map(t => t.trim());
     schedule.isRecurent = frequency !== "NONE";
+    schedule.tier = body.tier || schedule.tier || "PUBLIC";
+    // Update plans: only set if PRO tier, otherwise clear
+    if (body.tier === "PRO" && validPlans.length > 0) {
+      schedule.plans = validPlans;
+    } else if (body.tier !== "PRO") {
+      schedule.plans = [];
+    }
     await schedule.save();
 
-    const populatedSchedule = await Schedule.findById(schedule._id);
+    const populatedSchedule = await Schedule.findById(schedule._id)
+      .populate("category", "name")
+      .populate("educator", "first_name last_name image")
+      .populate("language", "name")
+      .populate("plans", "name price description hotmartCheckoutCode hotmartCheckoutUrl");
 
     await updateLiveStreamForSchedule(populatedSchedule);
 
@@ -532,7 +619,7 @@ export const updateRecurringSessions = async (req, res) => {
       return res.status(200).json({
         success: true,
         message: "Single session updated successfully",
-        schedule,
+        schedule: populatedSchedule,
         session
       });
     }
@@ -579,6 +666,7 @@ export const updateRecurringSessions = async (req, res) => {
     res.status(200).json({
       success: true,
       message: "Recurring sessions updated successfully",
+      schedule: populatedSchedule,
       rule: newRule,
       schedules: newSessions
     });
