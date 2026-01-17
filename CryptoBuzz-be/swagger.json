@@ -1,7 +1,7 @@
 {
   "swagger": "2.0",
   "info": {
-    "title": "Crypto Buzz platform API",
+    "title": "Cripto Buzz platform API",
     "description": "It's backend for an online Trading analysis .",
     "version": "1.0.0"
   },
@@ -28,6 +28,9 @@
                   "example": "any"
                 },
                 "remember": {
+                  "example": "any"
+                },
+                "role": {
                   "example": "any"
                 }
               }
@@ -202,6 +205,9 @@
             "schema": {
               "type": "object",
               "properties": {
+                "plans": {
+                  "example": "any"
+                },
                 "name": {
                   "example": "any"
                 },
@@ -236,6 +242,9 @@
                   "example": "any"
                 },
                 "pips": {
+                  "example": "any"
+                },
+                "accessType": {
                   "example": "any"
                 }
               }
@@ -282,6 +291,9 @@
             "schema": {
               "type": "object",
               "properties": {
+                "plans": {
+                  "example": "any"
+                },
                 "name": {
                   "example": "any"
                 },
@@ -310,6 +322,9 @@
                   "example": "any"
                 },
                 "pips": {
+                  "example": "any"
+                },
+                "accessType": {
                   "example": "any"
                 }
               }
@@ -433,6 +448,9 @@
             "schema": {
               "type": "object",
               "properties": {
+                "plans": {
+                  "example": "any"
+                },
                 "title": {
                   "example": "any"
                 },
@@ -446,6 +464,9 @@
                   "example": "any"
                 },
                 "category": {
+                  "example": "any"
+                },
+                "accessType": {
                   "example": "any"
                 }
               }
@@ -492,6 +513,9 @@
             "schema": {
               "type": "object",
               "properties": {
+                "plans": {
+                  "example": "any"
+                },
                 "title": {
                   "example": "any"
                 },
@@ -502,6 +526,9 @@
                   "example": "any"
                 },
                 "category": {
+                  "example": "any"
+                },
+                "accessType": {
                   "example": "any"
                 }
               }
@@ -628,6 +655,9 @@
             "schema": {
               "type": "object",
               "properties": {
+                "plans": {
+                  "example": "any"
+                },
                 "content": {
                   "example": "any"
                 },
@@ -635,6 +665,9 @@
                   "example": "any"
                 },
                 "category": {
+                  "example": "any"
+                },
+                "accessType": {
                   "example": "any"
                 }
               }
@@ -681,6 +714,9 @@
             "schema": {
               "type": "object",
               "properties": {
+                "plans": {
+                  "example": "any"
+                },
                 "content": {
                   "example": "any"
                 },
@@ -688,6 +724,9 @@
                   "example": "any"
                 },
                 "category": {
+                  "example": "any"
+                },
+                "accessType": {
                   "example": "any"
                 }
               }
@@ -1080,10 +1119,13 @@
             "schema": {
               "type": "object",
               "properties": {
+                "plans": {
+                  "example": "any"
+                },
                 "tags": {
                   "example": "any"
                 },
-                "datetime": {
+                "tier": {
                   "example": "any"
                 }
               }
@@ -1166,10 +1208,16 @@
             "schema": {
               "type": "object",
               "properties": {
+                "plans": {
+                  "example": "any"
+                },
                 "tags": {
                   "example": "any"
                 },
                 "datetime": {
+                  "example": "any"
+                },
+                "tier": {
                   "example": "any"
                 }
               }
@@ -1305,6 +1353,9 @@
                 "datetime": {
                   "example": "any"
                 },
+                "plans": {
+                  "example": "any"
+                },
                 "title": {
                   "example": "any"
                 },
@@ -1321,6 +1372,9 @@
                   "example": "any"
                 },
                 "tags": {
+                  "example": "any"
+                },
+                "tier": {
                   "example": "any"
                 }
               }
@@ -1373,6 +1427,9 @@
                 "datetime": {
                   "example": "any"
                 },
+                "plans": {
+                  "example": "any"
+                },
                 "title": {
                   "example": "any"
                 },
@@ -1389,6 +1446,9 @@
                   "example": "any"
                 },
                 "tags": {
+                  "example": "any"
+                },
+                "tier": {
                   "example": "any"
                 }
               }
@@ -2195,6 +2255,9 @@
             "schema": {
               "type": "object",
               "properties": {
+                "plans": {
+                  "example": "any"
+                },
                 "title": {
                   "example": "any"
                 },
@@ -2205,6 +2268,9 @@
                   "example": "any"
                 },
                 "url": {
+                  "example": "any"
+                },
+                "accessType": {
                   "example": "any"
                 }
               }
@@ -2251,6 +2317,9 @@
             "schema": {
               "type": "object",
               "properties": {
+                "plans": {
+                  "example": "any"
+                },
                 "title": {
                   "example": "any"
                 },
@@ -2258,6 +2327,9 @@
                   "example": "any"
                 },
                 "url": {
+                  "example": "any"
+                },
+                "accessType": {
                   "example": "any"
                 }
               }
@@ -2369,6 +2441,313 @@
         "responses": {
           "200": {
             "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/v1/common/payment/webhook/hotmart": {
+      "post": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "slice(-4",
+            "in": "header",
+            "type": "string"
+          },
+          {
+            "name": "x-hotmart-hottok",
+            "in": "header",
+            "type": "string"
+          },
+          {
+            "name": "hottok",
+            "in": "query",
+            "type": "string"
+          },
+          {
+            "name": "event",
+            "in": "query",
+            "type": "string"
+          },
+          {
+            "name": "transaction",
+            "in": "query",
+            "type": "string"
+          },
+          {
+            "name": "purchase",
+            "in": "query",
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "hottok": {
+                  "example": "any"
+                },
+                "event": {
+                  "example": "any"
+                },
+                "req": {
+                  "example": "any"
+                },
+                "event_type": {
+                  "example": "any"
+                },
+                "notification_type": {
+                  "example": "any"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        }
+      }
+    },
+    "/api/v1/common/payment/purchases": {
+      "get": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/v1/common/payment/purchased-plans": {
+      "get": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/v1/common/payment/access/batch": {
+      "post": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "courseIds": {
+                  "example": "any"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/v1/common/payment/access/course/{courseId}": {
+      "get": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "courseId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/v1/common/payment/course/{courseId}/plans": {
+      "get": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "courseId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/v1/common/payment/plan/{planId}/courses": {
+      "get": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "planId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/v1/common/payment/checkout": {
+      "post": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/v1/common/hotmart/products": {
+      "get": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
           }
         }
       }
@@ -4018,6 +4397,318 @@
         }
       }
     },
+    "/api/v1/admin/plan/hotmart-products": {
+      "get": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/v1/admin/plan/": {
+      "get": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          },
+          {
+            "name": "search",
+            "in": "query",
+            "type": "string"
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      },
+      "post": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Created"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/v1/admin/plan/{id}": {
+      "get": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      },
+      "put": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      },
+      "delete": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/v1/admin/purchase/": {
+      "get": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "type": "string"
+          },
+          {
+            "name": "courseId",
+            "in": "query",
+            "type": "string"
+          },
+          {
+            "name": "userId",
+            "in": "query",
+            "type": "string"
+          },
+          {
+            "name": "startDate",
+            "in": "query",
+            "type": "string"
+          },
+          {
+            "name": "endDate",
+            "in": "query",
+            "type": "string"
+          },
+          {
+            "name": "search",
+            "in": "query",
+            "type": "string"
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "type": "string"
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/v1/admin/purchase/{id}": {
+      "get": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
     "/api/v1/educator/live-stream/list": {
       "get": {
         "description": "",
@@ -4394,7 +5085,7 @@
         }
       }
     },
-    "/api/v1/users/auth/sign-up": {
+    "/api/v1/users/auth/signup": {
       "post": {
         "description": "",
         "parameters": [
@@ -4436,7 +5127,7 @@
         }
       }
     },
-    "/api/v1/users/auth/sign-in": {
+    "/api/v1/users/auth/signin": {
       "post": {
         "description": "",
         "parameters": [
@@ -4476,11 +5167,6 @@
       "get": {
         "description": "",
         "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "type": "string"
-          },
           {
             "name": "categoryName",
             "in": "query",
@@ -4529,11 +5215,6 @@
         "description": "",
         "parameters": [
           {
-            "name": "Authorization",
-            "in": "header",
-            "type": "string"
-          },
-          {
             "name": "categoryName",
             "in": "query",
             "type": "string"
@@ -4570,11 +5251,6 @@
       "get": {
         "description": "",
         "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "type": "string"
-          },
           {
             "name": "categoryName",
             "in": "query",
@@ -4613,11 +5289,6 @@
         "description": "",
         "parameters": [
           {
-            "name": "Authorization",
-            "in": "header",
-            "type": "string"
-          },
-          {
             "name": "page",
             "in": "query",
             "type": "string"
@@ -4636,6 +5307,242 @@
         "responses": {
           "200": {
             "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/v1/users/schedule/": {
+      "get": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "categoryId",
+            "in": "query",
+            "type": "string"
+          },
+          {
+            "name": "language",
+            "in": "query",
+            "type": "string"
+          },
+          {
+            "name": "startDate",
+            "in": "query",
+            "type": "string"
+          },
+          {
+            "name": "endDate",
+            "in": "query",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/v1/users/schedule/get-token": {
+      "post": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "userId": {
+                  "example": "any"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/v1/users/schedule/educator/{educatorId}/active-live": {
+      "get": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "educatorId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/v1/users/schedule/active-live-streams": {
+      "get": {
+        "description": "",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/v1/users/category/fetch": {
+      "get": {
+        "description": "",
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/v1/users/educator/": {
+      "get": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "search",
+            "in": "query",
+            "type": "string"
+          },
+          {
+            "name": "category",
+            "in": "query",
+            "type": "string"
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "type": "string"
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/v1/users/educator/details/{educatorId}": {
+      "get": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "educatorId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/v1/users/rating/": {
+      "post": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "educator": {
+                  "example": "any"
+                },
+                "rating": {
+                  "example": "any"
+                },
+                "comment": {
+                  "example": "any"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Created"
+          }
+        }
+      }
+    },
+    "/api/v1/users/course/get": {
+      "get": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "mainSection",
+            "in": "query",
+            "type": "string"
+          },
+          {
+            "name": "categoryId",
+            "in": "query",
+            "type": "string"
+          },
+          {
+            "name": "language",
+            "in": "query",
+            "type": "string"
+          },
+          {
+            "name": "id",
+            "in": "query",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/v1/users/language/": {
+      "get": {
+        "description": "",
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "500": {
+            "description": "Internal Server Error"
           }
         }
       }

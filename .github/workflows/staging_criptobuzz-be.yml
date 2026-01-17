@@ -98,12 +98,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: node-app
-          path: |
-            CryptoBuzz-be/package.json
-            CryptoBuzz-be/package-lock.json
-            CryptoBuzz-be/dist
-            CryptoBuzz-be/src
-            CryptoBuzz-be/.env.example
+          path: CryptoBuzz-be
           retention-days: 1   # 🔥 cost saver
 
   deploy:
@@ -118,7 +113,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: node-app
-          path: CryptoBuzz-be
+          path: .
 
       - name: Login to Azure (OIDC)
         uses: azure/login@v2
@@ -132,4 +127,4 @@ jobs:
         with:
           app-name: 'criptoBuzz-be'
           slot-name: 'Production'
-          package: CryptoBuzz-be
+          package: .
