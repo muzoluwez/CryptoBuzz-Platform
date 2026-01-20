@@ -12,6 +12,7 @@ import TicketRoute from "./ticket.routes.js";
 import RatingRoute from "./rating.routes.js";
 import PlanRoute from "./plan.routes.js";
 import PurchaseRoute from "./purchase.routes.js";
+import BannerRoute from "./banner.routes.js";
 
 
 router.use("/auth", AuthRoute);
@@ -25,6 +26,7 @@ router.use("/ticket", TicketRoute);
 router.use("/rating", RatingRoute);
 router.use("/plan", PlanRoute);
 router.use("/purchase", PurchaseRoute);
+router.use("/banner", BannerRoute);
 
 export default router;
 

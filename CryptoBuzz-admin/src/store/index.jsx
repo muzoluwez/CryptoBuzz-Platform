@@ -29,6 +29,7 @@ import { adminCryptoAnalysisApiSlice } from "./api/admin/adminCryptoAnalysisApiS
 import { adminHotmartApiSlice } from "./api/admin/adminHotmartApiSlice";
 import { adminPlanApiSlice } from "./api/admin/adminPlanApiSlice";
 import { adminPurchaseApiSlice } from "./api/admin/adminPurchaseApiSlice";
+import { adminBannersApiSlice } from "./api/admin/adminBannersApiSlice";
 
 // ============================================================================
 // REDUX PERSIST CONFIGURATION
@@ -92,6 +93,7 @@ export const store = configureStore({
     [adminHotmartApiSlice.reducerPath]: adminHotmartApiSlice.reducer,
     [adminPlanApiSlice.reducerPath]: adminPlanApiSlice.reducer,
     [adminPurchaseApiSlice.reducerPath]: adminPurchaseApiSlice.reducer,
+    [adminBannersApiSlice.reducerPath]: adminBannersApiSlice.reducer,
   },
 
   middleware: (getDefaultMiddleware) =>
@@ -119,7 +121,8 @@ export const store = configureStore({
       adminCryptoAnalysisApiSlice.middleware,
       adminHotmartApiSlice.middleware,
       adminPlanApiSlice.middleware,
-      adminPurchaseApiSlice.middleware
+      adminPurchaseApiSlice.middleware,
+      adminBannersApiSlice.middleware
     ),
 });
 

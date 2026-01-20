@@ -2,11 +2,12 @@ import React, { useState } from 'react';
 import Languages from './languages/Languages';
 import CoursesTypes from './course-type/CoursesTypes';
 import AdminAcademyCategory from '../academy-category/AdminAcademyCategory';
+import Banners from './banners/Banners';
 
 const GeneralSetting = () => {
   const [activeTab, setActiveTab] = useState("Language");
 
-  const tabs = ["Language", "Courses Type", "Courses Category"];
+  const tabs = ["Language", "Courses Type", "Courses Category", "Banners"];
 
   return (
     <div className="container-fluid pb-5">
@@ -31,6 +32,7 @@ const GeneralSetting = () => {
         {activeTab === "Language" && <Languages />}
         {activeTab === "Courses Type" && <CoursesTypes />}
         {activeTab === "Courses Category" && <AdminAcademyCategory />}
+        {activeTab === "Banners" && <Banners />}
       </div>
     </div>
   );
