@@ -25,6 +25,7 @@ import { clientScheduleApiSlice } from './client/clientScheduleApiSlice';
 import { clientSocialApiSlice } from './client/clientSocialApiSlice';
 import { clientTradeAnalysisApiSlice } from './client/clientTradeAnalysisApiSlice';
 import { clientPaymentApiSlice } from './client/clientPaymentApiSlice';
+import { clientBannerApiSlice } from './client/clientBannerApiSlice';
 
 const persistConfig = {
   key: 'root',
@@ -50,6 +51,7 @@ const rootReducer = combineReducers({
   [clientRatingApiSlice.reducerPath]: clientRatingApiSlice.reducer,
   [clientSocialApiSlice.reducerPath]: clientSocialApiSlice.reducer,
   [clientScheduleApiSlice.reducerPath]: clientScheduleApiSlice.reducer,
+  [clientBannerApiSlice.reducerPath]: clientBannerApiSlice.reducer,
 });
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);
@@ -74,6 +76,7 @@ export const store = configureStore({
       clientRatingApiSlice.middleware,
       clientSocialApiSlice.middleware,
       clientScheduleApiSlice.middleware,
+      clientBannerApiSlice.middleware,
     ),
 });
 
