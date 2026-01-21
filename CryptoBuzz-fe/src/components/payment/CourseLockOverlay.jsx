@@ -72,8 +72,8 @@ export function CourseLockOverlay({
   return (
     <div
       className={cn(
-        "absolute inset-0 bg-black/25 rounded-xl z-10",
-        !hasHeightOverride && "h-[305px]",
+        "absolute inset-0 bg-black/50 rounded-xl z-10",
+        !hasHeightOverride && "h-[435px]",
         "flex flex-col items-center justify-center",
         className
       )}
@@ -121,7 +121,7 @@ export function CourseLockOverlay({
           }}
           disabled={isPurchasing}
           className={cn(
-            "w-full bg-primary hover:bg-primary/90 text-white",
+            "w-full bg-yellow-500 hover:bg-yellow-600 text-white",
             "disabled:opacity-50 disabled:cursor-not-allowed",
             "shadow-lg"
           )}

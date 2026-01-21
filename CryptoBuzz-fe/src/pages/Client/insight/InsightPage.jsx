@@ -378,7 +378,7 @@ export default function InsightPage() {
                       </h3>
 
                       {/* Preview - 2 lines max */}
-                      <p className="mt-2 text-sm text-muted-foreground line-clamp-2">
+                      <p className="mt-2 text-sm text-muted-foreground line-clamp-2 h-10">
                         {isLocked ? `${(insight?.preview || "").substring(0, 8)}******` : (insight?.preview || "")}
                       </p>
 

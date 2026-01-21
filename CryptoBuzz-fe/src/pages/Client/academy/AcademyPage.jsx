@@ -361,8 +361,8 @@ function CourseUI({
     <>
       <div className="">
 
-        <h1 className="text-2xl font-bold">Courses</h1>
-        <p className="text-sm text-gray-500">Home / Courses / Crypto</p>
+        <h1 className="text-2xl font-bold">Academia</h1>
+        <p className="text-sm text-gray-500">Inicio / Academia / Crypto</p>
 
         <Card className="mt-5 p-4 rounded-xl shadow-sm">
           <div className="flex gap-3">
@@ -544,7 +544,7 @@ function CourseUI({
                                 disabled={isLocked}
                                 className={`w-full flex items-center gap-3 p-3 rounded-lg transition-colors mt-2 relative ${isSelected
                                   ? "bg-yellow-400 hover:bg-yellow-500"
-                                  : "bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 "
+                                  : "bg-gray-100 hover:bg-gray-200 dark:bg-[#201a09] dark:hover:bg-[#201a09] cursor-pointer"
                                   } ${isLocked ? "opacity-60 cursor-not-allowed" : ""}`}
                               >
                                 {isLocked && (
@@ -552,7 +552,7 @@ function CourseUI({
                                     <Lock className="w-4 h-4 text-gray-500" />
                                   </div>
                                 )}
-                                <div className="w-8 h-8 rounded-full flex items-center justify-center bg-gray-900">
+                                <div className="w-8 h-8 rounded-full flex items-center justify-center bg-gray-800 dark:bg-gray-600">
                                   <Play className="w-4 h-4 text-white fill-white" />
                                 </div>
 
@@ -648,7 +648,7 @@ function CourseUI({
         {!hideVault && courses && courses.length > 0 && (
           <div className="mt-12">
             <div className="flex items-center justify-between flex-wrap gap-4 mb-6">
-              <h3 className="text-2xl font-bold text-gray-900 dark:text-gray-200">Recommended Courses</h3>
+              <h3 className="text-2xl font-bold text-gray-900 dark:text-gray-200">Cursos Recomendados</h3>
               {/* <div className="flex gap-4">
                 <button className="text-sm text-gray-600 hover:text-gray-900 dark:hover:text-white cursor-pointer flex items-center gap-1">
                   Experience <ChevronDown className="w-4 h-4" />

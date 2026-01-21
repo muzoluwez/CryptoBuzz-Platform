@@ -89,7 +89,7 @@ export function Footer() {
               />
             </Link>
             <p className="text-sm leading-relaxed text-gray-400 mt-5">
-              Cripto Buzz is a platform for learning about cryptocurrencies and trading strategies.
+              Cripto Buzz es una pataforma de aprendizaje para capitalizar el mercado de las criptomonedas.
             </p>
           </div>
 
@@ -97,7 +97,6 @@ export function Footer() {
           <div className="flex items-start lg:items-center gap-3">
             {[
               FaInstagram,
-              FaLinkedinIn,
               FaYoutube,
               FaTiktok,
               FaXTwitter,
@@ -105,7 +104,7 @@ export function Footer() {
               <a
                 key={index}
                 href="#"
-                className="w-10 h-10 flex items-center justify-center rounded-lg bg-[#1a2040] hover:bg-[#1a2040] transition"
+                className="w-10 h-10 flex items-center justify-center rounded-lg bg-[#40361a] hover:bg-[#402f1a] transition"
               >
                 <Icon className="text-white text-lg" />
               </a>
@@ -119,12 +118,11 @@ export function Footer() {
         {/* Bottom Section */}
         <div className="flex flex-col md:flex-row justify-between items-center gap-4 text-sm">
           <p className="text-gray-400 text-center md:text-left">
-            © {currentYear} CriptoBuzz. All rights reserved. · Built for
-            creators, by creators
+            © {currentYear} CriptoBuzz. Todos los derechos reservados
           </p>
 
           <div className="flex flex-wrap justify-center gap-4">
-            {['FAQ', 'Terms of Service', 'Privacy Policy', 'Cookie Policy'].map(
+            {['Preguntas Frecuentes', 'Términos y Condiciones', 'Política de Privacidad', 'Política de Cookies'].map(
               (item) => (
                 <a
                   key={item}

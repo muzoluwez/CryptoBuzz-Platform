@@ -8,6 +8,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardHeading
 import { LoginRequired } from '@/components/common/access-states/LoginRequired';
 import { useAuthContext } from '@/context/AuthContext';
 import useDocumentTitle from '../../../hooks/use-document-title';
+import hero_banner from "/media/images/crypto_banner.jpg";
 
 
 const DummyImage = ({ src, alt = "", className = "" }) => (
@@ -148,15 +149,15 @@ export default function HomePage() {
           <main className="">
             {/* Page Header */}
             <header className="mb-6">
-              <h1 className="text-2xl font-bold">Cripto Buzz Home</h1>
-              <p className="text-sm text-gray-500">Home</p>
+              <h1 className="text-2xl font-bold">Cripto Buzz Inicio</h1>
+              <p className="text-sm text-gray-500">Incio</p>
             </header>
 
             {/* HERO */}
             <section className="card mb-6 bg-white !rounded-2xl">
               <div className="relative h-52 md:h-60 lg:h-72">
                 <DummyImage
-                  src="https://images.unsplash.com/photo-1542744173-8e7e53415bb0?q=80&w=1600&auto=format&fit=crop"
+                  src={hero_banner}
                   alt="hero"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent"></div>
@@ -166,8 +167,7 @@ export default function HomePage() {
                     Cripto Buzz
                   </h2>
                   <p className="text-sm md:text-base drop-shadow-sm line-clamp-2">
-                    Cripto Buzz is a platform for learning about cryptocurrencies
-                    and trading strategies.
+                    es una plataforma de aprendizaje sobre criptomonedas y estrategias de inversión
                   </p>
                 </div>
               </div>
@@ -179,37 +179,34 @@ export default function HomePage() {
                 {/* Top-left stacked cards */}
                 <div className="grid grid-cols-1 md:grid-cols-1 gap-6">
                   <div className="flex flex-col gap-5">
-                    <Card className="relative text-white bg-[url('../../../../public/media/images/FreeMembershipTraining.png')] bg-cover h-64 overflow-hidden">
+                    <Card className="relative text-white bg-[url('/media/images/banner_1.png')] bg-cover h-64 overflow-hidden">
                       <CardContent className="flex flex-col justify-center h-full z-10 md:max-w-[75%]">
                         <div>
                           <CardHeading className="text-2xl font-black">
-                            Academy
+                            Academia
                           </CardHeading>
                           <p className="mt-2 text-lg line-clamp-3">
-                            Comprehensive trading education from basics to
-                            advanced strategies
+                            Aprendizaje desde lo más básico hasta lo más avanzado para que inicies a capitalizar el mercado.
                           </p>
                         </div>
                         <div className="mt-4">
                           <Link
                             to="/client/academy"
                             className="btn bg-white text-black cursor-pointer">
-                            Start Learning
+                            Inicia tu aprendizaje!
                           </Link>
                         </div>
                       </CardContent>
                       <div className="absolute inset-0 bg-gradient-black z-0"></div>
                     </Card>
-                    <Card className="relative text-white bg-[url('../../../../public/media/images/PremiumAcademy.png')] bg-cover h-64 overflow-hidden">
+                    <Card className="relative text-white bg-[url('/media/images/banner_2.png')] bg-cover h-64 overflow-hidden">
                       <CardContent className="flex flex-col justify-center h-full z-10 md:max-w-[75%]">
                         <div>
                           <CardHeading className="text-2xl font-black">
-                            Premium Membership
+                            Membresía VIP
                           </CardHeading>
                           <p className="mt-2 text-lg line-clamp-3">
-                            Cripto Buzz Premium Membership is a platform for
-                            learning about cryptocurrencies and trading
-                            strategies.
+                            Cripto Buzz VIP te dará los análisis clave que te permitirán tomar atajos en el mercado cripto.
                           </p>
                         </div>
                         <div className="mt-4">
@@ -217,7 +214,7 @@ export default function HomePage() {
                             to="/client/home"
                             className="btn bg-white text-black cursor-pointer "
                           >
-                            Start Membership
+                            Obtener VIP
                           </Link>
                         </div>
                       </CardContent>
@@ -229,7 +226,7 @@ export default function HomePage() {
 
               {/* Right big highlighted card */}
               <div className="lg:col-span-2 space-y-6">
-                <Card className="relative text-white bg-[url('../../../../public/media/images/live-user--bg.png')] bg-cover overflow-hidden h-full">
+                <Card className="relative text-white bg-[url('/media/images/live_user_bg.png')] bg-cover overflow-hidden h-full">
                   {/* Live Badge - Only show when there are live streams */}
                   {liveStreams.length > 0 && !isLiveStreamsLoading && (
                     <div className="absolute top-4 left-4 z-30 bg-red-600 text-white text-xs font-semibold px-3 py-1.5 rounded-full flex items-center gap-2 shadow-lg">
@@ -240,13 +237,13 @@ export default function HomePage() {
                   <CardContent className="flex flex-col items-center justify-between w-full z-10 h-full py-10">
                     <div className="text-center">
                       <CardHeading className="text-3xl font-black mb-5 leading-10">
-                        Who is live on <br /> Cripto Buzz
+                        Descubre quién esta vivo en <br /> Cripto Buzz
                       </CardHeading>
                       <p className="mt-2 text-lg opacity-95 leading-6">
                         {isLiveStreamsLoading
                           ? 'Loading live streams...'
                           : liveStreams.length === 0
-                            ? 'No educators are currently live. Check back soon!'
+                            ? 'No hay educatores en vivo en estos momentos. Revisa nuestro calendario para que no te pierdas la proxima sesión!'
                             : 'Join our live trading sessions and learn from experts'}
                       </p>
                     </div>
@@ -411,16 +408,16 @@ export default function HomePage() {
                 <CardContent className="p-0">
                   <div className="relative h-full">
                     <img
-                      src="https://images.unsplash.com/photo-1519389950473-47ba0277781c?q=80&w=800&auto=format&fit=crop"
+                      src="/media/images/home_images/1.jpg"
                       alt="live sessions"
                       className="w-full h-full object-cover"
                     />
                     <div className="absolute left-4 bottom-4 text-white z-10">
                       <h4 className=" text-2xl font-bold">
-                        Cripto Buzz Live Sessions
+                        Cripto Buzz Sesiones en Vivo
                       </h4>
                       <p className="text-md mt-1 mb-5">
-                        Join live trading sessions and webinars
+                        Únete a nuestras clases en vivo
                       </p>
                       <Link
                         to="/client/live"
@@ -438,17 +435,16 @@ export default function HomePage() {
                 <CardContent className="p-0">
                   <div className="relative h-full">
                     <img
-                      src="https://images.unsplash.com/photo-1559526324-593bc073d938?q=80&w=800&auto=format&fit=crop"
+                      src="/media/images/home_images/2.jpg"
                       alt="trading ideas"
                       className="w-full h-full object-cover"
                     />
                     <div className="absolute left-4 bottom-4 text-white z-10">
                       <h4 className=" text-2xl font-bold">
-                        Cripto Buzz Trading Ideas
+                        Ideas de Trading
                       </h4>
                       <p className="text-md mt-1 mb-5">
-                        Get the latest trading ideas to help you make better
-                        decisions
+                        Obtén acceso a nuestras entradas en tiempo real!
                       </p>
                       <Link
                         to="/client/idea"
@@ -466,7 +462,7 @@ export default function HomePage() {
                 <CardContent className="p-0">
                   <div className="relative h-full">
                     <img
-                      src="https://images.unsplash.com/photo-1519389950473-47ba0277781c?q=80&w=800&auto=format&fit=crop"
+                      src="/media/images/home_images/3.jpg"
                       alt="social feed"
                       className="w-full h-full object-cover"
                     />
@@ -475,7 +471,7 @@ export default function HomePage() {
                         Cripto Buzz Social Feed
                       </h4>
                       <p className="text-md mt-1 mb-5">
-                        Follow the latest news and updates from the crypto world
+                        Sigue las actualizaciones más recientes del mercado, sobre nuestra plataforma y contenido.
                       </p>
                       <Link
                         to="/client/social"
@@ -494,12 +490,12 @@ export default function HomePage() {
             <section className="grid grid-cols-3 lg:grid-cols-3 gap-6">
               {/* Activity feed (large left) */}
               <div className="col-span-12 lg:col-span-2 rounded-2xl">
-                <div className="card rounded-2xl p-6 h-full">
+                <div className="card border !rounded-xl p-6 h-full">
                   {/* Header */}
                   <div className="flex flex-wrap items-center justify-between mb-6 gap-3">
                     <h3 className="text-lg font-bold dark:text-white flex items-center gap-2">
                       <Activity className="w-5 h-5 text-yellow-400" />
-                      Live Activity Feed
+                      Actividad del Feed
                     </h3>
 
                     <div className="flex gap-1 p-1 rounded-lg">
@@ -565,7 +561,7 @@ export default function HomePage() {
                       posts.map((post) => (
                         <div
                           key={post._id}
-                          className="flex items-center gap-3 p-3 bg-gray-100 dark:bg-gray-900 rounded-xl hover:bg-gray-100 transition cursor-pointer"
+                          className="flex items-center gap-3 p-3 bg-gray-100 dark:bg-[#201a09] rounded-xl hover:bg-gray-100 transition cursor-pointer"
                           onClick={() =>
                             navigate(`/client/social?socialType=${socialType}`)
                           }
@@ -583,11 +579,11 @@ export default function HomePage() {
 
                           <div className="flex-1">
                             <div className="flex items-center justify-between ">
-                              <p className="dark:text-white font-medium text-[11px]">
+                              <p className="dark:text-white font-medium text-[14px]">
                                 {post.author?.first_name || 'IQNOIC'}{' '}
                                 {post.author?.last_name || 'EDUCATOR'}
                               </p>
-                              <p className="text-xs text-gray-600 dark:text-gray-400 font-medium text-[11px]">
+                              <p className="text-xs text-gray-600 dark:text-gray-400 font-medium text-[14px]">
                                 {timeAgo(post.createdAt || new Date())}
                               </p>
                             </div>
@@ -623,7 +619,7 @@ export default function HomePage() {
               </div>
 
               {/* Right Sidebar */}
-              <div className="col-span-12 lg:col-span-1">
+              {/* <div className="col-span-12 lg:col-span-1">
                 <aside className="space-y-6 mb-5">
                   <Card className="p-4">
                     <CardHeader className="!p-0 min-h-0 !pb-3 mb-3">
@@ -706,7 +702,7 @@ export default function HomePage() {
                     </CardContent>
                   </Card>
                 </aside>
-              </div>
+              </div> */}
             </section>
           </main>
         </div>
