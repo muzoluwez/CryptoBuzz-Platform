@@ -390,7 +390,7 @@ export default function SocialPage() {
                 className="relative h-full"
                 key={post?.id || post?._id}
               >
-                <Card className="max-w-full overflow-hidden rounded-xl shadow-md mb-5 min-h-[250px] h-full relative">
+                <Card className="max-w-full overflow-hidden rounded-xl shadow-md mb-5 h-full relative">
                   
                   {/* Lock Icon - Top Right Corner of entire card (only when locked) */}
                   {isLocked && (

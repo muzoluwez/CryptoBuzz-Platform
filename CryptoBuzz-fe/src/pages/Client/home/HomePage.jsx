@@ -179,7 +179,7 @@ export default function HomePage() {
                 {/* Top-left stacked cards */}
                 <div className="grid grid-cols-1 md:grid-cols-1 gap-6">
                   <div className="flex flex-col gap-5">
-                    <Card className="relative text-white bg-[url('/media/images/banner_1.png')] bg-cover h-64 overflow-hidden">
+                    <Card className="relative rounded-xl text-white bg-[url('/media/images/banner_1.png')] bg-cover h-64 overflow-hidden">
                       <CardContent className="flex flex-col justify-center h-full z-10 md:max-w-[75%]">
                         <div>
                           <CardHeading className="text-2xl font-black">
