@@ -2,8 +2,6 @@ import React, { useEffect, useState } from 'react';
 import { Lock } from 'lucide-react';
 import { Card, CardContent } from '../ui/card';
 import { useCourseAccessFromMap } from '@/hooks/use-batch-course-access';
-import { CourseLockOverlay } from './CourseLockOverlay';
-import { useCreatePaymentLinkMutation, useLazyGetCoursePlansQuery } from '@/store/client/clientPaymentApiSlice';
 import { PlanSelectionModal } from './PlanSelectionModal';
 import { toast } from 'sonner';
 import { convertRtkEditorToFormattedPlainText } from '@/lib/rtkEditorUtils';
@@ -23,7 +21,6 @@ export function RecommendedCourseCard({ course, onCourseClick, accessMap = {} })
   const courseId = course?._id || course?.id;
   const navigate = useNavigate();
   const isAuthenticated = useSelector(selectIsAuthenticated);
-  const [createPaymentLink, { isLoading: isPurchasing }] = useCreatePaymentLinkMutation();
   const [showPlanModal, setShowPlanModal] = useState(false);
   const [modalPlans, setModalPlans] = useState([]);
 
@@ -34,95 +31,82 @@ export function RecommendedCourseCard({ course, onCourseClick, accessMap = {} })
     course
   );
 
-  // Handle purchase - Check authentication first, then fetch plans
-  const handlePurchase = async (e) => {
-    // Stop propagation if event is provided (from button click)
-    if (e && e.stopPropagation) {
-      e.stopPropagation(); // Prevent course click
-    }
+  // Handle lock icon click - Determine which action to take based on access type
+  const handleLockClick = async (e) => {
+    // Stop propagation to prevent card click
+    e.stopPropagation();
 
     if (!courseId) {
       toast.error('Course ID is required');
       return;
     }
 
-    // For PRO courses, check authentication first
-    // If not authenticated, redirect to login
-    if (courseTier === 'PRO' && !isAuthenticated) {
+    // Determine the access type and take appropriate action
+    // 1. Login Required - Navigate to login page
+    if (lockReason === 'LOGIN_REQUIRED' || (courseTier === 'PRO' && !isAuthenticated)) {
       navigate('/login', { state: { from: window.location.pathname } });
       return;
     }
 
-    console.log('🔄 RecommendedCourseCard: Fetching plans for course:', courseId);
+    // 2. UID Required - Navigate to login page (UID modal not yet implemented)
+    if (lockReason === 'UID_REQUIRED') {
+      navigate('/login', { state: { from: window.location.pathname } });
+      return;
+    }
 
-    try {
-      // ALWAYS fetch plans first
-      // Use full API URL (same as RTK Query uses)
-      const apiBaseUrl = `${import.meta.env.VITE_APP_API_URL || 'http://localhost:8000'}/api/v1`;
-      const plansApiUrl = `${apiBaseUrl}/common/payment/course/${courseId}/plans`;
-      const authToken = localStorage.getItem('token') || '';
+    // 3. Purchase Required (Paid content) - ALWAYS show plan modal
+    if (lockReason === 'PURCHASE_REQUIRED' || courseTier === 'PRO') {
+      console.log('🔄 RecommendedCourseCard: Fetching plans for course:', courseId);
 
-      console.log('📡 RecommendedCourseCard: Calling plans API:', plansApiUrl);
+      try {
+        // ALWAYS fetch plans first
+        const apiBaseUrl = `${import.meta.env.VITE_APP_API_URL || 'http://localhost:8000'}/api/v1`;
+        const plansApiUrl = `${apiBaseUrl}/common/payment/course/${courseId}/plans`;
+        const authToken = localStorage.getItem('token') || '';
 
-      const plansResponse = await fetch(plansApiUrl, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          ...(authToken && { 'Authorization': `Bearer ${authToken}` })
-        },
-      });
+        console.log('📡 RecommendedCourseCard: Calling plans API:', plansApiUrl);
 
-      if (!plansResponse.ok) {
-        throw new Error(`Plans API failed: ${plansResponse.status}`);
-      }
-
-      const plansResult = await plansResponse.json();
-      const fetchedPlans = plansResult?.data?.plans || plansResult?.plans || [];
-
-      console.log('✅ Plans fetched:', {
-        fetchedPlans,
-        count: fetchedPlans.length,
-        plansResult,
-        courseId
-      });
-
-      // Check if multiple plans - show modal
-      if (fetchedPlans.length > 1) {
-        console.log('✅ Multiple plans detected - opening modal', {
-          plansCount: fetchedPlans.length,
-          plans: fetchedPlans
+        const plansResponse = await fetch(plansApiUrl, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            ...(authToken && { 'Authorization': `Bearer ${authToken}` })
+          },
         });
-        setModalPlans(fetchedPlans);
-        setShowPlanModal(true);
-        return; // Exit early - modal will handle purchase
-      }
 
-      // If single plan, log it for debugging
-      if (fetchedPlans.length === 1) {
-        console.log('⚠️ Single plan detected - proceeding to checkout directly', {
-          plan: fetchedPlans[0]
-        });
-      } else {
-        console.warn('⚠️ No plans found for course - proceeding to checkout without planId', {
+        if (!plansResponse.ok) {
+          throw new Error(`Plans API failed: ${plansResponse.status}`);
+        }
+
+        const plansResult = await plansResponse.json();
+        const fetchedPlans = plansResult?.data?.plans || plansResult?.plans || [];
+
+        console.log('✅ Plans fetched:', {
+          fetchedPlans,
+          count: fetchedPlans.length,
+          plansResult,
           courseId
         });
+
+        // ALWAYS show modal - even for single plan (user requirement)
+        if (fetchedPlans.length > 0) {
+          console.log('✅ Plans detected - opening modal', {
+            plansCount: fetchedPlans.length,
+            plans: fetchedPlans
+          });
+          setModalPlans(fetchedPlans);
+          setShowPlanModal(true);
+          return;
+        }
+
+        // No plans found - show error
+        console.warn('⚠️ No plans found for course', { courseId });
+        toast.error('No payment plans available for this course');
+      } catch (error) {
+        console.error('Error fetching plans:', error);
+        const errorMessage = error?.data?.message || error?.message || 'Failed to fetch payment plans';
+        toast.error(errorMessage);
       }
-
-      // Single plan or no plans - proceed with checkout
-      const planId = fetchedPlans.length === 1 ? fetchedPlans[0]._id : undefined;
-      const payload = planId ? { courseId, planId } : courseId;
-
-      const response = await createPaymentLink(payload).unwrap();
-
-      if (response?.data?.checkoutUrl) {
-        window.location.href = response.data.checkoutUrl;
-      } else {
-        throw new Error('Checkout URL not received');
-      }
-    } catch (error) {
-      console.error('Purchase error:', error);
-      const errorMessage = error?.data?.message || error?.message || 'Failed to create payment link';
-      toast.error(errorMessage);
     }
   };
 
@@ -196,6 +180,18 @@ export function RecommendedCourseCard({ course, onCourseClick, accessMap = {} })
             }}
           />
 
+          {/* Lock Icon - Top Right Corner (only when locked) */}
+          {isLocked && (
+            <div 
+              className="absolute top-3 right-3 z-20 cursor-pointer"
+              onClick={handleLockClick}
+            >
+              <div className="bg-black/60 backdrop-blur-sm p-2.5 rounded-full hover:bg-black/80 transition-all">
+                <Lock className="w-5 h-5 text-white" />
+              </div>
+            </div>
+          )}
+
           {/* Course content - visible but slightly faded when locked */}
           <div className={cn(
             "absolute left-4 bottom-4 text-white z-10 transition-opacity",
@@ -225,18 +221,11 @@ export function RecommendedCourseCard({ course, onCourseClick, accessMap = {} })
       {/* Gradient overlay */}
       <div className='absolute bg-gradient-black inset-0 bg-gradient-green z-0'></div>
 
-      {/* Lock overlay - Show if course has lock requirement and no access */}
+      {/* Full Card Lock Overlay - Semi-transparent overlay over entire card */}
       {isLocked && (
-        <CourseLockOverlay
-          course={course}
-          onPurchase={handlePurchase}
-          isPurchasing={isPurchasing}
-          price={coursePrice}
-          tier={courseTier || course?.tier || 'PUBLIC'}
-          lockReason={lockReason}
-          lockMessage={lockMessage}
-          className="rounded-lg"
-          contentType="course"
+        <div 
+          className="absolute inset-0 bg-black/40 backdrop-blur-[1px] z-10 rounded-lg cursor-pointer" 
+          onClick={handleLockClick}
         />
       )}
 

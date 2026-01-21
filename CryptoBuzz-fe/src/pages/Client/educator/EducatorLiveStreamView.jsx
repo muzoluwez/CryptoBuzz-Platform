@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState, useMemo } from "react";
 import { StreamTheme, StreamVideoClient } from "@stream-io/video-react-sdk";
 import "@stream-io/video-react-sdk/dist/css/styles.css";
-import { Loader2 } from "lucide-react";
+import { Loader2, Lock } from "lucide-react";
 import { useParams, useNavigate } from "react-router";
 import { useAuthContext } from "../../../context/AuthContext";
 import { toAbsoluteUrl } from "../../../lib/helpers";
@@ -13,7 +13,6 @@ import { useSelector } from "react-redux";
 import { selectCurrentUser, selectIsAuthenticated } from "@/store/authSlice";
 import { useGetPurchasedPlanIdsQuery } from "@/store/client/clientPaymentApiSlice";
 import { checkAccess } from "@/utils/accessControl";
-import { CourseLockOverlay } from "@/components/payment/CourseLockOverlay";
 import { PlanSelectionModal } from "@/components/payment/PlanSelectionModal";
 import { toast } from "sonner";
 
@@ -162,22 +161,18 @@ const EducatorLiveStreamView = () => {
       return;
     }
 
-    if (plans.length > 1) {
-      setSelectedContentForPurchase({
-        id: activeLiveStream?._id || schedule?._id,
-        title: schedule?.title || 'Live Stream',
-        plans: plans,
-        contentType: 'liveStream',
-      });
-      setShowPlanModal(true);
-    } else {
-      const plan = plans[0];
-      if (plan.hotmartCheckoutUrl) {
-        window.location.href = plan.hotmartCheckoutUrl;
-      } else {
-        toast.error('Checkout URL not available for this plan');
-      }
-    }
+    // ALWAYS show modal - even for single plan (user requirement)
+    console.log('✅ Plans detected - opening modal', {
+      plansCount: plans.length,
+      plans: plans
+    });
+    setSelectedContentForPurchase({
+      id: activeLiveStream?._id || schedule?._id,
+      title: schedule?.title || 'Live Stream',
+      plans: plans,
+      contentType: 'liveStream',
+    });
+    setShowPlanModal(true);
   };
 
   // Cleanup when stream stops (isLive becomes false)
@@ -351,6 +346,19 @@ const EducatorLiveStreamView = () => {
   // Check if live stream is locked (PRO tier without purchase) - CHECK THIS EARLY
   // If locked, show lock overlay instead of stream content - NO STREAM VIEWER SHOULD RENDER
   if (isLive && activeLiveStream && accessResult.showLock && !accessResult.hasAccess) {
+    const lockReason = accessResult.lockReason;
+
+    const handleLockClick = (e) => {
+      e.stopPropagation();
+      if (lockReason === 'LOGIN_REQUIRED' || (tier === 'PRO' && !isAuthenticatedRedux)) {
+        navigate('/login', { state: { from: window.location.pathname } });
+      } else if (lockReason === 'UID_REQUIRED') {
+        navigate('/login', { state: { from: window.location.pathname } });
+      } else if (lockReason === 'PURCHASE_REQUIRED' || tier === 'PRO') {
+        handleLiveStreamPurchase();
+      }
+    };
+
     return (
       <div className="relative w-full h-[600px] bg-gray-900 rounded-xl overflow-hidden">
         {/* Show banner image with blur */}
@@ -363,16 +371,23 @@ const EducatorLiveStreamView = () => {
             />
           </div>
         )}
-        {/* Lock overlay - full height for live stream */}
-        <CourseLockOverlay
-          course={schedule}
-          tier={tier}
-          lockReason={accessResult.lockReason}
-          lockMessage={accessResult.lockMessage}
-          onPurchase={handleLiveStreamPurchase}
-          className="h-full"
-          contentType="Live Stream"
+        
+        {/* Lock Icon - Top Right Corner */}
+        <div 
+          className="absolute top-3 right-3 z-30 cursor-pointer"
+          onClick={handleLockClick}
+        >
+          <div className="bg-black/60 backdrop-blur-sm p-2.5 rounded-full hover:bg-black/80 transition-all">
+            <Lock className="w-5 h-5 text-white" />
+          </div>
+        </div>
+
+        {/* Full Card Lock Overlay - Semi-transparent overlay over entire card */}
+        <div 
+          className="absolute inset-0 bg-black/40 backdrop-blur-[1px] z-10 rounded-xl cursor-pointer" 
+          onClick={handleLockClick}
         />
+
         {/* Plan Selection Modal */}
         {selectedContentForPurchase && (
           <PlanSelectionModal

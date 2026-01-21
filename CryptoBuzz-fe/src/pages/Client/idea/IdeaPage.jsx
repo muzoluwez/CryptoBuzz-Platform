@@ -1,10 +1,9 @@
 import { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { useGetIdeasQuery } from '@/store/client/clientIdeaApiSlice';
-import { CopyIcon, Eye, LockKeyhole } from "lucide-react";
+import { CopyIcon, Eye, Lock, LockKeyhole } from "lucide-react";
 import { toast } from 'sonner';
 import { checkAccess } from '@/utils/accessControl';
-import { CourseLockOverlay } from '@/components/payment/CourseLockOverlay';
 import { PlanSelectionModal } from '@/components/payment/PlanSelectionModal';
 import { useSelector } from 'react-redux';
 import { selectCurrentUser, selectIsAuthenticated } from '@/store/authSlice';
@@ -202,9 +201,25 @@ export default function IdeaPage() {
 
               const isLocked = showLock && !hasAccess;
 
-              // Handle purchase action (only called when user is authenticated)
-              const handlePurchase = () => {
-                if (tier === 'PRO' && isAuthenticated) {
+              // Handle lock icon click - Determine which action to take based on access type
+              const handleLockClick = (e) => {
+                // Stop propagation to prevent card interactions
+                e.stopPropagation();
+
+                // 1. Login Required - Navigate to login page
+                if (lockReason === 'LOGIN_REQUIRED' || (tier === 'PRO' && !isAuthenticated)) {
+                  navigate('/login', { state: { from: window.location.pathname } });
+                  return;
+                }
+
+                // 2. UID Required - Navigate to login page (UID modal not yet implemented)
+                if (lockReason === 'UID_REQUIRED') {
+                  navigate('/login', { state: { from: window.location.pathname } });
+                  return;
+                }
+
+                // 3. Purchase Required (Paid content) - ALWAYS show plan modal
+                if (lockReason === 'PURCHASE_REQUIRED' || tier === 'PRO') {
                   // Debug: Log the idea object to see what we're working with
                   console.log('Idea object for purchase:', c);
                   console.log('Plans from idea:', c.plans);
@@ -243,24 +258,18 @@ export default function IdeaPage() {
                     return;
                   }
 
-                  // If multiple plans, show selection modal
-                  if (contentPlans.length > 1) {
-                    setSelectedContentForPurchase({
-                      id: c._id,
-                      title: c.name,
-                      plans: contentPlans,
-                      contentType: 'idea',
-                    });
-                    setShowPlanModal(true);
-                  } else {
-                    // Single plan - redirect directly to checkout
-                    const plan = contentPlans[0];
-                    if (plan.hotmartCheckoutUrl) {
-                      window.location.href = plan.hotmartCheckoutUrl;
-                    } else {
-                      toast.error('Checkout URL not available for this plan');
-                    }
-                  }
+                  // ALWAYS show modal - even for single plan (user requirement)
+                  console.log('✅ Plans detected - opening modal', {
+                    plansCount: contentPlans.length,
+                    plans: contentPlans
+                  });
+                  setSelectedContentForPurchase({
+                    id: c._id,
+                    title: c.name,
+                    plans: contentPlans,
+                    contentType: 'idea',
+                  });
+                  setShowPlanModal(true);
                 }
               };
 
@@ -270,7 +279,7 @@ export default function IdeaPage() {
                   key={c._id || i}
                 >
                   <Card
-                    className="rounded-2xl shadow-lg border border-gray-medium overflow-hidden animate-slideInUp h-full"
+                    className="rounded-2xl shadow-lg border border-gray-medium overflow-hidden animate-slideInUp h-full relative"
                     style={{ animationDelay: `${i * 0.1}s` }}
                   >
 
@@ -289,6 +298,18 @@ export default function IdeaPage() {
                         {/* <p className=" font-medium">{c.year}</p> */}
                       </div>
                     </CardHeader>
+
+                    {/* Lock Icon - Top Right Corner of entire card (only when locked) */}
+                    {isLocked && (
+                      <div 
+                        className="absolute top-3 right-3 z-30 cursor-pointer"
+                        onClick={handleLockClick}
+                      >
+                        <div className="bg-black/60 backdrop-blur-sm p-2.5 rounded-full hover:bg-black/80 transition-all">
+                          <Lock className="w-5 h-5 text-white" />
+                        </div>
+                      </div>
+                    )}
 
                     {/* TOP CHART IMAGE CAROUSEL */}
                     <div className="relative">
@@ -476,20 +497,15 @@ export default function IdeaPage() {
                         </button>
                       </CardFooter>
                     )}
-                  </Card>
 
-                  {/* Full Card Lock Overlay */}
-                  {isLocked && (
-                    <div className="absolute inset-0 z-40 rounded-2xl overflow-hidden">
-                      <CourseLockOverlay
-                        tier={tier}
-                        lockReason={lockReason}
-                        lockMessage={lockMessage}
-                        onPurchase={handlePurchase}
-                        contentType="Idea"
+                    {/* Full Card Lock Overlay - Semi-transparent overlay over entire card */}
+                    {isLocked && (
+                      <div 
+                        className="absolute inset-0 bg-black/40 backdrop-blur-[1px] z-10 rounded-2xl cursor-pointer" 
+                        onClick={handleLockClick}
                       />
-                    </div>
-                  )}
+                    )}
+                  </Card>
 
                   {/* Hover Overlay with Message */}
                   {isLocked && hoveredCardId === c._id && (

@@ -1,10 +1,10 @@
 import { useMemo, useState } from 'react';
 import { useGetSocialsQuery } from '@/store/client/clientSocialApiSlice';
 import { Button } from 'react-aria-components';
+import { Lock } from 'lucide-react';
 import { Link, useNavigate } from 'react-router';
 import { toast } from 'sonner';
 import { checkAccess } from '@/utils/accessControl';
-import { CourseLockOverlay } from '@/components/payment/CourseLockOverlay';
 import { PlanSelectionModal } from '@/components/payment/PlanSelectionModal';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
@@ -311,9 +311,25 @@ export default function SocialPage() {
 
             const isLocked = showLock && !hasAccess;
 
-            // Handle purchase action (only called when user is authenticated)
-            const handlePurchase = () => {
-              if (tier === 'PRO' && isAuthenticated) {
+            // Handle lock icon click - Determine which action to take based on access type
+            const handleLockClick = (e) => {
+              // Stop propagation to prevent card interactions
+              e.stopPropagation();
+
+              // 1. Login Required - Navigate to login page
+              if (lockReason === 'LOGIN_REQUIRED' || (tier === 'PRO' && !isAuthenticated)) {
+                navigate('/login', { state: { from: window.location.pathname } });
+                return;
+              }
+
+              // 2. UID Required - Navigate to login page (UID modal not yet implemented)
+              if (lockReason === 'UID_REQUIRED') {
+                navigate('/login', { state: { from: window.location.pathname } });
+                return;
+              }
+
+              // 3. Purchase Required (Paid content) - ALWAYS show plan modal
+              if (lockReason === 'PURCHASE_REQUIRED' || tier === 'PRO') {
                 // Debug: Log the post object to see what we're working with
                 console.log('Post object for purchase:', post);
                 console.log('Plans from post:', post?.plans);
@@ -351,24 +367,18 @@ export default function SocialPage() {
                   return;
                 }
 
-                // If multiple plans, show selection modal
-                if (contentPlans.length > 1) {
-                  setSelectedContentForPurchase({
-                    id: post?._id || post?.id,
-                    title: post?.content?.substring(0, 50) || 'Social Post',
-                    plans: contentPlans,
-                    contentType: 'post',
-                  });
-                  setShowPlanModal(true);
-                } else {
-                  // Single plan - redirect directly to checkout
-                  const plan = contentPlans[0];
-                  if (plan.hotmartCheckoutUrl) {
-                    window.location.href = plan.hotmartCheckoutUrl;
-                  } else {
-                    toast.error('Checkout URL not available for this plan');
-                  }
-                }
+                // ALWAYS show modal - even for single plan (user requirement)
+                console.log('✅ Plans detected - opening modal', {
+                  plansCount: contentPlans.length,
+                  plans: contentPlans
+                });
+                setSelectedContentForPurchase({
+                  id: post?._id || post?.id,
+                  title: post?.content?.substring(0, 50) || 'Social Post',
+                  plans: contentPlans,
+                  contentType: 'post',
+                });
+                setShowPlanModal(true);
               }
             };
 
@@ -377,7 +387,20 @@ export default function SocialPage() {
                 className="relative h-full"
                 key={post?.id || post?._id}
               >
-                <Card className={`max-w-full overflow-hidden rounded-xl shadow-md mb-5 min-h-[250px] h-full `}>
+                <Card className="max-w-full overflow-hidden rounded-xl shadow-md mb-5 min-h-[250px] h-full relative">
+                  
+                  {/* Lock Icon - Top Right Corner of entire card (only when locked) */}
+                  {isLocked && (
+                    <div 
+                      className="absolute top-3 right-3 z-30 cursor-pointer"
+                      onClick={handleLockClick}
+                    >
+                      <div className="bg-black/60 backdrop-blur-sm p-2.5 rounded-full hover:bg-black/80 transition-all">
+                        <Lock className="w-5 h-5 text-white" />
+                      </div>
+                    </div>
+                  )}
+
                   <CardHeader className="p-4 justify-between">
                     <div className="flex items-center gap-3">
                       <Avatar className="h-10 w-10">
@@ -466,21 +489,15 @@ export default function SocialPage() {
                         </div>
                       )}
                   </CardContent>
-                </Card>
 
-                {/* Full Card Lock Overlay */}
-                {isLocked && (
-                  <div className="absolute inset-0 z-40 rounded-xl overflow-hidden">
-                    <CourseLockOverlay
-                      tier={tier}
-                      lockReason={lockReason}
-                      lockMessage={lockMessage}
-                      onPurchase={handlePurchase}
-                      contentType="Social"
-                      className="h-full"
+                  {/* Full Card Lock Overlay - Semi-transparent overlay over entire card */}
+                  {isLocked && (
+                    <div 
+                      className="absolute inset-0 bg-black/40 backdrop-blur-[1px] z-10 rounded-xl cursor-pointer" 
+                      onClick={handleLockClick}
                     />
-                  </div>
-                )}
+                  )}
+                </Card>
               </div>
             );
           })}
