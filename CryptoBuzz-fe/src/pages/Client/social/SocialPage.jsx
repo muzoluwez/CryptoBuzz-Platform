@@ -177,7 +177,7 @@ export default function SocialPage() {
   // Loading state
   if (isLoading) {
     return (
-      <div className="container py-6">
+      <div className="container px-0 py-6">
         <div className="flex justify-between items-center mb-6">
           <header className="">
             <h1 className="text-2xl font-semibold text-black dark:text-white">
@@ -199,7 +199,7 @@ export default function SocialPage() {
   // Error state
   if (isError) {
     return (
-      <div className="container py-6">
+      <div className="container px-0 py-6">
         <div className="flex justify-between items-center mb-6">
           <header className="">
             <h1 className="text-2xl font-semibold text-black dark:text-white">
@@ -223,7 +223,7 @@ export default function SocialPage() {
   // Empty state
   if (!posts || posts.length === 0) {
     return (
-      <div className="container py-6">
+      <div className="container px-0 py-6">
         <div className="flex justify-between items-center mb-6">
           <header className="">
             <h1 className="text-2xl font-semibold text-black dark:text-white">
@@ -263,7 +263,7 @@ export default function SocialPage() {
 
   return (
     <>
-      <div className="container py-6">
+      <div className="container px-0 py-6">
         <div className="flex justify-between items-center mb-6">
           <header className="">
             <h1 className="text-2xl font-semibold text-black dark:text-white">

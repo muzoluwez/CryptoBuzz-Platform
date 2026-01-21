@@ -17,7 +17,7 @@ export function Main() {
       <Header />
       <div className="grow" role="content">
         <div className='grid grid-cols-12 gap-4'>
-          <div className='col-span-12 md:col-span-2 flex justify-end'>
+          <div className='col-span-12 md:col-span-2 flex md:justify-end'>
             <DynamicBanner position="left" />
           </div>
           <div className='col-span-12 px-5 md:col-span-8 md:px-0'>
@@ -25,7 +25,7 @@ export function Main() {
               <Outlet />
             </div>
           </div>
-          <div className='col-span-12 md:col-span-2'>
+          <div className='col-span-12 md:col-span-2 flex md:justify-end'>
             <DynamicBanner position="right" />
           </div>
         </div>
