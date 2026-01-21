@@ -176,7 +176,7 @@ const ImageCarousel = ({
               e?.stopPropagation();
               handleImageClick();
             }}
-            className="absolute left-3 bottom-3 z-30 text-primary p-2 bg-white bg-opacity-95 hover:bg-opacity-100 rounded-full shadow-md transition-all"
+            className="absolute right-3 top-3 z-30 text-primary p-2 bg-white bg-opacity-95 hover:bg-opacity-100 rounded-full shadow-md transition-all cursor-pointer"
             aria-label="View image"
           >
             <Eye size={20} />

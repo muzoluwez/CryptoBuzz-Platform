@@ -1,13 +1,14 @@
 import { useMemo, useState } from 'react';
 import { useGetSocialsQuery } from '@/store/client/clientSocialApiSlice';
 import { Button } from 'react-aria-components';
+import { Lock } from 'lucide-react';
 import { Link, useNavigate } from 'react-router';
 import { toast } from 'sonner';
 import { checkAccess } from '@/utils/accessControl';
-import { CourseLockOverlay } from '@/components/payment/CourseLockOverlay';
 import { PlanSelectionModal } from '@/components/payment/PlanSelectionModal';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
+import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuLabel, DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import ImageCarousel from '@/components/common/ImageCarousel';
 import ImageViewer from '@/components/common/ImageViewer';
@@ -18,6 +19,7 @@ import useDocumentTitle from '../../../hooks/use-document-title';
 import { useSelector } from 'react-redux';
 import { selectCurrentUser, selectIsAuthenticated } from '@/store/authSlice';
 import { useGetPurchasedPlanIdsQuery } from '@/store/client/clientPaymentApiSlice';
+import { UidRequired } from '@/components/common/access-states/UidRequired';
 
 
 export default function SocialPage() {
@@ -28,6 +30,7 @@ export default function SocialPage() {
   const [selectedImages, setSelectedImages] = useState([]);
   const [showPlanModal, setShowPlanModal] = useState(false);
   const [selectedContentForPurchase, setSelectedContentForPurchase] = useState(null);
+  const [showUidModal, setShowUidModal] = useState(false);
   const [filters, setFilters] = useState({
     images: false,
     videos: false,
@@ -174,7 +177,7 @@ export default function SocialPage() {
   // Loading state
   if (isLoading) {
     return (
-      <div className="container py-6">
+      <div className="container px-0 py-6">
         <div className="flex justify-between items-center mb-6">
           <header className="">
             <h1 className="text-2xl font-semibold text-black dark:text-white">
@@ -196,7 +199,7 @@ export default function SocialPage() {
   // Error state
   if (isError) {
     return (
-      <div className="container py-6">
+      <div className="container px-0 py-6">
         <div className="flex justify-between items-center mb-6">
           <header className="">
             <h1 className="text-2xl font-semibold text-black dark:text-white">
@@ -220,7 +223,7 @@ export default function SocialPage() {
   // Empty state
   if (!posts || posts.length === 0) {
     return (
-      <div className="container py-6">
+      <div className="container px-0 py-6">
         <div className="flex justify-between items-center mb-6">
           <header className="">
             <h1 className="text-2xl font-semibold text-black dark:text-white">
@@ -260,7 +263,7 @@ export default function SocialPage() {
 
   return (
     <>
-      <div className="container py-6">
+      <div className="container px-0 py-6">
         <div className="flex justify-between items-center mb-6">
           <header className="">
             <h1 className="text-2xl font-semibold text-black dark:text-white">
@@ -311,9 +314,25 @@ export default function SocialPage() {
 
             const isLocked = showLock && !hasAccess;
 
-            // Handle purchase action (only called when user is authenticated)
-            const handlePurchase = () => {
-              if (tier === 'PRO' && isAuthenticated) {
+            // Handle lock icon click - Determine which action to take based on access type
+            const handleLockClick = (e) => {
+              // Stop propagation to prevent card interactions
+              e.stopPropagation();
+
+              // 1. Login Required - Navigate to login page
+              if (lockReason === 'LOGIN_REQUIRED' || (tier === 'PRO' && !isAuthenticated)) {
+                navigate('/login', { state: { from: window.location.pathname } });
+                return;
+              }
+
+              // 2. UID Required - Show UID modal
+              if (lockReason === 'UID_REQUIRED') {
+                setShowUidModal(true);
+                return;
+              }
+
+              // 3. Purchase Required (Paid content) - ALWAYS show plan modal
+              if (lockReason === 'PURCHASE_REQUIRED' || tier === 'PRO') {
                 // Debug: Log the post object to see what we're working with
                 console.log('Post object for purchase:', post);
                 console.log('Plans from post:', post?.plans);
@@ -351,24 +370,18 @@ export default function SocialPage() {
                   return;
                 }
 
-                // If multiple plans, show selection modal
-                if (contentPlans.length > 1) {
-                  setSelectedContentForPurchase({
-                    id: post?._id || post?.id,
-                    title: post?.content?.substring(0, 50) || 'Social Post',
-                    plans: contentPlans,
-                    contentType: 'post',
-                  });
-                  setShowPlanModal(true);
-                } else {
-                  // Single plan - redirect directly to checkout
-                  const plan = contentPlans[0];
-                  if (plan.hotmartCheckoutUrl) {
-                    window.location.href = plan.hotmartCheckoutUrl;
-                  } else {
-                    toast.error('Checkout URL not available for this plan');
-                  }
-                }
+                // ALWAYS show modal - even for single plan (user requirement)
+                console.log('✅ Plans detected - opening modal', {
+                  plansCount: contentPlans.length,
+                  plans: contentPlans
+                });
+                setSelectedContentForPurchase({
+                  id: post?._id || post?.id,
+                  title: post?.content?.substring(0, 50) || 'Social Post',
+                  plans: contentPlans,
+                  contentType: 'post',
+                });
+                setShowPlanModal(true);
               }
             };
 
@@ -377,7 +390,20 @@ export default function SocialPage() {
                 className="relative h-full"
                 key={post?.id || post?._id}
               >
-                <Card className={`max-w-full overflow-hidden rounded-xl shadow-md mb-5 min-h-[250px] h-full `}>
+                <Card className="max-w-full overflow-hidden rounded-xl shadow-md mb-5 h-full relative">
+                  
+                  {/* Lock Icon - Top Right Corner of entire card (only when locked) */}
+                  {isLocked && (
+                    <div 
+                      className="absolute top-3 right-3 z-30 cursor-pointer"
+                      onClick={handleLockClick}
+                    >
+                      <div className="bg-black/60 backdrop-blur-sm p-2.5 rounded-full hover:bg-black/80 transition-all">
+                        <Lock className="w-5 h-5 text-white" />
+                      </div>
+                    </div>
+                  )}
+
                   <CardHeader className="p-4 justify-between">
                     <div className="flex items-center gap-3">
                       <Avatar className="h-10 w-10">
@@ -466,21 +492,15 @@ export default function SocialPage() {
                         </div>
                       )}
                   </CardContent>
-                </Card>
 
-                {/* Full Card Lock Overlay */}
-                {isLocked && (
-                  <div className="absolute inset-0 z-40 rounded-xl overflow-hidden">
-                    <CourseLockOverlay
-                      tier={tier}
-                      lockReason={lockReason}
-                      lockMessage={lockMessage}
-                      onPurchase={handlePurchase}
-                      contentType="Social"
-                      className="h-full"
+                  {/* Full Card Lock Overlay - Semi-transparent overlay over entire card */}
+                  {isLocked && (
+                    <div 
+                      className="absolute inset-0 bg-black/40 backdrop-blur-[1px] z-10 rounded-xl cursor-pointer" 
+                      onClick={handleLockClick}
                     />
-                  </div>
-                )}
+                  )}
+                </Card>
               </div>
             );
           })}
@@ -505,6 +525,24 @@ export default function SocialPage() {
           }}
         />
       )}
+
+      {/* UID Required Modal */}
+      <Dialog open={showUidModal} onOpenChange={setShowUidModal}>
+        <DialogContent className="sm:max-w-md">
+          <UidRequired 
+            onConnectUid={(e) => {
+              e?.preventDefault();
+              e?.stopPropagation();
+              setShowUidModal(false);
+              // Only navigate to login if user is not authenticated
+              if (!isAuthenticated) {
+                navigate('/login', { state: { from: window.location.pathname } });
+              }
+            }}
+            onClose={() => setShowUidModal(false)}
+          />
+        </DialogContent>
+      </Dialog>
 
       {/* Image Viewer Modal */}
       <ImageViewer

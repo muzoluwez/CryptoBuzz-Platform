@@ -14,7 +14,7 @@ export default function LivePage() {
   useDocumentTitle('Live Sessions');
   const [activeCategory, setActiveCategory] = useState(null);
   const [activeCategoryId, setActiveCategoryId] = useState(null);
-  const [activeWeek, setActiveWeek] = useState('Current Week');
+  const [activeWeek, setActiveWeek] = useState('Esta Semana');
   const [activeEducatorId, setActiveEducatorId] = useState(null);
   const navigate = useNavigate();
 
@@ -44,7 +44,7 @@ export default function LivePage() {
     const currentDay = now.getDay(); // 0 = Sunday, 1 = Monday, etc.
     const daysToMonday = currentDay === 0 ? -6 : 1 - currentDay; // Get to Monday
 
-    if (weekType === 'Current Week') {
+    if (weekType === 'Esta Semana') {
       const monday = new Date(now);
       monday.setDate(now.getDate() + daysToMonday);
       monday.setHours(0, 0, 0, 0);
@@ -236,10 +236,10 @@ export default function LivePage() {
         <div className="container mb-6">
           <div className="mb-5">
             <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-              Live
+              En Vivo
             </h1>
             <p className="text-sm text-gray-500 mt-1">
-              Home / Live / Live Sessions
+                Inicio / En Vivo / Sesiones en Vivo
             </p>
           </div>
           <div className="flex items-center justify-center py-12">
@@ -282,10 +282,10 @@ export default function LivePage() {
         <div className="container mb-6">
           <div className="mb-5">
             <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-              Live
+              En Vivo
             </h1>
             <p className="text-sm text-gray-500 mt-1">
-              Home / Live / Live Sessions
+                Inicio / En Vivo / Sesiones en Vivo
             </p>
           </div>
           <div className="flex items-center justify-center py-12">
@@ -356,10 +356,10 @@ export default function LivePage() {
         {/* Header */}
         <div className="mb-5">
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-            Live
+            En Vivo
           </h1>
           <p className="text-sm text-gray-500 mt-1">
-            Home / Live / Live Sessions
+              Inicio / En Vivo / Sesiones en Vivo
           </p>
         </div>
 
@@ -395,7 +395,7 @@ export default function LivePage() {
 
           {/* Week Tabs */}
           <div className="flex gap-8 mb-8 border-b border-gray-200 dark:border-gray-700 mt-8">
-            {['Current Week', 'Next Week'].map((week) => (
+            {['Esta Semana', 'Próxima Semana'].map((week) => (
               <button
                 key={week}
                 onClick={() => setActiveWeek(week)}
@@ -552,15 +552,15 @@ export default function LivePage() {
                 {/* Days Header */}
                 <div className="grid grid-cols-8 bg-gradient-to-r from-yellow-600 to-yellow-700">
                   <div className="p-4 font-semibold text-center text-white border-r border-yellow-600">
-                    Educators
+                  Educadores
                   </div>
                   {weekDays.map((day, index) => (
                     <div
                       key={index}
                       className="p-4 text-center font-semibold text-white border-r border-yellow-600 last:border-r-0"
                     >
-                      <div className="text-sm">
-                        {day.toLocaleDateString('en-US', { weekday: 'short' })}
+                      <div className="text-sm capitalize">
+                        {day.toLocaleDateString('es-ES', { weekday: 'short' })}
                       </div>
                       <div className="text-xs mt-1">{day.getDate()}</div>
                     </div>

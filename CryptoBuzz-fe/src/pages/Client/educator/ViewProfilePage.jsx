@@ -14,11 +14,13 @@ import { useParams } from 'react-router';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { LoginRequired } from '@/components/common/access-states/LoginRequired';
+import { UidRequired } from '@/components/common/access-states/UidRequired';
 import ViewCryptoModel from '../../../components/models/ViewCryptoModel';
 import ViewIdeaModel from '../../../components/models/ViewIdeaModel';
 import ViewInsightModel from '../../../components/models/ViewInsightModel';
 import { Button } from '../../../components/ui/button';
 import { Card } from '../../../components/ui/card';
+import { Dialog, DialogContent } from '../../../components/ui/dialog';
 import { useAuthContext } from '../../../context/AuthContext';
 import useDocumentTitle from '../../../hooks/use-document-title';
 import {
@@ -33,7 +35,6 @@ import { useSelector } from 'react-redux';
 import { selectCurrentUser, selectIsAuthenticated } from '@/store/authSlice';
 import { useGetPurchasedPlanIdsQuery } from '@/store/client/clientPaymentApiSlice';
 import { checkAccess } from '@/utils/accessControl';
-import { CourseLockOverlay } from '@/components/payment/CourseLockOverlay';
 import { PlanSelectionModal } from '@/components/payment/PlanSelectionModal';
 
 export default function ViewProfile() {
@@ -51,6 +52,7 @@ export default function ViewProfile() {
   const [selectedInsight, setSelectedInsight] = useState(null);
   const [isCryptoModalOpen, setIsCryptoModalOpen] = useState(false);
   const [selectedCrypto, setSelectedCrypto] = useState(null);
+  const [showUidModal, setShowUidModal] = useState(false);
   const { volume, setVolume, isMuted, setIsMuted } = useGrantAccess();
 
   const toggleMute = () => setIsMuted((v) => !v);
@@ -199,24 +201,18 @@ export default function ViewProfile() {
       return;
     }
 
-    if (contentPlans.length > 1) {
-      console.log('Multiple plans - opening plan selection modal');
-      setSelectedContentForPurchase({
-        id: course._id,
-        title: course.title,
-        plans: contentPlans,
-        contentType: 'course',
-      });
-      setShowPlanModal(true);
-    } else {
-      console.log('Single plan - redirecting to checkout');
-      const plan = contentPlans[0];
-      if (plan.hotmartCheckoutUrl) {
-        window.location.href = plan.hotmartCheckoutUrl;
-      } else {
-        toast.error('Checkout URL not available for this plan');
-      }
-    }
+    // ALWAYS show modal - even for single plan (user requirement)
+    console.log('✅ Plans detected - opening modal', {
+      plansCount: contentPlans.length,
+      plans: contentPlans
+    });
+    setSelectedContentForPurchase({
+      id: course._id,
+      title: course.title,
+      plans: contentPlans,
+      contentType: 'course',
+    });
+    setShowPlanModal(true);
   };
 
   const handleIdeaPurchase = (idea) => {
@@ -245,22 +241,18 @@ export default function ViewProfile() {
       return;
     }
 
-    if (contentPlans.length > 1) {
-      setSelectedContentForPurchase({
-        id: idea._id,
-        title: idea.name,
-        plans: contentPlans,
-        contentType: 'idea',
-      });
-      setShowPlanModal(true);
-    } else {
-      const plan = contentPlans[0];
-      if (plan.hotmartCheckoutUrl) {
-        window.location.href = plan.hotmartCheckoutUrl;
-      } else {
-        toast.error('Checkout URL not available for this plan');
-      }
-    }
+    // ALWAYS show modal - even for single plan (user requirement)
+    console.log('✅ Plans detected - opening modal', {
+      plansCount: contentPlans.length,
+      plans: contentPlans
+    });
+    setSelectedContentForPurchase({
+      id: idea._id,
+      title: idea.name,
+      plans: contentPlans,
+      contentType: 'idea',
+    });
+    setShowPlanModal(true);
   };
 
   const handleInsightPurchase = (insight) => {
@@ -289,22 +281,18 @@ export default function ViewProfile() {
       return;
     }
 
-    if (contentPlans.length > 1) {
-      setSelectedContentForPurchase({
-        id: insight._id,
-        title: insight.title,
-        plans: contentPlans,
-        contentType: 'insight',
-      });
-      setShowPlanModal(true);
-    } else {
-      const plan = contentPlans[0];
-      if (plan.hotmartCheckoutUrl) {
-        window.location.href = plan.hotmartCheckoutUrl;
-      } else {
-        toast.error('Checkout URL not available for this plan');
-      }
-    }
+    // ALWAYS show modal - even for single plan (user requirement)
+    console.log('✅ Plans detected - opening modal', {
+      plansCount: contentPlans.length,
+      plans: contentPlans
+    });
+    setSelectedContentForPurchase({
+      id: insight._id,
+      title: insight.title,
+      plans: contentPlans,
+      contentType: 'insight',
+    });
+    setShowPlanModal(true);
   };
 
   // Transform insight data for modal (convert objects to strings)
@@ -538,17 +526,43 @@ export default function ViewProfile() {
                     isPremium: tier === "PRO",
                   });
 
+                  const isLocked = accessResult.showLock && !accessResult.hasAccess;
+                  const lockReason = accessResult.lockReason;
+
+                  const handleLockClick = (e) => {
+                    e.stopPropagation();
+                    if (lockReason === 'LOGIN_REQUIRED' || (tier === 'PRO' && !isAuthenticatedRedux)) {
+                      navigate('/login', { state: { from: window.location.pathname } });
+                    } else if (lockReason === 'UID_REQUIRED') {
+                      setShowUidModal(true);
+                    } else if (lockReason === 'PURCHASE_REQUIRED' || tier === 'PRO') {
+                      handleCoursePurchase(course);
+                    }
+                  };
+
                   return (
                     <div
                       key={course?._id || course?.id}
-                      className={`bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden hover:shadow-lg transition-shadow relative ${accessResult.showLock && !accessResult.hasAccess ? 'cursor-default' : 'cursor-pointer'}`}
+                      className={`bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden hover:shadow-lg transition-shadow relative ${isLocked ? 'cursor-default' : 'cursor-pointer'}`}
                       onClick={() => {
-                        if (accessResult.showLock && !accessResult.hasAccess) {
+                        if (isLocked) {
                           return; // Don't navigate if locked
                         }
                         navigate('/client/academy', { state: { selectedCourse: course } });
                       }}
                     >
+                      {/* Lock Icon - Top Right Corner (only when locked) */}
+                      {isLocked && (
+                        <div 
+                          className="absolute top-3 right-3 z-30 cursor-pointer"
+                          onClick={handleLockClick}
+                        >
+                          <div className="bg-black/60 backdrop-blur-sm p-2.5 rounded-full hover:bg-black/80 transition-all">
+                            <Lock className="w-5 h-5 text-white" />
+                          </div>
+                        </div>
+                      )}
+
                       {course?.imageUrl ? (
                         <div className={`h-[250px] relative ${accessResult.showLock && !accessResult.hasAccess ? 'blur-[2px] opacity-85' : ''}`}>
                           <img
@@ -574,18 +588,17 @@ export default function ViewProfile() {
                           </div>
                         </div>
                       )}
-                      <div className={`p-4 ${accessResult.showLock && !accessResult.hasAccess ? 'opacity-85' : ''}`}>
+                      <div className={`p-4 ${isLocked ? 'opacity-85' : ''}`}>
                         <p className="text-sm text-gray-700 font-medium dark:text-white">
                           {course?.title || 'Course'}
                         </p>
                       </div>
-                      {accessResult.showLock && !accessResult.hasAccess && (
-                        <CourseLockOverlay
-                          course={course}
-                          tier={tier}
-                          lockReason={accessResult.lockReason}
-                          lockMessage={accessResult.lockMessage}
-                          onPurchase={() => handleCoursePurchase(course)}
+
+                      {/* Full Card Lock Overlay - Semi-transparent overlay over entire card */}
+                      {isLocked && (
+                        <div 
+                          className="absolute inset-0 bg-black/40 backdrop-blur-[1px] z-10 rounded-xl cursor-pointer" 
+                          onClick={handleLockClick}
                         />
                       )}
                     </div>
@@ -628,18 +641,44 @@ export default function ViewProfile() {
                     isPremium: tier === "PRO",
                   });
 
+                  const isLocked = accessResult.showLock && !accessResult.hasAccess;
+                  const lockReason = accessResult.lockReason;
+
+                  const handleLockClick = (e) => {
+                    e.stopPropagation();
+                    if (lockReason === 'LOGIN_REQUIRED' || (tier === 'PRO' && !isAuthenticatedRedux)) {
+                      navigate('/login', { state: { from: window.location.pathname } });
+                    } else if (lockReason === 'UID_REQUIRED') {
+                      setShowUidModal(true);
+                    } else if (lockReason === 'PURCHASE_REQUIRED' || tier === 'PRO') {
+                      handleIdeaPurchase(idea);
+                    }
+                  };
+
                   return (
                     <div
                       key={idea?._id || idea?.id}
-                      className={`bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden hover:shadow-lg transition-shadow relative ${accessResult.showLock && !accessResult.hasAccess ? 'cursor-default' : 'cursor-pointer'}`}
+                      className={`bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden hover:shadow-lg transition-shadow relative ${isLocked ? 'cursor-default' : 'cursor-pointer'}`}
                       onClick={() => {
-                        if (accessResult.showLock && !accessResult.hasAccess) {
+                        if (isLocked) {
                           return; // Don't open modal if locked
                         }
                         setSelectedIdea(idea);
                         setIsIdeaModalOpen(true);
                       }}
                     >
+                      {/* Lock Icon - Top Right Corner (only when locked) */}
+                      {isLocked && (
+                        <div 
+                          className="absolute top-3 right-3 z-30 cursor-pointer"
+                          onClick={handleLockClick}
+                        >
+                          <div className="bg-black/60 backdrop-blur-sm p-2.5 rounded-full hover:bg-black/80 transition-all">
+                            <Lock className="w-5 h-5 text-white" />
+                          </div>
+                        </div>
+                      )}
+
                       {idea?.image_Url ||
                       (idea?.image && idea.image?.length > 0) ? (
                         <div className={`h-[228px] relative ${accessResult.showLock && !accessResult.hasAccess ? 'blur-[2px] opacity-85' : ''}`}>
@@ -676,7 +715,7 @@ export default function ViewProfile() {
                           </div>
                         </div>
                       )}
-                      <div className={`p-4 ${accessResult.showLock && !accessResult.hasAccess ? 'opacity-85' : ''}`}>
+                      <div className={`p-4 ${isLocked ? 'opacity-85' : ''}`}>
                         <p className="font-bold text-gray-900 dark:text-white">
                           {idea?.name || 'Idea'}
                         </p>
@@ -688,13 +727,12 @@ export default function ViewProfile() {
                             ''}<br />
                         </p>
                       </div>
-                      {accessResult.showLock && !accessResult.hasAccess && (
-                        <CourseLockOverlay
-                          course={idea}
-                          tier={tier}
-                          lockReason={accessResult.lockReason}
-                          lockMessage={accessResult.lockMessage}
-                          onPurchase={() => handleIdeaPurchase(idea)}
+
+                      {/* Full Card Lock Overlay - Semi-transparent overlay over entire card */}
+                      {isLocked && (
+                        <div 
+                          className="absolute inset-0 bg-black/40 backdrop-blur-[1px] z-10 rounded-xl cursor-pointer" 
+                          onClick={handleLockClick}
                         />
                       )}
                     </div>
@@ -737,18 +775,44 @@ export default function ViewProfile() {
                     isPremium: tier === "PRO",
                   });
 
+                  const isLocked = accessResult.showLock && !accessResult.hasAccess;
+                  const lockReason = accessResult.lockReason;
+
+                  const handleLockClick = (e) => {
+                    e.stopPropagation();
+                    if (lockReason === 'LOGIN_REQUIRED' || (tier === 'PRO' && !isAuthenticatedRedux)) {
+                      navigate('/login', { state: { from: window.location.pathname } });
+                    } else if (lockReason === 'UID_REQUIRED') {
+                      setShowUidModal(true);
+                    } else if (lockReason === 'PURCHASE_REQUIRED' || tier === 'PRO') {
+                      handleInsightPurchase(insight);
+                    }
+                  };
+
                   return (
                     <div
                       key={insight?._id || insight?.id}
-                      className={`bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden hover:shadow-lg transition-shadow relative ${accessResult.showLock && !accessResult.hasAccess ? 'cursor-default' : 'cursor-pointer'}`}
+                      className={`bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden hover:shadow-lg transition-shadow relative ${isLocked ? 'cursor-default' : 'cursor-pointer'}`}
                       onClick={() => {
-                        if (accessResult.showLock && !accessResult.hasAccess) {
+                        if (isLocked) {
                           return; // Don't open modal if locked
                         }
                         setSelectedInsight(insight);
                         setIsInsightModalOpen(true);
                       }}
                     >
+                      {/* Lock Icon - Top Right Corner (only when locked) */}
+                      {isLocked && (
+                        <div 
+                          className="absolute top-3 right-3 z-30 cursor-pointer"
+                          onClick={handleLockClick}
+                        >
+                          <div className="bg-black/60 backdrop-blur-sm p-2.5 rounded-full hover:bg-black/80 transition-all">
+                            <Lock className="w-5 h-5 text-white" />
+                          </div>
+                        </div>
+                      )}
+
                       {insight?.photos && insight.photos?.length > 0 ? (
                         <div className={`h-[228px] relative ${accessResult.showLock && !accessResult.hasAccess ? 'blur-[2px] opacity-85' : ''}`}>
                           <img
@@ -782,7 +846,7 @@ export default function ViewProfile() {
                           </div>
                         </div>
                       )}
-                      <div className={`p-4 ${accessResult.showLock && !accessResult.hasAccess ? 'opacity-85' : ''}`}>
+                      <div className={`p-4 ${isLocked ? 'opacity-85' : ''}`}>
                         <p className="font-bold text-gray-900 text-sm dark:text-white">
                           {insight?.title || 'Insight'}
                         </p>
@@ -790,13 +854,12 @@ export default function ViewProfile() {
                           {convertRtkEditorToFormattedPlainText(insight?.description?.substring(0, 50)) || ''}
                         </p>
                       </div>
-                      {accessResult.showLock && !accessResult.hasAccess && (
-                        <CourseLockOverlay
-                          course={insight}
-                          tier={tier}
-                          lockReason={accessResult.lockReason}
-                          lockMessage={accessResult.lockMessage}
-                          onPurchase={() => handleInsightPurchase(insight)}
+
+                      {/* Full Card Lock Overlay - Semi-transparent overlay over entire card */}
+                      {isLocked && (
+                        <div 
+                          className="absolute inset-0 bg-black/40 backdrop-blur-[1px] z-10 rounded-xl cursor-pointer" 
+                          onClick={handleLockClick}
                         />
                       )}
                     </div>
@@ -1078,6 +1141,24 @@ export default function ViewProfile() {
           useDirectPlanCheckout={true}
         />
       )}
+
+      {/* UID Required Modal */}
+      <Dialog open={showUidModal} onOpenChange={setShowUidModal}>
+        <DialogContent className="sm:max-w-md">
+          <UidRequired 
+            onConnectUid={(e) => {
+              e?.preventDefault();
+              e?.stopPropagation();
+              setShowUidModal(false);
+              // Only navigate to login if user is not authenticated
+              if (!isAuthenticatedRedux) {
+                navigate('/login', { state: { from: window.location.pathname } });
+              }
+            }}
+            onClose={() => setShowUidModal(false)}
+          />
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

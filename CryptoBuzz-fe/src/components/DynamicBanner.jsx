@@ -26,7 +26,7 @@ const DynamicBanner = ({ position }) => {
         <div className="m-2 mt-4 hidden md:block">
           <div className="w-full h-auto bg-gray-100 animate-pulse"></div>
         </div>
-        <div className="m-2 mt-4 block md:hidden">
+        <div className="m-2 mt-4 block md:hidden w-full">
           <div className="w-full h-auto bg-gray-100 animate-pulse"></div>
         </div>
       </>
@@ -56,8 +56,8 @@ const DynamicBanner = ({ position }) => {
       </div>
       
       {/* Mobile Image */}
-      <div className="m-2 mt-4 block md:hidden" onClick={handleClick} style={{ cursor: banner.link ? 'pointer' : 'default' }}>
-        <img src={banner.mobileImage} className='w-100 mx-auto' alt={banner.title || ""} />
+      <div className="m-2 mt-4 block md:hidden w-full" onClick={handleClick} style={{ cursor: banner.link ? 'pointer' : 'default' }}>
+        <img src={banner.mobileImage} className='w-full mx-auto' alt={banner.title || ""} />
       </div>
     </>
   );

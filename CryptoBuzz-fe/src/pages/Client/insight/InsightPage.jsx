@@ -10,16 +10,17 @@ import {
 } from '@/lib/rtkEditorUtils';
 import { useNavigate } from 'react-router-dom';
 import { checkAccess } from '@/utils/accessControl';
-import { CourseLockOverlay } from '@/components/payment/CourseLockOverlay';
 import { PlanSelectionModal } from '@/components/payment/PlanSelectionModal';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
+import { Dialog, DialogContent } from '@/components/ui/dialog';
 import ViewInsightModel from '@/components/models/ViewInsightModel';
 import { useSelector } from 'react-redux';
 import { selectCurrentUser, selectIsAuthenticated } from '@/store/authSlice';
 import { useGetPurchasedPlanIdsQuery } from '@/store/client/clientPaymentApiSlice';
+import { UidRequired } from '@/components/common/access-states/UidRequired';
 
 import {
   Toolbar,
@@ -35,6 +36,7 @@ export default function InsightPage() {
   const [activeTab, setActiveTab] = useState('All');
   const [showPlanModal, setShowPlanModal] = useState(false);
   const [selectedContentForPurchase, setSelectedContentForPurchase] = useState(null);
+  const [showUidModal, setShowUidModal] = useState(false);
   const navigate = useNavigate();
 
   // Access control hooks - called at component level
@@ -258,9 +260,25 @@ export default function InsightPage() {
 
               const isLocked = showLock && !hasAccess;
 
-              // Handle purchase action (only called when user is authenticated)
-              const handlePurchase = () => {
-                if (tier === 'PRO' && isAuthenticated) {
+              // Handle lock icon click - Determine which action to take based on access type
+              const handleLockClick = (e) => {
+                // Stop propagation to prevent card interactions
+                e.stopPropagation();
+
+                // 1. Login Required - Navigate to login page
+                if (lockReason === 'LOGIN_REQUIRED' || (tier === 'PRO' && !isAuthenticated)) {
+                  navigate('/login', { state: { from: window.location.pathname } });
+                  return;
+                }
+
+                // 2. UID Required - Show UID modal
+                if (lockReason === 'UID_REQUIRED') {
+                  setShowUidModal(true);
+                  return;
+                }
+
+                // 3. Purchase Required (Paid content) - ALWAYS show plan modal
+                if (lockReason === 'PURCHASE_REQUIRED' || tier === 'PRO') {
                   // Debug: Log the insight object to see what we're working with
                   console.log('Insight object for purchase:', insight);
                   console.log('Plans from insight:', insight.plans);
@@ -298,24 +316,18 @@ export default function InsightPage() {
                     return;
                   }
 
-                  // If multiple plans, show selection modal
-                  if (contentPlans.length > 1) {
-                    setSelectedContentForPurchase({
-                      id: insight?._id,
-                      title: insight?.title,
-                      plans: contentPlans,
-                      contentType: 'insight',
-                    });
-                    setShowPlanModal(true);
-                  } else {
-                    // Single plan - redirect directly to checkout
-                    const plan = contentPlans[0];
-                    if (plan.hotmartCheckoutUrl) {
-                      window.location.href = plan.hotmartCheckoutUrl;
-                    } else {
-                      toast.error('Checkout URL not available for this plan');
-                    }
-                  }
+                  // ALWAYS show modal - even for single plan (user requirement)
+                  console.log('✅ Plans detected - opening modal', {
+                    plansCount: contentPlans.length,
+                    plans: contentPlans
+                  });
+                  setSelectedContentForPurchase({
+                    id: insight?._id,
+                    title: insight?.title,
+                    plans: contentPlans,
+                    contentType: 'insight',
+                  });
+                  setShowPlanModal(true);
                 }
               };
 
@@ -325,7 +337,7 @@ export default function InsightPage() {
                   key={insight?._id || insight?.id}
                 >
                   <Card
-                    className="bg-card border border-border overflow-hidden h-full"
+                    className="bg-card border border-border overflow-hidden h-full relative"
                   >
 
                     {/* image */}
@@ -344,6 +356,18 @@ export default function InsightPage() {
                           showViewButton={hasAccess}
                         />
                       </div>
+
+                      {/* Lock Icon - Top Right Corner (only when locked) */}
+                      {isLocked && (
+                        <div 
+                          className="absolute top-3 right-3 z-20 cursor-pointer"
+                          onClick={handleLockClick}
+                        >
+                          <div className="bg-black/60 backdrop-blur-sm p-2.5 rounded-full hover:bg-black/80 transition-all">
+                            <Lock className="w-5 h-5 text-white" />
+                          </div>
+                        </div>
+                      )}
                     </div>
 
                     <CardContent className="p-4">
@@ -378,7 +402,7 @@ export default function InsightPage() {
                       </h3>
 
                       {/* Preview - 2 lines max */}
-                      <p className="mt-2 text-sm text-muted-foreground line-clamp-2">
+                      <p className="mt-2 text-sm text-muted-foreground line-clamp-2 h-10">
                         {isLocked ? `${(insight?.preview || "").substring(0, 8)}******` : (insight?.preview || "")}
                       </p>
 
@@ -402,20 +426,15 @@ export default function InsightPage() {
                         </div>
                       </CardFooter>
                     )}
-                  </Card>
 
-                  {/* Full Card Lock Overlay */}
-                  {isLocked && (
-                    <div className="absolute inset-0 z-40 rounded-lg overflow-hidden">
-                      <CourseLockOverlay
-                        tier={tier}
-                        lockReason={lockReason}
-                        lockMessage={lockMessage}
-                        onPurchase={handlePurchase}
-                        contentType="Insight"
+                    {/* Full Card Lock Overlay - Semi-transparent overlay over entire card */}
+                    {isLocked && (
+                      <div 
+                        className="absolute inset-0 bg-black/40 backdrop-blur-[1px] z-10 rounded-lg cursor-pointer" 
+                        onClick={handleLockClick}
                       />
-                    </div>
-                  )}
+                    )}
+                  </Card>
 
                   {/* Hover Overlay with Message */}
                   {!hasAccess && hoveredInsightId === insight._id && (
@@ -460,6 +479,24 @@ export default function InsightPage() {
           }}
         />
       )}
+
+      {/* UID Required Modal */}
+      <Dialog open={showUidModal} onOpenChange={setShowUidModal}>
+        <DialogContent className="sm:max-w-md">
+          <UidRequired 
+            onConnectUid={(e) => {
+              e?.preventDefault();
+              e?.stopPropagation();
+              setShowUidModal(false);
+              // Only navigate to login if user is not authenticated
+              if (!isAuthenticated) {
+                navigate('/login', { state: { from: window.location.pathname } });
+              }
+            }}
+            onClose={() => setShowUidModal(false)}
+          />
+        </DialogContent>
+      </Dialog>
 
       {/* ------------------- MODAL ------------------- */}
       <ViewInsightModel
