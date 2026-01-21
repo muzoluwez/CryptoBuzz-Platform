@@ -14,11 +14,13 @@ import { useParams } from 'react-router';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { LoginRequired } from '@/components/common/access-states/LoginRequired';
+import { UidRequired } from '@/components/common/access-states/UidRequired';
 import ViewCryptoModel from '../../../components/models/ViewCryptoModel';
 import ViewIdeaModel from '../../../components/models/ViewIdeaModel';
 import ViewInsightModel from '../../../components/models/ViewInsightModel';
 import { Button } from '../../../components/ui/button';
 import { Card } from '../../../components/ui/card';
+import { Dialog, DialogContent } from '../../../components/ui/dialog';
 import { useAuthContext } from '../../../context/AuthContext';
 import useDocumentTitle from '../../../hooks/use-document-title';
 import {
@@ -50,6 +52,7 @@ export default function ViewProfile() {
   const [selectedInsight, setSelectedInsight] = useState(null);
   const [isCryptoModalOpen, setIsCryptoModalOpen] = useState(false);
   const [selectedCrypto, setSelectedCrypto] = useState(null);
+  const [showUidModal, setShowUidModal] = useState(false);
   const { volume, setVolume, isMuted, setIsMuted } = useGrantAccess();
 
   const toggleMute = () => setIsMuted((v) => !v);
@@ -531,7 +534,7 @@ export default function ViewProfile() {
                     if (lockReason === 'LOGIN_REQUIRED' || (tier === 'PRO' && !isAuthenticatedRedux)) {
                       navigate('/login', { state: { from: window.location.pathname } });
                     } else if (lockReason === 'UID_REQUIRED') {
-                      navigate('/login', { state: { from: window.location.pathname } });
+                      setShowUidModal(true);
                     } else if (lockReason === 'PURCHASE_REQUIRED' || tier === 'PRO') {
                       handleCoursePurchase(course);
                     }
@@ -646,7 +649,7 @@ export default function ViewProfile() {
                     if (lockReason === 'LOGIN_REQUIRED' || (tier === 'PRO' && !isAuthenticatedRedux)) {
                       navigate('/login', { state: { from: window.location.pathname } });
                     } else if (lockReason === 'UID_REQUIRED') {
-                      navigate('/login', { state: { from: window.location.pathname } });
+                      setShowUidModal(true);
                     } else if (lockReason === 'PURCHASE_REQUIRED' || tier === 'PRO') {
                       handleIdeaPurchase(idea);
                     }
@@ -780,7 +783,7 @@ export default function ViewProfile() {
                     if (lockReason === 'LOGIN_REQUIRED' || (tier === 'PRO' && !isAuthenticatedRedux)) {
                       navigate('/login', { state: { from: window.location.pathname } });
                     } else if (lockReason === 'UID_REQUIRED') {
-                      navigate('/login', { state: { from: window.location.pathname } });
+                      setShowUidModal(true);
                     } else if (lockReason === 'PURCHASE_REQUIRED' || tier === 'PRO') {
                       handleInsightPurchase(insight);
                     }
@@ -1138,6 +1141,24 @@ export default function ViewProfile() {
           useDirectPlanCheckout={true}
         />
       )}
+
+      {/* UID Required Modal */}
+      <Dialog open={showUidModal} onOpenChange={setShowUidModal}>
+        <DialogContent className="sm:max-w-md">
+          <UidRequired 
+            onConnectUid={(e) => {
+              e?.preventDefault();
+              e?.stopPropagation();
+              setShowUidModal(false);
+              // Only navigate to login if user is not authenticated
+              if (!isAuthenticatedRedux) {
+                navigate('/login', { state: { from: window.location.pathname } });
+              }
+            }}
+            onClose={() => setShowUidModal(false)}
+          />
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

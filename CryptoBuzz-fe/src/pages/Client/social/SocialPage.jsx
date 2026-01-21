@@ -8,6 +8,7 @@ import { checkAccess } from '@/utils/accessControl';
 import { PlanSelectionModal } from '@/components/payment/PlanSelectionModal';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
+import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuLabel, DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import ImageCarousel from '@/components/common/ImageCarousel';
 import ImageViewer from '@/components/common/ImageViewer';
@@ -18,6 +19,7 @@ import useDocumentTitle from '../../../hooks/use-document-title';
 import { useSelector } from 'react-redux';
 import { selectCurrentUser, selectIsAuthenticated } from '@/store/authSlice';
 import { useGetPurchasedPlanIdsQuery } from '@/store/client/clientPaymentApiSlice';
+import { UidRequired } from '@/components/common/access-states/UidRequired';
 
 
 export default function SocialPage() {
@@ -28,6 +30,7 @@ export default function SocialPage() {
   const [selectedImages, setSelectedImages] = useState([]);
   const [showPlanModal, setShowPlanModal] = useState(false);
   const [selectedContentForPurchase, setSelectedContentForPurchase] = useState(null);
+  const [showUidModal, setShowUidModal] = useState(false);
   const [filters, setFilters] = useState({
     images: false,
     videos: false,
@@ -322,9 +325,9 @@ export default function SocialPage() {
                 return;
               }
 
-              // 2. UID Required - Navigate to login page (UID modal not yet implemented)
+              // 2. UID Required - Show UID modal
               if (lockReason === 'UID_REQUIRED') {
-                navigate('/login', { state: { from: window.location.pathname } });
+                setShowUidModal(true);
                 return;
               }
 
@@ -522,6 +525,24 @@ export default function SocialPage() {
           }}
         />
       )}
+
+      {/* UID Required Modal */}
+      <Dialog open={showUidModal} onOpenChange={setShowUidModal}>
+        <DialogContent className="sm:max-w-md">
+          <UidRequired 
+            onConnectUid={(e) => {
+              e?.preventDefault();
+              e?.stopPropagation();
+              setShowUidModal(false);
+              // Only navigate to login if user is not authenticated
+              if (!isAuthenticated) {
+                navigate('/login', { state: { from: window.location.pathname } });
+              }
+            }}
+            onClose={() => setShowUidModal(false)}
+          />
+        </DialogContent>
+      </Dialog>
 
       {/* Image Viewer Modal */}
       <ImageViewer

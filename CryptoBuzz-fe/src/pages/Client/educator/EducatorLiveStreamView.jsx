@@ -14,6 +14,8 @@ import { selectCurrentUser, selectIsAuthenticated } from "@/store/authSlice";
 import { useGetPurchasedPlanIdsQuery } from "@/store/client/clientPaymentApiSlice";
 import { checkAccess } from "@/utils/accessControl";
 import { PlanSelectionModal } from "@/components/payment/PlanSelectionModal";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { UidRequired } from "@/components/common/access-states/UidRequired";
 import { toast } from "sonner";
 
 
@@ -55,6 +57,7 @@ const EducatorLiveStreamView = () => {
   // Plan selection modal state
   const [showPlanModal, setShowPlanModal] = useState(false);
   const [selectedContentForPurchase, setSelectedContentForPurchase] = useState(null);
+  const [showUidModal, setShowUidModal] = useState(false);
 
   // Fetch active live stream for educator
   const {
@@ -353,7 +356,7 @@ const EducatorLiveStreamView = () => {
       if (lockReason === 'LOGIN_REQUIRED' || (tier === 'PRO' && !isAuthenticatedRedux)) {
         navigate('/login', { state: { from: window.location.pathname } });
       } else if (lockReason === 'UID_REQUIRED') {
-        navigate('/login', { state: { from: window.location.pathname } });
+        setShowUidModal(true);
       } else if (lockReason === 'PURCHASE_REQUIRED' || tier === 'PRO') {
         handleLiveStreamPurchase();
       }
@@ -404,6 +407,24 @@ const EducatorLiveStreamView = () => {
             useDirectPlanCheckout={true}
           />
         )}
+
+        {/* UID Required Modal */}
+        <Dialog open={showUidModal} onOpenChange={setShowUidModal}>
+          <DialogContent className="sm:max-w-md">
+            <UidRequired 
+              onConnectUid={(e) => {
+                e?.preventDefault();
+                e?.stopPropagation();
+                setShowUidModal(false);
+                // Only navigate to login if user is not authenticated
+                if (!isAuthenticatedRedux) {
+                  navigate('/login', { state: { from: window.location.pathname } });
+                }
+              }}
+              onClose={() => setShowUidModal(false)}
+            />
+          </DialogContent>
+        </Dialog>
       </div>
     );
   }

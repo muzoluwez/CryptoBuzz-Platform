@@ -9,6 +9,8 @@ import { useSelector } from 'react-redux';
 import { cn } from '@/lib/utils';
 import { selectIsAuthenticated } from '@/store/authSlice';
 import { useNavigate } from 'react-router-dom';
+import { Dialog, DialogContent } from '../ui/dialog';
+import { UidRequired } from '../common/access-states/UidRequired';
 
 /**
  * RecommendedCourseCard Component
@@ -23,6 +25,7 @@ export function RecommendedCourseCard({ course, onCourseClick, accessMap = {} })
   const isAuthenticated = useSelector(selectIsAuthenticated);
   const [showPlanModal, setShowPlanModal] = useState(false);
   const [modalPlans, setModalPlans] = useState([]);
+  const [showUidModal, setShowUidModal] = useState(false);
 
   // Get course access from batch access map (efficient)
   const { hasAccess, isPremium, coursePrice, courseTier, lockReason, lockMessage, showLock } = useCourseAccessFromMap(
@@ -48,9 +51,9 @@ export function RecommendedCourseCard({ course, onCourseClick, accessMap = {} })
       return;
     }
 
-    // 2. UID Required - Navigate to login page (UID modal not yet implemented)
+    // 2. UID Required - Show UID modal
     if (lockReason === 'UID_REQUIRED') {
-      navigate('/login', { state: { from: window.location.pathname } });
+      setShowUidModal(true);
       return;
     }
 
@@ -240,6 +243,24 @@ export function RecommendedCourseCard({ course, onCourseClick, accessMap = {} })
         courseTitle={course?.title || 'this course'}
         plans={modalPlans}
       />
+
+      {/* UID Required Modal */}
+      <Dialog open={showUidModal} onOpenChange={setShowUidModal}>
+        <DialogContent className="sm:max-w-md">
+          <UidRequired 
+            onConnectUid={(e) => {
+              e?.preventDefault();
+              e?.stopPropagation();
+              setShowUidModal(false);
+              // Only navigate to login if user is not authenticated
+              if (!isAuthenticated) {
+                navigate('/login', { state: { from: window.location.pathname } });
+              }
+            }}
+            onClose={() => setShowUidModal(false)}
+          />
+        </DialogContent>
+      </Dialog>
     </Card>
   );
 }

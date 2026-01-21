@@ -10,6 +10,7 @@ import {
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Lock } from 'lucide-react';
 import { toast } from 'sonner';
 import { useState, useMemo } from "react";
@@ -25,11 +26,13 @@ import { useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { selectCurrentUser, selectIsAuthenticated } from '@/store/authSlice';
 import { useGetPurchasedPlanIdsQuery } from '@/store/client/clientPaymentApiSlice';
+import { UidRequired } from '@/components/common/access-states/UidRequired';
 
 export default function CryptoPage() {
   useDocumentTitle('Crypto Analysis');
   const [showPlanModal, setShowPlanModal] = useState(false);
   const [selectedContentForPurchase, setSelectedContentForPurchase] = useState(null);
+  const [showUidModal, setShowUidModal] = useState(false);
   const navigate = useNavigate();
 
   // Access control hooks - called at component level
@@ -293,9 +296,9 @@ export default function CryptoPage() {
                   return;
                 }
 
-                // 2. UID Required - Navigate to login page (UID modal not yet implemented)
+                // 2. UID Required - Show UID modal
                 if (lockReason === 'UID_REQUIRED') {
-                  navigate('/login', { state: { from: window.location.pathname } });
+                  setShowUidModal(true);
                   return;
                 }
 
@@ -472,6 +475,24 @@ export default function CryptoPage() {
           }}
         />
       )}
+
+      {/* UID Required Modal */}
+      <Dialog open={showUidModal} onOpenChange={setShowUidModal}>
+        <DialogContent className="sm:max-w-md">
+          <UidRequired 
+            onConnectUid={(e) => {
+              e?.preventDefault();
+              e?.stopPropagation();
+              setShowUidModal(false);
+              // Only navigate to login if user is not authenticated
+              if (!isAuthenticated) {
+                navigate('/login', { state: { from: window.location.pathname } });
+              }
+            }}
+            onClose={() => setShowUidModal(false)}
+          />
+        </DialogContent>
+      </Dialog>
 
       {/* ------------------- MODAL ------------------- */}
       <ViewCryptoModel

@@ -12,11 +12,13 @@ import { useGetPurchasedPlanIdsQuery } from '@/store/client/clientPaymentApiSlic
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 import ImageCarousel from '@/components/common/ImageCarousel';
 import ImageViewer from '@/components/common/ImageViewer';
 import { Toolbar, ToolbarHeading } from '@/components/layouts/layout-7/components/toolbar';
 import ViewIdeaModel from '@/components/models/ViewIdeaModel';
 import useDocumentTitle from '@/hooks/use-document-title';
+import { UidRequired } from '@/components/common/access-states/UidRequired';
 
 
 export default function IdeaPage() {
@@ -25,6 +27,7 @@ export default function IdeaPage() {
   const [selectedCard, setSelectedCard] = useState(null);
   const [showPlanModal, setShowPlanModal] = useState(false);
   const [selectedContentForPurchase, setSelectedContentForPurchase] = useState(null);
+  const [showUidModal, setShowUidModal] = useState(false);
   const navigate = useNavigate();
 
   // Access control hooks - called at component level
@@ -212,9 +215,9 @@ export default function IdeaPage() {
                   return;
                 }
 
-                // 2. UID Required - Navigate to login page (UID modal not yet implemented)
+                // 2. UID Required - Show UID modal
                 if (lockReason === 'UID_REQUIRED') {
-                  navigate('/login', { state: { from: window.location.pathname } });
+                  setShowUidModal(true);
                   return;
                 }
 
@@ -549,6 +552,24 @@ export default function IdeaPage() {
           }}
         />
       )}
+
+      {/* UID Required Modal */}
+      <Dialog open={showUidModal} onOpenChange={setShowUidModal}>
+        <DialogContent className="sm:max-w-md">
+          <UidRequired 
+            onConnectUid={(e) => {
+              e?.preventDefault();
+              e?.stopPropagation();
+              setShowUidModal(false);
+              // Only navigate to login if user is not authenticated
+              if (!isAuthenticated) {
+                navigate('/login', { state: { from: window.location.pathname } });
+              }
+            }}
+            onClose={() => setShowUidModal(false)}
+          />
+        </DialogContent>
+      </Dialog>
 
       {/* Image Viewer Modal */}
       <ImageViewer

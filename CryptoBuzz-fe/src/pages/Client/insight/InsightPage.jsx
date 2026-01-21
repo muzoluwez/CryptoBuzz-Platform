@@ -15,10 +15,12 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
+import { Dialog, DialogContent } from '@/components/ui/dialog';
 import ViewInsightModel from '@/components/models/ViewInsightModel';
 import { useSelector } from 'react-redux';
 import { selectCurrentUser, selectIsAuthenticated } from '@/store/authSlice';
 import { useGetPurchasedPlanIdsQuery } from '@/store/client/clientPaymentApiSlice';
+import { UidRequired } from '@/components/common/access-states/UidRequired';
 
 import {
   Toolbar,
@@ -34,6 +36,7 @@ export default function InsightPage() {
   const [activeTab, setActiveTab] = useState('All');
   const [showPlanModal, setShowPlanModal] = useState(false);
   const [selectedContentForPurchase, setSelectedContentForPurchase] = useState(null);
+  const [showUidModal, setShowUidModal] = useState(false);
   const navigate = useNavigate();
 
   // Access control hooks - called at component level
@@ -268,9 +271,9 @@ export default function InsightPage() {
                   return;
                 }
 
-                // 2. UID Required - Navigate to login page (UID modal not yet implemented)
+                // 2. UID Required - Show UID modal
                 if (lockReason === 'UID_REQUIRED') {
-                  navigate('/login', { state: { from: window.location.pathname } });
+                  setShowUidModal(true);
                   return;
                 }
 
@@ -476,6 +479,24 @@ export default function InsightPage() {
           }}
         />
       )}
+
+      {/* UID Required Modal */}
+      <Dialog open={showUidModal} onOpenChange={setShowUidModal}>
+        <DialogContent className="sm:max-w-md">
+          <UidRequired 
+            onConnectUid={(e) => {
+              e?.preventDefault();
+              e?.stopPropagation();
+              setShowUidModal(false);
+              // Only navigate to login if user is not authenticated
+              if (!isAuthenticated) {
+                navigate('/login', { state: { from: window.location.pathname } });
+              }
+            }}
+            onClose={() => setShowUidModal(false)}
+          />
+        </DialogContent>
+      </Dialog>
 
       {/* ------------------- MODAL ------------------- */}
       <ViewInsightModel

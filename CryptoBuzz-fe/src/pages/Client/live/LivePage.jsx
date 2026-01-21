@@ -552,15 +552,15 @@ export default function LivePage() {
                 {/* Days Header */}
                 <div className="grid grid-cols-8 bg-gradient-to-r from-yellow-600 to-yellow-700">
                   <div className="p-4 font-semibold text-center text-white border-r border-yellow-600">
-                    Educators
+                  Educadores
                   </div>
                   {weekDays.map((day, index) => (
                     <div
                       key={index}
                       className="p-4 text-center font-semibold text-white border-r border-yellow-600 last:border-r-0"
                     >
-                      <div className="text-sm">
-                        {day.toLocaleDateString('en-US', { weekday: 'short' })}
+                      <div className="text-sm capitalize">
+                        {day.toLocaleDateString('es-ES', { weekday: 'short' })}
                       </div>
                       <div className="text-xs mt-1">{day.getDate()}</div>
                     </div>
