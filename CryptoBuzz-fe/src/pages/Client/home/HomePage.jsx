@@ -8,7 +8,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardHeading
 import { LoginRequired } from '@/components/common/access-states/LoginRequired';
 import { useAuthContext } from '@/context/AuthContext';
 import useDocumentTitle from '../../../hooks/use-document-title';
-import hero_banner from "/media/images/crypto_banner.jpg";
+import hero_banner from "/media/images/crypto_banner.jpeg";
 
 
 const DummyImage = ({ src, alt = "", className = "" }) => (
@@ -160,7 +160,6 @@ export default function HomePage() {
                   src={hero_banner}
                   alt="hero"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent"></div>
 
                 <div className="absolute px-4 bottom-6 text-white mb-4">
                   <h2 className="text-2xl md:text-3xl font-semibold drop-shadow-md">
@@ -179,7 +178,7 @@ export default function HomePage() {
                 {/* Top-left stacked cards */}
                 <div className="grid grid-cols-1 md:grid-cols-1 gap-6">
                   <div className="flex flex-col gap-5">
-                    <Card className="relative rounded-xl text-white bg-[url('/media/images/banner_1.png')] bg-cover h-64 overflow-hidden">
+                    <Card className="relative rounded-xl text-white bg-[url('/media/images/banner_1.jpeg')] bg-cover h-64 overflow-hidden">
                       <CardContent className="flex flex-col justify-center h-full z-10 md:max-w-[75%]">
                         <div>
                           <CardHeading className="text-2xl font-black">
@@ -197,9 +196,8 @@ export default function HomePage() {
                           </Link>
                         </div>
                       </CardContent>
-                      <div className="absolute inset-0 bg-gradient-black z-0"></div>
                     </Card>
-                    <Card className="relative text-white bg-[url('/media/images/banner_2.png')] bg-cover h-64 overflow-hidden">
+                    <Card className="relative text-white bg-[url('/media/images/banner_2.jpeg')] bg-cover h-64 overflow-hidden">
                       <CardContent className="flex flex-col justify-center h-full z-10 md:max-w-[75%]">
                         <div>
                           <CardHeading className="text-2xl font-black">
@@ -218,7 +216,6 @@ export default function HomePage() {
                           </Link>
                         </div>
                       </CardContent>
-                      <div className="absolute inset-0 bg-gradient-black z-0"></div>
                     </Card>
                   </div>
                 </div>
@@ -386,7 +383,7 @@ export default function HomePage() {
                       <div className="flex flex-col items-center mt-7">
                         <div className="h-34 w-34 radius-live-user overflow-hidden mb-3">
                           <img
-                            src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&w=800&auto=format&fit=crop"
+                            src="/media/images/live_user.jpeg"
                             alt="No live stream"
                             className="w-full h-full object-cover opacity-70"
                           />
@@ -408,7 +405,7 @@ export default function HomePage() {
                 <CardContent className="p-0">
                   <div className="relative h-full">
                     <img
-                      src="/media/images/home_images/1.jpg"
+                      src="/media/images/home_images/1.jpeg"
                       alt="live sessions"
                       className="w-full h-full object-cover"
                     />
@@ -428,14 +425,13 @@ export default function HomePage() {
                     </div>
                   </div>
                 </CardContent>
-                <div className="absolute bg-gradient-black  inset-0 bg-gradient-green z-0"></div>
               </Card>
 
               <Card className="relative bg-black text-white h-[438px] p-0 overflow-hidden">
                 <CardContent className="p-0">
                   <div className="relative h-full">
                     <img
-                      src="/media/images/home_images/2.jpg"
+                      src="/media/images/home_images/2.jpeg"
                       alt="trading ideas"
                       className="w-full h-full object-cover"
                     />
@@ -455,14 +451,13 @@ export default function HomePage() {
                     </div>
                   </div>
                 </CardContent>
-                <div className="absolute bg-gradient-black  inset-0 bg-gradient-green z-0"></div>
               </Card>
 
               <Card className="relative bg-black text-white h-[438px] p-0 overflow-hidden">
                 <CardContent className="p-0">
                   <div className="relative h-full">
                     <img
-                      src="/media/images/home_images/3.jpg"
+                      src="/media/images/home_images/3.jpeg"
                       alt="social feed"
                       className="w-full h-full object-cover"
                     />
@@ -482,14 +477,13 @@ export default function HomePage() {
                     </div>
                   </div>
                 </CardContent>
-                <div className="absolute bg-gradient-black  inset-0 bg-gradient-green z-0"></div>
               </Card>
             </section>
 
             {/* FEED + SIDEBAR */}
             <section className="grid grid-cols-3 lg:grid-cols-3 gap-6">
               {/* Activity feed (large left) */}
-              <div className="col-span-12 lg:col-span-2 rounded-2xl">
+              <div className="col-span-12 rounded-2xl">
                 <div className="card border !rounded-xl p-6 h-full">
                   {/* Header */}
                   <div className="flex flex-wrap items-center justify-between mb-6 gap-3">
