@@ -483,7 +483,7 @@ export default function HomePage() {
             {/* FEED + SIDEBAR */}
             <section className="grid grid-cols-3 lg:grid-cols-3 gap-6">
               {/* Activity feed (large left) */}
-              <div className="col-span-12 lg:col-span-2 rounded-2xl">
+              <div className="col-span-12 rounded-2xl">
                 <div className="card border !rounded-xl p-6 h-full">
                   {/* Header */}
                   <div className="flex flex-wrap items-center justify-between mb-6 gap-3">
