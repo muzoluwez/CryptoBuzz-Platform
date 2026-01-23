@@ -92,6 +92,18 @@ const CreateCourseModal = forwardRef(
           payload.plan = planField;
         }
 
+        // Handle recommendedCourses array (max 4 courses)
+        const recommendedCoursesArray = [];
+        // FormData sends recommendedCourses[] as multiple entries, collect them all
+        for (const [key, value] of formData.entries()) {
+          if (key === "recommendedCourses[]" && value && value !== "" && value !== "null" && value !== "undefined") {
+            recommendedCoursesArray.push(value);
+          }
+        }
+        
+        // Always include recommendedCourses array (even if empty) to ensure proper update
+        payload.recommendedCourses = recommendedCoursesArray.slice(0, 4);
+
         // Add price field if present (from plan)
         const priceField = formData.get("price");
         if (priceField !== null) {
@@ -108,6 +120,11 @@ const CreateCourseModal = forwardRef(
               // Handle plans array specially - send as JSON string for FormData
               if (key === "plans" && Array.isArray(value)) {
                 uploadFormData.append("plans", JSON.stringify(value));
+              } else if (key === "recommendedCourses" && Array.isArray(value)) {
+                // Handle recommendedCourses array - send each course ID separately
+                value.forEach((courseId) => {
+                  uploadFormData.append("recommendedCourses[]", courseId);
+                });
               } else {
                 uploadFormData.append(key, value);
               }

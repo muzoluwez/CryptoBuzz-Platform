@@ -14,6 +14,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { useGetLanguagesQuery } from "../../../../../../../store/api/educator/educatorLanguageApiSlice";
 import { useFetchCategoriesQuery, useGetEducatorCoursesTypesQuery } from "../../../../../../../store/api/educator/educatorAcademyCategoryApiSlice";
 import { useFetchPlansQuery } from "../../../../../../../store/api/educator/educatorPlanApiSlice";
+import CustomSelect from "@/components/CustomSelect";
 ;
 
 // Schema for course validation
@@ -34,6 +35,7 @@ const createCourseSchema = z.object({
   plans: z.array(z.string()).nullable().optional(),
   section: z.string().min(1, "Please select a course type"),
   language: z.string().min(1, "Please select a course language"),
+  recommendedCourses: z.array(z.string()).max(4, "Maximum 4 recommended courses allowed").nullable().optional(),
 }).refine((data) => {
   if (data.tier === "PRO" && (!data.plans || data.plans.length === 0)) {
     return false;
@@ -70,6 +72,7 @@ const editCourseSchema = z.object({
   plans: z.array(z.string()).nullable().optional(),
   section: z.string().min(1, "Please select a course type"),
   language: z.string().min(1, "Please select a course language"),
+  recommendedCourses: z.array(z.string()).max(4, "Maximum 4 recommended courses allowed").nullable().optional(),
 }).refine((data) => {
   if (data.tier === "PRO" && (!data.plans || data.plans.length === 0)) {
     return false;
@@ -85,6 +88,8 @@ const CourseForm = ({ onSubmit, initialData, isLoading }) => {
     initialData?.imageUrl || null
   );
   const [currentImageFile, setCurrentImageFile] = useState(null);
+  const [availableCourses, setAvailableCourses] = useState([]);
+  const [loadingCourses, setLoadingCourses] = useState(false);
   const { data } = useFetchCategoriesQuery();
   const { data: languagesList } = useGetLanguagesQuery();
   const { data: courseTypesList } = useGetEducatorCoursesTypesQuery();
@@ -114,6 +119,7 @@ const CourseForm = ({ onSubmit, initialData, isLoading }) => {
       language: "",
       tier: "PUBLIC",
       plans: [],
+      recommendedCourses: [],
     },
   });
 
@@ -137,6 +143,15 @@ const CourseForm = ({ onSubmit, initialData, isLoading }) => {
       } else {
         setValue("plans", []);
       }
+      // Handle recommendedCourses
+      if (initialData.recommendedCourses && Array.isArray(initialData.recommendedCourses)) {
+        const recommendedCourseIds = initialData.recommendedCourses.map(rc => 
+          rc._id || rc
+        ).filter(Boolean);
+        setValue("recommendedCourses", recommendedCourseIds);
+      } else {
+        setValue("recommendedCourses", []);
+      }
     }
   }, [initialData, setValue]);
 
@@ -156,6 +171,38 @@ const CourseForm = ({ onSubmit, initialData, isLoading }) => {
   const selectedTier = watch("tier");
   const selectedSection = watch("section");
   const selectedLanguage = watch("language");
+  const selectedRecommendedCourses = watch("recommendedCourses") || [];
+
+  // Fetch available courses for recommended courses selector
+  useEffect(() => {
+    const fetchCourses = async () => {
+      setLoadingCourses(true);
+      try {
+        const token = localStorage.getItem("token");
+        const apiBaseUrl = import.meta.env.VITE_APP_API_URL || "http://localhost:8000";
+        const response = await fetch(`${apiBaseUrl}/api/v1/common/course?published=true&isDeleted=false`, {
+          headers: {
+            "Authorization": `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        });
+        if (response.ok) {
+          const result = await response.json();
+          // Filter out the current course if editing
+          const courses = result.data || [];
+          const filteredCourses = initialData?._id 
+            ? courses.filter(c => c._id !== initialData._id)
+            : courses;
+          setAvailableCourses(filteredCourses);
+        }
+      } catch (error) {
+        console.error("Error fetching courses:", error);
+      } finally {
+        setLoadingCourses(false);
+      }
+    };
+    fetchCourses();
+  }, [initialData?._id]);
 
   // Clear plans field when tier changes to non-PRO tiers
   useEffect(() => {
@@ -196,6 +243,13 @@ const CourseForm = ({ onSubmit, initialData, isLoading }) => {
       // Non-PRO courses have price 0 and no plans
       formData.append("price", 0);
       // Explicitly do not append plans for non-PRO courses
+    }
+
+    // Append recommended courses (max 4)
+    if (data.recommendedCourses && Array.isArray(data.recommendedCourses) && data.recommendedCourses.length > 0) {
+      data.recommendedCourses.slice(0, 4).forEach((courseId) => {
+        formData.append("recommendedCourses[]", courseId);
+      });
     }
 
     // Handle image file - required for new courses, optional for edits with existing image
@@ -532,6 +586,74 @@ const CourseForm = ({ onSubmit, initialData, isLoading }) => {
           </p>
         </div>
       )}
+
+      {/* Recommended Courses Selector */}
+      <div className="space-y-2">
+        <label className="block text-sm font-medium text-gray-700">
+          Recommended Courses <span className="text-gray-500 text-xs">(Max 4)</span>
+        </label>
+        <Controller
+          name="recommendedCourses"
+          control={control}
+          render={({ field }) => {
+            const selectedCourses = field.value || [];
+            
+            // Prepare options for dropdown
+            const courseOptions = availableCourses.map(course => ({
+              label: course.title,
+              value: course._id,
+            }));
+
+            // Handle change with max 4 limit
+            const handleChange = (values) => {
+              if (Array.isArray(values)) {
+                // Limit to max 4 courses
+                const limitedValues = values.slice(0, 4);
+                if (limitedValues.length !== values.length && values.length > 4) {
+                  // Show warning if user tries to select more than 4
+                  console.warn("Maximum 4 recommended courses allowed");
+                }
+                field.onChange(limitedValues);
+              } else {
+                field.onChange([]);
+              }
+            };
+
+            return (
+              <div className={`${errors.recommendedCourses ? "border-red-500" : ""}`}>
+                {loadingCourses ? (
+                  <div className="text-sm text-gray-500 py-2">Loading courses...</div>
+                ) : (
+                  <CustomSelect
+                    mode="multiple"
+                    options={courseOptions}
+                    value={selectedCourses}
+                    onChange={handleChange}
+                    placeholder="Select recommended courses (max 4)"
+                    maxTagCount={4}
+                    disabled={loadingCourses}
+                    style={{ width: "100%" }}
+                  />
+                )}
+                {selectedCourses.length > 0 && (
+                  <div className="mt-2 text-sm text-gray-600">
+                    {selectedCourses.length} course{selectedCourses.length !== 1 ? 's' : ''} selected
+                    {selectedCourses.length >= 4 && (
+                      <span className="text-orange-600 ml-2">(Maximum reached)</span>
+                    )}
+                  </div>
+                )}
+              </div>
+            );
+          }}
+        />
+        {errors.recommendedCourses && (
+          <p className="text-sm text-red-600">{errors.recommendedCourses.message}</p>
+        )}
+        <p className="text-xs text-gray-500">
+          Select up to 4 courses to recommend to users when they view this course. These will only be displayed when the main course is accessible.
+        </p>
+      </div>
 
       <div className="flex items-center justify-between p-4 border rounded-lg">
         <div>

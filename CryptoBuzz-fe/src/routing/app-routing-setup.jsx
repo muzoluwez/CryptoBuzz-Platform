@@ -9,6 +9,7 @@ import IdeaPage from '@/pages/Client/idea/IdeaPage';
 import InsightPage from '@/pages/Client/insight/InsightPage';
 import EducatorsPage from '@/pages/Client/live/EducatorsPage';
 import LivePage from '@/pages/Client/live/LivePage';
+import MarketplacePage from '@/pages/Client/marketplace/MarketplacePage';
 import ProfilePage from '@/pages/Client/profile/ProfilePage';
 import SocialPage from '@/pages/Client/social/SocialPage';
 // IMPORT THE NEW LAYOUT
@@ -53,6 +54,7 @@ export function AppRoutingSetup() {
         <Route path="/client/profile" element={<ProfilePage />} />
         <Route path="/client/idea" element={<IdeaPage />} />
         <Route path="/client/social" element={<SocialPage />} />
+        <Route path="/client/marketplace" element={<MarketplacePage />} />
         <Route path="/client/view-profile/:id" element={<ViewProfile />} />
       </Route>
 

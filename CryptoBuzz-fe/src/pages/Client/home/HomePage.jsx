@@ -209,7 +209,7 @@ export default function HomePage() {
                         </div>
                         <div className="mt-4">
                           <Link
-                            to="/client/home"
+                            to="/client/marketplace"
                             className="btn bg-white text-black cursor-pointer "
                           >
                             Obtener VIP

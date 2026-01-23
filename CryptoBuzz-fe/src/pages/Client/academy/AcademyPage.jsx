@@ -93,7 +93,8 @@ function CourseUI({
   onBackToVault,
   academyCourseLoading = false,
   academyCourseFetching = false,
-  courseAccessMap = {}
+  courseAccessMap = {},
+  currentCourseHasAccess = false
 }) {
 
   // console.log("CourseUI Rendered with lecture:", lecture, "and currentCourse:", currentCourse);
@@ -456,7 +457,7 @@ function CourseUI({
                 </div>
 
                 <div className="flex items-center justify-between flex-wrap gap-4 mt-6">
-                  <h2 className="text-3xl font-bold text-gray-900 dark:text-gray-200">
+                  <h2 className="text-3xl font-bold text-gray-900 dark:text-gray-200 max-w-[650px]">
                     {lecture?.title || selectedVideo
                       ? (introLessons?.find(l => (l?.id === selectedVideo?.id || l?._id === selectedVideo?.id))?.title ||
                         currentCourse?.flatMap(c => c?.lectures || [])?.find(l => l?._id === selectedVideo?.id)?.title ||
@@ -683,8 +684,29 @@ function CourseUI({
           </div>
         )}
 
+        {/* Course-Specific Recommended Courses - Show when available */}
+        {hideVault && data?.recommendedCourses && data.recommendedCourses.length > 0 && (
+          <div className="mt-12">
+            <div className="flex items-center justify-between flex-wrap gap-4 mb-6">
+              <h3 className="text-2xl font-bold text-gray-900 dark:text-gray-200">Cursos Recomendados</h3>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {data.recommendedCourses.map((course) => {
+                return (
+                  <RecommendedCourseCard
+                    key={course?.id || course?._id}
+                    course={course}
+                    onCourseClick={onCourseClick}
+                    accessMap={courseAccessMap}
+                  />
+                )
+              })}
+            </div>
+          </div>
+        )}
+
         {/* Back to Vault Button - Show when vault is hidden */}
-        {hideVault && (
+        {/* {hideVault && (
           <div className="mt-6 flex justify-center">
             <button
               onClick={onBackToVault}
@@ -693,7 +715,7 @@ function CourseUI({
               ← Back to Recommended Courses
             </button>
           </div>
-        )}
+        )} */}
       </div>
 
       {/* Plan Selection Modal - Always render when showPlanModal is true */}
@@ -754,6 +776,16 @@ export default function AcademyPage() {
       }
     }
   }, [state?.selectedCourse]);
+
+  // Handle courseId from URL parameter
+  useEffect(() => {
+    if (courseId) {
+      // Set the course ID to trigger API call
+      setSelectedCourseId(courseId);
+      // Hide vault to show course content
+      setHideVault(true);
+    }
+  }, [courseId]);
 
   // API call with category and id parameters - refetches when activeTab or selectedCourseId changes
   const {
@@ -1066,9 +1098,20 @@ export default function AcademyPage() {
       allCourses.push(currentCourseForBatch);
     }
 
+    // Add recommended courses from API response if available
+    if (data?.recommendedCourses && Array.isArray(data.recommendedCourses)) {
+      data.recommendedCourses.forEach(recCourse => {
+        const recCourseId = recCourse._id || recCourse.id;
+        if (recCourseId && !allCourses.find(c => (c?._id || c?.id) === recCourseId)) {
+          allCourses.push(recCourse);
+        }
+      });
+    }
+
     // Debug logging
     console.log('📚 All Courses for Batch Check:', {
       recommendedCoursesCount: courses.length,
+      courseSpecificRecommendedCount: data?.recommendedCourses?.length || 0,
       allCoursesCount: allCourses.length,
       courses: allCourses.map(c => ({
         id: c?._id || c?.id,
@@ -1079,7 +1122,7 @@ export default function AcademyPage() {
     });
 
     return allCourses;
-  }, [courses, currentCourseForBatch]);
+  }, [courses, currentCourseForBatch, data?.recommendedCourses]);
 
   // Batch access hook for all courses (recommended + current)
   const { checkAccess: checkBatchAccess, courseIds } = useBatchCourseAccess(allCoursesForBatchCheck);
@@ -1185,6 +1228,15 @@ export default function AcademyPage() {
   const activeCategoryName = getCategoryName(activeTab);
   const uiType = getCategoryUI(activeCategoryName);
 
+  // Check access for current course to determine if recommended courses should be shown
+  const currentCourseSection = currentCourse?.[0] || null;
+  const currentCourseId = currentCourseSection?.course || currentCourseSection?._id || null;
+  const { hasAccess: currentCourseHasAccess } = useCourseAccessFromMap(
+    currentCourseId,
+    courseAccessMap,
+    currentCourseSection
+  );
+
   // Show loading state
   if (academyCourseLoading) {
     return (
@@ -1232,6 +1284,7 @@ export default function AcademyPage() {
         academyCourseLoading={academyCourseLoading}
         academyCourseFetching={academyCourseFetching}
         courseAccessMap={courseAccessMap}
+        currentCourseHasAccess={currentCourseHasAccess}
         onCourseClick={handleCourseClick}
         onBackToVault={handleBackToVault}
         onLectureSelect={(lectureId) => {

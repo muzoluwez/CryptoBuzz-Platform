@@ -60,6 +60,12 @@ const CourseSchema = new mongoose.Schema(
       default: null,
     },
 
+    // Recommended courses - array of course IDs (max 4)
+    recommendedCourses: [{
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Course",
+    }],
+
     isDeleted: { type: Boolean, default: false },
     deletedAt: { type: Date },
   },
