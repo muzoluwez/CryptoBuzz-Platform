@@ -591,56 +591,6 @@ const CourseForm = ({ onSubmit, initialData, isLoading }) => {
         </div>
       )}
 
-      <div className="flex items-center justify-between p-4 border rounded-lg">
-        <div>
-          <label
-            htmlFor="published"
-            className="text-sm font-medium text-gray-700"
-          >
-            Publish Course
-          </label>
-          <p className="text-sm text-gray-500">
-            Make this course available to students
-          </p>
-        </div>
-        <Controller
-          name="published"
-          control={control}
-          render={({ field }) => (
-            <Checkbox
-              id="published"
-              checked={field.value}
-              onCheckedChange={field.onChange}
-            />
-          )}
-        />
-      </div>
-
-      <div className="flex items-center justify-between p-4 border rounded-lg">
-        <div>
-          <label
-            htmlFor="isFeatured"
-            className="text-sm font-medium text-gray-700"
-          >
-            Feature Course
-          </label>
-          <p className="text-sm text-gray-500">
-            Highlight this course on the homepage
-          </p>
-        </div>
-        <Controller
-          name="isFeatured"
-          control={control}
-          render={({ field }) => (
-            <Checkbox
-              id="isFeatured"
-              checked={field.value}
-              onCheckedChange={field.onChange}
-            />
-          )}
-        />
-      </div>
-
       {/* Recommended Courses Selector */}
       <div className="space-y-2">
         <label className="block text-sm font-medium text-gray-700">
@@ -707,6 +657,56 @@ const CourseForm = ({ onSubmit, initialData, isLoading }) => {
         <p className="text-xs text-gray-500">
           Select up to 4 courses to recommend to users when they view this course. These will only be displayed when the main course is accessible.
         </p>
+      </div>
+
+      <div className="flex items-center justify-between p-4 border rounded-lg">
+        <div>
+          <label
+            htmlFor="published"
+            className="text-sm font-medium text-gray-700"
+          >
+            Publish Course
+          </label>
+          <p className="text-sm text-gray-500">
+            Make this course available to students
+          </p>
+        </div>
+        <Controller
+          name="published"
+          control={control}
+          render={({ field }) => (
+            <Checkbox
+              id="published"
+              checked={field.value}
+              onCheckedChange={field.onChange}
+            />
+          )}
+        />
+      </div>
+
+      <div className="flex items-center justify-between p-4 border rounded-lg">
+        <div>
+          <label
+            htmlFor="isFeatured"
+            className="text-sm font-medium text-gray-700"
+          >
+            Feature Course
+          </label>
+          <p className="text-sm text-gray-500">
+            Highlight this course on the homepage
+          </p>
+        </div>
+        <Controller
+          name="isFeatured"
+          control={control}
+          render={({ field }) => (
+            <Checkbox
+              id="isFeatured"
+              checked={field.value}
+              onCheckedChange={field.onChange}
+            />
+          )}
+        />
       </div>
 
       <div className="flex justify-end space-x-4">
