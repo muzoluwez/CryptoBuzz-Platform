@@ -154,9 +154,9 @@ export function MegaMenu() {
         <NavigationMenuItem>
           <NavigationMenuLink asChild>
             <Link
-              // to="/client/social"
+              to="/client/marketplace"
               className={cn(linkClass)}
-              // data-active={isActive('/client/social') || undefined}
+              data-active={isActive('/client/marketplace') || undefined}
             >
               Tienda
             </Link>

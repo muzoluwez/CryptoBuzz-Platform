@@ -72,3 +72,90 @@ button:focus-visible {
     background-color: #f9f9f9;
   }
 }
+/* CustomSelect component handles remove icon styling theme-aware */
+/* This rule is kept for backward compatibility but CustomSelect overrides it */
+.ant-select-multiple .ant-select-content .ant-select-selection-item-remove {
+  color: #ffffff !important;
+}
+
+/* Theme-aware remove icon styling */
+.dark .ant-select-selection-item-remove,
+.dark .ant-select-multiple .ant-select-selection-item-remove {
+  color: #facc15 !important;
+}
+
+.light .ant-select-selection-item-remove,
+.light .ant-select-multiple .ant-select-selection-item-remove {
+  color: #92400e !important;
+}
+
+/* Remove outline but keep border on CustomSelect focus */
+.custom-select-wrapper .ant-select,
+.custom-select-wrapper .ant-select-focused,
+.custom-select-wrapper .ant-select-open,
+.custom-select-wrapper .ant-select-focused .ant-select-selector,
+.custom-select-wrapper .ant-select-open .ant-select-selector {
+  outline: none !important;
+  outline-width: 0 !important;
+  outline-style: none !important;
+  outline-offset: 0 !important;
+  box-shadow: none !important;
+}
+
+/* Remove white outline from ant-select-outlined but keep border */
+.custom-select-wrapper .ant-select-outlined,
+.custom-select-wrapper .ant-select-outlined .ant-select-selector,
+.custom-select-wrapper .ant-select-outlined.ant-select-focused,
+.custom-select-wrapper .ant-select-outlined.ant-select-open,
+.custom-select-wrapper .ant-select-outlined.ant-select-focused .ant-select-selector,
+.custom-select-wrapper .ant-select-outlined.ant-select-open .ant-select-selector {
+  outline: none !important;
+  outline-width: 0 !important;
+  outline-style: none !important;
+  outline-offset: 0 !important;
+  box-shadow: none !important;
+}
+
+/* Remove all borders from internal elements */
+.custom-select-wrapper .ant-select .ant-select-selector *,
+.custom-select-wrapper .ant-select-focused .ant-select-selector *,
+.custom-select-wrapper .ant-select-open .ant-select-selector *,
+.custom-select-wrapper .ant-select .ant-select-selection-search-input,
+.custom-select-wrapper .ant-select .ant-select-selection-overflow,
+.custom-select-wrapper .ant-select .ant-select-selection-item {
+  border: none !important;
+  border-color: transparent !important;
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+/* Make search and clear icons visible in dark mode */
+.dark .custom-select-wrapper .ant-select-selection-search-icon,
+.dark .custom-select-wrapper .ant-select-selection-search-icon svg,
+.dark .custom-select-wrapper .ant-select-selection-search-icon span,
+.dark .custom-select-wrapper .ant-select-selection-search-icon span svg,
+.dark .custom-select-wrapper .ant-select-clear,
+.dark .custom-select-wrapper .ant-select-clear svg,
+.dark .custom-select-wrapper .ant-select-clear span,
+.dark .custom-select-wrapper .ant-select-clear span svg,
+.dark .custom-select-wrapper .ant-select-arrow,
+.dark .custom-select-wrapper .ant-select-arrow svg,
+.dark .custom-select-wrapper .ant-select-arrow span,
+.dark .custom-select-wrapper .ant-select-arrow span svg,
+.dark .custom-select-wrapper .ant-select .ant-select-selector .anticon,
+.dark .custom-select-wrapper .ant-select .ant-select-selector .anticon svg {
+  color: #e5e7eb !important;
+  opacity: 0.8 !important;
+  fill: #e5e7eb !important;
+}
+
+.dark .custom-select-wrapper .ant-select-selection-search-icon:hover,
+.dark .custom-select-wrapper .ant-select-selection-search-icon:hover svg,
+.dark .custom-select-wrapper .ant-select-clear:hover,
+.dark .custom-select-wrapper .ant-select-clear:hover svg,
+.dark .custom-select-wrapper .ant-select-arrow:hover,
+.dark .custom-select-wrapper .ant-select-arrow:hover svg {
+  opacity: 1 !important;
+  color: #facc15 !important;
+  fill: #facc15 !important;
+}

@@ -120,20 +120,35 @@ export const CourseBasedOnSection = async (req, res) => {
       }
       
       const singleCourse = await Course.findOne(singleCourseQuery)
+        .populate("recommendedCourses", "_id title description imageUrl price tier")
         .sort({ createdAt: -1 })
         .lean();
 
-      const categoriesActiveData = await Category.find({
-        _id: { $in: categoryId ? categoryId : coursesData[0]?.category._id },
-        status: true
-      });
+      const categoryIdForQuery = categoryId 
+        ? categoryId 
+        : (coursesData[0]?.category?._id ? coursesData[0].category._id : null);
+      
+      const categoriesActiveData = categoryIdForQuery 
+        ? await Category.find({
+            _id: mongoose.Types.ObjectId.isValid(categoryIdForQuery) 
+              ? new mongoose.Types.ObjectId(categoryIdForQuery) 
+              : categoryIdForQuery,
+            status: true
+          })
+        : await Category.find({ status: true });
 
-      const languageActiveData = await LanguageModel.find({
-        status: true,
-        name: language ? language : coursesData[0]?.language
-      })
-        .select("_id name")
-        .lean();
+      const languageForQuery = language || coursesData[0]?.language || null;
+      
+      const languageActiveData = languageForQuery
+        ? await LanguageModel.find({
+            status: true,
+            name: languageForQuery
+          })
+          .select("_id name")
+          .lean()
+        : await LanguageModel.find({ status: true })
+          .select("_id name")
+          .lean();
 
       if (!singleCourse) {
         return res.status(200).json({
@@ -170,17 +185,29 @@ export const CourseBasedOnSection = async (req, res) => {
         isDeleted: false  // Explicitly filter out deleted courses
       };
 
-      const categoriesActiveData = await Category.find({
-        _id: { $in: categoryId ? (mongoose.Types.ObjectId.isValid(categoryId) ? new mongoose.Types.ObjectId(categoryId) : null) : (coursesData[0]?.category?._id ? coursesData[0].category._id : null) },
-        status: true
-      });
+      const categoryIdForQuery = categoryId 
+        ? (mongoose.Types.ObjectId.isValid(categoryId) ? new mongoose.Types.ObjectId(categoryId) : null)
+        : (coursesData[0]?.category?._id ? coursesData[0].category._id : null);
+      
+      const categoriesActiveData = categoryIdForQuery
+        ? await Category.find({
+            _id: categoryIdForQuery,
+            status: true
+          })
+        : await Category.find({ status: true });
 
-      const languageActiveData = await LanguageModel.find({
-        status: true,
-        name: language ? language : coursesData[0]?.language
-      })
-        .select("_id name")
-        .lean();
+      const languageForQuery = language || coursesData[0]?.language || null;
+      
+      const languageActiveData = languageForQuery
+        ? await LanguageModel.find({
+            status: true,
+            name: languageForQuery
+          })
+          .select("_id name")
+          .lean()
+        : await LanguageModel.find({ status: true })
+          .select("_id name")
+          .lean();
 
       if (!categoryId && !language && !id) {
         if (!coursesData.length) {
@@ -215,7 +242,10 @@ export const CourseBasedOnSection = async (req, res) => {
         }
       }
 
-      courses = await Course.find(courseQuery).sort({ createdAt: 1 }).lean();
+      courses = await Course.find(courseQuery)
+        .populate("recommendedCourses", "_id title description imageUrl price tier")
+        .sort({ createdAt: 1 })
+        .lean();
     }
 
     // If no course found after filters
@@ -292,6 +322,20 @@ export const CourseBasedOnSection = async (req, res) => {
 
     const activeCourse = allCourses.filter(course => course._id.toString() == id);
 
+    // Get recommended courses from the current course(s)
+    let recommendedCoursesData = [];
+    if (courses.length > 0 && courses[0].recommendedCourses) {
+      recommendedCoursesData = courses[0].recommendedCourses.map(recCourse => ({
+        _id: recCourse._id,
+        id: recCourse._id,
+        title: recCourse.title,
+        description: recCourse.description,
+        imageUrl: recCourse.imageUrl,
+        price: recCourse.price || 0,
+        tier: recCourse.tier || "PUBLIC"
+      }));
+    }
+
     return res.status(200).json({
       success: true,
       mainSection,
@@ -304,15 +348,146 @@ export const CourseBasedOnSection = async (req, res) => {
       })),
       course: Object.values(sectionsByCourse).flat(),
       upcomingCourse: allCourses,
-      activeCourse
+      activeCourse,
+      recommendedCourses: recommendedCoursesData
     });
   } catch (err) {
-    console.error("getAllCategoriesWithSection error:", err);
+    console.error("CourseBasedOnSection error:", err);
+    console.error("Error details:", {
+      message: err.message,
+      stack: err.stack,
+      query: req.query
+    });
     return res.status(500).json({
       success: false,
-      message: "Something went wrong"
+      message: "Something went wrong",
+      error: process.env.NODE_ENV === 'development' ? err.message : undefined
     });
   }
 };
 
-export default { CourseBasedOnSection };
+/**
+ * Get all courses for marketplace
+ * Returns all published courses with optional filtering by language, category, and pagination
+ * Note: Returns courses from ALL sections (not filtered by section) to include admin courses
+ */
+export const getAllCoursesForMarketplace = async (req, res) => {
+  try {
+    const { language, categoryId, category, page = 1, limit = 100 } = req.query;
+
+    // Build query - only published and not deleted courses
+    // IMPORTANT: Do NOT filter by section - we want ALL courses from ALL sections
+    // This ensures admin courses are included regardless of their section value
+    let query = {
+      published: true,
+      isDeleted: false
+    };
+
+    // Filter by language if provided
+    if (language) {
+      const trimmedLanguage = language.trim();
+      query.language = { 
+        $regex: new RegExp(`^${trimmedLanguage.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\s*$`, 'i') 
+      };
+    }
+
+    // Filter by category if provided (support both 'category' and 'categoryId' for compatibility)
+    const categoryParam = categoryId || category;
+    if (categoryParam) {
+      if (mongoose.Types.ObjectId.isValid(categoryParam)) {
+        query.category = new mongoose.Types.ObjectId(categoryParam);
+      } else {
+        return res.status(400).json({ 
+          success: false, 
+          message: "Invalid categoryId format" 
+        });
+      }
+    }
+
+    // Calculate pagination
+    const pageNum = parseInt(page, 10) || 1;
+    const limitNum = parseInt(limit, 10) || 100;
+    const skip = (pageNum - 1) * limitNum;
+
+    // Debug: Log the query to help identify issues
+    console.log("Marketplace query:", JSON.stringify(query, null, 2));
+
+    // Fetch courses with pagination
+    // Note: We explicitly do NOT filter by section or createdBy to include ALL published courses
+    const courses = await Course.find(query)
+      .select("_id title description imageUrl price tier category language instructor createdAt section createdBy")
+      .populate("category", "_id name")
+      .populate("instructor", "first_name last_name email image")
+      .populate("createdBy", "first_name last_name email role")
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limitNum)
+      .lean();
+
+    // Get total count for pagination
+    const totalCourses = await Course.countDocuments(query);
+    
+    // Debug: Log course count and sample courses
+    console.log(`Marketplace: Found ${courses.length} courses (total: ${totalCourses})`);
+    if (courses.length > 0) {
+      console.log("Sample course sections:", courses.slice(0, 5).map(c => ({ 
+        id: c._id, 
+        title: c.title, 
+        section: c.section,
+        published: true,
+        createdBy: c.createdBy?._id 
+      })));
+    }
+
+    // Format response to match frontend expectations
+    const formattedCourses = courses.map(course => ({
+      _id: course._id,
+      id: course._id, // Also include as 'id' for compatibility
+      title: course.title,
+      description: course.description,
+      imageUrl: course.imageUrl,
+      price: course.price || 0,
+      tier: course.tier || "PUBLIC",
+      hotmartProductId: course.hotmartProductId || null,
+      section: course.section || null, // Include section for debugging
+      category: course.category ? {
+        _id: course.category._id,
+        name: course.category.name
+      } : null,
+      language: course.language,
+      instructor: course.instructor ? {
+        _id: course.instructor._id,
+        first_name: course.instructor.first_name,
+        last_name: course.instructor.last_name,
+        email: course.instructor.email,
+        image: course.instructor.image
+      } : null,
+      createdBy: course.createdBy ? {
+        _id: course.createdBy._id,
+        role: course.createdBy.role,
+        name: `${course.createdBy.first_name || ''} ${course.createdBy.last_name || ''}`.trim()
+      } : null,
+      createdAt: course.createdAt
+    }));
+
+    return res.status(200).json({
+      success: true,
+      data: formattedCourses,
+      pagination: {
+        page: pageNum,
+        limit: limitNum,
+        total: totalCourses,
+        totalPages: Math.ceil(totalCourses / limitNum)
+      }
+    });
+  } catch (error) {
+    console.error("getAllCoursesForMarketplace error:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Something went wrong",
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
+  }
+};
+
+export default { CourseBasedOnSection, getAllCoursesForMarketplace };
