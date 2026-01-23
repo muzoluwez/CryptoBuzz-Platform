@@ -164,28 +164,30 @@ export function RecommendedCourseCard({ course, onCourseClick, accessMap = {} })
 
   return (
     <Card
-      className={`relative bg-black text-white h-[438px] p-0 overflow-hidden group transition-all ${isLocked ? 'cursor-default' : 'cursor-pointer hover:scale-[1.02]'
+      className={`relative bg-white p-3 border-gray-200 text-white overflow-hidden group transition-all ${isLocked ? 'cursor-default' : 'cursor-pointer hover:scale-[1.02]'
         }`}
       onClick={handleCardClick}
     >
+      <div className='h-[200px] sm:h-[30vh]'>
+        <img
+          src={course?.imageUrl || "https://images.unsplash.com/photo-1559526324-593bc073d938?q=80&w=800&auto=format&fit=crop"}
+          alt={course?.title || "course"}
+          className={cn(
+            "w-full h-full object-cover rounded-xl transition-all duration-300",
+            isLocked && "blur-[2px]"
+          )}
+          onError={(e) => {
+            e.target.onerror = null;
+            e.target.src = "https://placehold.co/400x225/E0BBE4/957DAD?text=Image+Error";
+          }}
+        />
+      </div>
       <CardContent className="p-0">
-        <div className="relative h-full">
-          <img
-            src={course?.imageUrl || "https://images.unsplash.com/photo-1559526324-593bc073d938?q=80&w=800&auto=format&fit=crop"}
-            alt={course?.title || "course"}
-            className={cn(
-              "w-full h-full object-cover transition-all duration-300",
-              isLocked && "blur-[2px]"
-            )}
-            onError={(e) => {
-              e.target.onerror = null;
-              e.target.src = "https://placehold.co/400x225/E0BBE4/957DAD?text=Image+Error";
-            }}
-          />
+        <div className="h-full">
 
           {/* Lock Icon - Top Right Corner (only when locked) */}
           {isLocked && (
-            <div 
+            <div
               className="absolute top-3 right-3 z-20 cursor-pointer"
               onClick={handleLockClick}
             >
@@ -197,11 +199,11 @@ export function RecommendedCourseCard({ course, onCourseClick, accessMap = {} })
 
           {/* Course content - visible but slightly faded when locked */}
           <div className={cn(
-            "absolute left-4 bottom-4 text-white z-10 transition-opacity",
+            "z-10 transition-opacity",
             isLocked ? "opacity-85" : "opacity-100"
           )}>
-            <h4 className="text-2xl font-bold">{course?.title}</h4>
-            <p className="text-md mt-3 text-gray-200 line-clamp-2">
+            <h4 className="text-2xl text-gray-800 font-bold mt-4">{course?.title}</h4>
+            <p className="text-md mt-3 text-gray-600 line-clamp-2">
               {course?.description ? convertRtkEditorToFormattedPlainText(course.description, true) : ''}
             </p>
             {!isLocked && (
@@ -222,12 +224,12 @@ export function RecommendedCourseCard({ course, onCourseClick, accessMap = {} })
       </CardContent>
 
       {/* Gradient overlay */}
-      <div className='absolute bg-gradient-black inset-0 bg-gradient-green z-0'></div>
+      {/* <div className='absolute bg-gradient-black inset-0 bg-gradient-green z-0'></div> */}
 
       {/* Full Card Lock Overlay - Semi-transparent overlay over entire card */}
       {isLocked && (
-        <div 
-          className="absolute inset-0 bg-black/40 backdrop-blur-[1px] z-10 rounded-lg cursor-pointer" 
+        <div
+          className="absolute inset-0 bg-black/40 backdrop-blur-[1px] z-10 rounded-lg cursor-pointer"
           onClick={handleLockClick}
         />
       )}
@@ -247,7 +249,7 @@ export function RecommendedCourseCard({ course, onCourseClick, accessMap = {} })
       {/* UID Required Modal */}
       <Dialog open={showUidModal} onOpenChange={setShowUidModal}>
         <DialogContent className="sm:max-w-md">
-          <UidRequired 
+          <UidRequired
             onConnectUid={(e) => {
               e?.preventDefault();
               e?.stopPropagation();

@@ -457,7 +457,7 @@ function CourseUI({
                 </div>
 
                 <div className="flex items-center justify-between flex-wrap gap-4 mt-6">
-                  <h2 className="text-3xl font-bold text-gray-900 dark:text-gray-200">
+                  <h2 className="text-3xl font-bold text-gray-900 dark:text-gray-200 max-w-[650px]">
                     {lecture?.title || selectedVideo
                       ? (introLessons?.find(l => (l?.id === selectedVideo?.id || l?._id === selectedVideo?.id))?.title ||
                         currentCourse?.flatMap(c => c?.lectures || [])?.find(l => l?._id === selectedVideo?.id)?.title ||
