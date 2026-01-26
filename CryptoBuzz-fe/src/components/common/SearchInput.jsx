@@ -110,8 +110,8 @@ export default function SearchInput({
         disabled={disabled}
         autoComplete="off"
         className={cn(
-          'pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none',
-          'bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100',
+          'pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-800 rounded-lg focus:outline-none',
+          'bg-white dark:bg-[#fff9e224] text-gray-900 dark:text-gray-100',
           'placeholder:text-gray-400 dark:placeholder:text-gray-500',
           'focus:border-gray-400 dark:focus:border-gray-600 transition-colors',
           'disabled:cursor-not-allowed disabled:opacity-50',

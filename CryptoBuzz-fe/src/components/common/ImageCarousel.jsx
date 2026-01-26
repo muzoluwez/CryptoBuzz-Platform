@@ -162,7 +162,7 @@ const ImageCarousel = ({
             }}
           />
         ) : imageError ? (
-          <div className={`w-full ${height} bg-gray-200 dark:bg-gray-700 rounded-lg flex items-center justify-center ${imageClassName || ""}`}>
+          <div className={`w-full ${height} bg-gray-200 dark:bg-[#fff9e224] flex items-center justify-center ${imageClassName || ""}`}>
             <div className="text-center p-4">
               <p className="text-gray-500 dark:text-gray-400 text-sm">Image not available</p>
             </div>
@@ -176,7 +176,7 @@ const ImageCarousel = ({
               e?.stopPropagation();
               handleImageClick();
             }}
-            className="absolute right-3 top-3 z-30 text-primary p-2 bg-white bg-opacity-95 hover:bg-opacity-100 rounded-full shadow-md transition-all cursor-pointer"
+            className="absolute right-3 top-3 z-30 text-white p-2 bg-yellow-500 bg-opacity-95 rounded-full shadow-md transition-all cursor-pointer"
             aria-label="View image"
           >
             <Eye size={20} />
