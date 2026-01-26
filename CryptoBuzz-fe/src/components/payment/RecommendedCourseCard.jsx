@@ -11,6 +11,7 @@ import { selectIsAuthenticated } from '@/store/authSlice';
 import { useNavigate } from 'react-router-dom';
 import { Dialog, DialogContent } from '../ui/dialog';
 import { UidRequired } from '../common/access-states/UidRequired';
+import { useLazyGetCoursePlansQuery } from '@/store/client/clientPaymentApiSlice';
 
 /**
  * RecommendedCourseCard Component
@@ -26,6 +27,9 @@ export function RecommendedCourseCard({ course, onCourseClick, accessMap = {} })
   const [showPlanModal, setShowPlanModal] = useState(false);
   const [modalPlans, setModalPlans] = useState([]);
   const [showUidModal, setShowUidModal] = useState(false);
+  
+  // Use RTK Query lazy hook to fetch plans
+  const [triggerGetPlans] = useLazyGetCoursePlansQuery();
 
   // Get course access from batch access map (efficient)
   const { hasAccess, isPremium, coursePrice, courseTier, lockReason, lockMessage, showLock } = useCourseAccessFromMap(
@@ -62,26 +66,10 @@ export function RecommendedCourseCard({ course, onCourseClick, accessMap = {} })
       console.log('🔄 RecommendedCourseCard: Fetching plans for course:', courseId);
 
       try {
-        // ALWAYS fetch plans first
-        const apiBaseUrl = `${import.meta.env.VITE_APP_API_URL || 'http://localhost:8000'}/api/v1`;
-        const plansApiUrl = `${apiBaseUrl}/common/payment/course/${courseId}/plans`;
-        const authToken = localStorage.getItem('token') || '';
-
-        console.log('📡 RecommendedCourseCard: Calling plans API:', plansApiUrl);
-
-        const plansResponse = await fetch(plansApiUrl, {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-            ...(authToken && { 'Authorization': `Bearer ${authToken}` })
-          },
-        });
-
-        if (!plansResponse.ok) {
-          throw new Error(`Plans API failed: ${plansResponse.status}`);
-        }
-
-        const plansResult = await plansResponse.json();
+        // Use RTK Query to fetch plans
+        console.log('📡 RecommendedCourseCard: Calling plans API via RTK Query for course:', courseId);
+        
+        const plansResult = await triggerGetPlans(courseId).unwrap();
         const fetchedPlans = plansResult?.data?.plans || plansResult?.plans || [];
 
         console.log('✅ Plans fetched:', {

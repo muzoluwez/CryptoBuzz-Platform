@@ -170,34 +170,15 @@ function CourseUI({
     // Show loading state
     toast.info('Loading plans...', { duration: 2000 });
 
-    // CRITICAL: Fetch plans FIRST before doing anything else
+    // CRITICAL: Fetch plans FIRST before doing anything else using RTK Query
     console.log('🔄 STEP 1: Starting plans fetch for course:', currentCourseId);
 
     try {
-      // Use native fetch to ensure we wait for the response
-      // Use full API URL (same as RTK Query uses)
-      const apiBaseUrl = `${import.meta.env.VITE_APP_API_URL || 'http://localhost:8000'}/api/v1`;
-      const plansApiUrl = `${apiBaseUrl}/common/payment/course/${currentCourseId}/plans`;
-      console.log('📡 STEP 2: Calling plans API:', plansApiUrl, 'with token:', authToken ? 'YES' : 'NO');
-
-      const plansResponse = await fetch(plansApiUrl, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          ...(authToken && { 'Authorization': `Bearer ${authToken}` })
-        },
-      });
-
-      console.log('📥 STEP 3: Plans API response received, status:', plansResponse.status);
-
-      if (!plansResponse.ok) {
-        const errorText = await plansResponse.text();
-        console.error('❌ Plans API failed:', plansResponse.status, errorText);
-        throw new Error(`Plans API failed: ${plansResponse.status}`);
-      }
-
-      const plansResult = await plansResponse.json();
-      console.log('📦 STEP 4: Plans API response parsed:', plansResult);
+      // Use RTK Query lazy hook to fetch plans
+      console.log('📡 STEP 2: Calling plans API via RTK Query for course:', currentCourseId);
+      
+      const plansResult = await triggerGetPlans(currentCourseId).unwrap();
+      console.log('📦 STEP 3: Plans API response received:', plansResult);
 
       // Extract plans from the response
       let fetchedPlans = [];
@@ -241,12 +222,16 @@ function CourseUI({
       console.error('Error details:', {
         message: error?.message,
         data: error?.data,
+        status: error?.status,
         stack: error?.stack
       });
 
-      // If error is from plans fetch, don't proceed to checkout
-      if (error?.message?.includes('Plans API failed')) {
-        toast.error('Failed to load payment plans. Please try again.');
+      // If error is from plans fetch (RTK Query error), don't proceed to checkout
+      // RTK Query errors have status and data properties
+      if (error?.status === 401 || error?.data?.message === "Invalid or expired token" || 
+          error?.message?.includes('Plans API failed') || error?.status) {
+        const errorMessage = error?.data?.message || error?.message || 'Failed to load payment plans. Please try again.';
+        toast.error(errorMessage);
         return; // Exit - don't call checkout
       }
 

@@ -20,13 +20,18 @@ const baseQueryWithReauth = async (args, api, extraOptions) => {
     if (result.error) {
         const { status, data } = result.error;
 
-        if (data?.error === "Invalid or expired access token") {
-            // console.warn("JWT expired! Logging out...");
-
+        // Handle "Invalid or expired token" error message
+        if (data?.message === "Invalid or expired token" || 
+            status === 401 || 
+            data?.error === "jwt expired" || 
+            data?.error === "invalid signature" ||
+            data?.error === "Invalid or expired access token") {
+            
             // Clear local storage
             localStorage.clear();
+            sessionStorage.clear();
 
-            // Redirect user to login page
+            // Redirect user to home page
             window.location.href = "/auth/login"; // Adjust route as needed
         }
     }
