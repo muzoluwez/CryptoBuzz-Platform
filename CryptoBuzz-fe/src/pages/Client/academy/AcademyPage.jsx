@@ -456,7 +456,7 @@ function CourseUI({
                   )}
                 </div>
 
-                <div className="flex items-center justify-between flex-wrap gap-4 mt-6">
+                <div className="flex items-start justify-between flex-wrap gap-4 mt-6">
                   <h2 className="text-3xl font-bold text-gray-900 dark:text-gray-200 max-w-[650px]">
                     {lecture?.title || selectedVideo
                       ? (introLessons?.find(l => (l?.id === selectedVideo?.id || l?._id === selectedVideo?.id))?.title ||
@@ -465,7 +465,7 @@ function CourseUI({
                       : "Select a lesson to begin"}
                   </h2>
                   {selectedVideo && (
-                    <button className="mt-3 btn bg-transparent border border-white text-gray-800 dark:text-white cursor-pointer">
+                    <button className="btn bg-transparent border border-white text-gray-800 dark:text-white cursor-pointer">
                       Mark as Complete
                     </button>
                   )}
@@ -489,7 +489,7 @@ function CourseUI({
           </div>
 
           <div className="lg:col-span-1">
-            <Card className="rounded-lg shadow-md p-4 md:p-6 sticky top-6">
+            <Card className="rounded-lg shadow-md p-4 md:p-6 sticky top-20">
               {/* Show "Coming Soon" in sidebar if no courses */}
               {hasNoCourses ? (
                 <div className="flex flex-col items-center justify-center py-12 px-6">

@@ -400,8 +400,8 @@ export default function HomePage() {
               </div>
             </section>
 
-            <section className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
-              <Card className="relative bg-black text-white h-[438px] p-0 overflow-hidden">
+            <section className="grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
+              <Card className="relative bg-black text-white p-0 overflow-hidden">
                 <CardContent className="p-0">
                   <div className="relative h-full">
                     <img
@@ -409,7 +409,7 @@ export default function HomePage() {
                       alt="live sessions"
                       className="w-full h-full object-cover"
                     />
-                    <div className="absolute left-4 bottom-4 text-white z-10">
+                    <div className="absolute left-4 bottom-6 text-white z-10">
                       <h4 className=" text-2xl font-bold">
                         Cripto Buzz Sesiones en Vivo
                       </h4>
@@ -427,7 +427,7 @@ export default function HomePage() {
                 </CardContent>
               </Card>
 
-              <Card className="relative bg-black text-white h-[438px] p-0 overflow-hidden">
+              <Card className="relative bg-black text-white p-0 overflow-hidden">
                 <CardContent className="p-0">
                   <div className="relative h-full">
                     <img
@@ -435,7 +435,7 @@ export default function HomePage() {
                       alt="trading ideas"
                       className="w-full h-full object-cover"
                     />
-                    <div className="absolute left-4 bottom-4 text-white z-10">
+                    <div className="absolute left-4 bottom-6 text-white z-10">
                       <h4 className=" text-2xl font-bold">
                         Ideas de Trading
                       </h4>
@@ -453,7 +453,7 @@ export default function HomePage() {
                 </CardContent>
               </Card>
 
-              <Card className="relative bg-black text-white h-[438px] p-0 overflow-hidden">
+              <Card className="relative bg-black text-white p-0 overflow-hidden">
                 <CardContent className="p-0">
                   <div className="relative h-full">
                     <img
@@ -461,7 +461,7 @@ export default function HomePage() {
                       alt="social feed"
                       className="w-full h-full object-cover"
                     />
-                    <div className="absolute left-4 bottom-4 text-white z-10">
+                    <div className="absolute left-4 bottom-6 text-white z-10">
                       <h4 className=" text-2xl font-bold">
                         Cripto Buzz Social Feed
                       </h4>
