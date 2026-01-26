@@ -17,7 +17,7 @@ import { useState, useMemo } from "react";
 import { checkAccess } from "@/utils/accessControl";
 import { PlanSelectionModal } from "@/components/payment/PlanSelectionModal";
 import { useGetCryptosQuery } from "@/store/client/clientCryptoApiSlice";
-import { convertRtkEditorToFormattedPlainText, convertRtkEditorToDisplayFormat } from "@/lib/rtkEditorUtils";
+import { convertRtkEditorToFormattedPlainText, convertRtkEditorToDisplayFormat, convertRtkEditorToHtmlWithLinks } from "@/lib/rtkEditorUtils";
 import ImageViewer from "@/components/common/ImageViewer";
 import ImageCarousel from "@/components/common/ImageCarousel";
 import ViewCryptoModel from "@/components/models/ViewCryptoModel";
@@ -27,6 +27,83 @@ import { useSelector } from 'react-redux';
 import { selectCurrentUser, selectIsAuthenticated } from '@/store/authSlice';
 import { useGetPurchasedPlanIdsQuery } from '@/store/client/clientPaymentApiSlice';
 import { UidRequired } from '@/components/common/access-states/UidRequired';
+
+// Helper function to check if URL is an external video URL (YouTube, Vimeo, Loom)
+const isExternalVideoUrl = (url) => {
+  if (!url || typeof url !== 'string') return false;
+  const youtubeRegex = /^(https?:\/\/)?(www\.)?(youtube\.com|youtu\.be)\/.+/;
+  const vimeoRegex = /^(https?:\/\/)?(www\.)?vimeo\.com\/.+/;
+  const loomRegex = /^(https?:\/\/)?(www\.)?(loom\.com|loom\.share)\/.+/;
+  return youtubeRegex.test(url) || vimeoRegex.test(url) || loomRegex.test(url);
+};
+
+// Helper function to check if video is uploaded (not external URL)
+const isUploadedVideo = (url) => {
+  if (!url || typeof url !== 'string') return false;
+  // Check if it's an external video URL
+  const lower = url.toLowerCase();
+  return !(
+    lower.includes('youtube.com') ||
+    lower.includes('youtu.be') ||
+    lower.includes('vimeo.com') ||
+    lower.includes('loom.com') ||
+    lower.includes('loom.share') ||
+    lower.includes('stream.mux.com') ||
+    lower.includes('player.mux.com')
+  );
+};
+
+// Helper function to get video thumbnail URL
+const getVideoThumbnail = (url) => {
+  if (!url) return "";
+  const lower = url.toLowerCase();
+
+  if (isUploadedVideo(url)) return "";
+
+  if (lower.includes("youtube.com/watch?v=")) {
+    try {
+      const id = url.split("v=")[1].split("&")[0];
+      return `https://img.youtube.com/vi/${id}/hqdefault.jpg`;
+    } catch (e) {}
+  }
+  if (lower.includes("youtu.be/")) {
+    try {
+      const id = url.split("youtu.be/")[1].split("?")[0];
+      return `https://img.youtube.com/vi/${id}/hqdefault.jpg`;
+    } catch (e) {}
+  }
+
+  if (lower.includes("vimeo.com/")) {
+    try {
+      const id = url.split("vimeo.com/")[1].split("?")[0].split("/")[0];
+      return `https://vumbnail.com/${id}.jpg`;
+    } catch (e) {}
+  }
+
+  if (lower.includes("loom.com/")) {
+    try {
+      const parts = url.split("loom.com/")[1];
+      const id = parts.split("/")[1] || parts.split("/")[0];
+      return `https://cdn.loom.com/sessions/thumbnails/${id}-00001.jpg`;
+    } catch (e) {}
+  }
+
+  if (
+    lower.includes("stream.mux.com/") ||
+    lower.includes("player.mux.com/")
+  ) {
+    try {
+      const id = url
+        .split("mux.com/")[1]
+        .split("?")[0]
+        .split(".")[0]
+        .split("/")[0];
+      return `https://image.mux.com/${id}/thumbnail.jpg`;
+    } catch (e) {}
+  }
+
+  return "";
+};
 
 export default function CryptoPage() {
   useDocumentTitle('Crypto Analysis');
@@ -105,10 +182,19 @@ export default function CryptoPage() {
         ? convertRtkEditorToFormattedPlainText(crypto.description, true)
         : "";
 
-      // Get display format with clickable links for full view
-      const fullDisplayHtml = crypto.description
-        ? convertRtkEditorToDisplayFormat(crypto.description, true, true)
-        : "";
+      // For full display: use raw HTML to preserve images and structure exactly as created
+      // The description from API already contains HTML with inline images
+      // We'll process it to make links clickable while preserving all HTML structure
+      let fullDisplayHtml = crypto.description || "";
+      if (fullDisplayHtml && typeof window !== 'undefined') {
+        // Make links clickable while preserving all HTML (including images)
+        try {
+          fullDisplayHtml = convertRtkEditorToHtmlWithLinks(fullDisplayHtml);
+        } catch (e) {
+          // Fallback: use raw HTML if processing fails
+          console.warn('Error processing HTML for display:', e);
+        }
+      }
 
       // For preview: get single line version (no line breaks) and limit to 2 lines worth
       const singleLineText = crypto.description
@@ -161,6 +247,8 @@ export default function CryptoPage() {
         url: crypto?.url,
         data: crypto?.data,
         photos: crypto?.photos || [],
+        videoUrl: crypto?.videoUrl || null,
+        mediaType: crypto?.mediaType || "image",
         ...restOfCrypto, // Include all other properties (excluding category and plans)
         // Override specific properties after spread to ensure correct format
         category: categoryName, // Always use string category name, not object
@@ -365,21 +453,85 @@ export default function CryptoPage() {
               return (
                 <Card key={crypto?._id || crypto?.id} className="bg-card border border-border overflow-hidden relative">
 
-                  {/* image */}
+                  {/* Media (Image or Video) */}
                   <div className="w-full h-44 overflow-hidden relative">
                     <div className={isLocked ? 'blur-[2px]' : ''}>
-                      <ImageCarousel
-                        images={
-                          crypto?.photos && Array.isArray(crypto.photos) && crypto.photos.length > 0
-                            ? crypto.photos
-                            : crypto?.image
-                              ? [crypto.image]
-                              : []
-                        }
-                        alt={crypto?.title || "Crypto analysis"}
-                        height="h-44"
-                        showViewButton={hasAccess}
-                      />
+                      {crypto?.mediaType === 'video' && crypto?.videoUrl ? (
+                        // Video thumbnail with play icon
+                        <div className="relative w-full h-44 bg-black">
+                          {isExternalVideoUrl(crypto.videoUrl) ? (
+                            // External video (YouTube, Vimeo, Loom) - show thumbnail or placeholder
+                            <div className="relative w-full h-full">
+                              {(() => {
+                                const thumbnailUrl = getVideoThumbnail(crypto.videoUrl);
+                                return thumbnailUrl ? (
+                                  <img
+                                    src={thumbnailUrl}
+                                    alt="Video thumbnail"
+                                    className="w-full h-full object-cover"
+                                    onError={(e) => {
+                                      // Fallback if thumbnail fails to load
+                                      e.target.style.display = 'none';
+                                    }}
+                                  />
+                                ) : (
+                                  <div className="w-full h-full bg-gradient-to-br from-gray-800 to-gray-900 flex items-center justify-center">
+                                    <div className="text-white text-center">
+                                      <svg className="w-12 h-12 mx-auto mb-2" fill="currentColor" viewBox="0 0 24 24">
+                                        <path d="M8 5v14l11-7z" />
+                                      </svg>
+                                      <p className="text-xs">Video</p>
+                                    </div>
+                                  </div>
+                                );
+                              })()}
+                              <div className="absolute inset-0 flex items-center justify-center bg-black/20">
+                                <div className="w-16 h-16 rounded-full bg-white/90 flex items-center justify-center cursor-pointer hover:bg-white transition-all">
+                                  <svg className="w-8 h-8 text-gray-900 ml-1" fill="currentColor" viewBox="0 0 24 24">
+                                    <path d="M8 5v14l11-7z" />
+                                  </svg>
+                                </div>
+                              </div>
+                            </div>
+                          ) : (
+                            // Uploaded video file - use video element
+                            <>
+                              <video
+                                src={crypto.videoUrl}
+                                className="w-full h-full object-cover"
+                                muted
+                                preload="metadata"
+                                onLoadedMetadata={(e) => {
+                                  // Set video thumbnail
+                                  const video = e.target;
+                                  video.currentTime = 1; // Seek to 1 second for thumbnail
+                                }}
+                              />
+                              <div className="absolute inset-0 flex items-center justify-center bg-black/20">
+                                <div className="w-16 h-16 rounded-full bg-white/90 flex items-center justify-center cursor-pointer hover:bg-white transition-all">
+                                  <svg className="w-8 h-8 text-gray-900 ml-1" fill="currentColor" viewBox="0 0 24 24">
+                                    <path d="M8 5v14l11-7z" />
+                                  </svg>
+                                </div>
+                              </div>
+                            </>
+                          )}
+                        </div>
+                      ) : (
+                        // Image carousel
+                        <ImageCarousel
+                          images={
+                            crypto?.photos && Array.isArray(crypto.photos) && crypto.photos.length > 0
+                              ? crypto.photos
+                              : crypto?.image
+                                ? [crypto.image]
+                                : []
+                          }
+                          alt={crypto?.title || "Crypto analysis"}
+                          height="h-44"
+                          showViewButton={hasAccess}
+                        />
+                      )}
                     </div>
 
                     {/* Lock Icon - Top Right Corner (only when locked) */}

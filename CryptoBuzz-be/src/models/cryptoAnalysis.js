@@ -36,6 +36,14 @@ const cryptoAnalysisSchema = new mongoose.Schema(
         type: String, // Image URLs
       },
     ],
+    videoUrl: {
+      type: String, // Video URL (single video)
+    },
+    mediaType: {
+      type: String,
+      enum: ["image", "video"],
+      default: "image",
+    },
     accessType: {
       type: String,
       enum: ["PUBLIC", "LOGGED_IN", "UID_ONLY", "PRO"],
