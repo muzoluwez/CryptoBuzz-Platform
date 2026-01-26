@@ -152,7 +152,7 @@ export function RecommendedCourseCard({ course, onCourseClick, accessMap = {} })
 
   return (
     <Card
-      className={`relative bg-white p-3 border-gray-200 text-white overflow-hidden group transition-all ${isLocked ? 'cursor-default' : 'cursor-pointer hover:scale-[1.02]'
+      className={`relative bg-white dark:bg-gray-950 0 p-3 border-gray-200 dark:border-gray-800 text-white overflow-hidden group transition-all ${isLocked ? 'cursor-default' : 'cursor-pointer hover:scale-[1.02]'
         }`}
       onClick={handleCardClick}
     >
@@ -179,7 +179,7 @@ export function RecommendedCourseCard({ course, onCourseClick, accessMap = {} })
               className="absolute top-3 right-3 z-20 cursor-pointer"
               onClick={handleLockClick}
             >
-              <div className="bg-black/60 backdrop-blur-sm p-2.5 rounded-full hover:bg-black/80 transition-all">
+              <div className="bg-yellow-500 backdrop-blur-sm p-2.5 rounded-full hover:bg-yellow-600/80 transition-all">
                 <Lock className="w-5 h-5 text-white" />
               </div>
             </div>
@@ -190,8 +190,8 @@ export function RecommendedCourseCard({ course, onCourseClick, accessMap = {} })
             "z-10 transition-opacity",
             isLocked ? "opacity-85" : "opacity-100"
           )}>
-            <h4 className="text-2xl text-gray-800 font-bold mt-4">{course?.title}</h4>
-            <p className="text-md mt-3 text-gray-600 line-clamp-2">
+            <h4 className="text-2xl text-gray-800 dark:text-gray-100 font-bold mt-4">{course?.title}</h4>
+            <p className="text-md mt-3 text-gray-600 dark:text-gray-200 line-clamp-2">
               {course?.description ? convertRtkEditorToFormattedPlainText(course.description, true) : ''}
             </p>
             {!isLocked && (

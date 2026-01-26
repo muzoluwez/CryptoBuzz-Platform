@@ -183,7 +183,7 @@ export default function SocialPage() {
             <h1 className="text-2xl font-semibold text-black dark:text-white">
               Social
             </h1>
-            <p className="text-xs text-gray-500 mt-1">Latest community posts</p>
+            <p className="text-sm text-muted-foreground mt-1">Latest community posts</p>
           </header>
         </div>
         <div className="flex items-center justify-center min-h-[400px]">
@@ -205,7 +205,7 @@ export default function SocialPage() {
             <h1 className="text-2xl font-semibold text-black dark:text-white">
               Social
             </h1>
-            <p className="text-xs text-gray-500 mt-1">Latest community posts</p>
+            <p className="text-sm text-muted-foreground mt-1">Latest community posts</p>
           </header>
         </div>
         <div className="flex items-center justify-center min-h-[400px]">
@@ -229,7 +229,7 @@ export default function SocialPage() {
             <h1 className="text-2xl font-semibold text-black dark:text-white">
               Social
             </h1>
-            <p className="text-xs text-gray-500 mt-1">Latest community posts</p>
+            <p className="text-sm text-muted-foreground mt-1">Latest community posts</p>
           </header>
           {/* <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -269,7 +269,7 @@ export default function SocialPage() {
             <h1 className="text-2xl font-semibold text-black dark:text-white">
               Social
             </h1>
-            <p className="text-xs text-gray-500 mt-1">Latest community posts</p>
+            <p className="text-sm text-muted-foreground mt-1">Latest community posts</p>
           </header>
           {/* <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -398,7 +398,7 @@ export default function SocialPage() {
                       className="absolute top-3 right-3 z-30 cursor-pointer"
                       onClick={handleLockClick}
                     >
-                      <div className="bg-black/60 backdrop-blur-sm p-2.5 rounded-full hover:bg-black/80 transition-all">
+                      <div className="bg-yellow-500 backdrop-blur-sm p-2.5 rounded-full hover:bg-yellow-600/80 transition-all">
                         <Lock className="w-5 h-5 text-white" />
                       </div>
                     </div>
@@ -436,7 +436,7 @@ export default function SocialPage() {
 
                   <CardContent className={`p-4 pt-2 ${isLocked ? 'blur-md opacity-85' : ''}`}>
                     <div className="">
-                      <div className="text-sm text-gray-600 dark:text-gray-300 mt-2">
+                      <div className="text-sm text-gray-600 dark:text-gray-100 mt-2">
                         {post?.content ? (
                           isLocked ? (
                             <p className="line-clamp-3">{`${(post?.content || "").substring(0, 8)}******`}</p>

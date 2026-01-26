@@ -5,9 +5,9 @@ import { Key } from 'lucide-react';
 
 export function UidRequired({ onConnectUid, onClose }) {
     return (
-        <div className="flex flex-col items-center justify-center p-8 m-4 !mb-0 text-center bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-lg">
-            <div className="bg-gray-200 dark:bg-gray-800 p-4 rounded-full mb-4">
-                <Key className="w-8 h-8 text-gray-500 dark:text-gray-400" />
+        <div className="flex flex-col items-center justify-center p-8 m-4 !mb-0 text-center bg-gray-50 dark:bg-[#fff9e224] border border-gray-200 dark:border-gray-800 rounded-lg">
+            <div className="bg-gray-200 dark:bg-[#fff9e224] p-4 rounded-full mb-4">
+                <Key className="w-8 h-8 text-gray-500 dark:text-yellow-500" />
             </div>
             <div className="space-y-4">
                 <h3 className="text-xl font-semibold">UID Required</h3>

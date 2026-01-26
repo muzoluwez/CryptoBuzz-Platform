@@ -218,7 +218,7 @@ export default function InsightPage() {
                   transition cursor-pointer
                   ${activeTab === tab
                     ? 'bg-yellow-500 text-white shadow'
-                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700'
+                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-[#fff9e224] dark:text-gray-300'
                   }
                 `}
               >
@@ -363,7 +363,7 @@ export default function InsightPage() {
                           className="absolute top-3 right-3 z-20 cursor-pointer"
                           onClick={handleLockClick}
                         >
-                          <div className="bg-black/60 backdrop-blur-sm p-2.5 rounded-full hover:bg-black/80 transition-all">
+                          <div className="bg-yellow-500 backdrop-blur-sm p-2.5 rounded-full hover:bg-yellow-600/80 transition-all">
                             <Lock className="w-5 h-5 text-white" />
                           </div>
                         </div>
