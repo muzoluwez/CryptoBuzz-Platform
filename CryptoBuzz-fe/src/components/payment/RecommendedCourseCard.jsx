@@ -11,6 +11,7 @@ import { selectIsAuthenticated } from '@/store/authSlice';
 import { useNavigate } from 'react-router-dom';
 import { Dialog, DialogContent } from '../ui/dialog';
 import { UidRequired } from '../common/access-states/UidRequired';
+import { useLazyGetCoursePlansQuery } from '@/store/client/clientPaymentApiSlice';
 
 /**
  * RecommendedCourseCard Component
@@ -26,6 +27,9 @@ export function RecommendedCourseCard({ course, onCourseClick, accessMap = {} })
   const [showPlanModal, setShowPlanModal] = useState(false);
   const [modalPlans, setModalPlans] = useState([]);
   const [showUidModal, setShowUidModal] = useState(false);
+  
+  // Use RTK Query lazy hook to fetch plans
+  const [triggerGetPlans] = useLazyGetCoursePlansQuery();
 
   // Get course access from batch access map (efficient)
   const { hasAccess, isPremium, coursePrice, courseTier, lockReason, lockMessage, showLock } = useCourseAccessFromMap(
@@ -62,26 +66,10 @@ export function RecommendedCourseCard({ course, onCourseClick, accessMap = {} })
       console.log('🔄 RecommendedCourseCard: Fetching plans for course:', courseId);
 
       try {
-        // ALWAYS fetch plans first
-        const apiBaseUrl = `${import.meta.env.VITE_APP_API_URL || 'http://localhost:8000'}/api/v1`;
-        const plansApiUrl = `${apiBaseUrl}/common/payment/course/${courseId}/plans`;
-        const authToken = localStorage.getItem('token') || '';
-
-        console.log('📡 RecommendedCourseCard: Calling plans API:', plansApiUrl);
-
-        const plansResponse = await fetch(plansApiUrl, {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-            ...(authToken && { 'Authorization': `Bearer ${authToken}` })
-          },
-        });
-
-        if (!plansResponse.ok) {
-          throw new Error(`Plans API failed: ${plansResponse.status}`);
-        }
-
-        const plansResult = await plansResponse.json();
+        // Use RTK Query to fetch plans
+        console.log('📡 RecommendedCourseCard: Calling plans API via RTK Query for course:', courseId);
+        
+        const plansResult = await triggerGetPlans(courseId).unwrap();
         const fetchedPlans = plansResult?.data?.plans || plansResult?.plans || [];
 
         console.log('✅ Plans fetched:', {
@@ -164,7 +152,7 @@ export function RecommendedCourseCard({ course, onCourseClick, accessMap = {} })
 
   return (
     <Card
-      className={`relative bg-white p-3 border-gray-200 text-white overflow-hidden group transition-all ${isLocked ? 'cursor-default' : 'cursor-pointer hover:scale-[1.02]'
+      className={`relative bg-white dark:bg-gray-950 0 p-3 border-gray-200 dark:border-gray-800 text-white overflow-hidden group transition-all ${isLocked ? 'cursor-default' : 'cursor-pointer hover:scale-[1.02]'
         }`}
       onClick={handleCardClick}
     >
@@ -191,7 +179,7 @@ export function RecommendedCourseCard({ course, onCourseClick, accessMap = {} })
               className="absolute top-3 right-3 z-20 cursor-pointer"
               onClick={handleLockClick}
             >
-              <div className="bg-black/60 backdrop-blur-sm p-2.5 rounded-full hover:bg-black/80 transition-all">
+              <div className="bg-yellow-500 backdrop-blur-sm p-2.5 rounded-full hover:bg-yellow-600/80 transition-all">
                 <Lock className="w-5 h-5 text-white" />
               </div>
             </div>
@@ -202,8 +190,8 @@ export function RecommendedCourseCard({ course, onCourseClick, accessMap = {} })
             "z-10 transition-opacity",
             isLocked ? "opacity-85" : "opacity-100"
           )}>
-            <h4 className="text-2xl text-gray-800 font-bold mt-4">{course?.title}</h4>
-            <p className="text-md mt-3 text-gray-600 line-clamp-2">
+            <h4 className="text-2xl text-gray-800 dark:text-gray-100 font-bold mt-4">{course?.title}</h4>
+            <p className="text-md mt-3 text-gray-600 dark:text-gray-200 line-clamp-2">
               {course?.description ? convertRtkEditorToFormattedPlainText(course.description, true) : ''}
             </p>
             {!isLocked && (

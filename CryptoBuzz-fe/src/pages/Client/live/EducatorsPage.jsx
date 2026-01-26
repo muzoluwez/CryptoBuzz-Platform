@@ -84,7 +84,7 @@ const EducatorsPage = () => {
         educator?.categories?.[0]?.name || educator?.category || 'General';
       const categoryId = educator?.categories?.[0]?._id || null;
       const fullName = `${educator?.first_name || ''} ${educator?.last_name || ''}`.trim() || educator?.title || 'Unknown';
-      
+
       return {
         id: educator?._id,
         _id: educator?._id,
@@ -141,7 +141,7 @@ const EducatorsPage = () => {
       const matchesTab =
         activeTab === 'All' ||
         (activeTab === 'Following' && followingIds.includes(educator.id));
-      
+
       // Additional client-side search for cases where API doesn't handle it
       const matchesSearch =
         !searchQuery.trim() ||
@@ -163,10 +163,10 @@ const EducatorsPage = () => {
               onClick={() => navigate('/client/live')}
               className="
             px-6 py-2 
-             bg-gray-100 
-            hover:bg-gray-200 
-            dark:bg-gray-800
-            dark:text-gray-200
+            bg-gray-100 
+            hover:bg-gray-200
+            dark:bg-[#fff9e224]
+            dark:text-[#ffcd0b]
             text-gray-700 
             text-sm 
             font-medium 
@@ -206,25 +206,22 @@ const EducatorsPage = () => {
             {/* Tabs */}
             <button
               onClick={() => setActiveTab('All')}
-              className={`px-6 py-2 rounded-lg font-medium cursor-pointer transition-all ${
-                activeTab === 'All'
+              className={`px-6 py-2 rounded-lg font-medium cursor-pointer transition-all ${activeTab === 'All'
                   ? 'bg-primary text-white shadow-lg'
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-200 hover:dark:bg-gray-700'
-              }`}
+                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-[#fff9e224] dark:text-[#ffcd0b]'
+                }`}
             >
               All
             </button>
             <button
               onClick={() => setActiveTab('Following')}
-              className={`px-6 py-2 rounded-lg font-medium cursor-pointer transition-all ${
-                activeTab === 'Following'
+              className={`px-6 py-2 rounded-lg font-medium cursor-pointer transition-all ${activeTab === 'Following'
                   ? 'bg-primary text-white shadow-lg'
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-200 hover:dark:bg-gray-700'
-              }`}
+                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-[#fff9e224] dark:text-[#ffcd0b]'
+                }`}
             >
               Following
             </button>
-
             {/* Category Dropdown */}
             <div className="w-48">
               <SelectWithClear
@@ -278,7 +275,7 @@ const EducatorsPage = () => {
             {filteredEducators.map((educator) => (
               <Card
                 key={educator.id}
-                className="rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow bg-white dark:bg-gray-900"
+                className="rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow bg-white dark:bg-gray-950"
               >
                 {/* Header Section with Banner Image */}
                 <div className="relative h-48 overflow-hidden">
@@ -402,11 +399,10 @@ const EducatorsPage = () => {
                   <div className="grid grid-cols-2 gap-3">
                     <button
                       onClick={() => handleFollow(educator.id)}
-                      className={`py-2.5 rounded-lg font-medium transition-all flex items-center justify-center gap-2 cursor-pointer ${
-                        followingIds.includes(educator.id)
+                      className={`py-2.5 rounded-lg font-medium transition-all flex items-center justify-center gap-2 cursor-pointer ${followingIds.includes(educator.id)
                           ? 'bg-primary text-white hover:bg-primary-dark'
                           : 'bg-primary/10 text-black dark:text-gray-200 hover:bg-primary/20'
-                      }`}
+                        }`}
                     >
                       {followingIds.includes(educator.id) ? (
                         <>
@@ -426,7 +422,7 @@ const EducatorsPage = () => {
                           state: { educatorId: educator?._id || educator?.id },
                         })
                       }
-                      className="py-2.5 bg-gray-900 dark:bg-gray-800 text-white dark:text-gray-200 rounded-lg font-medium hover:bg-gray-800 dark:hover:bg-gray-700 transition-all flex items-center justify-center gap-2 cursor-pointer"
+                      className="py-2.5 bg-gray-900 dark:bg-[#fff9e224] dark:text-[#ffcd0b] text-white rounded-lg font-medium hover:bg-gray-800 transition-all flex items-center justify-center gap-2 cursor-pointer"
                     >
                       <Eye className="w-4 h-4" />
                       View Profile

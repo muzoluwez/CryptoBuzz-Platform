@@ -64,7 +64,9 @@ export const getCryptos = asyncHandler(async (req, res) => {
         title: crypto.title,
         description: crypto.description,
         url: crypto.url,
-        photos: crypto.photos,
+        photos: crypto.photos || [],
+        videoUrl: crypto.videoUrl || null,
+        mediaType: crypto.mediaType || (crypto.videoUrl ? "video" : "image"),
         accessType: crypto.accessType,
         plans: crypto.plans || [], // Include populated plans
         createdAt: crypto.createdAt,

@@ -15,6 +15,7 @@ import StreamRoute from "./stream.routes.js";
 import healthcheckRoute from "./healthcheck.routes.js";
 import PaymentRoute from "./payment.routes.js";
 import HotmartRoute from "./hotmart.routes.js";
+import EditorImageRoute from "./editorImage.routes.js";
 
 router.use("/auth", AuthRoute);
 router.use("/dashboard", DashboardRoute);
@@ -30,6 +31,7 @@ router.use("/stream", StreamRoute);
 router.use("/healthCheck", healthcheckRoute);
 router.use("/payment", PaymentRoute);
 router.use("/hotmart", HotmartRoute);
+router.use("/editor", EditorImageRoute);
 
 export default router;
 

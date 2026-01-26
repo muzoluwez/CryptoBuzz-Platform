@@ -308,7 +308,7 @@ export default function IdeaPage() {
                         className="absolute top-3 right-3 z-30 cursor-pointer"
                         onClick={handleLockClick}
                       >
-                        <div className="bg-black/60 backdrop-blur-sm p-2.5 rounded-full hover:bg-black/80 transition-all">
+                        <div className="bg-yellow-500 backdrop-blur-sm p-2.5 rounded-full hover:bg-yellow-600/80 transition-all">
                           <Lock className="w-5 h-5 text-white" />
                         </div>
                       </div>

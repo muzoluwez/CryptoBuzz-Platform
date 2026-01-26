@@ -126,7 +126,7 @@ const ImageSlider = ({
                       }}
                     />
                   ) : (
-                    <div className={`w-full ${height || "h-96"} bg-gray-200 dark:bg-gray-700 rounded-lg flex items-center justify-center ${imageClassName || ""}`}>
+                    <div className={`w-full ${height || "h-96"} bg-gray-200 dark:bg-[#fff9e224] rounded-lg flex items-center justify-center ${imageClassName || ""}`}>
                       <p className="text-gray-500 dark:text-gray-400 text-sm">Image not available</p>
                     </div>
                   )}

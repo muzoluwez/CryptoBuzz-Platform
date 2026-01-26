@@ -86,7 +86,7 @@ export const MENU_MEGA_MOBILE = [
   },
   {
     title: 'Tienda',
-    // path: '/client/social',
+    path: '/client/marketplace',
   },
 ];
 

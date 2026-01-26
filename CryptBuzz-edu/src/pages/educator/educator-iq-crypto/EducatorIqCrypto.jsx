@@ -95,21 +95,57 @@ const EducatorIqCrypto = ({ title = "Cripto Projects" }) => {
           <DataGridColumnHeader title="Images" column={column} />
         ),
         enableSorting: false,
-        cell: ({ row }) => (
-          <div
-            className="flex flex-col justify-center items-center gap-0.5"
-            onClick={() => {
-              setSelectedRow(row.original);
-              setIsLightBoxOpen(true);
-            }}
-          >
-            <img
-              src={row?.original?.image[0]}
-              className="rounded-full cursor-pointer size-9 shrink-0"
-              alt=""
-            />
-          </div>
-        ),
+        cell: ({ row }) => {
+          // Handle image display - support string, array, or null
+          const imageData = row?.original?.image;
+          const photosData = row?.original?.photos;
+          const videoUrl = row?.original?.videoUrl;
+          const mediaType = row?.original?.mediaType;
+          
+          // Get image URL - handle different formats
+          let imageUrl = null;
+          if (Array.isArray(imageData) && imageData.length > 0) {
+            imageUrl = imageData[0];
+          } else if (typeof imageData === 'string') {
+            imageUrl = imageData;
+          } else if (Array.isArray(photosData) && photosData.length > 0) {
+            imageUrl = photosData[0];
+          } else if (photosData && typeof photosData === 'string') {
+            imageUrl = photosData;
+          }
+          
+          // Show video icon if video is present
+          const isVideo = mediaType === 'video' || videoUrl;
+          
+          return (
+            <div
+              className="flex flex-col justify-center items-center gap-0.5"
+              onClick={() => {
+                setSelectedRow(row.original);
+                setIsLightBoxOpen(true);
+              }}
+            >
+              {isVideo ? (
+                <div className="rounded-full cursor-pointer size-9 shrink-0 bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
+                  <i className="ki-filled ki-video text-primary text-lg"></i>
+                </div>
+              ) : imageUrl ? (
+                <img
+                  src={imageUrl}
+                  className="rounded-full cursor-pointer size-9 shrink-0 object-cover"
+                  alt=""
+                  onError={(e) => {
+                    e.target.style.display = 'none';
+                  }}
+                />
+              ) : (
+                <div className="rounded-full cursor-pointer size-9 shrink-0 bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
+                  <i className="ki-filled ki-picture text-gray-400 text-lg"></i>
+                </div>
+              )}
+            </div>
+          );
+        },
         meta: {
           headerClassName: "min-w-[100px]",
         },

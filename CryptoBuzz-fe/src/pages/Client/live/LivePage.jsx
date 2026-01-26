@@ -334,9 +334,9 @@ export default function LivePage() {
               className="
             px-6 py-2 
             bg-gray-100 
-            hover:bg-gray-200 
-            dark:bg-gray-800
-            dark:text-gray-200
+            hover:bg-gray-200
+            dark:bg-[#fff9e224]
+            dark:text-[#ffcd0b]
             text-gray-700 
             text-sm 
             font-medium 
