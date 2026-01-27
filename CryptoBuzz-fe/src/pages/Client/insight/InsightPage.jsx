@@ -398,12 +398,12 @@ export default function InsightPage() {
 
                       {/* Title */}
                       <h3 className="mt-4 text-lg font-bold text-primary">
-                        {insight?.title || "Untitled"}
+                        {isLocked ? "****************" : (insight?.title || "Untitled")}
                       </h3>
 
                       {/* Preview - 2 lines max */}
                       <p className="mt-2 text-sm text-muted-foreground line-clamp-2 h-10">
-                        {isLocked ? `${(insight?.preview || "").substring(0, 8)}******` : (insight?.preview || "")}
+                        {isLocked ? "****************************************" : (insight?.preview || "")}
                       </p>
 
                       {/* Button - Only show when not locked */}

@@ -568,11 +568,11 @@ export default function CryptoPage() {
                     </div>
 
                     {/* Title */}
-                    <h3 className="mt-4 text-lg font-bold text-primary">{crypto?.title || "Untitled"}</h3>
+                    <h3 className="mt-4 text-lg font-bold text-primary">{isLocked ? "****************" : (crypto?.title || "Untitled")}</h3>
 
                     {/* Preview - 2 lines max */}
                     <p className="mt-2 text-sm text-muted-foreground line-clamp-2 h-10">
-                      {hasAccess ? crypto?.preview || "" : "This content is locked. Upgrade your plan or log in to view full analysis."}
+                      {isLocked ? "****************************************" : (crypto?.preview || "")}
                     </p>
 
                     {/* Button */}
