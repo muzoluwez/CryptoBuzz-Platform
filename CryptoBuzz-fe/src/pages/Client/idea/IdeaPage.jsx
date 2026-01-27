@@ -347,7 +347,7 @@ export default function IdeaPage() {
                                 key={idx}
                                 className={`${base} ${buySellClass}`}
                               >
-                                {tag.label?.toString().toUpperCase()}
+                                {isLocked ? '******' : tag.label?.toString().toUpperCase()}
                               </Badge>
                             );
                           }
@@ -359,7 +359,7 @@ export default function IdeaPage() {
                                 key={idx}
                                 className={`${base} bg-gray-200 text-gray-600`}
                               >
-                                {tag.label}
+                                {isLocked ? '******' : tag.label}
                               </Badge>
                             );
                           }
@@ -396,7 +396,19 @@ export default function IdeaPage() {
                                 key={idx}
                                 className={`${base} ${statusClass}`}
                               >
-                                {pretty}
+                                {isLocked ? '******' : pretty}
+                              </Badge>
+                            );
+                          }
+
+                          // Name tag (e.g., BTCUSD)
+                          if (tag.type === 'name') {
+                            return (
+                              <Badge
+                                key={idx}
+                                className={`${base} bg-gray-200 text-gray-600`}
+                              >
+                                {isLocked ? '******' : tag.label}
                               </Badge>
                             );
                           }

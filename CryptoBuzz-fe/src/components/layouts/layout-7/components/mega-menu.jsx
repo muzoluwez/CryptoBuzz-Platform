@@ -35,7 +35,7 @@ export function MegaMenu() {
 
   return (
     <NavigationMenu>
-      <NavigationMenuList className="gap-7.5">
+      <NavigationMenuList className="gap-5 xl:gap-7.5">
         {/* Home Item */}
         <NavigationMenuItem>
           <NavigationMenuLink asChild>

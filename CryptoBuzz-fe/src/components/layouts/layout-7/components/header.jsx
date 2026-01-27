@@ -16,7 +16,7 @@ const Header = () => {
       )}
       data-header-sticky={headerSticky ? 'on' : 'off'}
     >
-      <div className="container flex flex-wrap gap-2 items-center lg:gap-4">
+      <div className="container flex flex-wrap gap-2 items-center lg:gap-3">
         <HeaderLogo />
         <HeaderTopbar />
       </div>

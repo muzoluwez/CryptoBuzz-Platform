@@ -177,7 +177,7 @@ export default function SocialPage() {
   // Loading state
   if (isLoading) {
     return (
-      <div className="container px-0 py-6">
+      <>
         <div className="flex justify-between items-center mb-6">
           <header className="">
             <h1 className="text-2xl font-semibold text-black dark:text-white">
@@ -192,14 +192,14 @@ export default function SocialPage() {
             <p className="text-gray-500">Loading social posts...</p>
           </div>
         </div>
-      </div>
+      </>
     );
   }
 
   // Error state
   if (isError) {
     return (
-      <div className="container px-0 py-6">
+      <>
         <div className="flex justify-between items-center mb-6">
           <header className="">
             <h1 className="text-2xl font-semibold text-black dark:text-white">
@@ -216,14 +216,14 @@ export default function SocialPage() {
             </p>
           </div>
         </div>
-      </div>
+      </>
     );
   }
 
   // Empty state
   if (!posts || posts.length === 0) {
     return (
-      <div className="container px-0 py-6">
+      <>
         <div className="flex justify-between items-center mb-6">
           <header className="">
             <h1 className="text-2xl font-semibold text-black dark:text-white">
@@ -257,21 +257,20 @@ export default function SocialPage() {
             <p className="text-gray-500">No social posts available</p>
           </div>
         </div>
-      </div>
+      </>
     );
   }
 
   return (
     <>
-      <div className="container px-0 py-6">
-        <div className="flex justify-between items-center mb-6">
-          <header className="">
-            <h1 className="text-2xl font-semibold text-black dark:text-white">
-              Social
-            </h1>
-            <p className="text-sm text-muted-foreground mt-1">Latest community posts</p>
-          </header>
-          {/* <DropdownMenu>
+      <div className="flex justify-between items-center mb-6">
+        <header className="">
+          <h1 className="text-2xl font-semibold text-black dark:text-white">
+            Social
+          </h1>
+          <p className="text-sm text-muted-foreground mt-1">Latest community posts</p>
+        </header>
+        {/* <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button className="btn !flex gap-2 bg-primary !text-dark cursor-pointer ">
                 Filter <FilterIcon className="w-5" />{' '}
@@ -291,220 +290,219 @@ export default function SocialPage() {
               </DropdownMenuRadioGroup>
             </DropdownMenuContent>
           </DropdownMenu> */}
-        </div>
-        <div>
-          {posts?.map((post) => {
-            // Compute access control using utility function (not hook) inside map
-            const tier = post?.tier || post?.accessType || "PUBLIC";
-            const contentPlans = (post?.plans || post?.allowedPlans || []).map(p => (p?._id || p)?.toString()).filter(Boolean);
+      </div>
+      <div>
+        {posts?.map((post) => {
+          // Compute access control using utility function (not hook) inside map
+          const tier = post?.tier || post?.accessType || "PUBLIC";
+          const contentPlans = (post?.plans || post?.allowedPlans || []).map(p => (p?._id || p)?.toString()).filter(Boolean);
 
-            // Check if user has purchased any plan associated with this content
-            const hasPurchase = tier === "PRO" && contentPlans.length > 0 && purchasedPlanIds.size > 0
-              ? contentPlans.some(planId => purchasedPlanIds.has(planId))
-              : false;
+          // Check if user has purchased any plan associated with this content
+          const hasPurchase = tier === "PRO" && contentPlans.length > 0 && purchasedPlanIds.size > 0
+            ? contentPlans.some(planId => purchasedPlanIds.has(planId))
+            : false;
 
-            // Use checkAccess utility function (not hook)
-            const { hasAccess, showLock, lockReason, lockMessage } = checkAccess({
-              tier,
-              isAuthenticated,
-              userUid,
-              hasPurchase,
-              isPremium: tier === "PRO",
-            });
+          // Use checkAccess utility function (not hook)
+          const { hasAccess, showLock, lockReason, lockMessage } = checkAccess({
+            tier,
+            isAuthenticated,
+            userUid,
+            hasPurchase,
+            isPremium: tier === "PRO",
+          });
 
-            const isLocked = showLock && !hasAccess;
+          const isLocked = showLock && !hasAccess;
 
-            // Handle lock icon click - Determine which action to take based on access type
-            const handleLockClick = (e) => {
-              // Stop propagation to prevent card interactions
-              e.stopPropagation();
+          // Handle lock icon click - Determine which action to take based on access type
+          const handleLockClick = (e) => {
+            // Stop propagation to prevent card interactions
+            e.stopPropagation();
 
-              // 1. Login Required - Navigate to login page
-              if (lockReason === 'LOGIN_REQUIRED' || (tier === 'PRO' && !isAuthenticated)) {
-                navigate('/login', { state: { from: window.location.pathname } });
+            // 1. Login Required - Navigate to login page
+            if (lockReason === 'LOGIN_REQUIRED' || (tier === 'PRO' && !isAuthenticated)) {
+              navigate('/login', { state: { from: window.location.pathname } });
+              return;
+            }
+
+            // 2. UID Required - Show UID modal
+            if (lockReason === 'UID_REQUIRED') {
+              setShowUidModal(true);
+              return;
+            }
+
+            // 3. Purchase Required (Paid content) - ALWAYS show plan modal
+            if (lockReason === 'PURCHASE_REQUIRED' || tier === 'PRO') {
+              // Debug: Log the post object to see what we're working with
+              console.log('Post object for purchase:', post);
+              console.log('Plans from post:', post?.plans);
+
+              // Get plans from the content item
+              // Plans can come as an array of objects (populated) or array of IDs (not populated)
+              const rawPlans = post?.plans || [];
+              console.log('Raw plans array:', rawPlans);
+
+              // Filter out null/undefined and map to proper format
+              const contentPlans = rawPlans
+                .filter(p => p && (p?._id || p))
+                .map(p => {
+                  // If p is just an ID string, return null (we'd need to fetch it, but for now skip)
+                  if (typeof p === 'string') {
+                    console.warn('Plan is a string ID, not populated:', p);
+                    return null;
+                  }
+                  // If p is an object with _id, it's populated
+                  return {
+                    _id: p?._id || p,
+                    name: p?.name || 'Plan',
+                    description: p?.description || '',
+                    price: p?.price || 0,
+                    hotmartCheckoutUrl: p?.hotmartCheckoutUrl || '',
+                  };
+                })
+                .filter(Boolean); // Remove null entries
+
+              console.log('Processed content plans:', contentPlans);
+
+              if (contentPlans.length === 0) {
+                toast.error('No plans available for this content');
+                console.error('No valid plans found. Raw plans:', rawPlans);
                 return;
               }
 
-              // 2. UID Required - Show UID modal
-              if (lockReason === 'UID_REQUIRED') {
-                setShowUidModal(true);
-                return;
-              }
+              // ALWAYS show modal - even for single plan (user requirement)
+              console.log('✅ Plans detected - opening modal', {
+                plansCount: contentPlans.length,
+                plans: contentPlans
+              });
+              setSelectedContentForPurchase({
+                id: post?._id || post?.id,
+                title: post?.content?.substring(0, 50) || 'Social Post',
+                plans: contentPlans,
+                contentType: 'post',
+              });
+              setShowPlanModal(true);
+            }
+          };
 
-              // 3. Purchase Required (Paid content) - ALWAYS show plan modal
-              if (lockReason === 'PURCHASE_REQUIRED' || tier === 'PRO') {
-                // Debug: Log the post object to see what we're working with
-                console.log('Post object for purchase:', post);
-                console.log('Plans from post:', post?.plans);
+          return (
+            <div
+              className="relative h-full"
+              key={post?.id || post?._id}
+            >
+              <Card className="max-w-full overflow-hidden rounded-xl shadow-md mb-5 h-full relative">
 
-                // Get plans from the content item
-                // Plans can come as an array of objects (populated) or array of IDs (not populated)
-                const rawPlans = post?.plans || [];
-                console.log('Raw plans array:', rawPlans);
-
-                // Filter out null/undefined and map to proper format
-                const contentPlans = rawPlans
-                  .filter(p => p && (p?._id || p))
-                  .map(p => {
-                    // If p is just an ID string, return null (we'd need to fetch it, but for now skip)
-                    if (typeof p === 'string') {
-                      console.warn('Plan is a string ID, not populated:', p);
-                      return null;
-                    }
-                    // If p is an object with _id, it's populated
-                    return {
-                      _id: p?._id || p,
-                      name: p?.name || 'Plan',
-                      description: p?.description || '',
-                      price: p?.price || 0,
-                      hotmartCheckoutUrl: p?.hotmartCheckoutUrl || '',
-                    };
-                  })
-                  .filter(Boolean); // Remove null entries
-
-                console.log('Processed content plans:', contentPlans);
-
-                if (contentPlans.length === 0) {
-                  toast.error('No plans available for this content');
-                  console.error('No valid plans found. Raw plans:', rawPlans);
-                  return;
-                }
-
-                // ALWAYS show modal - even for single plan (user requirement)
-                console.log('✅ Plans detected - opening modal', {
-                  plansCount: contentPlans.length,
-                  plans: contentPlans
-                });
-                setSelectedContentForPurchase({
-                  id: post?._id || post?.id,
-                  title: post?.content?.substring(0, 50) || 'Social Post',
-                  plans: contentPlans,
-                  contentType: 'post',
-                });
-                setShowPlanModal(true);
-              }
-            };
-
-            return (
-              <div
-                className="relative h-full"
-                key={post?.id || post?._id}
-              >
-                <Card className="max-w-full overflow-hidden rounded-xl shadow-md mb-5 h-full relative">
-                  
-                  {/* Lock Icon - Top Right Corner of entire card (only when locked) */}
-                  {isLocked && (
-                    <div 
-                      className="absolute top-3 right-3 z-30 cursor-pointer"
-                      onClick={handleLockClick}
-                    >
-                      <div className="bg-yellow-500 backdrop-blur-sm p-2.5 rounded-full hover:bg-yellow-600/80 transition-all">
-                        <Lock className="w-5 h-5 text-white" />
-                      </div>
+                {/* Lock Icon - Top Right Corner of entire card (only when locked) */}
+                {isLocked && (
+                  <div
+                    className="absolute top-3 right-3 z-30 cursor-pointer"
+                    onClick={handleLockClick}
+                  >
+                    <div className="bg-yellow-500 backdrop-blur-sm p-2.5 rounded-full hover:bg-yellow-600/80 transition-all">
+                      <Lock className="w-5 h-5 text-white" />
                     </div>
-                  )}
+                  </div>
+                )}
 
-                  <CardHeader className="p-4 justify-between">
-                    <div className="flex items-center gap-3">
-                      <Avatar className="h-10 w-10">
-                        <AvatarImage
-                          src={post?.author?.image}
-                          alt={post?.author?.name || 'Author'}
-                        />
-                        <AvatarFallback>
-                          {post?.author?.fallback || 'U'}
-                        </AvatarFallback>
-                      </Avatar>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center justify-between gap-3">
-                          <div className="min-w-0">
-                            <div className="text-sm font-semibold truncate">
-                              {`${post?.author?.first_name || ''} ${post?.author?.last_name || ''}`.trim() ||
-                                'Unknown Author'}{' '}
-                              <span className="text-xs font-normal text-gray-400">
-                                • {post?.author?.role || 'Educator'}
-                              </span>
-                            </div>
-                            <div className="text-xs text-gray-400 truncate">
-                              {/* {post?.time || ''} */}
-                            </div>
+                <CardHeader className="p-4 justify-between">
+                  <div className="flex items-center gap-3">
+                    <Avatar className="h-10 w-10">
+                      <AvatarImage
+                        src={post?.author?.image}
+                        alt={post?.author?.name || 'Author'}
+                      />
+                      <AvatarFallback>
+                        {post?.author?.fallback || 'U'}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center justify-between gap-3">
+                        <div className="min-w-0">
+                          <div className="text-sm font-semibold truncate">
+                            {`${post?.author?.first_name || ''} ${post?.author?.last_name || ''}`.trim() ||
+                              'Unknown Author'}{' '}
+                            <span className="text-xs font-normal text-gray-400">
+                              • {post?.author?.role || 'Educator'}
+                            </span>
+                          </div>
+                          <div className="text-xs text-gray-400 truncate">
+                            {/* {post?.time || ''} */}
                           </div>
                         </div>
                       </div>
                     </div>
-                  </CardHeader>
+                  </div>
+                </CardHeader>
 
-                  <CardContent className={`p-4 pt-2 ${isLocked ? 'blur-md opacity-85' : ''}`}>
-                    <div className="">
-                      <div className="text-sm text-gray-600 dark:text-gray-100 mt-2">
-                        {post?.content ? (
-                          isLocked ? (
-                            <p className="line-clamp-3">{`${(post?.content || "").substring(0, 8)}******`}</p>
-                          ) : (
-                            <ShowMoreLess text={post.content} limit={100} />
-                          )
+                <CardContent className={`p-4 pt-2 ${isLocked ? 'opacity-85' : ''}`}>
+                  <div className="">
+                    <div className="text-sm text-gray-600 dark:text-gray-100 mt-2">
+                      {post?.content ? (
+                        isLocked ? (
+                          <p className="line-clamp-3">{`${(post?.content || "").substring(0, 8)}******`}</p>
                         ) : (
-                          <p className="line-clamp-3">No content available.</p>
-                        )}
-                      </div>
+                          <ShowMoreLess text={post.content} limit={100} />
+                        )
+                      ) : (
+                        <p className="line-clamp-3">No content available.</p>
+                      )}
                     </div>
-                    {/* Images */}
-                    {post?.images &&
-                      Array.isArray(post.images) &&
-                      post.images.length > 0 && (
-                        <div className="rounded-xl overflow-hidden h-72 relative mt-5 mb-4">
-                          <div className={isLocked ? 'blur-md' : ''}>
-                            <ImageCarousel
-                              images={post.images}
-                              alt={post?.content || 'Social post'}
-                              height="h-72"
-                              showViewButton={hasAccess}
-                              className="rounded-xl"
-                            />
-                          </div>
-                          <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent pointer-events-none" />
+                  </div>
+                  {/* Images */}
+                  {post?.images &&
+                    Array.isArray(post.images) &&
+                    post.images.length > 0 && (
+                      <div className="relative w-full overflow-hidden rounded-xl bg-black/5 dark:bg-white/5 group cursor-pointer mt-5">
+                        <div className={isLocked ? '' : ''}>
+                          <ImageCarousel
+                            images={post.images}
+                            alt={post?.content || 'Social post'}
+                            height="h-full"
+                            showViewButton={hasAccess}
+                            className="rounded-xl social_post"
+                          />
                         </div>
-                      )}
-                    {/* Videos */}
-                    {post?.videos &&
-                      Array.isArray(post.videos) &&
-                      post.videos.length > 0 && (
-                        <div className={`rounded-xl overflow-hidden space-y-4 mb-4 ${isLocked ? 'blur-md' : ''}`}>
-                          {post.videos.map((video, idx) => (
-                            <div
-                              key={idx}
-                              className="relative w-full h-72 rounded-xl overflow-hidden bg-black"
+                        <div className="absolute inset-0 to-transparent pointer-events-none" />
+                      </div>
+                    )}
+                  {/* Videos */}
+                  {post?.videos &&
+                    Array.isArray(post.videos) &&
+                    post.videos.length > 0 && (
+                      <div className={`rounded-xl overflow-hidden space-y-4 mb-4 ${isLocked ? 'blur-md' : ''}`}>
+                        {post.videos.map((video, idx) => (
+                          <div
+                            key={idx}
+                            className="relative w-full h-72 rounded-xl overflow-hidden bg-black"
+                          >
+                            <video
+                              src={video}
+                              controls
+                              className="w-full h-full object-contain"
+                              onError={(e) => {
+                                if (e?.target) {
+                                  e.target.style.display = 'none';
+                                }
+                              }}
                             >
-                              <video
-                                src={video}
-                                controls
-                                className="w-full h-full object-contain"
-                                onError={(e) => {
-                                  if (e?.target) {
-                                    e.target.style.display = 'none';
-                                  }
-                                }}
-                              >
-                                Your browser does not support the video tag.
-                              </video>
-                            </div>
-                          ))}
-                        </div>
-                      )}
-                  </CardContent>
+                              Your browser does not support the video tag.
+                            </video>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                </CardContent>
 
-                  {/* Full Card Lock Overlay - Semi-transparent overlay over entire card */}
-                  {isLocked && (
-                    <div 
-                      className="absolute inset-0 bg-black/40 backdrop-blur-[1px] z-10 rounded-xl cursor-pointer" 
-                      onClick={handleLockClick}
-                    />
-                  )}
-                </Card>
-              </div>
-            );
-          })}
-        </div>
+                {/* Full Card Lock Overlay - Semi-transparent overlay over entire card */}
+                {isLocked && (
+                  <div
+                    className="absolute inset-0 z-10 rounded-xl cursor-pointer"
+                    onClick={handleLockClick}
+                  />
+                )}
+              </Card>
+            </div>
+          );
+        })}
       </div>
 
       {/* Plan Selection Modal */}
@@ -529,7 +527,7 @@ export default function SocialPage() {
       {/* UID Required Modal */}
       <Dialog open={showUidModal} onOpenChange={setShowUidModal}>
         <DialogContent className="sm:max-w-md">
-          <UidRequired 
+          <UidRequired
             onConnectUid={(e) => {
               e?.preventDefault();
               e?.stopPropagation();

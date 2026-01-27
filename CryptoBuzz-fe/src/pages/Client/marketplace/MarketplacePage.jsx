@@ -109,7 +109,7 @@ export default function MarketplacePage() {
   };
 
   return (
-    <div className="container my-6">
+    <>
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-200 mb-2">Marketplace</h1>
         <p className="text-gray-600 dark:text-gray-400">Explore all available courses</p>
@@ -129,7 +129,7 @@ export default function MarketplacePage() {
           </Card>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 2xl:grid-cols-3 gap-6">
           {courses.map((course) => {
             return (
               <RecommendedCourseCard
@@ -142,6 +142,6 @@ export default function MarketplacePage() {
           })}
         </div>
       )}
-    </div>
+    </>
   );
 }
