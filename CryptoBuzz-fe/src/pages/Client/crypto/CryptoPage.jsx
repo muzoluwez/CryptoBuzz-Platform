@@ -292,7 +292,7 @@ export default function CryptoPage() {
   }, [cryptos]);
 
   return (
-    <>
+    <div>
       <header className="mb-6">
         <h1 className="text-2xl font-semibold text-foreground">Crypto Analysis</h1>
         <p className="text-sm text-muted-foreground mt-1">Latest cryptocurrency insights and analysis</p>
@@ -451,7 +451,6 @@ export default function CryptoPage() {
 
             return (
               <Card key={crypto?._id || crypto?.id} className="bg-card border border-border overflow-hidden relative">
-
                 {/* Media (Image or Video) */}
                 <div className="w-full h-44 overflow-hidden relative">
                   <div className={isLocked ? 'blur-[2px]' : ''}>
@@ -645,14 +644,14 @@ export default function CryptoPage() {
       </Dialog>
 
       {/* ------------------- MODAL ------------------- */}
-      <ViewCryptoModel
+      {selectedCrypto && <ViewCryptoModel
         crypto={selectedCrypto}
         isOpen={!!selectedCrypto}
         onClose={() => setSelectedCrypto(null)}
-      />
+      />}
 
       {/* Image Viewer Modal */}
-      <ImageViewer
+      {/* <ImageViewer
         image={selectedImage}
         images={
           selectedCrypto?.photos && Array.isArray(selectedCrypto.photos) && selectedCrypto.photos.length > 0
@@ -666,8 +665,8 @@ export default function CryptoPage() {
         isOpen={!!selectedImage}
         onClose={() => setSelectedImage(null)}
         alt="Crypto analysis chart"
-      />
-    </>
+      /> */}
+    </div>
   );
 }
 

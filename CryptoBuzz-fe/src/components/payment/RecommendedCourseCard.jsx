@@ -194,19 +194,7 @@ export function RecommendedCourseCard({ course, onCourseClick, accessMap = {} })
             <p className="text-md mt-3 text-gray-600 dark:text-gray-200 line-clamp-2">
               {course?.description ? convertRtkEditorToFormattedPlainText(course.description, true) : ''}
             </p>
-            {!isLocked && (
-              <button
-                className="text-sm font-medium mt-2 text-yellow-600 hover:text-yellow-700 cursor-pointer transition-colors"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  if (onCourseClick) {
-                    onCourseClick(course);
-                  }
-                }}
-              >
-                {course?.link || "Show more"}
-              </button>
-            )}
+            <p className="text-sm mt-3 text-gray-600 dark:text-gray-200">By {course?.createdBy?.name || "Educator"}</p>
           </div>
         </div>
       </CardContent>

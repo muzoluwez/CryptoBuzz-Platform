@@ -58,7 +58,7 @@ const StreamWrapper = ({ call, children, bannerImage, educatorData }) => {
                 src={
                   bannerImage
                     ? bannerImage
-                    : toAbsoluteUrl("/media/images/2600x1600/live_banner.jpg")
+                    : toAbsoluteUrl("/media/images/2600x1600/bg-image-fullname.png")
                 }
                 alt=""
                 className="w-full h-full rounded-xl object-cover"
