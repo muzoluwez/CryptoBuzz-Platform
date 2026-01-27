@@ -140,12 +140,12 @@ const PostCard = ({ post, onEdit, isOwnPost = false, refetch }) => {
         {hasImages && (
           <div>
             {post.images.length === 1 ? (
-              <>
+            <>
                 <img
-                  src={post.images[0]}
-                  alt="Post content"
-                  className="w-[650px] rounded-lg h-96 object-cover cursor-pointer"
-                  onClick={() => setIsOpen(true)}
+                src={post.images[0]}
+                alt="Post content"
+                className="w-full max-w-[650px] rounded-lg h-auto max-h-[600px] object-contain cursor-pointer"
+                onClick={() => setIsOpen(true)}
                 />
 
                 {/* Modal */}
@@ -158,7 +158,7 @@ const PostCard = ({ post, onEdit, isOwnPost = false, refetch }) => {
                       <img
                         src={post.images[0]}
                         alt="Post enlarged"
-                        className="max-w-full max-h-[90vh] rounded-2xl"
+                        className="max-w-full max-h-[90vh] object-contain rounded-2xl"
                       />
                       <button
                         onClick={() => setIsOpen(false)}
@@ -200,7 +200,7 @@ const PostCard = ({ post, onEdit, isOwnPost = false, refetch }) => {
               <video
                 key={index}
                 src={video}
-                className="w-full rounded-lg"
+                className="w-full h-auto max-h-[600px] object-contain rounded-lg"
                 controls
               />
             ))}
