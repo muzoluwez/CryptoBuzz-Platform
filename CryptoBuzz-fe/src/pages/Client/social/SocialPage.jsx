@@ -434,7 +434,7 @@ export default function SocialPage() {
                     </div>
                   </CardHeader>
 
-                  <CardContent className={`p-4 pt-2 ${isLocked ? 'blur-md opacity-85' : ''}`}>
+                  <CardContent className={`p-4 pt-2 ${isLocked ? 'opacity-85' : ''}`}>
                     <div className="">
                       <div className="text-sm text-gray-600 dark:text-gray-100 mt-2">
                         {post?.content ? (
@@ -452,17 +452,17 @@ export default function SocialPage() {
                     {post?.images &&
                       Array.isArray(post.images) &&
                       post.images.length > 0 && (
-                        <div className="rounded-xl overflow-hidden h-72 relative mt-5 mb-4">
-                          <div className={isLocked ? 'blur-md' : ''}>
+                        <div className="rounded-xl overflow-hidden h-96 relative mt-5 mb-4">
+                          <div className={isLocked ? '' : ''}>
                             <ImageCarousel
                               images={post.images}
                               alt={post?.content || 'Social post'}
-                              height="h-72"
+                              height="h-96"
                               showViewButton={hasAccess}
                               className="rounded-xl"
                             />
                           </div>
-                          <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent pointer-events-none" />
+                          <div className="absolute inset-0 to-transparent pointer-events-none" />
                         </div>
                       )}
                     {/* Videos */}
@@ -496,7 +496,7 @@ export default function SocialPage() {
                   {/* Full Card Lock Overlay - Semi-transparent overlay over entire card */}
                   {isLocked && (
                     <div 
-                      className="absolute inset-0 bg-black/40 backdrop-blur-[1px] z-10 rounded-xl cursor-pointer" 
+                      className="absolute inset-0 z-10 rounded-xl cursor-pointer" 
                       onClick={handleLockClick}
                     />
                   )}

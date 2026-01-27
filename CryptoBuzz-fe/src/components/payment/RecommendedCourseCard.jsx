@@ -162,7 +162,7 @@ export function RecommendedCourseCard({ course, onCourseClick, accessMap = {} })
           alt={course?.title || "course"}
           className={cn(
             "w-full h-full object-cover rounded-xl transition-all duration-300",
-            isLocked && "blur-[2px]"
+            isLocked && ""
           )}
           onError={(e) => {
             e.target.onerror = null;
@@ -176,7 +176,7 @@ export function RecommendedCourseCard({ course, onCourseClick, accessMap = {} })
           {/* Lock Icon - Top Right Corner (only when locked) */}
           {isLocked && (
             <div
-              className="absolute top-3 right-3 z-20 cursor-pointer"
+              className="absolute top-6 right-6 z-20 cursor-pointer"
               onClick={handleLockClick}
             >
               <div className="bg-yellow-500 backdrop-blur-sm p-2.5 rounded-full hover:bg-yellow-600/80 transition-all">
@@ -217,7 +217,7 @@ export function RecommendedCourseCard({ course, onCourseClick, accessMap = {} })
       {/* Full Card Lock Overlay - Semi-transparent overlay over entire card */}
       {isLocked && (
         <div
-          className="absolute inset-0 bg-black/40 backdrop-blur-[1px] z-10 rounded-lg cursor-pointer"
+          className="absolute inset-0 z-10 rounded-lg cursor-pointer"
           onClick={handleLockClick}
         />
       )}

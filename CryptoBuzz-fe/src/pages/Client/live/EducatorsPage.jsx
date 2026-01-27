@@ -271,7 +271,7 @@ const EducatorsPage = () => {
 
         {/* Educators Grid */}
         {!isLoading && !isError && (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 2xl:grid-cols-3 gap-6">
             {filteredEducators.map((educator) => (
               <Card
                 key={educator.id}
@@ -363,7 +363,7 @@ const EducatorsPage = () => {
                   </p>
 
                   {/* Description/Bio */}
-                  <p className="text-gray-600 dark:text-gray-300 text-sm mb-6 line-clamp-3">
+                  <p className="text-gray-600 dark:text-gray-300 text-sm mb-6 line-clamp-2">
                     {educator.bio || educator.description?.replace(/<[^>]*>/g, '') || 'No description available'}
                   </p>
 
