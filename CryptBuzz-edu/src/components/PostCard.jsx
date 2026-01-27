@@ -138,13 +138,13 @@ const PostCard = ({ post, onEdit, isOwnPost = false, refetch }) => {
       <div className="space-y-3">
         {/* Images */}
         {hasImages && (
-          <div>
+          <div className="flex justify-center">
             {post.images.length === 1 ? (
               <>
                 <img
                   src={post.images[0]}
                   alt="Post content"
-                  className="w-[650px] rounded-lg h-96 object-cover cursor-pointer"
+                  className="w-full max-w-[650px] rounded-lg h-auto max-h-[600px] object-contain cursor-pointer"
                   onClick={() => setIsOpen(true)}
                 />
 

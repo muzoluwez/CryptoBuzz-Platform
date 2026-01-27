@@ -97,7 +97,7 @@ const ImageViewer = ({
           <img
             src={currentImage}
             alt={alt || "Image"}
-            className="w-full h-full object-contain rounded-lg animate-slideInUp"
+            className="max-w-full max-h-[90vh] object-contain rounded-2xl animate-slideInUp"
             onError={(e) => {
               if (e?.target) {
                 e.target.src = 'https://via.placeholder.com/800x600?text=Image+Not+Found';

@@ -138,7 +138,7 @@ const PostCard = ({ post, onEdit, isOwnPost = false, refetch }) => {
       <div className="space-y-3">
         {/* Images */}
         {hasImages && (
-          <div>
+          <div className="flex justify-center">
             {post.images.length === 1 ? (
             <>
                 <img

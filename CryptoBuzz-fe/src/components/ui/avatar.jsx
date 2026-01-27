@@ -37,7 +37,7 @@ function AvatarImage({ className, ...props }) {
     <div className={cn('relative overflow-hidden rounded-full', className)}>
       <AvatarPrimitive.Image
         data-slot="avatar-image"
-        className={cn('aspect-square h-full w-full')}
+        className={cn('aspect-square object-cover h-full w-full')}
         {...props}
       />
     </div>
