@@ -133,14 +133,10 @@ export default function ViewCryptoModel({ crypto, isOpen, onClose }) {
                 img {
                   max-width: 100% !important;
                   height: auto !important;
-                  margin: 1rem 0 !important;
                   border-radius: 0.5rem !important;
                   display: block !important;
                 }
                 /* Paragraph spacing */
-                p {
-                  margin: 0.75rem 0 !important;
-                }
                 /* Headings */
                 h1, h2, h3 {
                   margin-top: 1rem !important;

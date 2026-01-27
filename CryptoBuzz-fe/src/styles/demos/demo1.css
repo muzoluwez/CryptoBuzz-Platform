@@ -555,3 +555,7 @@
   height: auto;
   max-height: 600px;
 }
+.header_nav {
+  color: white !important;
+  text-decoration: none !important;
+}
