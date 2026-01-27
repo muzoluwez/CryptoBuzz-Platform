@@ -536,3 +536,7 @@
 .avatar_img img {
   border-radius: 50px;
 }
+.social_post img {
+  height: 600px !important;
+  object-fit: contain !important;
+}

@@ -458,7 +458,7 @@ export default function SocialPage() {
                             alt={post?.content || 'Social post'}
                             height="h-full"
                             showViewButton={hasAccess}
-                            className="rounded-xl"
+                            className="rounded-xl social_post"
                           />
                         </div>
                         <div className="absolute inset-0 to-transparent pointer-events-none" />

@@ -304,12 +304,11 @@ export default function LivePage() {
   return (
     <>
       <Card className="w-full flex justify-center mb-6 p-3">
-        <div className="container">
-          <div className="flex gap-4">
-            {/* Button 1 */}
-            <button
-              onClick={() => navigate('/client/live')}
-              className="
+        <div className="flex gap-4">
+          {/* Button 1 */}
+          <button
+            onClick={() => navigate('/client/live')}
+            className="
             px-6 py-2 
             bg-primary 
             text-gray-700 
@@ -320,14 +319,14 @@ export default function LivePage() {
             transition
             cursor-pointer
           "
-            >
-              Live Sessions
-            </button>
+          >
+            Live Sessions
+          </button>
 
-            {/* Button 2 */}
-            <button
-              onClick={() => navigate('/client/educators')}
-              className="
+          {/* Button 2 */}
+          <button
+            onClick={() => navigate('/client/educators')}
+            className="
             px-6 py-2 
             bg-gray-100 
             hover:bg-gray-200
@@ -341,10 +340,9 @@ export default function LivePage() {
             transition
             cursor-pointer
           "
-            >
-              Educators
-            </button>
-          </div>
+          >
+            Educators
+          </button>
         </div>
       </Card>
       {/* Header */}
