@@ -25,7 +25,7 @@ const HeaderLogo = () => {
   }, [pathname]);
 
   return (
-    <div className="flex items-stretch gap-1.5 lg:gap-10 grow">
+    <div className="flex items-stretch gap-1.5 lg:gap-8 grow">
       <div className="flex items-center gap-2.5">
         <Link to="/client/home">
           <img

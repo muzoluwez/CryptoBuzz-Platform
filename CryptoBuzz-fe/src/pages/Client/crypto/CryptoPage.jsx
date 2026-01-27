@@ -64,20 +64,20 @@ const getVideoThumbnail = (url) => {
     try {
       const id = url.split("v=")[1].split("&")[0];
       return `https://img.youtube.com/vi/${id}/hqdefault.jpg`;
-    } catch (e) {}
+    } catch (e) { }
   }
   if (lower.includes("youtu.be/")) {
     try {
       const id = url.split("youtu.be/")[1].split("?")[0];
       return `https://img.youtube.com/vi/${id}/hqdefault.jpg`;
-    } catch (e) {}
+    } catch (e) { }
   }
 
   if (lower.includes("vimeo.com/")) {
     try {
       const id = url.split("vimeo.com/")[1].split("?")[0].split("/")[0];
       return `https://vumbnail.com/${id}.jpg`;
-    } catch (e) {}
+    } catch (e) { }
   }
 
   if (lower.includes("loom.com/")) {
@@ -85,7 +85,7 @@ const getVideoThumbnail = (url) => {
       const parts = url.split("loom.com/")[1];
       const id = parts.split("/")[1] || parts.split("/")[0];
       return `https://cdn.loom.com/sessions/thumbnails/${id}-00001.jpg`;
-    } catch (e) {}
+    } catch (e) { }
   }
 
   if (
@@ -99,7 +99,7 @@ const getVideoThumbnail = (url) => {
         .split(".")[0]
         .split("/")[0];
       return `https://image.mux.com/${id}/thumbnail.jpg`;
-    } catch (e) {}
+    } catch (e) { }
   }
 
   return "";
@@ -219,7 +219,7 @@ export default function CryptoPage() {
 
       // Ensure plans are preserved correctly BEFORE spread (to avoid overwriting)
       const plansFromApi = crypto?.plans || crypto?.allowedPlans || [];
-      
+
       // Debug: Log plans for each crypto item
       if (crypto?.accessType === 'PRO' || crypto?.tier === 'PRO') {
         console.log(`Crypto ${crypto?._id} (PRO tier) - Plans from API:`, plansFromApi);
@@ -293,321 +293,319 @@ export default function CryptoPage() {
 
   return (
     <>
-      <div className="container py-6">
-        <header className="mb-6">
-          <h1 className="text-2xl font-semibold text-foreground">Crypto Analysis</h1>
-          <p className="text-sm text-muted-foreground mt-1">Latest cryptocurrency insights and analysis</p>
-        </header>
+      <header className="mb-6">
+        <h1 className="text-2xl font-semibold text-foreground">Crypto Analysis</h1>
+        <p className="text-sm text-muted-foreground mt-1">Latest cryptocurrency insights and analysis</p>
+      </header>
 
-        {/* ------------------- LOADING STATE ------------------- */}
-        {isLoading && (
-          <div className="flex items-center justify-center py-12">
-            <div className="text-center">
-              <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-yellow-500"></div>
-              <p className="mt-4 text-muted-foreground">Loading crypto analysis...</p>
-            </div>
+      {/* ------------------- LOADING STATE ------------------- */}
+      {isLoading && (
+        <div className="flex items-center justify-center py-12">
+          <div className="text-center">
+            <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-yellow-500"></div>
+            <p className="mt-4 text-muted-foreground">Loading crypto analysis...</p>
           </div>
-        )}
+        </div>
+      )}
 
-        {/* ------------------- ERROR STATE ------------------- */}
-        {error && (
-          <div className="flex items-center justify-center py-12">
-            <div className="text-center">
-              <p className="text-red-500 text-lg font-semibold">Error loading crypto analysis</p>
-              <p className="text-muted-foreground mt-2">
-                {error?.data?.message || error?.error || "Something went wrong. Please try again later."}
-              </p>
-            </div>
+      {/* ------------------- ERROR STATE ------------------- */}
+      {error && (
+        <div className="flex items-center justify-center py-12">
+          <div className="text-center">
+            <p className="text-red-500 text-lg font-semibold">Error loading crypto analysis</p>
+            <p className="text-muted-foreground mt-2">
+              {error?.data?.message || error?.error || "Something went wrong. Please try again later."}
+            </p>
           </div>
-        )}
+        </div>
+      )}
 
-        {/* ------------------- TABS ------------------- */}
-        {!isLoading && !error && (
-          <div className="flex gap-3 mb-6 flex-wrap">
-            {categories.map((tab) => (
-              <button
-                key={tab}
-                onClick={() => setActiveTab(tab)}
-                className={`
+      {/* ------------------- TABS ------------------- */}
+      {!isLoading && !error && (
+        <div className="flex gap-3 mb-6 flex-wrap">
+          {categories.map((tab) => (
+            <button
+              key={tab}
+              onClick={() => setActiveTab(tab)}
+              className={`
                   px-4 py-2 text-sm font-medium rounded-lg
                   transition cursor-pointer
                   ${activeTab === tab
-                    ? "bg-yellow-500 text-white shadow"
-                    : "bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-[#fff9e224] dark:text-gray-300"
-                  }
+                  ? "bg-yellow-500 text-white shadow"
+                  : "bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-[#fff9e224] dark:text-gray-300"
+                }
                 `}
-              >
-                {tab}
-              </button>
-            ))}
-          </div>
-        )}
+            >
+              {tab}
+            </button>
+          ))}
+        </div>
+      )}
 
-        {/* ------------------- GRID ------------------- */}
-        {!isLoading && !error && (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredCryptos.length === 0 && !isLoading && !error && (
-              <div className="col-span-full flex items-center justify-center py-12">
-                <p className="text-muted-foreground">No crypto analysis available at the moment.</p>
-              </div>
-            )}
+      {/* ------------------- GRID ------------------- */}
+      {!isLoading && !error && (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {filteredCryptos.length === 0 && !isLoading && !error && (
+            <div className="col-span-full flex items-center justify-center py-12">
+              <p className="text-muted-foreground">No crypto analysis available at the moment.</p>
+            </div>
+          )}
 
-            {filteredCryptos.map((crypto) => {
-              // Compute access control using utility function (not hook) inside map
-              const tier = crypto.tier || crypto.accessType || "PUBLIC";
-              const contentPlans = (crypto.plans || crypto.allowedPlans || []).map(p => (p?._id || p)?.toString()).filter(Boolean);
+          {filteredCryptos.map((crypto) => {
+            // Compute access control using utility function (not hook) inside map
+            const tier = crypto.tier || crypto.accessType || "PUBLIC";
+            const contentPlans = (crypto.plans || crypto.allowedPlans || []).map(p => (p?._id || p)?.toString()).filter(Boolean);
 
-              // Check if user has purchased any plan associated with this content
-              const hasPurchase = tier === "PRO" && contentPlans.length > 0 && purchasedPlanIds.size > 0
-                ? contentPlans.some(planId => purchasedPlanIds.has(planId))
-                : false;
+            // Check if user has purchased any plan associated with this content
+            const hasPurchase = tier === "PRO" && contentPlans.length > 0 && purchasedPlanIds.size > 0
+              ? contentPlans.some(planId => purchasedPlanIds.has(planId))
+              : false;
 
-              // Use checkAccess utility function (not hook)
-              const { hasAccess, showLock, lockReason, lockMessage } = checkAccess({
-                tier,
-                isAuthenticated,
-                userUid,
-                hasPurchase,
-                isPremium: tier === "PRO",
-              });
+            // Use checkAccess utility function (not hook)
+            const { hasAccess, showLock, lockReason, lockMessage } = checkAccess({
+              tier,
+              isAuthenticated,
+              userUid,
+              hasPurchase,
+              isPremium: tier === "PRO",
+            });
 
-              const isLocked = showLock && !hasAccess;
+            const isLocked = showLock && !hasAccess;
 
-              // Handle lock icon click - Determine which action to take based on access type
-              const handleLockClick = (e) => {
-                // Stop propagation to prevent card interactions
-                e.stopPropagation();
+            // Handle lock icon click - Determine which action to take based on access type
+            const handleLockClick = (e) => {
+              // Stop propagation to prevent card interactions
+              e.stopPropagation();
 
-                // 1. Login Required - Navigate to login page
-                if (lockReason === 'LOGIN_REQUIRED' || (tier === 'PRO' && !isAuthenticated)) {
-                  navigate('/login', { state: { from: window.location.pathname } });
-                  return;
-                }
+              // 1. Login Required - Navigate to login page
+              if (lockReason === 'LOGIN_REQUIRED' || (tier === 'PRO' && !isAuthenticated)) {
+                navigate('/login', { state: { from: window.location.pathname } });
+                return;
+              }
 
-                // 2. UID Required - Show UID modal
-                if (lockReason === 'UID_REQUIRED') {
-                  setShowUidModal(true);
-                  return;
-                }
+              // 2. UID Required - Show UID modal
+              if (lockReason === 'UID_REQUIRED') {
+                setShowUidModal(true);
+                return;
+              }
 
-                // 3. Purchase Required (Paid content) - ALWAYS show plan modal
-                if (lockReason === 'PURCHASE_REQUIRED' || tier === 'PRO') {
-                  // Debug: Log the crypto object to see what we're working with
-                  console.log('Crypto object for purchase:', crypto);
-                  console.log('Plans from crypto:', crypto.plans);
+              // 3. Purchase Required (Paid content) - ALWAYS show plan modal
+              if (lockReason === 'PURCHASE_REQUIRED' || tier === 'PRO') {
+                // Debug: Log the crypto object to see what we're working with
+                console.log('Crypto object for purchase:', crypto);
+                console.log('Plans from crypto:', crypto.plans);
 
-                  // Get plans from the content item
-                  // Plans can come as an array of objects (populated) or array of IDs (not populated)
-                  const rawPlans = crypto.plans || [];
-                  console.log('Raw plans array:', rawPlans);
+                // Get plans from the content item
+                // Plans can come as an array of objects (populated) or array of IDs (not populated)
+                const rawPlans = crypto.plans || [];
+                console.log('Raw plans array:', rawPlans);
 
-                  // Filter out null/undefined and map to proper format
-                  const contentPlans = rawPlans
-                    .filter(p => p && (p._id || p))
-                    .map(p => {
-                      // If p is just an ID string, return null (we'd need to fetch it, but for now skip)
-                      if (typeof p === 'string') {
-                        console.warn('Plan is a string ID, not populated:', p);
-                        return null;
-                      }
-                      // If p is an object with _id, it's populated
-                      return {
-                        _id: p._id || p,
-                        name: p.name || 'Plan',
-                        description: p.description || '',
-                        price: p.price || 0,
-                        hotmartCheckoutUrl: p.hotmartCheckoutUrl || '',
-                      };
-                    })
-                    .filter(Boolean); // Remove null entries
+                // Filter out null/undefined and map to proper format
+                const contentPlans = rawPlans
+                  .filter(p => p && (p._id || p))
+                  .map(p => {
+                    // If p is just an ID string, return null (we'd need to fetch it, but for now skip)
+                    if (typeof p === 'string') {
+                      console.warn('Plan is a string ID, not populated:', p);
+                      return null;
+                    }
+                    // If p is an object with _id, it's populated
+                    return {
+                      _id: p._id || p,
+                      name: p.name || 'Plan',
+                      description: p.description || '',
+                      price: p.price || 0,
+                      hotmartCheckoutUrl: p.hotmartCheckoutUrl || '',
+                    };
+                  })
+                  .filter(Boolean); // Remove null entries
 
-                  console.log('Processed content plans:', contentPlans);
+                console.log('Processed content plans:', contentPlans);
 
-                  if (contentPlans.length === 0) {
-                    toast.error('This PRO content has no plans assigned. Please contact support or check admin settings.');
-                    console.error('No valid plans found. Raw plans:', rawPlans);
-                    console.error('Crypto item details:', {
-                      id: crypto._id,
-                      title: crypto.title,
-                      tier: tier,
-                      accessType: crypto.accessType,
-                    });
-                    return;
-                  }
-
-                  // ALWAYS show modal - even for single plan (user requirement)
-                  console.log('✅ Plans detected - opening modal', {
-                    plansCount: contentPlans.length,
-                    plans: contentPlans
-                  });
-                  setSelectedContentForPurchase({
+                if (contentPlans.length === 0) {
+                  toast.error('This PRO content has no plans assigned. Please contact support or check admin settings.');
+                  console.error('No valid plans found. Raw plans:', rawPlans);
+                  console.error('Crypto item details:', {
                     id: crypto._id,
                     title: crypto.title,
-                    plans: contentPlans,
-                    contentType: 'crypto',
+                    tier: tier,
+                    accessType: crypto.accessType,
                   });
-                  setShowPlanModal(true);
+                  return;
                 }
-              };
 
-              return (
-                <Card key={crypto?._id || crypto?.id} className="bg-card border border-border overflow-hidden relative">
+                // ALWAYS show modal - even for single plan (user requirement)
+                console.log('✅ Plans detected - opening modal', {
+                  plansCount: contentPlans.length,
+                  plans: contentPlans
+                });
+                setSelectedContentForPurchase({
+                  id: crypto._id,
+                  title: crypto.title,
+                  plans: contentPlans,
+                  contentType: 'crypto',
+                });
+                setShowPlanModal(true);
+              }
+            };
 
-                  {/* Media (Image or Video) */}
-                  <div className="w-full h-44 overflow-hidden relative">
-                    <div className={isLocked ? 'blur-[2px]' : ''}>
-                      {crypto?.mediaType === 'video' && crypto?.videoUrl ? (
-                        // Video thumbnail with play icon
-                        <div className="relative w-full h-44 bg-black">
-                          {isExternalVideoUrl(crypto.videoUrl) ? (
-                            // External video (YouTube, Vimeo, Loom) - show thumbnail or placeholder
-                            <div className="relative w-full h-full">
-                              {(() => {
-                                const thumbnailUrl = getVideoThumbnail(crypto.videoUrl);
-                                return thumbnailUrl ? (
-                                  <img
-                                    src={thumbnailUrl}
-                                    alt="Video thumbnail"
-                                    className="w-full h-full object-cover"
-                                    onError={(e) => {
-                                      // Fallback if thumbnail fails to load
-                                      e.target.style.display = 'none';
-                                    }}
-                                  />
-                                ) : (
-                                  <div className="w-full h-full bg-gradient-to-br from-gray-800 to-gray-900 flex items-center justify-center">
-                                    <div className="text-white text-center">
-                                      <svg className="w-12 h-12 mx-auto mb-2" fill="currentColor" viewBox="0 0 24 24">
-                                        <path d="M8 5v14l11-7z" />
-                                      </svg>
-                                      <p className="text-xs">Video</p>
-                                    </div>
+            return (
+              <Card key={crypto?._id || crypto?.id} className="bg-card border border-border overflow-hidden relative">
+
+                {/* Media (Image or Video) */}
+                <div className="w-full h-44 overflow-hidden relative">
+                  <div className={isLocked ? 'blur-[2px]' : ''}>
+                    {crypto?.mediaType === 'video' && crypto?.videoUrl ? (
+                      // Video thumbnail with play icon
+                      <div className="relative w-full h-44 bg-black">
+                        {isExternalVideoUrl(crypto.videoUrl) ? (
+                          // External video (YouTube, Vimeo, Loom) - show thumbnail or placeholder
+                          <div className="relative w-full h-full">
+                            {(() => {
+                              const thumbnailUrl = getVideoThumbnail(crypto.videoUrl);
+                              return thumbnailUrl ? (
+                                <img
+                                  src={thumbnailUrl}
+                                  alt="Video thumbnail"
+                                  className="w-full h-full object-cover"
+                                  onError={(e) => {
+                                    // Fallback if thumbnail fails to load
+                                    e.target.style.display = 'none';
+                                  }}
+                                />
+                              ) : (
+                                <div className="w-full h-full bg-gradient-to-br from-gray-800 to-gray-900 flex items-center justify-center">
+                                  <div className="text-white text-center">
+                                    <svg className="w-12 h-12 mx-auto mb-2" fill="currentColor" viewBox="0 0 24 24">
+                                      <path d="M8 5v14l11-7z" />
+                                    </svg>
+                                    <p className="text-xs">Video</p>
                                   </div>
-                                );
-                              })()}
-                              <div className="absolute inset-0 flex items-center justify-center bg-black/20">
-                                <div className="w-16 h-16 rounded-full bg-white/90 flex items-center justify-center cursor-pointer hover:bg-white transition-all">
-                                  <svg className="w-8 h-8 text-gray-900 ml-1" fill="currentColor" viewBox="0 0 24 24">
-                                    <path d="M8 5v14l11-7z" />
-                                  </svg>
                                 </div>
+                              );
+                            })()}
+                            <div className="absolute inset-0 flex items-center justify-center bg-black/20">
+                              <div className="w-16 h-16 rounded-full bg-white/90 flex items-center justify-center cursor-pointer hover:bg-white transition-all">
+                                <svg className="w-8 h-8 text-gray-900 ml-1" fill="currentColor" viewBox="0 0 24 24">
+                                  <path d="M8 5v14l11-7z" />
+                                </svg>
                               </div>
                             </div>
-                          ) : (
-                            // Uploaded video file - use video element
-                            <>
-                              <video
-                                src={crypto.videoUrl}
-                                className="w-full h-full object-cover"
-                                muted
-                                preload="metadata"
-                                onLoadedMetadata={(e) => {
-                                  // Set video thumbnail
-                                  const video = e.target;
-                                  video.currentTime = 1; // Seek to 1 second for thumbnail
-                                }}
-                              />
-                              <div className="absolute inset-0 flex items-center justify-center bg-black/20">
-                                <div className="w-16 h-16 rounded-full bg-white/90 flex items-center justify-center cursor-pointer hover:bg-white transition-all">
-                                  <svg className="w-8 h-8 text-gray-900 ml-1" fill="currentColor" viewBox="0 0 24 24">
-                                    <path d="M8 5v14l11-7z" />
-                                  </svg>
-                                </div>
+                          </div>
+                        ) : (
+                          // Uploaded video file - use video element
+                          <>
+                            <video
+                              src={crypto.videoUrl}
+                              className="w-full h-full object-cover"
+                              muted
+                              preload="metadata"
+                              onLoadedMetadata={(e) => {
+                                // Set video thumbnail
+                                const video = e.target;
+                                video.currentTime = 1; // Seek to 1 second for thumbnail
+                              }}
+                            />
+                            <div className="absolute inset-0 flex items-center justify-center bg-black/20">
+                              <div className="w-16 h-16 rounded-full bg-white/90 flex items-center justify-center cursor-pointer hover:bg-white transition-all">
+                                <svg className="w-8 h-8 text-gray-900 ml-1" fill="currentColor" viewBox="0 0 24 24">
+                                  <path d="M8 5v14l11-7z" />
+                                </svg>
                               </div>
-                            </>
-                          )}
-                        </div>
-                      ) : (
-                        // Image carousel
-                        <ImageCarousel
-                          images={
-                            crypto?.photos && Array.isArray(crypto.photos) && crypto.photos.length > 0
-                              ? crypto.photos
-                              : crypto?.image
-                                ? [crypto.image]
-                                : []
-                          }
-                          alt={crypto?.title || "Crypto analysis"}
-                          height="h-44"
-                          showViewButton={hasAccess}
-                        />
-                      )}
-                    </div>
-
-                    {/* Lock Icon - Top Right Corner (only when locked) */}
-                    {isLocked && (
-                      <div 
-                        className="absolute top-3 right-3 z-20 cursor-pointer"
-                        onClick={handleLockClick}
-                      >
-                        <div className="bg-yellow-500 backdrop-blur-sm p-2.5 rounded-full hover:bg-yellow-600/80 transition-all">
-                          <Lock className="w-5 h-5 text-white" />
-                        </div>
+                            </div>
+                          </>
+                        )}
                       </div>
+                    ) : (
+                      // Image carousel
+                      <ImageCarousel
+                        images={
+                          crypto?.photos && Array.isArray(crypto.photos) && crypto.photos.length > 0
+                            ? crypto.photos
+                            : crypto?.image
+                              ? [crypto.image]
+                              : []
+                        }
+                        alt={crypto?.title || "Crypto analysis"}
+                        height="h-44"
+                        showViewButton={hasAccess}
+                      />
                     )}
                   </div>
 
-                  <CardContent className="p-4">
-
-                    {/* Author */}
-                    <div className="flex items-center gap-3">
-                      <Avatar className="h-10 w-10">
-                        <AvatarImage src={crypto?.avatar} alt={crypto?.author || "Author"} />
-                        <AvatarFallback>{crypto?.author?.[0] || "A"}</AvatarFallback>
-                      </Avatar>
-
-                      <div className="flex-1">
-                        <div className="flex items-center justify-between">
-                          <div>
-                            <p className="text-sm font-medium truncate">{crypto?.author || "Unknown"}</p>
-                            <p className="text-xs text-muted-foreground">{crypto?.date || ""}</p>
-                          </div>
-                          <Badge>{crypto?.category || ""}</Badge>
-                        </div>
+                  {/* Lock Icon - Top Right Corner (only when locked) */}
+                  {isLocked && (
+                    <div
+                      className="absolute top-3 right-3 z-20 cursor-pointer"
+                      onClick={handleLockClick}
+                    >
+                      <div className="bg-yellow-500 backdrop-blur-sm p-2.5 rounded-full hover:bg-yellow-600/80 transition-all">
+                        <Lock className="w-5 h-5 text-white" />
                       </div>
                     </div>
-
-                    {/* Title */}
-                    <h3 className="mt-4 text-lg font-bold text-primary">{isLocked ? "****************" : (crypto?.title || "Untitled")}</h3>
-
-                    {/* Preview - 2 lines max */}
-                    <p className="mt-2 text-sm text-muted-foreground line-clamp-2 h-10">
-                      {isLocked ? "****************************************" : (crypto?.preview || "")}
-                    </p>
-
-                    {/* Button */}
-                    <div className="mt-4">
-                      <Button
-                        onClick={() => setSelectedCrypto(crypto)}
-                        className="w-full bg-yellow-600 text-white hover:bg-yellow-700"
-                      >
-                        {hasAccess ? "View Details" : "Unlock Analysis"}
-                      </Button>
-                    </div>
-
-                  </CardContent>
-
-                  <CardFooter className="p-4">
-                    <div className="text-sm text-muted-foreground">
-                      Published • {crypto?.date?.split(',')?.[0] || ""}
-                    </div>
-                  </CardFooter>
-
-                  {/* Full Card Lock Overlay - Semi-transparent overlay over entire card */}
-                  {isLocked && (
-                    <div 
-                      className="absolute inset-0 bg-black/40 backdrop-blur-[1px] z-10 rounded-lg cursor-pointer" 
-                      onClick={handleLockClick}
-                    />
                   )}
+                </div>
 
-                </Card>
-              )
-            })}
-          </div>
-        )}
+                <CardContent className="p-4">
 
-      </div>
+                  {/* Author */}
+                  <div className="flex items-center gap-3">
+                    <Avatar className="h-10 w-10">
+                      <AvatarImage src={crypto?.avatar} alt={crypto?.author || "Author"} />
+                      <AvatarFallback>{crypto?.author?.[0] || "A"}</AvatarFallback>
+                    </Avatar>
+
+                    <div className="flex-1">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="text-sm font-medium truncate">{crypto?.author || "Unknown"}</p>
+                          <p className="text-xs text-muted-foreground">{crypto?.date || ""}</p>
+                        </div>
+                        <Badge>{crypto?.category || ""}</Badge>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Title */}
+                  <h3 className="mt-4 text-lg font-bold text-primary">{isLocked ? "****************" : (crypto?.title || "Untitled")}</h3>
+
+                  {/* Preview - 2 lines max */}
+                  <p className="mt-2 text-sm text-muted-foreground line-clamp-2 h-10">
+                    {isLocked ? "****************************************" : (crypto?.preview || "")}
+                  </p>
+
+                  {/* Button */}
+                  <div className="mt-4">
+                    <Button
+                      onClick={() => setSelectedCrypto(crypto)}
+                      className="w-full bg-yellow-600 text-white hover:bg-yellow-700"
+                    >
+                      {hasAccess ? "View Details" : "Unlock Analysis"}
+                    </Button>
+                  </div>
+
+                </CardContent>
+
+                <CardFooter className="p-4">
+                  <div className="text-sm text-muted-foreground">
+                    Published • {crypto?.date?.split(',')?.[0] || ""}
+                  </div>
+                </CardFooter>
+
+                {/* Full Card Lock Overlay - Semi-transparent overlay over entire card */}
+                {isLocked && (
+                  <div
+                    className="absolute inset-0 bg-black/40 backdrop-blur-[1px] z-10 rounded-lg cursor-pointer"
+                    onClick={handleLockClick}
+                  />
+                )}
+
+              </Card>
+            )
+          })}
+        </div>
+      )}
+
 
       {/* Plan Selection Modal */}
       {selectedContentForPurchase && (
@@ -631,7 +629,7 @@ export default function CryptoPage() {
       {/* UID Required Modal */}
       <Dialog open={showUidModal} onOpenChange={setShowUidModal}>
         <DialogContent className="sm:max-w-md">
-          <UidRequired 
+          <UidRequired
             onConnectUid={(e) => {
               e?.preventDefault();
               e?.stopPropagation();

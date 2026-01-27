@@ -151,7 +151,7 @@ const ImageCarousel = ({
           <img
             src={currentImage}
             alt={alt || "Image"}
-            className={`w-full ${height} object-cover transition-opacity duration-200 ${
+            className={`transition-opacity duration-200 w-full h-[600px] aspect-square object-contain ${
               isLoading ? "opacity-0" : "opacity-100"
             } ${imageClassName || ""}`}
             onError={(e) => {

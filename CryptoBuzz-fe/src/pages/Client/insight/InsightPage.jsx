@@ -170,296 +170,294 @@ export default function InsightPage() {
 
   return (
     <>
-      <div className="container py-6">
-        <header className="mb-6">
-          <h1 className="text-2xl font-semibold text-foreground">
-            Insight Feed
-          </h1>
-          <p className="text-sm text-muted-foreground mt-1">
-            Latest market insights and analysis
-          </p>
-        </header>
+      <header className="mb-6">
+        <h1 className="text-2xl font-semibold text-foreground">
+          Insight Feed
+        </h1>
+        <p className="text-sm text-muted-foreground mt-1">
+          Latest market insights and analysis
+        </p>
+      </header>
 
-        {/* ------------------- LOADING STATE ------------------- */}
-        {isLoading && (
-          <div className="flex items-center justify-center py-12">
-            <div className="text-center">
-              <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-yellow-500"></div>
-              <p className="mt-4 text-muted-foreground">Loading insights...</p>
-            </div>
+      {/* ------------------- LOADING STATE ------------------- */}
+      {isLoading && (
+        <div className="flex items-center justify-center py-12">
+          <div className="text-center">
+            <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-yellow-500"></div>
+            <p className="mt-4 text-muted-foreground">Loading insights...</p>
           </div>
-        )}
+        </div>
+      )}
 
-        {/* ------------------- ERROR STATE ------------------- */}
-        {error && (
-          <div className="flex items-center justify-center py-12">
-            <div className="text-center">
-              <p className="text-red-500 text-lg font-semibold">
-                Error loading insights
-              </p>
-              <p className="text-muted-foreground mt-2">
-                {error?.data?.message ||
-                  error?.error ||
-                  'Something went wrong. Please try again later.'}
-              </p>
-            </div>
+      {/* ------------------- ERROR STATE ------------------- */}
+      {error && (
+        <div className="flex items-center justify-center py-12">
+          <div className="text-center">
+            <p className="text-red-500 text-lg font-semibold">
+              Error loading insights
+            </p>
+            <p className="text-muted-foreground mt-2">
+              {error?.data?.message ||
+                error?.error ||
+                'Something went wrong. Please try again later.'}
+            </p>
           </div>
-        )}
+        </div>
+      )}
 
-        {/* ------------------- TABS ------------------- */}
-        {!isLoading && !error && (
-          <div className="flex gap-3 mb-6 flex-wrap">
-            {categories.map((tab) => (
-              <button
-                key={tab}
-                onClick={() => setActiveTab(tab)}
-                className={`
+      {/* ------------------- TABS ------------------- */}
+      {!isLoading && !error && (
+        <div className="flex gap-3 mb-6 flex-wrap">
+          {categories.map((tab) => (
+            <button
+              key={tab}
+              onClick={() => setActiveTab(tab)}
+              className={`
                   px-4 py-2 text-sm font-medium rounded-lg
                   transition cursor-pointer
                   ${activeTab === tab
-                    ? 'bg-yellow-500 text-white shadow'
-                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-[#fff9e224] dark:text-gray-300'
-                  }
+                  ? 'bg-yellow-500 text-white shadow'
+                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-[#fff9e224] dark:text-gray-300'
+                }
                 `}
+            >
+              {tab}
+            </button>
+          ))}
+        </div>
+      )}
+
+      {/* ------------------- GRID ------------------- */}
+      {!isLoading && !error && (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {filteredInsights.length === 0 && !isLoading && !error && (
+            <div className="col-span-full flex items-center justify-center py-12">
+              <p className="text-muted-foreground">
+                No insights available at the moment.
+              </p>
+            </div>
+          )}
+
+          {filteredInsights.map((insight) => {
+            // Compute access control using utility function (not hook) inside map
+            const tier = insight?.tier || insight?.accessType || "PUBLIC";
+            const contentPlans = (insight?.plans || insight?.allowedPlans || []).map(p => (p?._id || p)?.toString()).filter(Boolean);
+
+            // Check if user has purchased any plan associated with this content
+            const hasPurchase = tier === "PRO" && contentPlans.length > 0 && purchasedPlanIds.size > 0
+              ? contentPlans.some(planId => purchasedPlanIds.has(planId))
+              : false;
+
+            // Use checkAccess utility function (not hook)
+            const { hasAccess, showLock, lockReason, lockMessage } = checkAccess({
+              tier,
+              isAuthenticated,
+              userUid,
+              hasPurchase,
+              isPremium: tier === "PRO",
+            });
+
+            const isLocked = showLock && !hasAccess;
+
+            // Handle lock icon click - Determine which action to take based on access type
+            const handleLockClick = (e) => {
+              // Stop propagation to prevent card interactions
+              e.stopPropagation();
+
+              // 1. Login Required - Navigate to login page
+              if (lockReason === 'LOGIN_REQUIRED' || (tier === 'PRO' && !isAuthenticated)) {
+                navigate('/login', { state: { from: window.location.pathname } });
+                return;
+              }
+
+              // 2. UID Required - Show UID modal
+              if (lockReason === 'UID_REQUIRED') {
+                setShowUidModal(true);
+                return;
+              }
+
+              // 3. Purchase Required (Paid content) - ALWAYS show plan modal
+              if (lockReason === 'PURCHASE_REQUIRED' || tier === 'PRO') {
+                // Debug: Log the insight object to see what we're working with
+                console.log('Insight object for purchase:', insight);
+                console.log('Plans from insight:', insight.plans);
+
+                // Get plans from the content item
+                // Plans can come as an array of objects (populated) or array of IDs (not populated)
+                const rawPlans = insight?.plans || insight?.allowedPlans || [];
+                console.log('Raw plans array:', rawPlans);
+
+                // Filter out null/undefined and map to proper format
+                const contentPlans = rawPlans
+                  .filter(p => p && (p._id || p))
+                  .map(p => {
+                    // If p is just an ID string, return null (we'd need to fetch it, but for now skip)
+                    if (typeof p === 'string') {
+                      console.warn('Plan is a string ID, not populated:', p);
+                      return null;
+                    }
+                    // If p is an object with _id, it's populated
+                    return {
+                      _id: p._id || p,
+                      name: p.name || 'Plan',
+                      description: p.description || '',
+                      price: p.price || 0,
+                      hotmartCheckoutUrl: p.hotmartCheckoutUrl || '',
+                    };
+                  })
+                  .filter(Boolean); // Remove null entries
+
+                console.log('Processed content plans:', contentPlans);
+
+                if (contentPlans.length === 0) {
+                  toast.error('No plans available for this content');
+                  console.error('No valid plans found. Raw plans:', rawPlans);
+                  return;
+                }
+
+                // ALWAYS show modal - even for single plan (user requirement)
+                console.log('✅ Plans detected - opening modal', {
+                  plansCount: contentPlans.length,
+                  plans: contentPlans
+                });
+                setSelectedContentForPurchase({
+                  id: insight?._id,
+                  title: insight?.title,
+                  plans: contentPlans,
+                  contentType: 'insight',
+                });
+                setShowPlanModal(true);
+              }
+            };
+
+            return (
+              <div
+                className="relative h-full"
+                key={insight?._id || insight?.id}
               >
-                {tab}
-              </button>
-            ))}
-          </div>
-        )}
-
-        {/* ------------------- GRID ------------------- */}
-        {!isLoading && !error && (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredInsights.length === 0 && !isLoading && !error && (
-              <div className="col-span-full flex items-center justify-center py-12">
-                <p className="text-muted-foreground">
-                  No insights available at the moment.
-                </p>
-              </div>
-            )}
-
-            {filteredInsights.map((insight) => {
-              // Compute access control using utility function (not hook) inside map
-              const tier = insight?.tier || insight?.accessType || "PUBLIC";
-              const contentPlans = (insight?.plans || insight?.allowedPlans || []).map(p => (p?._id || p)?.toString()).filter(Boolean);
-
-              // Check if user has purchased any plan associated with this content
-              const hasPurchase = tier === "PRO" && contentPlans.length > 0 && purchasedPlanIds.size > 0
-                ? contentPlans.some(planId => purchasedPlanIds.has(planId))
-                : false;
-
-              // Use checkAccess utility function (not hook)
-              const { hasAccess, showLock, lockReason, lockMessage } = checkAccess({
-                tier,
-                isAuthenticated,
-                userUid,
-                hasPurchase,
-                isPremium: tier === "PRO",
-              });
-
-              const isLocked = showLock && !hasAccess;
-
-              // Handle lock icon click - Determine which action to take based on access type
-              const handleLockClick = (e) => {
-                // Stop propagation to prevent card interactions
-                e.stopPropagation();
-
-                // 1. Login Required - Navigate to login page
-                if (lockReason === 'LOGIN_REQUIRED' || (tier === 'PRO' && !isAuthenticated)) {
-                  navigate('/login', { state: { from: window.location.pathname } });
-                  return;
-                }
-
-                // 2. UID Required - Show UID modal
-                if (lockReason === 'UID_REQUIRED') {
-                  setShowUidModal(true);
-                  return;
-                }
-
-                // 3. Purchase Required (Paid content) - ALWAYS show plan modal
-                if (lockReason === 'PURCHASE_REQUIRED' || tier === 'PRO') {
-                  // Debug: Log the insight object to see what we're working with
-                  console.log('Insight object for purchase:', insight);
-                  console.log('Plans from insight:', insight.plans);
-
-                  // Get plans from the content item
-                  // Plans can come as an array of objects (populated) or array of IDs (not populated)
-                  const rawPlans = insight?.plans || insight?.allowedPlans || [];
-                  console.log('Raw plans array:', rawPlans);
-
-                  // Filter out null/undefined and map to proper format
-                  const contentPlans = rawPlans
-                    .filter(p => p && (p._id || p))
-                    .map(p => {
-                      // If p is just an ID string, return null (we'd need to fetch it, but for now skip)
-                      if (typeof p === 'string') {
-                        console.warn('Plan is a string ID, not populated:', p);
-                        return null;
-                      }
-                      // If p is an object with _id, it's populated
-                      return {
-                        _id: p._id || p,
-                        name: p.name || 'Plan',
-                        description: p.description || '',
-                        price: p.price || 0,
-                        hotmartCheckoutUrl: p.hotmartCheckoutUrl || '',
-                      };
-                    })
-                    .filter(Boolean); // Remove null entries
-
-                  console.log('Processed content plans:', contentPlans);
-
-                  if (contentPlans.length === 0) {
-                    toast.error('No plans available for this content');
-                    console.error('No valid plans found. Raw plans:', rawPlans);
-                    return;
-                  }
-
-                  // ALWAYS show modal - even for single plan (user requirement)
-                  console.log('✅ Plans detected - opening modal', {
-                    plansCount: contentPlans.length,
-                    plans: contentPlans
-                  });
-                  setSelectedContentForPurchase({
-                    id: insight?._id,
-                    title: insight?.title,
-                    plans: contentPlans,
-                    contentType: 'insight',
-                  });
-                  setShowPlanModal(true);
-                }
-              };
-
-              return (
-                <div
-                  className="relative h-full"
-                  key={insight?._id || insight?.id}
+                <Card
+                  className="bg-card border border-border overflow-hidden h-full relative"
                 >
-                  <Card
-                    className="bg-card border border-border overflow-hidden h-full relative"
-                  >
 
-                    {/* image */}
-                    <div className="w-full h-44 overflow-hidden relative">
-                      <div className={isLocked ? 'blur-md' : ''}>
-                        <ImageCarousel
-                          images={
-                            insight?.photos && Array.isArray(insight.photos) && insight.photos.length > 0
-                              ? insight.photos
-                              : insight?.image
-                                ? [insight.image]
-                                : []
-                          }
-                          alt={insight?.title || "Trade insight"}
-                          height="h-44"
-                          showViewButton={hasAccess}
-                        />
-                      </div>
-
-                      {/* Lock Icon - Top Right Corner (only when locked) */}
-                      {isLocked && (
-                        <div 
-                          className="absolute top-3 right-3 z-20 cursor-pointer"
-                          onClick={handleLockClick}
-                        >
-                          <div className="bg-yellow-500 backdrop-blur-sm p-2.5 rounded-full hover:bg-yellow-600/80 transition-all">
-                            <Lock className="w-5 h-5 text-white" />
-                          </div>
-                        </div>
-                      )}
-                    </div>
-
-                    <CardContent className="p-4">
-                      {/* Author */}
-                      <div className="flex items-center gap-3">
-                        <Avatar className="h-10 w-10">
-                          <AvatarImage
-                            src={insight?.avatar}
-                            alt={insight?.author || "Author"}
-                          />
-                          <AvatarFallback>{insight?.author?.[0] || "A"}</AvatarFallback>
-                        </Avatar>
-
-                        <div className="flex-1">
-                          <div className="flex items-center justify-between">
-                            <div>
-                              <p className="text-sm font-medium truncate">
-                                {insight?.author || "Unknown"}
-                              </p>
-                              <p className="text-xs text-muted-foreground">
-                                {insight?.date || ""}
-                              </p>
-                            </div>
-                            <Badge>{insight?.category || ""}</Badge>
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Title */}
-                      <h3 className="mt-4 text-lg font-bold text-primary">
-                        {isLocked ? "****************" : (insight?.title || "Untitled")}
-                      </h3>
-
-                      {/* Preview - 2 lines max */}
-                      <p className="mt-2 text-sm text-muted-foreground line-clamp-2 h-10">
-                        {isLocked ? "****************************************" : (insight?.preview || "")}
-                      </p>
-
-                      {/* Button - Only show when not locked */}
-                      {!isLocked && (
-                        <div className="mt-4">
-                          <Button
-                            onClick={() => setSelectedInsight(insight)}
-                            className="w-full bg-yellow-600 text-white hover:bg-yellow-700"
-                          >
-                            View Details
-                          </Button>
-                        </div>
-                      )}
-                    </CardContent>
-
-                    {!isLocked && (
-                      <CardFooter className="p-4">
-                        <div className="text-sm text-muted-foreground">
-                          Published • {insight?.date?.split(',')?.[0] || ""}
-                        </div>
-                      </CardFooter>
-                    )}
-
-                    {/* Full Card Lock Overlay - Semi-transparent overlay over entire card */}
-                    {isLocked && (
-                      <div 
-                        className="absolute inset-0 bg-black/40 backdrop-blur-[1px] z-10 rounded-lg cursor-pointer" 
-                        onClick={handleLockClick}
+                  {/* image */}
+                  <div className="w-full h-44 overflow-hidden relative">
+                    <div className={isLocked ? 'blur-md' : ''}>
+                      <ImageCarousel
+                        images={
+                          insight?.photos && Array.isArray(insight.photos) && insight.photos.length > 0
+                            ? insight.photos
+                            : insight?.image
+                              ? [insight.image]
+                              : []
+                        }
+                        alt={insight?.title || "Trade insight"}
+                        height="h-44"
+                        showViewButton={hasAccess}
                       />
-                    )}
-                  </Card>
+                    </div>
 
-                  {/* Hover Overlay with Message */}
-                  {!hasAccess && hoveredInsightId === insight._id && (
-                    <div
-                      className="absolute inset-0 bg-black/70 flex items-center justify-center z-50 rounded-xl cursor-pointer transition-opacity animate-in fade-in duration-200"
-                      onClick={() => navigate('/login')}
-                    >
-                      <div className="text-center text-white p-6">
-                        <Lock className="w-12 h-12 mx-auto mb-4" />
-                        <h3 className="text-xl font-semibold mb-2">
-                          Login Required
-                        </h3>
-                        <p className="text-sm opacity-90">
-                          Please login to view insights
-                        </p>
+                    {/* Lock Icon - Top Right Corner (only when locked) */}
+                    {isLocked && (
+                      <div
+                        className="absolute top-3 right-3 z-20 cursor-pointer"
+                        onClick={handleLockClick}
+                      >
+                        <div className="bg-yellow-500 backdrop-blur-sm p-2.5 rounded-full hover:bg-yellow-600/80 transition-all">
+                          <Lock className="w-5 h-5 text-white" />
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  <CardContent className="p-4">
+                    {/* Author */}
+                    <div className="flex items-center gap-3">
+                      <Avatar className="h-10 w-10">
+                        <AvatarImage
+                          src={insight?.avatar}
+                          alt={insight?.author || "Author"}
+                        />
+                        <AvatarFallback>{insight?.author?.[0] || "A"}</AvatarFallback>
+                      </Avatar>
+
+                      <div className="flex-1">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="text-sm font-medium truncate">
+                              {insight?.author || "Unknown"}
+                            </p>
+                            <p className="text-xs text-muted-foreground">
+                              {insight?.date || ""}
+                            </p>
+                          </div>
+                          <Badge>{insight?.category || ""}</Badge>
+                        </div>
                       </div>
                     </div>
-                  )}
-                </div>
 
-              );
-            })}
-          </div>
-        )}
-      </div>
+                    {/* Title */}
+                    <h3 className="mt-4 text-lg font-bold text-primary">
+                      {isLocked ? "****************" : (insight?.title || "Untitled")}
+                    </h3>
+
+                    {/* Preview - 2 lines max */}
+                    <p className="mt-2 text-sm text-muted-foreground line-clamp-2 h-10">
+                      {isLocked ? "****************************************" : (insight?.preview || "")}
+                    </p>
+
+                    {/* Button - Only show when not locked */}
+                    {!isLocked && (
+                      <div className="mt-4">
+                        <Button
+                          onClick={() => setSelectedInsight(insight)}
+                          className="w-full bg-yellow-600 text-white hover:bg-yellow-700"
+                        >
+                          View Details
+                        </Button>
+                      </div>
+                    )}
+                  </CardContent>
+
+                  {!isLocked && (
+                    <CardFooter className="p-4">
+                      <div className="text-sm text-muted-foreground">
+                        Published • {insight?.date?.split(',')?.[0] || ""}
+                      </div>
+                    </CardFooter>
+                  )}
+
+                  {/* Full Card Lock Overlay - Semi-transparent overlay over entire card */}
+                  {isLocked && (
+                    <div
+                      className="absolute inset-0 bg-black/40 backdrop-blur-[1px] z-10 rounded-lg cursor-pointer"
+                      onClick={handleLockClick}
+                    />
+                  )}
+                </Card>
+
+                {/* Hover Overlay with Message */}
+                {!hasAccess && hoveredInsightId === insight._id && (
+                  <div
+                    className="absolute inset-0 bg-black/70 flex items-center justify-center z-50 rounded-xl cursor-pointer transition-opacity animate-in fade-in duration-200"
+                    onClick={() => navigate('/login')}
+                  >
+                    <div className="text-center text-white p-6">
+                      <Lock className="w-12 h-12 mx-auto mb-4" />
+                      <h3 className="text-xl font-semibold mb-2">
+                        Login Required
+                      </h3>
+                      <p className="text-sm opacity-90">
+                        Please login to view insights
+                      </p>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+            );
+          })}
+        </div>
+      )}
 
       {/* Plan Selection Modal */}
       {selectedContentForPurchase && (
@@ -483,7 +481,7 @@ export default function InsightPage() {
       {/* UID Required Modal */}
       <Dialog open={showUidModal} onOpenChange={setShowUidModal}>
         <DialogContent className="sm:max-w-md">
-          <UidRequired 
+          <UidRequired
             onConnectUid={(e) => {
               e?.preventDefault();
               e?.stopPropagation();
