@@ -4,6 +4,8 @@ import mongoose from "mongoose";
 import Category from "../../models/category.js";
 import SectionModel from "../../models/section.js";
 import LanguageModel from "../../models/language.js";
+import courseProgress from "../../models/courseProgress.js";
+import Lecture from "../../models/lecture.js";
 // import Schedule from "../../model/schedule.model.js";
 // import RecurrenceSchedule from "../../model/RecurrenceSchedule.js";
 
@@ -42,12 +44,12 @@ export const CourseBasedOnSection = async (req, res) => {
     }
 
     // Build query with explicit isDeleted filter
-    let query = { 
-      section: mainSection, 
+    let query = {
+      section: mainSection,
       published: true,
       isDeleted: false  // Explicitly filter out deleted courses
     };
-    
+
     if (categoryId) {
       // Ensure categoryId is a valid ObjectId
       if (mongoose.Types.ObjectId.isValid(categoryId)) {
@@ -56,7 +58,7 @@ export const CourseBasedOnSection = async (req, res) => {
         return res.status(400).json({ success: false, message: "Invalid categoryId format" });
       }
     }
-    
+
     // Handle language with trim and regex to match even if database has trailing spaces
     if (language) {
       const trimmedLanguage = language.trim();
@@ -94,7 +96,7 @@ export const CourseBasedOnSection = async (req, res) => {
         published: true,
         isDeleted: false  // Explicitly filter out deleted courses
       };
-      
+
       if (id) {
         if (mongoose.Types.ObjectId.isValid(id)) {
           singleCourseQuery._id = new mongoose.Types.ObjectId(id);
@@ -102,7 +104,7 @@ export const CourseBasedOnSection = async (req, res) => {
       } else if (coursesData[0]?._id) {
         singleCourseQuery._id = coursesData[0]._id;
       }
-      
+
       if (categoryId) {
         if (mongoose.Types.ObjectId.isValid(categoryId)) {
           singleCourseQuery.category = new mongoose.Types.ObjectId(categoryId);
@@ -110,7 +112,7 @@ export const CourseBasedOnSection = async (req, res) => {
       } else if (coursesData[0]?.category?._id) {
         singleCourseQuery.category = coursesData[0].category._id;
       }
-      
+
       if (language) {
         const trimmedLanguage = language.trim();
         singleCourseQuery.language = { $regex: new RegExp(`^${trimmedLanguage.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\s*$`, 'i') };
@@ -118,32 +120,32 @@ export const CourseBasedOnSection = async (req, res) => {
         const trimmedLang = String(coursesData[0].language).trim();
         singleCourseQuery.language = { $regex: new RegExp(`^${trimmedLang.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\s*$`, 'i') };
       }
-      
+
       const singleCourse = await Course.findOne(singleCourseQuery)
         .populate("recommendedCourses", "_id title description imageUrl price tier")
         .sort({ createdAt: -1 })
         .lean();
 
-      const categoryIdForQuery = categoryId 
-        ? categoryId 
+      const categoryIdForQuery = categoryId
+        ? categoryId
         : (coursesData[0]?.category?._id ? coursesData[0].category._id : null);
-      
-      const categoriesActiveData = categoryIdForQuery 
+
+      const categoriesActiveData = categoryIdForQuery
         ? await Category.find({
-            _id: mongoose.Types.ObjectId.isValid(categoryIdForQuery) 
-              ? new mongoose.Types.ObjectId(categoryIdForQuery) 
-              : categoryIdForQuery,
-            status: true
-          })
+          _id: mongoose.Types.ObjectId.isValid(categoryIdForQuery)
+            ? new mongoose.Types.ObjectId(categoryIdForQuery)
+            : categoryIdForQuery,
+          status: true
+        })
         : await Category.find({ status: true });
 
       const languageForQuery = language || coursesData[0]?.language || null;
-      
+
       const languageActiveData = languageForQuery
         ? await LanguageModel.find({
-            status: true,
-            name: languageForQuery
-          })
+          status: true,
+          name: languageForQuery
+        })
           .select("_id name")
           .lean()
         : await LanguageModel.find({ status: true })
@@ -179,30 +181,30 @@ export const CourseBasedOnSection = async (req, res) => {
       courses.push(singleCourse); // put into array for consistent handling
     } else {
       // If no filters applied, use first course
-      let courseQuery = { 
+      let courseQuery = {
         section: mainSection,
         published: true,
         isDeleted: false  // Explicitly filter out deleted courses
       };
 
-      const categoryIdForQuery = categoryId 
+      const categoryIdForQuery = categoryId
         ? (mongoose.Types.ObjectId.isValid(categoryId) ? new mongoose.Types.ObjectId(categoryId) : null)
         : (coursesData[0]?.category?._id ? coursesData[0].category._id : null);
-      
+
       const categoriesActiveData = categoryIdForQuery
         ? await Category.find({
-            _id: categoryIdForQuery,
-            status: true
-          })
+          _id: categoryIdForQuery,
+          status: true
+        })
         : await Category.find({ status: true });
 
       const languageForQuery = language || coursesData[0]?.language || null;
-      
+
       const languageActiveData = languageForQuery
         ? await LanguageModel.find({
-            status: true,
-            name: languageForQuery
-          })
+          status: true,
+          name: languageForQuery
+        })
           .select("_id name")
           .lean()
         : await LanguageModel.find({ status: true })
@@ -256,16 +258,16 @@ export const CourseBasedOnSection = async (req, res) => {
         language: languageData,
         categories: sortCategories(categoriesData),
         course: [],
-          AllCourse: coursesData.map(item => ({
-            _id: item._id,
-            title: item.title,
-            description: item.description,
-            imageUrl: item.imageUrl,
-            tier: item.tier,
-            price: item.price,
-            hotmartProductId: item.hotmartProductId
-          }))
-        });
+        AllCourse: coursesData.map(item => ({
+          _id: item._id,
+          title: item.title,
+          description: item.description,
+          imageUrl: item.imageUrl,
+          tier: item.tier,
+          price: item.price,
+          hotmartProductId: item.hotmartProductId
+        }))
+      });
     }
 
     // STEP 2: Extract required values
@@ -298,6 +300,8 @@ export const CourseBasedOnSection = async (req, res) => {
         title: section.title,
         order: section.order,
         course: courseId,
+        courseTitle: courses.find(c => c._id.toString() === courseId)?.title || "",
+        courseDescription: courses.find(c => c._id.toString() === courseId)?.description || "",
         lectures: (section.lectures || []).map(lec => ({
           _id: lec._id,
           title: lec.title,
@@ -386,8 +390,8 @@ export const getAllCoursesForMarketplace = async (req, res) => {
     // Filter by language if provided
     if (language) {
       const trimmedLanguage = language.trim();
-      query.language = { 
-        $regex: new RegExp(`^${trimmedLanguage.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\s*$`, 'i') 
+      query.language = {
+        $regex: new RegExp(`^${trimmedLanguage.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\s*$`, 'i')
       };
     }
 
@@ -397,9 +401,9 @@ export const getAllCoursesForMarketplace = async (req, res) => {
       if (mongoose.Types.ObjectId.isValid(categoryParam)) {
         query.category = new mongoose.Types.ObjectId(categoryParam);
       } else {
-        return res.status(400).json({ 
-          success: false, 
-          message: "Invalid categoryId format" 
+        return res.status(400).json({
+          success: false,
+          message: "Invalid categoryId format"
         });
       }
     }
@@ -426,16 +430,16 @@ export const getAllCoursesForMarketplace = async (req, res) => {
 
     // Get total count for pagination
     const totalCourses = await Course.countDocuments(query);
-    
+
     // Debug: Log course count and sample courses
     console.log(`Marketplace: Found ${courses.length} courses (total: ${totalCourses})`);
     if (courses.length > 0) {
-      console.log("Sample course sections:", courses.slice(0, 5).map(c => ({ 
-        id: c._id, 
-        title: c.title, 
+      console.log("Sample course sections:", courses.slice(0, 5).map(c => ({
+        id: c._id,
+        title: c.title,
         section: c.section,
         published: true,
-        createdBy: c.createdBy?._id 
+        createdBy: c.createdBy?._id
       })));
     }
 
@@ -490,4 +494,105 @@ export const getAllCoursesForMarketplace = async (req, res) => {
   }
 };
 
-export default { CourseBasedOnSection, getAllCoursesForMarketplace };
+export const getCourseProgress = async (req, res) => {
+  const userId = req.user._id;
+  const { courseId } = req.params;
+
+  const progress = await courseProgress.findOne({
+    user: userId,
+    course: courseId,
+  });
+
+  return res.status(200).json({
+    success: true,
+    courseId,
+    completedLectures: progress?.completedLectures || [],
+    progressPercentage: progress?.progressPercentage || 0,
+  });
+};
+
+export const markLectureComplete = async (req, res) => {
+  const userId = req.user._id;
+  const { courseId, lectureId } = req.body;
+
+  let progress = await courseProgress.findOne({ user: userId, course: courseId });
+
+  if (!progress) {
+    progress = await courseProgress.create({
+      user: userId,
+      course: courseId,
+      completedLectures: [],
+    });
+  }
+
+  if (!progress.completedLectures.includes(lectureId)) {
+    progress.completedLectures.push(lectureId);
+  }
+
+  const totalLectures = await Lecture.countDocuments({
+    section: { $exists: true },
+  });
+
+  progress.progressPercentage =
+    (progress.completedLectures.length / totalLectures) * 100;
+
+  progress.isCompleted = progress.progressPercentage === 100;
+
+  await progress.save();
+
+  return res.status(200).json({ success: true });
+};
+
+export const undoLectureComplete = async (req, res) => {
+  const userId = req.user._id;
+  const { courseId, lectureId } = req.body;
+
+  if (!courseId || !lectureId) {
+    return res.status(400).json({
+      success: false,
+      message: "courseId and lectureId are required",
+    });
+  }
+
+  let progress = await courseProgress.findOne({
+    user: userId,
+    course: courseId,
+  });
+
+  // If no progress exists, nothing to undo
+  if (!progress) {
+    return res.status(200).json({
+      success: true,
+      message: "No progress found",
+    });
+  }
+
+  // Remove lectureId if exists
+  progress.completedLectures = progress.completedLectures.filter(
+    (id) => id.toString() !== lectureId.toString()
+  );
+
+  // ⚠️ IMPORTANT: count only lectures of THIS course
+  const totalLectures = await Lecture.countDocuments({
+    section: { $exists: true },
+  });
+
+  progress.progressPercentage =
+    totalLectures > 0
+      ? (progress.completedLectures.length / totalLectures) * 100
+      : 0;
+
+  progress.isCompleted = progress.progressPercentage === 100;
+
+  await progress.save();
+
+  return res.status(200).json({
+    success: true,
+    completedLectures: progress.completedLectures,
+    progressPercentage: progress.progressPercentage,
+  });
+};
+
+
+
+export default { CourseBasedOnSection, getAllCoursesForMarketplace, getCourseProgress, markLectureComplete, undoLectureComplete };

@@ -16,6 +16,7 @@ import { useCreatePaymentLinkMutation, useLazyGetCoursePlansQuery } from '../../
 import { selectCurrentToken, selectIsAuthenticated } from '../../../store/authSlice';
 import { toast } from 'sonner';
 import { selectSelectedLanguage } from '../../../store/languageSlice';
+import { useGetCourseProgressQuery, useMarkLectureCompleteMutation, useUndoLectureCompleteMutation } from '../../../store/client/clientCourseProgressApiSlice';
 
 
 
@@ -108,6 +109,10 @@ function CourseUI({
   // Video player state - sync with parent lecture state
   const [selectedVideo, setSelectedVideo] = useState(null);
   const [isVideoPlaying, setIsVideoPlaying] = useState(false);
+  const [markLectureComplete] = useMarkLectureCompleteMutation();
+  const [undoLectureComplete] = useUndoLectureCompleteMutation();
+
+
 
   // Payment state
   const [showPlanModal, setShowPlanModal] = useState(false);
@@ -146,6 +151,16 @@ function CourseUI({
   const isAuthenticated = useSelector(selectIsAuthenticated);
   const navigate = useNavigate();
 
+
+  const {
+    data: progressData,
+  } = useGetCourseProgressQuery(currentCourseId, {
+    skip: !isAuthenticated || !currentCourseId,
+  });
+
+  const completedLectureIds =
+    progressData?.completedLectures || [];
+
   // Handle purchase - Check authentication first, then fetch plans
   const handlePurchase = async () => {
     console.log('🚨🚨🚨 handlePurchase CALLED! 🚨🚨🚨');
@@ -176,7 +191,7 @@ function CourseUI({
     try {
       // Use RTK Query lazy hook to fetch plans
       console.log('📡 STEP 2: Calling plans API via RTK Query for course:', currentCourseId);
-      
+
       const plansResult = await triggerGetPlans(currentCourseId).unwrap();
       console.log('📦 STEP 3: Plans API response received:', plansResult);
 
@@ -228,8 +243,8 @@ function CourseUI({
 
       // If error is from plans fetch (RTK Query error), don't proceed to checkout
       // RTK Query errors have status and data properties
-      if (error?.status === 401 || error?.data?.message === "Invalid or expired token" || 
-          error?.message?.includes('Plans API failed') || error?.status) {
+      if (error?.status === 401 || error?.data?.message === "Invalid or expired token" ||
+        error?.message?.includes('Plans API failed') || error?.status) {
         const errorMessage = error?.data?.message || error?.message || 'Failed to load payment plans. Please try again.';
         toast.error(errorMessage);
         return; // Exit - don't call checkout
@@ -449,9 +464,34 @@ function CourseUI({
                         "Lesson Title")
                       : "Select a lesson to begin"}
                   </h2>
-                  {selectedVideo && (
-                    <button className="btn bg-transparent border border-white text-gray-800 dark:text-white cursor-pointer">
-                      Mark as Complete
+                  {selectedVideo && hasAccess && (
+                    <button
+                      onClick={async () => {
+                        const payload = {
+                          courseId: currentCourseId,
+                          lectureId: selectedVideo.id,
+                        };
+
+                        try {
+                          if (completedLectureIds.includes(selectedVideo.id)) {
+                            await undoLectureComplete(payload).unwrap();
+                            toast.success("Lecture marked as incomplete");
+                          } else {
+                            await markLectureComplete(payload).unwrap();
+                            toast.success("Lecture marked as complete");
+                          }
+                        } catch (err) {
+                          toast.error("Failed to update progress");
+                        }
+                      }}
+                      className={`btn border cursor-pointer ${completedLectureIds.includes(selectedVideo.id)
+                        ? "bg-green-600 text-white"
+                        : "bg-transparent text-gray-800 dark:text-white"
+                        }`}
+                    >
+                      {completedLectureIds.includes(selectedVideo.id)
+                        ? "Completed ✓"
+                        : "Mark as Complete"}
                     </button>
                   )}
                 </div>
@@ -493,6 +533,11 @@ function CourseUI({
                   {/* First Section (Intro Series) */}
                   {currentCourse?.length > 0 && currentCourse?.[0]?.title && (
                     <div className="mb-2">
+                      {/* {currentCourse?.[0]?.courseTitle && (
+                        <h3 className="font-bold text-gray-900 dark:text-gray-200">
+                          {currentCourse?.[0]?.courseTitle}
+                        </h3>
+                      )} */}
                       <button
                         onClick={() => toggle(currentCourse?.[0]?.title || "Intro Series")}
                         className="w-full flex items-center gap-3 p-3 rounded-lg transition-colors justify-between hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer"
@@ -511,6 +556,7 @@ function CourseUI({
                         <div className="space-y-2">
                           {introLessons?.map((lesson) => {
                             const lessonId = lesson?._id || lesson?.id;
+                            const isCompleted = completedLectureIds.includes(lessonId);
                             const isSelected = activeLectureId === lessonId || selectedVideo?.id === lessonId;
                             const videoUrl = lesson?.videoUrl || lesson?.content;
                             const isLocked = showLock && !hasAccess;
@@ -528,10 +574,14 @@ function CourseUI({
                                   }
                                 }}
                                 disabled={isLocked}
-                                className={`w-full flex items-center gap-3 p-3 rounded-lg transition-colors mt-2 relative ${isSelected
-                                  ? "bg-yellow-400 hover:bg-yellow-500"
-                                  : "bg-gray-100 hover:bg-gray-200 dark:bg-[#201a09] dark:hover:bg-[#201a09] cursor-pointer"
-                                  } ${isLocked ? "opacity-60 cursor-not-allowed" : ""}`}
+                                className={`w-full flex items-center gap-3 p-3 rounded-lg transition-colors mt-2 relative
+                                  ${isCompleted && !isSelected
+                                    ? "bg-green-100 border border-green-500"
+                                    : isSelected
+                                      ? "bg-yellow-400 hover:bg-yellow-500"
+                                      : "bg-gray-100 hover:bg-gray-200 dark:bg-[#201a09] dark:hover:bg-[#201a09]"
+                                  }
+                                  ${isLocked ? "opacity-60 cursor-not-allowed" : ""}`}
                               >
                                 {isLocked && (
                                   <div className="absolute right-2 top-2">
