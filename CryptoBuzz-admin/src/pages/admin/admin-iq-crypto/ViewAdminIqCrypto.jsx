@@ -8,7 +8,7 @@ import {
 import { format } from "date-fns";
 import ShowMoreLess from "../../../components/ui/showmoreless";
 import AdminIqCryptoSlider from "./AdminIqCryptoSlider";
-import CustomVideoPlayer from "../../../../../CryptBuzz-edu/src/components/CustomVideoPlayer.jsX";
+import CustomVideoPlayer from "../../../../../CryptBuzz-edu/src/components/CustomVideoPlayer.jsx";
 
 const ViewAdminIqCrypto = forwardRef(
   ({ isViewOpen, handleCloseView, selectedIdea, setIsLightBoxOpen }, ref) => {

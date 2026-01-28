@@ -8,7 +8,7 @@ import {
 import { format } from "date-fns";
 import ShowMoreLess from "../../../components/ui/showmoreless";
 import AdminIqCryptoSlider from "./EducatorIqCryptoSlider";
-import CustomVideoPlayer from "../../../components/CustomVideoPlayer.jsX";
+import CustomVideoPlayer from "../../../components/CustomVideoPlayer.jsx";
 
 const ViewEducatorIqCrypto = forwardRef(
   ({ isViewOpen, handleCloseView, selectedIdea, setIsLightBoxOpen }, ref) => {
