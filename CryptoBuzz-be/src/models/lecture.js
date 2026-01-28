@@ -24,12 +24,12 @@ const LectureSchema = new mongoose.Schema(
       required: true,
     },
 
-    completions: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "LectureCompletion",
-      },
-    ],
+    // completions: [
+    //   {
+    //     type: mongoose.Schema.Types.ObjectId,
+    //     ref: "LectureCompletion",
+    //   },
+    // ],
   },
   { timestamps: true }
 );

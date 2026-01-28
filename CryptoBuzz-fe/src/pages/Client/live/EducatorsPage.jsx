@@ -275,7 +275,7 @@ const EducatorsPage = () => {
               className="rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow bg-white dark:bg-gray-950"
             >
               {/* Header Section with Banner Image */}
-              <div className="relative h-48 overflow-hidden">
+              <div className="relative h-48 sm:h-[25vh] overflow-hidden">
                 {/* Banner Image Background */}
                 {educator.bannerImage ? (
                   <img

@@ -651,11 +651,11 @@ export default function LivePage() {
 
         {/* Educator Cards */}
         {educators.length > 0 && (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 mt-6">
             {educators.map((educator) => (
               <div
                 key={educator?.id}
-                className={`rounded-lg overflow-hidden shadow-lg relative h-96 ${educator?.image === 'plaid'
+                className={`rounded-lg overflow-hidden shadow-lg relative h-96 sm:h-[40vh] ${educator?.image === 'plaid'
                   ? 'bg-gradient-to-br from-gray-400 via-gray-500 to-gray-600'
                   : 'bg-gradient-to-br from-slate-500 via-slate-600 to-slate-700'
                   }`}
