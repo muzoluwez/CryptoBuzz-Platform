@@ -172,7 +172,7 @@ export default function HomePage() {
             </div>
           </section> */}
 
-          <Card className="relative bg-black mb-6 text-white p-0 overflow-hidden">
+          <Card className="relative bg-black mb-6 text-white p-0 overflow-hidden h-[30vh]">
             <CardContent className="p-0">
               <div className='relative h-full'>
                 <DummyImage
@@ -198,7 +198,7 @@ export default function HomePage() {
               {/* Top-left stacked cards */}
               <div className="grid grid-cols-1 md:grid-cols-1 gap-6">
                 <div className="flex flex-col gap-5">
-                  <Card className="relative bg-black text-white p-0 overflow-hidden">
+                  <Card className="relative bg-black text-white p-0 overflow-hidden h-[30vh]">
                     <CardContent className="p-0">
                       <div className='relative h-full'>
                         <img
@@ -224,7 +224,7 @@ export default function HomePage() {
                       </div>
                     </CardContent>
                   </Card>
-                  <Card className="relative bg-black text-white p-0 overflow-hidden">
+                  <Card className="relative bg-black text-white p-0 overflow-hidden h-[30vh]">
                     <CardContent className="p-0">
                       <div className='relative h-full'>
                         <img
@@ -447,7 +447,7 @@ export default function HomePage() {
                     <h4 className=" text-2xl font-bold">
                       Cripto Buzz Sesiones en Vivo
                     </h4>
-                    <p className="text-md mt-1 mb-5">
+                    <p className="text-md mt-1 mb-5 line-clamp-2">
                       Únete a nuestras clases en vivo
                     </p>
                     <Link
@@ -473,7 +473,7 @@ export default function HomePage() {
                     <h4 className=" text-2xl font-bold">
                       Ideas de Trading
                     </h4>
-                    <p className="text-md mt-1 mb-5">
+                    <p className="text-md mt-1 mb-5 line-clamp-2">
                       Obtén acceso a nuestras entradas en tiempo real!
                     </p>
                     <Link
@@ -499,7 +499,7 @@ export default function HomePage() {
                     <h4 className=" text-2xl font-bold">
                       Cripto Buzz Social Feed
                     </h4>
-                    <p className="text-md mt-1 mb-5">
+                    <p className="text-md mt-1 mb-5 line-clamp-2">
                       Sigue las actualizaciones más recientes del mercado, sobre nuestra plataforma y contenido.
                     </p>
                     <Link
