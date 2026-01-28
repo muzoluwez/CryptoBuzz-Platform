@@ -8,6 +8,7 @@ import {
 import { format } from "date-fns";
 import ShowMoreLess from "../../../components/ui/showmoreless";
 import AdminIqCryptoSlider from "./AdminIqCryptoSlider";
+import CustomVideoPlayer from "../../../../../CryptBuzz-edu/src/components/CustomVideoPlayer.jsX";
 
 const ViewAdminIqCrypto = forwardRef(
   ({ isViewOpen, handleCloseView, selectedIdea, setIsLightBoxOpen }, ref) => {
@@ -32,11 +33,11 @@ const ViewAdminIqCrypto = forwardRef(
                   </div>
                 </div>
                 <div className="">
-                  <AdminIqCryptoSlider
-                    sliderImages={selectedIdea?.image}
+                  {selectedIdea?.mediaType === "video" && selectedIdea?.videoUrl ? <CustomVideoPlayer videoUrl={selectedIdea?.videoUrl} /> : <AdminIqCryptoSlider
+                    sliderImages={selectedIdea?.photos}
                     setIsLightBoxOpen={setIsLightBoxOpen}
                     selectedIdea={selectedIdea}
-                  />
+                  />}
                 </div>
                 <div className="grid gap-5 p-5">
                   <div className="grid grid-cols-12 gap-4">
