@@ -145,23 +145,42 @@ export default function HomePage() {
       {/* <Toolbar>
         <ToolbarHeading title="Home" />
       </Toolbar> */}
-        <div className="my-6">
-          <main className="">
-            {/* Page Header */}
-            <header className="mb-6">
-              <h1 className="text-2xl font-bold">Cripto Buzz Inicio</h1>
-              <p className="text-sm text-gray-500">Inicio</p>
-            </header>
+      <div className="my-6">
+        <main className="">
+          {/* Page Header */}
+          <header className="mb-6">
+            <h1 className="text-2xl font-bold">Cripto Buzz Inicio</h1>
+            <p className="text-sm text-gray-500">Inicio</p>
+          </header>
 
-            {/* HERO */}
-            <section className="card mb-6 bg-white !rounded-2xl">
-              <div className="relative h-52 md:h-60 lg:h-72">
+          {/* HERO */}
+          {/* <section className="card mb-6 bg-white !rounded-2xl">
+            <div className="relative h-52 md:h-60 lg:h-72">
+              <DummyImage
+                src={hero_banner}
+                alt="hero"
+              />
+
+              <div className="absolute px-4 bottom-6 text-white mb-4">
+                <h2 className="text-2xl md:text-3xl font-semibold drop-shadow-md">
+                  Cripto Buzz
+                </h2>
+                <p className="text-sm md:text-base drop-shadow-sm line-clamp-2">
+                  es una plataforma de aprendizaje sobre criptomonedas y estrategias de inversión
+                </p>
+              </div>
+            </div>
+          </section> */}
+
+          <Card className="relative bg-black mb-6 text-white p-0 overflow-hidden">
+            <CardContent className="p-0">
+              <div className='relative h-full'>
                 <DummyImage
                   src={hero_banner}
                   alt="hero"
+                  className="w-full h-full object-cover"
                 />
-
-                <div className="absolute px-4 bottom-6 text-white mb-4">
+                <div className="absolute left-3 bottom-8 px-4 text-white z-10">
                   <h2 className="text-2xl md:text-3xl font-semibold drop-shadow-md">
                     Cripto Buzz
                   </h2>
@@ -170,330 +189,345 @@ export default function HomePage() {
                   </p>
                 </div>
               </div>
-            </section>
+            </CardContent>
+          </Card>
 
-            {/* TWO COLUMN FEATURES */}
-            <section className="grid grid-cols-1 lg:grid-cols-4 gap-6 mb-6">
-              <div className="lg:col-span-2 space-y-6">
-                {/* Top-left stacked cards */}
-                <div className="grid grid-cols-1 md:grid-cols-1 gap-6">
-                  <div className="flex flex-col gap-5">
-                    <Card className="relative rounded-xl text-white bg-[url('/media/images/banner_1.jpeg')] bg-cover h-64 overflow-hidden">
-                      <CardContent className="flex flex-col justify-center h-full z-10 md:max-w-[75%]">
-                        <div>
+          {/* TWO COLUMN FEATURES */}
+          <section className="grid grid-cols-1 lg:grid-cols-4 gap-6 mb-6">
+            <div className="lg:col-span-2 space-y-6">
+              {/* Top-left stacked cards */}
+              <div className="grid grid-cols-1 md:grid-cols-1 gap-6">
+                <div className="flex flex-col gap-5">
+                  <Card className="relative bg-black text-white p-0 overflow-hidden">
+                    <CardContent className="p-0">
+                      <div className='relative h-full'>
+                        <img
+                          src="/media/images/banner_1.jpeg"
+                          alt="live sessions"
+                          className="w-full h-full object-cover"
+                        />
+                        <div className="absolute top-1/2 -translate-y-1/2 px-4 text-white z-10">
                           <CardHeading className="text-2xl font-black">
                             Academia
                           </CardHeading>
                           <p className="mt-2 text-lg line-clamp-3">
                             Aprendizaje desde lo más básico hasta lo más avanzado para que inicies a capitalizar el mercado.
                           </p>
+                          <div className="mt-4">
+                            <Link
+                              to="/client/academy"
+                              className="btn bg-white text-black cursor-pointer">
+                              Inicia tu aprendizaje!
+                            </Link>
+                          </div>
                         </div>
-                        <div className="mt-4">
-                          <Link
-                            to="/client/academy"
-                            className="btn bg-white text-black cursor-pointer">
-                            Inicia tu aprendizaje!
-                          </Link>
-                        </div>
-                      </CardContent>
-                    </Card>
-                    <Card className="relative text-white bg-[url('/media/images/banner_2.jpeg')] bg-cover h-64 overflow-hidden">
-                      <CardContent className="flex flex-col justify-center h-full z-10 md:max-w-[75%]">
-                        <div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                  <Card className="relative bg-black text-white p-0 overflow-hidden">
+                    <CardContent className="p-0">
+                      <div className='relative h-full'>
+                        <img
+                          src="/media/images/banner_2.jpeg"
+                          alt="live sessions"
+                          className="w-full h-full object-cover"
+                        />
+                        <div className="absolute top-1/2 -translate-y-1/2 px-4 text-white z-10">
                           <CardHeading className="text-2xl font-black">
                             Membresía VIP
                           </CardHeading>
                           <p className="mt-2 text-lg line-clamp-3">
                             Cripto Buzz VIP te dará los análisis clave que te permitirán tomar atajos en el mercado cripto.
                           </p>
+                          <div className="mt-4">
+                            <Link
+                              to="/client/marketplace"
+                              className="btn bg-white text-black cursor-pointer "
+                            >
+                              Obtener VIP
+                            </Link>
+                          </div>
                         </div>
-                        <div className="mt-4">
-                          <Link
-                            to="/client/marketplace"
-                            className="btn bg-white text-black cursor-pointer "
-                          >
-                            Obtener VIP
-                          </Link>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  </div>
+                      </div>
+                    </CardContent>
+                  </Card>
                 </div>
               </div>
+            </div>
 
-              {/* Right big highlighted card */}
-              <div className="lg:col-span-2 space-y-6">
-                <Card className="relative text-white bg-[url('/media/images/live_user_bg.png')] bg-cover overflow-hidden h-full">
-                  {/* Live Badge - Only show when there are live streams */}
-                  {liveStreams.length > 0 && !isLiveStreamsLoading && (
-                    <div className="absolute top-4 left-4 z-30 bg-red-600 text-white text-xs font-semibold px-3 py-1.5 rounded-full flex items-center gap-2 shadow-lg">
-                      <span className="w-2 h-2 bg-white rounded-full animate-pulse"></span>
-                      LIVE
+            {/* Right big highlighted card */}
+            <div className="lg:col-span-2 space-y-6">
+              <Card className="relative text-white bg-[url('/media/images/live_user_bg.png')] bg-cover overflow-hidden h-full">
+                {/* Live Badge - Only show when there are live streams */}
+                {liveStreams.length > 0 && !isLiveStreamsLoading && (
+                  <div className="absolute top-4 left-4 z-30 bg-red-600 text-white text-xs font-semibold px-3 py-1.5 rounded-full flex items-center gap-2 shadow-lg">
+                    <span className="w-2 h-2 bg-white rounded-full animate-pulse"></span>
+                    LIVE
+                  </div>
+                )}
+                <CardContent className="flex flex-col items-center justify-between w-full z-10 h-full py-10">
+                  <div className="text-center">
+                    <CardHeading className="text-3xl font-black mb-5 leading-10">
+                      Descubre quién esta vivo en <br /> Cripto Buzz
+                    </CardHeading>
+                    <p className="mt-2 text-lg opacity-95 leading-6">
+                      {isLiveStreamsLoading
+                        ? 'Loading live streams...'
+                        : liveStreams.length === 0
+                          ? 'No hay educatores en vivo en estos momentos. Revisa nuestro calendario para que no te pierdas la proxima sesión!'
+                          : 'Join our live trading sessions and learn from experts'}
+                    </p>
+                  </div>
+
+                  {isLiveStreamsLoading ? (
+                    <div className="flex flex-col items-center mt-7">
+                      <div className="h-34 w-34 radius-live-user overflow-hidden mb-3 bg-gray-300 animate-pulse"></div>
+                      <div className="h-6 w-32 bg-gray-300 rounded animate-pulse mb-2"></div>
+                      <div className="h-4 w-24 bg-gray-300 rounded animate-pulse"></div>
+                    </div>
+                  ) : isLiveStreamsError ? (
+                    <div className="flex flex-col items-center mt-7">
+                      <p className="text-red-300 text-sm">
+                        Failed to load live streams
+                      </p>
+                    </div>
+                  ) : liveStreams.length > 0 && currentLiveStream ? (
+                    <div
+                      className="flex flex-col items-center mt-7 w-full relative"
+                      onTouchStart={onTouchStart}
+                      onTouchMove={onTouchMove}
+                      onTouchEnd={onTouchEnd}
+                    >
+                      {/* Slider Navigation - Only show if multiple educators */}
+                      {liveStreams.length > 1 && (
+                        <>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setCurrentLiveIndex(
+                                (prev) =>
+                                  (prev - 1 + liveStreams.length) %
+                                  liveStreams.length,
+                              );
+                            }}
+                            className="absolute left-2 top-1/2 -translate-y-1/2 z-20 bg-black/60 hover:bg-black/80 text-white p-2 rounded-full transition-all shadow-lg"
+                            aria-label="Previous educator"
+                          >
+                            <ChevronLeft size={20} />
+                          </button>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setCurrentLiveIndex(
+                                (prev) => (prev + 1) % liveStreams.length,
+                              );
+                            }}
+                            className="absolute right-2 top-1/2 -translate-y-1/2 z-20 bg-black/60 hover:bg-black/80 text-white p-2 rounded-full transition-all shadow-lg"
+                            aria-label="Next educator"
+                          >
+                            <ChevronRight size={20} />
+                          </button>
+                          {/* Dots indicator */}
+                          <div className="absolute bottom-16 flex gap-2 z-20">
+                            {liveStreams.map((_, index) => (
+                              <button
+                                key={index}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setCurrentLiveIndex(index);
+                                }}
+                                className={`w-2.5 h-2.5 rounded-full transition-all ${index === currentLiveIndex
+                                  ? 'bg-white w-6'
+                                  : 'bg-white/50 hover:bg-white/70'
+                                  }`}
+                                aria-label={`Go to slide ${index + 1}`}
+                              />
+                            ))}
+                          </div>
+                          {/* Counter */}
+                          <div className="absolute top-2 right-2 z-20 bg-black/60 text-white text-xs px-2 py-1 rounded-full">
+                            {currentLiveIndex + 1} / {liveStreams.length}
+                          </div>
+                        </>
+                      )}
+
+                      <div className="flex flex-col items-center">
+                        <Link
+                          to={`/client/view-profile/${currentLiveStream.educator?._id}`}
+                          className="flex flex-col items-center cursor-pointer hover:opacity-90 transition-opacity"
+                          onClick={(e) => {
+                            // Only prevent navigation if clicking on slider navigation buttons, dots, or counter
+                            const isSliderButton = e.target.closest('button[aria-label*="educator"]') ||
+                              e.target.closest('button[aria-label*="slide"]');
+                            const isCounter = e.target.closest('[class*="absolute"][class*="top-2"][class*="right-2"]');
+
+                            if (isSliderButton || isCounter) {
+                              e.preventDefault();
+                              e.stopPropagation();
+                            }
+                            // Allow navigation for image, name, and title clicks
+                          }}
+                        >
+                          <div className="h-34 w-34 radius-live-user overflow-hidden mb-3 relative">
+                            <img
+                              src={
+                                currentLiveStream.educator?.image ||
+                                currentLiveStream.educator?.bannerImage ||
+                                'https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&w=800&auto=format&fit=crop'
+                              }
+                              alt={
+                                currentLiveStream.educator?.first_name ||
+                                'Educator'
+                              }
+                              className="w-full h-full object-cover transition-opacity duration-300"
+                              onError={(e) => {
+                                e.target.src =
+                                  'https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&w=800&auto=format&fit=crop';
+                              }}
+                            />
+                            {/* Live indicator badge */}
+                          </div>
+                          <h4 className="font-semibold text-lg hover:underline">
+                            {currentLiveStream.educator?.first_name || ''}{' '}
+                            {currentLiveStream.educator?.last_name || ''}
+                          </h4>
+                          <p className="text-sm text-white/90">
+                            {currentLiveStream.title ||
+                              currentLiveStream.schedule?.title ||
+                              'Live Trading Session'}
+                          </p>
+                        </Link>
+                      </div>
+                      <button
+                        onClick={() => {
+                          if (!isAuthenticated) {
+                            setShowLoginRequired(true);
+                          } else {
+                            navigate(
+                              `/client/view-profile/${currentLiveStream.educator?._id}`,
+                            );
+                          }
+                        }}
+                        className="btn bg-white text-black mt-2 hover:bg-gray-100 transition-colors"
+                      >
+                        Watch Now
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="flex flex-col items-center mt-7">
+                      <div className="h-34 w-34 radius-live-user overflow-hidden mb-3">
+                        <img
+                          src="/media/images/live_user.jpeg"
+                          alt="No live stream"
+                          className="w-full h-full object-cover opacity-70"
+                        />
+                      </div>
+                      <h4 className="font-semibold text-lg text-white/70">
+                        No educators live
+                      </h4>
+                      <p className="text-sm text-white/60">Check back later</p>
                     </div>
                   )}
-                  <CardContent className="flex flex-col items-center justify-between w-full z-10 h-full py-10">
-                    <div className="text-center">
-                      <CardHeading className="text-3xl font-black mb-5 leading-10">
-                        Descubre quién esta vivo en <br /> Cripto Buzz
-                      </CardHeading>
-                      <p className="mt-2 text-lg opacity-95 leading-6">
-                        {isLiveStreamsLoading
-                          ? 'Loading live streams...'
-                          : liveStreams.length === 0
-                            ? 'No hay educatores en vivo en estos momentos. Revisa nuestro calendario para que no te pierdas la proxima sesión!'
-                            : 'Join our live trading sessions and learn from experts'}
-                      </p>
-                    </div>
-
-                    {isLiveStreamsLoading ? (
-                      <div className="flex flex-col items-center mt-7">
-                        <div className="h-34 w-34 radius-live-user overflow-hidden mb-3 bg-gray-300 animate-pulse"></div>
-                        <div className="h-6 w-32 bg-gray-300 rounded animate-pulse mb-2"></div>
-                        <div className="h-4 w-24 bg-gray-300 rounded animate-pulse"></div>
-                      </div>
-                    ) : isLiveStreamsError ? (
-                      <div className="flex flex-col items-center mt-7">
-                        <p className="text-red-300 text-sm">
-                          Failed to load live streams
-                        </p>
-                      </div>
-                    ) : liveStreams.length > 0 && currentLiveStream ? (
-                      <div
-                        className="flex flex-col items-center mt-7 w-full relative"
-                        onTouchStart={onTouchStart}
-                        onTouchMove={onTouchMove}
-                        onTouchEnd={onTouchEnd}
-                      >
-                        {/* Slider Navigation - Only show if multiple educators */}
-                        {liveStreams.length > 1 && (
-                          <>
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                setCurrentLiveIndex(
-                                  (prev) =>
-                                    (prev - 1 + liveStreams.length) %
-                                    liveStreams.length,
-                                );
-                              }}
-                              className="absolute left-2 top-1/2 -translate-y-1/2 z-20 bg-black/60 hover:bg-black/80 text-white p-2 rounded-full transition-all shadow-lg"
-                              aria-label="Previous educator"
-                            >
-                              <ChevronLeft size={20} />
-                            </button>
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                setCurrentLiveIndex(
-                                  (prev) => (prev + 1) % liveStreams.length,
-                                );
-                              }}
-                              className="absolute right-2 top-1/2 -translate-y-1/2 z-20 bg-black/60 hover:bg-black/80 text-white p-2 rounded-full transition-all shadow-lg"
-                              aria-label="Next educator"
-                            >
-                              <ChevronRight size={20} />
-                            </button>
-                            {/* Dots indicator */}
-                            <div className="absolute bottom-16 flex gap-2 z-20">
-                              {liveStreams.map((_, index) => (
-                                <button
-                                  key={index}
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    setCurrentLiveIndex(index);
-                                  }}
-                                  className={`w-2.5 h-2.5 rounded-full transition-all ${index === currentLiveIndex
-                                    ? 'bg-white w-6'
-                                    : 'bg-white/50 hover:bg-white/70'
-                                    }`}
-                                  aria-label={`Go to slide ${index + 1}`}
-                                />
-                              ))}
-                            </div>
-                            {/* Counter */}
-                            <div className="absolute top-2 right-2 z-20 bg-black/60 text-white text-xs px-2 py-1 rounded-full">
-                              {currentLiveIndex + 1} / {liveStreams.length}
-                            </div>
-                          </>
-                        )}
-
-                        <div className="flex flex-col items-center">
-                          <Link
-                            to={`/client/view-profile/${currentLiveStream.educator?._id}`}
-                            className="flex flex-col items-center cursor-pointer hover:opacity-90 transition-opacity"
-                            onClick={(e) => {
-                              // Only prevent navigation if clicking on slider navigation buttons, dots, or counter
-                              const isSliderButton = e.target.closest('button[aria-label*="educator"]') ||
-                                e.target.closest('button[aria-label*="slide"]');
-                              const isCounter = e.target.closest('[class*="absolute"][class*="top-2"][class*="right-2"]');
-
-                              if (isSliderButton || isCounter) {
-                                e.preventDefault();
-                                e.stopPropagation();
-                              }
-                              // Allow navigation for image, name, and title clicks
-                            }}
-                          >
-                            <div className="h-34 w-34 radius-live-user overflow-hidden mb-3 relative">
-                              <img
-                                src={
-                                  currentLiveStream.educator?.image ||
-                                  currentLiveStream.educator?.bannerImage ||
-                                  'https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&w=800&auto=format&fit=crop'
-                                }
-                                alt={
-                                  currentLiveStream.educator?.first_name ||
-                                  'Educator'
-                                }
-                                className="w-full h-full object-cover transition-opacity duration-300"
-                                onError={(e) => {
-                                  e.target.src =
-                                    'https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&w=800&auto=format&fit=crop';
-                                }}
-                              />
-                              {/* Live indicator badge */}
-                            </div>
-                            <h4 className="font-semibold text-lg hover:underline">
-                              {currentLiveStream.educator?.first_name || ''}{' '}
-                              {currentLiveStream.educator?.last_name || ''}
-                            </h4>
-                            <p className="text-sm text-white/90">
-                              {currentLiveStream.title ||
-                                currentLiveStream.schedule?.title ||
-                                'Live Trading Session'}
-                            </p>
-                          </Link>
-                        </div>
-                        <button
-                          onClick={() => {
-                            if (!isAuthenticated) {
-                              setShowLoginRequired(true);
-                            } else {
-                              navigate(
-                                `/client/view-profile/${currentLiveStream.educator?._id}`,
-                              );
-                            }
-                          }}
-                          className="btn bg-white text-black mt-2 hover:bg-gray-100 transition-colors"
-                        >
-                          Watch Now
-                        </button>
-                      </div>
-                    ) : (
-                      <div className="flex flex-col items-center mt-7">
-                        <div className="h-34 w-34 radius-live-user overflow-hidden mb-3">
-                          <img
-                            src="/media/images/live_user.jpeg"
-                            alt="No live stream"
-                            className="w-full h-full object-cover opacity-70"
-                          />
-                        </div>
-                        <h4 className="font-semibold text-lg text-white/70">
-                          No educators live
-                        </h4>
-                        <p className="text-sm text-white/60">Check back later</p>
-                      </div>
-                    )}
-                  </CardContent>
-                  <div className="absolute bg-gradient-yellow  inset-0 bg-gradient-green z-0"></div>
-                </Card>
-              </div>
-            </section>
-
-            <section className="grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
-              <Card className="relative bg-black text-white p-0 overflow-hidden">
-                <CardContent className="p-0">
-                  <div className="relative h-full">
-                    <img
-                      src="/media/images/home_images/1.jpeg"
-                      alt="live sessions"
-                      className="w-full h-full object-cover"
-                    />
-                    <div className="absolute left-4 bottom-6 text-white z-10">
-                      <h4 className=" text-2xl font-bold">
-                        Cripto Buzz Sesiones en Vivo
-                      </h4>
-                      <p className="text-md mt-1 mb-5">
-                        Únete a nuestras clases en vivo
-                      </p>
-                      <Link
-                        to="/client/live"
-                        className="mt-3 btn bg-transparent border border-white text-white cursor-pointer"
-                      >
-                        Start Learning
-                      </Link>
-                    </div>
-                  </div>
                 </CardContent>
+                <div className="absolute bg-gradient-yellow  inset-0 bg-gradient-green z-0"></div>
               </Card>
+            </div>
+          </section>
 
-              <Card className="relative bg-black text-white p-0 overflow-hidden">
-                <CardContent className="p-0">
-                  <div className="relative h-full">
-                    <img
-                      src="/media/images/home_images/2.jpeg"
-                      alt="trading ideas"
-                      className="w-full h-full object-cover"
-                    />
-                    <div className="absolute left-4 bottom-6 text-white z-10">
-                      <h4 className=" text-2xl font-bold">
-                        Ideas de Trading
-                      </h4>
-                      <p className="text-md mt-1 mb-5">
-                        Obtén acceso a nuestras entradas en tiempo real!
-                      </p>
-                      <Link
-                        to="/client/idea"
-                        className="mt-3 btn bg-transparent border border-white text-white cursor-pointer"
-                      >
-                        Start Learning
-                      </Link>
-                    </div>
+          <section className="grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
+            <Card className="relative bg-black text-white p-0 overflow-hidden">
+              <CardContent className="p-0">
+                <div className="relative h-full">
+                  <img
+                    src="/media/images/home_images/1.jpeg"
+                    alt="live sessions"
+                    className="w-full h-full object-cover"
+                  />
+                  <div className="absolute left-4 bottom-6 text-white z-10">
+                    <h4 className=" text-2xl font-bold">
+                      Cripto Buzz Sesiones en Vivo
+                    </h4>
+                    <p className="text-md mt-1 mb-5">
+                      Únete a nuestras clases en vivo
+                    </p>
+                    <Link
+                      to="/client/live"
+                      className="mt-3 btn bg-transparent border border-white text-white cursor-pointer"
+                    >
+                      Start Learning
+                    </Link>
                   </div>
-                </CardContent>
-              </Card>
+                </div>
+              </CardContent>
+            </Card>
 
-              <Card className="relative bg-black text-white p-0 overflow-hidden">
-                <CardContent className="p-0">
-                  <div className="relative h-full">
-                    <img
-                      src="/media/images/home_images/3.jpeg"
-                      alt="social feed"
-                      className="w-full h-full object-cover"
-                    />
-                    <div className="absolute left-4 bottom-6 text-white z-10">
-                      <h4 className=" text-2xl font-bold">
-                        Cripto Buzz Social Feed
-                      </h4>
-                      <p className="text-md mt-1 mb-5">
-                        Sigue las actualizaciones más recientes del mercado, sobre nuestra plataforma y contenido.
-                      </p>
-                      <Link
-                        to="/client/social"
-                        className="mt-3 btn bg-transparent border border-white text-white cursor-pointer"
-                      >
-                        Start Learning
-                      </Link>
-                    </div>
+            <Card className="relative bg-black text-white p-0 overflow-hidden">
+              <CardContent className="p-0">
+                <div className="relative h-full">
+                  <img
+                    src="/media/images/home_images/2.jpeg"
+                    alt="trading ideas"
+                    className="w-full h-full object-cover"
+                  />
+                  <div className="absolute left-4 bottom-6 text-white z-10">
+                    <h4 className=" text-2xl font-bold">
+                      Ideas de Trading
+                    </h4>
+                    <p className="text-md mt-1 mb-5">
+                      Obtén acceso a nuestras entradas en tiempo real!
+                    </p>
+                    <Link
+                      to="/client/idea"
+                      className="mt-3 btn bg-transparent border border-white text-white cursor-pointer"
+                    >
+                      Start Learning
+                    </Link>
                   </div>
-                </CardContent>
-              </Card>
-            </section>
+                </div>
+              </CardContent>
+            </Card>
 
-            {/* FEED + SIDEBAR */}
-            <section className="grid grid-cols-3 lg:grid-cols-3 gap-6">
-              {/* Activity feed (large left) */}
-              <div className="col-span-12 rounded-2xl">
-                <div className="card border !rounded-xl p-6 h-full">
-                  {/* Header */}
-                  <div className="flex flex-wrap items-center justify-between mb-6 gap-3">
-                    <h3 className="text-lg font-bold dark:text-white flex items-center gap-2">
-                      <Activity className="w-5 h-5 text-yellow-400" />
-                      Actividad del Feed
-                    </h3>
+            <Card className="relative bg-black text-white p-0 overflow-hidden">
+              <CardContent className="p-0">
+                <div className="relative h-full">
+                  <img
+                    src="/media/images/home_images/3.jpeg"
+                    alt="social feed"
+                    className="w-full h-full object-cover"
+                  />
+                  <div className="absolute left-4 bottom-6 text-white z-10">
+                    <h4 className=" text-2xl font-bold">
+                      Cripto Buzz Social Feed
+                    </h4>
+                    <p className="text-md mt-1 mb-5">
+                      Sigue las actualizaciones más recientes del mercado, sobre nuestra plataforma y contenido.
+                    </p>
+                    <Link
+                      to="/client/social"
+                      className="mt-3 btn bg-transparent border border-white text-white cursor-pointer"
+                    >
+                      Start Learning
+                    </Link>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </section>
 
-                    <div className="flex gap-1 p-1 rounded-lg">
-                      {/* <button
+          {/* FEED + SIDEBAR */}
+          <section className="grid grid-cols-3 lg:grid-cols-3 gap-6">
+            {/* Activity feed (large left) */}
+            <div className="col-span-12 rounded-2xl">
+              <div className="card border !rounded-xl p-6 h-full">
+                {/* Header */}
+                <div className="flex flex-wrap items-center justify-between mb-6 gap-3">
+                  <h3 className="text-lg font-bold dark:text-white flex items-center gap-2">
+                    <Activity className="w-5 h-5 text-yellow-400" />
+                    Actividad del Feed
+                  </h3>
+
+                  <div className="flex gap-1 p-1 rounded-lg">
+                    {/* <button
                       onClick={() => setSocialType("company")}
                       className={`
                         px-4 py-2 rounded-md text-sm font-medium transition-all
@@ -507,113 +541,113 @@ export default function HomePage() {
                       Corporate
                     </button> */}
 
-                      <button
-                        onClick={() => setSocialType('social')}
-                        className={`
+                    <button
+                      onClick={() => setSocialType('social')}
+                      className={`
                        py-2 px-4 rounded-lg cursor-pointer bg-yellow-400 text-sm 
                       text-black
                       `}
-                      >
-                        Social
-                      </button>
-                    </div>
+                    >
+                      Social
+                    </button>
                   </div>
+                </div>
 
-                  <div className="space-y-3">
-                    {isPostsLoading || isFetchingPosts ? (
-                      <>
-                        {[1, 2, 3, 4, 5].map((i) => (
-                          <div
-                            key={i}
-                            className="flex items-center gap-3 p-3 rounded-xl bg-gray-500 animate-pulse"
-                          >
-                            <div className="w-10 h-10 rounded-full bg-gray-300 dark:bg-gray-700/40"></div>
-
-                            <div className="flex-1 space-y-2">
-                              <div className="flex items-center justify-between">
-                                <div className="w-24 h-4 bg-gray-300 dark:bg-gray-700/40 rounded"></div>
-                                <div className="w-14 h-4 bg-gray-300 dark:bg-gray-700/40 rounded"></div>
-                              </div>
-
-                              <div className="w-full h-4 bg-gray-300 dark:bg-gray-700/40 rounded"></div>
-
-                              <div className="w-3/4 h-4 bg-gray-300 dark:bg-gray-700/40 rounded"></div>
-                            </div>
-
-                            <div className="w-4 h-4 bg-gray-300 dark:bg-gray-700/40 rounded"></div>
-                          </div>
-                        ))}
-                      </>
-                    ) : isPostsError ? (
-                      <div className="text-center py-10 text-red-500">
-                        <p className="mb-2">Failed to load social feed</p>
-                        <p className="text-sm text-gray-500">
-                          Please try again later
-                        </p>
-                      </div>
-                    ) : posts.length > 0 ? (
-                      posts.map((post) => (
+                <div className="space-y-3">
+                  {isPostsLoading || isFetchingPosts ? (
+                    <>
+                      {[1, 2, 3, 4, 5].map((i) => (
                         <div
-                          key={post._id}
-                          className="flex items-center gap-3 p-3 bg-gray-100 dark:bg-[#201a09] rounded-xl hover:bg-gray-100 transition cursor-pointer"
-                          onClick={() =>
-                            navigate(`/client/social?socialType=${socialType}`)
-                          }
+                          key={i}
+                          className="flex items-center gap-3 p-3 rounded-xl bg-gray-500 animate-pulse"
                         >
-                          <div className="relative">
-                            <img
-                              src={post.author?.image || '/media/avatars/1.png'}
-                              alt={post.author?.first_name || 'IQNOIC'}
-                              className="w-10 h-10 rounded-full object-cover"
-                              onError={(e) => {
-                                e.target.src = '/media/avatars/1.png';
-                              }}
-                            />
-                          </div>
+                          <div className="w-10 h-10 rounded-full bg-gray-300 dark:bg-gray-700/40"></div>
 
-                          <div className="flex-1">
-                            <div className="flex items-center justify-between ">
-                              <p className="dark:text-white font-medium text-[14px]">
-                                {post.author?.first_name || 'IQNOIC'}{' '}
-                                {post.author?.last_name || 'EDUCATOR'}
-                              </p>
-                              <p className="text-xs text-gray-600 dark:text-gray-400 font-medium text-[14px]">
-                                {timeAgo(post.createdAt || new Date())}
-                              </p>
+                          <div className="flex-1 space-y-2">
+                            <div className="flex items-center justify-between">
+                              <div className="w-24 h-4 bg-gray-300 dark:bg-gray-700/40 rounded"></div>
+                              <div className="w-14 h-4 bg-gray-300 dark:bg-gray-700/40 rounded"></div>
                             </div>
 
-                            <p className="text-xs text-gray-700 dark:text-gray-300 mt-1 font-medium text-[14px]">
-                              {getShortContent(post.content)}
-                              {htmlToPlainText(post.content).length > 120 && (
-                                <span
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    navigate(
-                                      `/client/social?socialType=${socialType}`,
-                                    );
-                                  }}
-                                  className="ml-1 text-yellow-600 dark:text-yellow-400 font-medium cursor-pointer"
-                                >
-                                  See more
-                                </span>
-                              )}
+                            <div className="w-full h-4 bg-gray-300 dark:bg-gray-700/40 rounded"></div>
+
+                            <div className="w-3/4 h-4 bg-gray-300 dark:bg-gray-700/40 rounded"></div>
+                          </div>
+
+                          <div className="w-4 h-4 bg-gray-300 dark:bg-gray-700/40 rounded"></div>
+                        </div>
+                      ))}
+                    </>
+                  ) : isPostsError ? (
+                    <div className="text-center py-10 text-red-500">
+                      <p className="mb-2">Failed to load social feed</p>
+                      <p className="text-sm text-gray-500">
+                        Please try again later
+                      </p>
+                    </div>
+                  ) : posts.length > 0 ? (
+                    posts.map((post) => (
+                      <div
+                        key={post._id}
+                        className="flex items-center gap-3 p-3 bg-gray-100 dark:bg-[#201a09] rounded-xl hover:bg-gray-100 transition cursor-pointer"
+                        onClick={() =>
+                          navigate(`/client/social?socialType=${socialType}`)
+                        }
+                      >
+                        <div className="relative">
+                          <img
+                            src={post.author?.image || '/media/avatars/1.png'}
+                            alt={post.author?.first_name || 'IQNOIC'}
+                            className="w-10 h-10 rounded-full object-cover"
+                            onError={(e) => {
+                              e.target.src = '/media/avatars/1.png';
+                            }}
+                          />
+                        </div>
+
+                        <div className="flex-1">
+                          <div className="flex items-center justify-between ">
+                            <p className="dark:text-white font-medium text-[14px]">
+                              {post.author?.first_name || 'IQNOIC'}{' '}
+                              {post.author?.last_name || 'EDUCATOR'}
+                            </p>
+                            <p className="text-xs text-gray-600 dark:text-gray-400 font-medium text-[14px]">
+                              {timeAgo(post.createdAt || new Date())}
                             </p>
                           </div>
 
-                          <ChevronRight className="w-4 h-4 text-gray-600 dark:text-gray-400" />
+                          <p className="text-xs text-gray-700 dark:text-gray-300 mt-1 font-medium text-[14px]">
+                            {getShortContent(post.content)}
+                            {htmlToPlainText(post.content).length > 120 && (
+                              <span
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  navigate(
+                                    `/client/social?socialType=${socialType}`,
+                                  );
+                                }}
+                                className="ml-1 text-yellow-600 dark:text-yellow-400 font-medium cursor-pointer"
+                              >
+                                See more
+                              </span>
+                            )}
+                          </p>
                         </div>
-                      ))
-                    ) : (
-                      <div className="text-center py-10 text-gray-500 dark:text-gray-400">
-                        No posts available right now.
+
+                        <ChevronRight className="w-4 h-4 text-gray-600 dark:text-gray-400" />
                       </div>
-                    )}
-                  </div>
+                    ))
+                  ) : (
+                    <div className="text-center py-10 text-gray-500 dark:text-gray-400">
+                      No posts available right now.
+                    </div>
+                  )}
                 </div>
               </div>
+            </div>
 
-              {/* Right Sidebar */}
-              {/* <div className="col-span-12 lg:col-span-1">
+            {/* Right Sidebar */}
+            {/* <div className="col-span-12 lg:col-span-1">
                 <aside className="space-y-6 mb-5">
                   <Card className="p-4">
                     <CardHeader className="!p-0 min-h-0 !pb-3 mb-3">
@@ -697,9 +731,9 @@ export default function HomePage() {
                   </Card>
                 </aside>
               </div> */}
-            </section>
-          </main>
-        </div>
+          </section>
+        </main>
+      </div>
       {/* Login Required Modal/Dialog */}
       {showLoginRequired && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">

@@ -452,11 +452,11 @@ const CryptoPage = () => {
             return (
               <Card key={crypto?._id || crypto?.id} className="bg-card border border-border overflow-hidden relative">
                 {/* Media (Image or Video) */}
-                <div className="w-full h-44 overflow-hidden relative">
+                <div className="relative">
                   <div className={isLocked ? 'blur-[2px]' : ''}>
                     {crypto?.mediaType === 'video' && crypto?.videoUrl ? (
                       // Video thumbnail with play icon
-                      <div className="relative w-full h-44 bg-black">
+                      <div className="relative w-full h-44 sm:h-[20vh] bg-black">
                         {isExternalVideoUrl(crypto.videoUrl) ? (
                           // External video (YouTube, Vimeo, Loom) - show thumbnail or placeholder
                           <div className="relative w-full h-full">
@@ -526,7 +526,7 @@ const CryptoPage = () => {
                               : []
                         }
                         alt={crypto?.title || "Crypto analysis"}
-                        height="h-44"
+                        height="h-44 sm:h-[20vh]"
                         showViewButton={hasAccess}
                       />
                     )}

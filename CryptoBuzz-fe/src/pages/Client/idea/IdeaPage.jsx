@@ -324,7 +324,7 @@ export default function IdeaPage() {
                               : [c.image || c.image_Url]
                           }
                           alt={c.name || 'Trading idea'}
-                          height="h-52"
+                          height="h-52 sm:h-[20vh]"
                           showViewButton={hasAccess}
                         />
                       </div>

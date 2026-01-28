@@ -340,7 +340,7 @@ export default function InsightPage() {
                 >
 
                   {/* image */}
-                  <div className="w-full h-44 overflow-hidden relative">
+                  <div className="relative">
                     <div className={isLocked ? 'blur-md' : ''}>
                       <ImageCarousel
                         images={
@@ -351,7 +351,7 @@ export default function InsightPage() {
                               : []
                         }
                         alt={insight?.title || "Trade insight"}
-                        height="h-44"
+                        height="h-52 sm:h-[20vh]"
                         showViewButton={hasAccess}
                       />
                     </div>
