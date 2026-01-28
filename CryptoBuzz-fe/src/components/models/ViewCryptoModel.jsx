@@ -61,7 +61,6 @@ export default function ViewCryptoModel({ crypto, isOpen, onClose }) {
             {crypto?.title}
           </DialogTitle>
         </DialogHeader>
-
         {/* AccessGate protects the Detail View */}
         <AccessGate
           accessType={crypto?.accessType}
@@ -128,36 +127,6 @@ export default function ViewCryptoModel({ crypto, isOpen, onClose }) {
                   __html: crypto?.fullDisplayHtml || crypto?.fullHtml || crypto?.full || "No content available." 
                 }}
               />
-              <style>{`
-                /* Ensure images are displayed properly */
-                img {
-                  max-width: 100% !important;
-                  height: auto !important;
-                  border-radius: 0.5rem !important;
-                  display: block !important;
-                }
-                /* Paragraph spacing */
-                /* Headings */
-                h1, h2, h3 {
-                  margin-top: 1rem !important;
-                  margin-bottom: 0.5rem !important;
-                  font-weight: 600 !important;
-                }
-                /* Lists */
-                ul, ol {
-                  margin: 0.75rem 0 !important;
-                  padding-left: 1.5rem !important;
-                }
-                /* Links */
-                a {
-                  color: #3b82f6 !important;
-                  text-decoration: underline !important;
-                }
-                a:hover {
-                  color: #2563eb !important;
-                }
-              `}</style>
-
               {/* Author */}
               <div className="flex items-center gap-4 pt-4 border-t">
                 <Avatar className="h-12 w-12">

@@ -105,7 +105,7 @@ const getVideoThumbnail = (url) => {
   return "";
 };
 
-export default function CryptoPage() {
+const CryptoPage = () => {
   useDocumentTitle('Crypto Analysis');
   const [showPlanModal, setShowPlanModal] = useState(false);
   const [selectedContentForPurchase, setSelectedContentForPurchase] = useState(null);
@@ -670,3 +670,4 @@ export default function CryptoPage() {
   );
 }
 
+export default CryptoPage;
