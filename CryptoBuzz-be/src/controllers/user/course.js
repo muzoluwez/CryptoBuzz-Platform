@@ -286,7 +286,7 @@ export const CourseBasedOnSection = async (req, res) => {
       _id: { $in: courseSectionId }
     })
       .sort({ order: 1, createdAt: -1 })
-      .populate("lectures", "title description videoUrl thumbnailUrl type content")
+      .populate("lectures", "title description videoUrl thumbnailUrl type content duration")
       .lean();
 
     // STEP 5: Group Sections by Course
@@ -309,7 +309,8 @@ export const CourseBasedOnSection = async (req, res) => {
           description: lec.description,
           thumbnailUrl: lec.thumbnailUrl,
           content: lec.content,
-          videoUrl: lec.videoUrl
+          videoUrl: lec.videoUrl,
+          duration: lec.duration
         }))
       });
     });

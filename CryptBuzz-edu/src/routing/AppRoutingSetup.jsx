@@ -113,18 +113,10 @@ const routes = {
     },
     { path: "/educator/live-session", element: <EducatorLiveSession /> },
     { path: "/educator/ended-live-sessions", element: <EducatorEndSession /> },
-
-
     {
       path: "/educator/live-session/:callId",
       element: <EducatorLiveSessionView />,
     },
-
-    {
-      path: "/educator/live-session/:callId",
-      element: <EducatorLiveSessionView />,
-    },
-
   ],
 };
 

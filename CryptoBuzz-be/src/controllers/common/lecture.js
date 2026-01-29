@@ -22,6 +22,7 @@ const lectureValidationSchema = yup.object().shape({
   type: yup.string().oneOf(["VIDEO", "TEXT", "QUIZ", "ASSIGNMENT"], "Invalid lecture type").default("VIDEO").optional(),
   preview: yup.boolean().default(false).optional(),
   thumbnailUrl: yup.string().url("Invalid thumbnail URL").nullable().optional(),
+  duration: yup.string().optional(),
   section: yup
     .string()
     .matches(/^[0-9a-fA-F]{24}$/, "Invalid section ID")
@@ -61,6 +62,8 @@ export const getLectures = async (req, res) => {
       type: lecture.type,
       preview: lecture.preview,
       thumbnailUrl: lecture.thumbnailUrl,
+      videoUrl: lecture.videoUrl,
+      duration: lecture.duration,
       section: lecture.section,
       // completions: lecture.completions,
       createdAt: lecture.createdAt,
@@ -104,7 +107,7 @@ export const createLecture = async (req, res) => {
   try {
     await lectureValidationSchema.validate(req.body);
 
-    const { title, description, content, order, type, preview, section } = req.body;
+    const { title, description, content, order, type, preview, section, duration } = req.body;
 
     const existing = await Lecture.findOne({ title, section });
     if (existing)
@@ -130,6 +133,7 @@ export const createLecture = async (req, res) => {
       type,
       preview,
       videoUrl,
+      duration,
       section
     });
 
@@ -151,7 +155,7 @@ export const updateLecture = async (req, res) => {
     const { id } = req.params;
     await lectureValidationSchema.validate(req.body);
 
-    const { title, description, content, order, type, preview, section } = req.body;
+    const { title, description, content, order, type, preview, section, duration } = req.body;
 
     const existingLecture = await Lecture.findById(id);
     if (!existingLecture) return res.status(404).json({ message: "Lecture not found" });
@@ -197,6 +201,7 @@ export const updateLecture = async (req, res) => {
         preview,
         videoUrl,
         thumbnailUrl,
+        duration,
         section
       },
       { new: true }

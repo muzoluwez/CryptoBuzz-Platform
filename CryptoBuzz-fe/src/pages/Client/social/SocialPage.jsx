@@ -10,8 +10,6 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuLabel, DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import ImageCarousel from '@/components/common/ImageCarousel';
-import ImageViewer from '@/components/common/ImageViewer';
 import ShowMoreLess from '@/components/common/ShowMoreLess';
 import { Toolbar, ToolbarHeading } from '@/components/layouts/layout-7/components/toolbar';
 import { Card, CardContent, CardFooter, CardHeader, CardHeading, CardTitle, CardToolbar } from '../../../components/ui/card';
@@ -27,7 +25,7 @@ export default function SocialPage() {
   const navigate = useNavigate();
   const [sortValue, setSortValue] = useState('latest');
   const [selectedImage, setSelectedImage] = useState(null);
-  const [selectedImages, setSelectedImages] = useState([]);
+  const [selectedImages, setSelectedImages] = useState([]); // kept for compatibility if needed elsewhere
   const [showPlanModal, setShowPlanModal] = useState(false);
   const [selectedContentForPurchase, setSelectedContentForPurchase] = useState(null);
   const [showUidModal, setShowUidModal] = useState(false);
@@ -389,7 +387,7 @@ export default function SocialPage() {
               className="relative h-full"
               key={post?.id || post?._id}
             >
-              <Card className="max-w-full overflow-hidden rounded-xl shadow-md mb-5 h-full relative">
+              <Card className="container overflow-hidden rounded-xl shadow-md mb-5 h-full relative max-w-full md:max-w-2xl mx-auto pb-8">
 
                 {/* Lock Icon - Top Right Corner of entire card (only when locked) */}
                 {isLocked && (
@@ -447,23 +445,108 @@ export default function SocialPage() {
                       )}
                     </div>
                   </div>
-                  {/* Images */}
+                  {/* Images (grid view, click to open modal) */}
                   {post?.images &&
                     Array.isArray(post.images) &&
-                    post.images.length > 0 && (
-                      <div className="relative w-full overflow-hidden rounded-xl bg-black/5 dark:bg-white/5 group cursor-pointer mt-5">
-                        <div className={isLocked ? '' : ''}>
-                          <ImageCarousel
-                            images={post.images}
-                            alt={post?.content || 'Social post'}
-                            height="h-full"
-                            showViewButton={hasAccess}
-                            className="rounded-xl social_post"
-                          />
+                    post.images.length > 0 && (() => {
+                      const images = post.images.filter(Boolean);
+                      if (images.length === 0) return null;
+
+                      const openImage = (idx) => {
+                        if (!hasAccess) return;
+                        const safeIdx = Math.max(0, Math.min(idx, images.length - 1));
+                        setSelectedImage(images[safeIdx]);
+                      };
+
+                      // Single image: show as uploaded (contain, max width like PostCard)
+                      if (images.length === 1) {
+                        return (
+                          <div className="mt-5 flex justify-center">
+                            <button
+                              type="button"
+                              className="w-full max-w-[650px] rounded-xl overflow-hidden bg-black/5 dark:bg-white/5"
+                              onClick={() => openImage(0)}
+                              disabled={!hasAccess}
+                            >
+                              <img
+                                src={images[0]}
+                                alt={post?.content || 'Social post'}
+                                className="w-full h-auto max-h-[600px] object-contain"
+                                onError={(e) => {
+                                  if (e?.target) e.target.style.display = 'none';
+                                }}
+                              />
+                            </button>
+                          </div>
+                        );
+                      }
+
+                      // Multi image: grid preview (like reference)
+                      const showImages = images.slice(0, 4);
+                      const remaining = images.length - showImages.length;
+
+                      return (
+                        <div className="mt-5 flex justify-center">
+                          <div className="w-full max-w-[650px] grid grid-cols-2 gap-2">
+                            {showImages.map((src, idx) => (
+                              <div
+                                key={`${src}-${idx}`}
+                                className="w-full max-w-[650px] rounded-xl overflow-hidden bg-black/5 dark:bg-white/5"
+                                onClick={() => openImage(idx)}
+                                disabled={!hasAccess}
+                              >
+                                <img
+                                  src={src}
+                                  alt={post?.content || 'Social post'}
+                                  className="w-full aspect-square object-contain transition-all duration-300 ease-in-out group-hover:scale-105"
+                                  onError={(e) => {
+                                    if (e?.target) e.target.style.display = 'none';
+                                  }}
+                                />
+
+                                {idx === 3 && remaining > 0 && (
+                                  <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
+                                    <span className="text-white text-xl font-semibold">
+                                      +{remaining}
+                                    </span>
+                                  </div>
+                                )}
+                                {selectedImage && (
+                                  <div
+                                    className="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50 p-4 backdrop-blur-sm"
+                                    onClick={() => setSelectedImage(null)}
+                                  >
+                                    <div
+                                      className="relative"
+                                      onClick={(e) => e?.stopPropagation()}
+                                    >
+                                      <img
+                                        src={selectedImage}
+                                        alt="Social post image"
+                                        className="rounded-2xl max-w-full max-h-[90vh] border border-gray-200 dark:border-[#2C2F36]"
+                                        onError={(e) => {
+                                          if (e?.target) {
+                                            e.target.style.display = 'none';
+                                          }
+                                        }}
+                                      />
+                                      <button
+                                        type="button"
+                                        className="absolute top-3 right-3 bg-white dark:bg-[#1F1F23] text-black dark:text-[#EDEDED] hover:bg-gray-200 dark:hover:bg-[#3B3B42] px-3 py-1 rounded-lg shadow-md transition cursor-pointer"
+                                        onClick={() => setSelectedImage(null)}
+                                        aria-label="Close image"
+                                      >
+                                        ✕
+                                      </button>
+                                    </div>
+                                  </div>
+                                )}
+                              </div>
+                            ))}
+                          </div>
                         </div>
-                        <div className="absolute inset-0 to-transparent pointer-events-none" />
-                      </div>
-                    )}
+                      );
+                    })()}
                   {/* Videos */}
                   {post?.videos &&
                     Array.isArray(post.videos) &&
@@ -542,17 +625,8 @@ export default function SocialPage() {
         </DialogContent>
       </Dialog>
 
-      {/* Image Viewer Modal */}
-      <ImageViewer
-        image={selectedImage}
-        images={selectedImages?.length > 0 ? selectedImages : []}
-        isOpen={!!selectedImage}
-        onClose={() => {
-          setSelectedImage(null);
-          setSelectedImages([]);
-        }}
-        alt="Social post image"
-      />
+      {/* Simple Image Modal (single image only) */}
+
     </>
   );
 }
