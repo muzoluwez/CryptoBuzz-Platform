@@ -1,7 +1,7 @@
 # Docs for the Azure Web Apps Deploy action: https://github.com/Azure/webapps-deploy
 # More GitHub Actions for Azure: https://github.com/Azure/actions
 
-# name: Build and deploy Node.js app to Azure Web App - criptobuzz-admin
+# name: Build and deploy Node.js app to Azure Web App - criptoBuzz-be
 
 # on:
 #   push:
@@ -24,6 +24,7 @@
 #           node-version: '20.x'
 
 #       - name: npm install, build, and test
+#         working-directory: CryptoBuzz-be
 #         run: |
 #           npm install
 #           npm run build --if-present
@@ -51,22 +52,19 @@
 #       - name: Login to Azure
 #         uses: azure/login@v2
 #         with:
-#           client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_E459827F87204BE291C02F1F73B0EF97 }}
-#           tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_2A2967BF594E4121AF39A8ACCBE32181 }}
-#           subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_8E6599DAA36242009D0F3AF89E57F065 }}
+#           client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_422DFE86F9434E9B83046D65FF8C449A }}
+#           tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_82C3963D654E480C83BFCF2C9C5C08CD }}
+#           subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_7838EF349E8E419FBFA89C29D141F7A6 }}
 
 #       - name: 'Deploy to Azure Web App'
 #         id: deploy-to-webapp
 #         uses: azure/webapps-deploy@v3
 #         with:
-#           app-name: 'criptobuzz-admin'
+#           app-name: 'criptoBuzz-be'
 #           slot-name: 'Production'
 #           package: .
-          
 
-
-
-name: Build and deploy Node.js app to Azure Web App - criptobuzz-admin-fe
+name: Build and deploy Node.js app to Azure Web App - criptoBuzz-backend
 
 on:
   push:
@@ -85,29 +83,23 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Set up Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version: '20.x'
 
-      - name: Install dependencies
-        working-directory: CryptoBuzz-admin
-        run: npm install --force 
-             npm install express
+      - name: Install & test (local check only)
+        working-directory: CryptoBuzz-be
+        run: |
+          npm install
+          npm run test --if-present
 
-      - name: Build project with ENV
-        working-directory: CryptoBuzz-admin
-        env:
-          VITE_APP_API_URL: ${{ secrets.VITE_APP_API_URL }}
-          VITE_APP_URL: ${{ secrets.VITE_APP_URL }}
-          VITE_ENV: ${{ secrets.VITE_ENV }}
-          VITE_SOCKET_URL: ${{ secrets.VITE_SOCKET_URL }}
-        run: npm run build
-
-      - name: Upload artifact for deployment
+      # ✅ Upload optimized artifact
+      - name: Upload backend artifact (1 day retention)
         uses: actions/upload-artifact@v4
         with:
           name: node-app
-          path: CryptoBuzz-admin
+          path: CryptoBuzz-be
+          retention-days: 1   # 🔥 cost saver
 
   deploy:
     runs-on: ubuntu-latest
@@ -121,17 +113,18 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: node-app
+          path: .
 
-      - name: Azure Login
+      - name: Login to Azure (OIDC)
         uses: azure/login@v2
         with:
-          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_E459827F87204BE291C02F1F73B0EF97 }}
-          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_2A2967BF594E4121AF39A8ACCBE32181 }}
-          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_8E6599DAA36242009D0F3AF89E57F065 }}
+          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_422DFE86F9434E9B83046D65FF8C449A }}
+          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_82C3963D654E480C83BFCF2C9C5C08CD }}
+          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_7838EF349E8E419FBFA89C29D141F7A6 }}
 
       - name: Deploy to Azure Web App
         uses: azure/webapps-deploy@v3
         with:
-          app-name: criptobuzz-admin
-          slot-name: Production
+          app-name: 'criptoBuzz-be'
+          slot-name: 'Production'
           package: .
