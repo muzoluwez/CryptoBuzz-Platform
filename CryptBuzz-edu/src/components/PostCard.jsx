@@ -138,13 +138,13 @@ const PostCard = ({ post, onEdit, isOwnPost = false, refetch }) => {
       <div className="space-y-3">
         {/* Images */}
         {hasImages && (
-          <div className="flex justify-center">
+          <div className="flex justify-start">
             {post.images.length === 1 ? (
               <>
                 <img
                   src={post.images[0]}
                   alt="Post content"
-                  className="w-full max-w-[650px] rounded-lg h-auto max-h-[600px] object-contain cursor-pointer"
+                  className="w-[650px] rounded-lg h-96 object-cover cursor-pointer"
                   onClick={() => setIsOpen(true)}
                 />
 
@@ -171,7 +171,7 @@ const PostCard = ({ post, onEdit, isOwnPost = false, refetch }) => {
                 )}
               </>
             ) : (
-              <div className="grid grid-cols-2 gap-2">
+              <div className="grid grid-cols-2 gap-2 w-full">
                 {post.images.slice(0, 4).map((image, index) => (
                   <div key={index} className="relative">
                     <img

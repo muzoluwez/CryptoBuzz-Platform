@@ -489,17 +489,16 @@ export default function SocialPage() {
                         <div className="mt-5 flex justify-center">
                           <div className="w-full max-w-[650px] grid grid-cols-2 gap-2">
                             {showImages.map((src, idx) => (
-                              <button
+                              <div
                                 key={`${src}-${idx}`}
-                                type="button"
-                                className="relative rounded-xl overflow-hidden bg-black/5 dark:bg-white/5 aspect-video"
+                                className="w-full max-w-[650px] rounded-xl overflow-hidden bg-black/5 dark:bg-white/5"
                                 onClick={() => openImage(idx)}
                                 disabled={!hasAccess}
                               >
                                 <img
                                   src={src}
                                   alt={post?.content || 'Social post'}
-                                  className="w-full h-full object-cover"
+                                  className="w-full aspect-square object-contain transition-all duration-300 ease-in-out group-hover:scale-105"
                                   onError={(e) => {
                                     if (e?.target) e.target.style.display = 'none';
                                   }}
@@ -512,7 +511,37 @@ export default function SocialPage() {
                                     </span>
                                   </div>
                                 )}
-                              </button>
+                                {selectedImage && (
+                                  <div
+                                    className="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50 p-4 backdrop-blur-sm"
+                                    onClick={() => setSelectedImage(null)}
+                                  >
+                                    <div
+                                      className="relative"
+                                      onClick={(e) => e?.stopPropagation()}
+                                    >
+                                      <img
+                                        src={selectedImage}
+                                        alt="Social post image"
+                                        className="rounded-2xl max-w-full max-h-[90vh] border border-gray-200 dark:border-[#2C2F36]"
+                                        onError={(e) => {
+                                          if (e?.target) {
+                                            e.target.style.display = 'none';
+                                          }
+                                        }}
+                                      />
+                                      <button
+                                        type="button"
+                                        className="absolute top-3 right-3 bg-white dark:bg-[#1F1F23] text-black dark:text-[#EDEDED] hover:bg-gray-200 dark:hover:bg-[#3B3B42] px-3 py-1 rounded-lg shadow-md transition cursor-pointer"
+                                        onClick={() => setSelectedImage(null)}
+                                        aria-label="Close image"
+                                      >
+                                        ✕
+                                      </button>
+                                    </div>
+                                  </div>
+                                )}
+                              </div>
                             ))}
                           </div>
                         </div>
@@ -597,36 +626,7 @@ export default function SocialPage() {
       </Dialog>
 
       {/* Simple Image Modal (single image only) */}
-      {selectedImage && (
-        <div
-          className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4"
-          onClick={() => setSelectedImage(null)}
-        >
-          <div
-            className="relative max-w-5xl w-full max-h-[90vh] flex items-center justify-center"
-            onClick={(e) => e?.stopPropagation()}
-          >
-            <button
-              type="button"
-              className="absolute top-4 right-4 p-2 bg-white/10 hover:bg-white/20 rounded-full transition-colors"
-              onClick={() => setSelectedImage(null)}
-              aria-label="Close image"
-            >
-              ✕
-            </button>
-            <img
-              src={selectedImage}
-              alt="Social post image"
-              className="max-w-full max-h-[90vh] object-contain rounded-2xl"
-              onError={(e) => {
-                if (e?.target) {
-                  e.target.style.display = 'none';
-                }
-              }}
-            />
-          </div>
-        </div>
-      )}
+
     </>
   );
 }
