@@ -11,9 +11,9 @@ const Support = () => {
             className="font-manrope flex min-h-screen flex-col items-center justify-center bg-cover bg-center bg-fixed p-4 w-full"
             style={{ backgroundImage: `url(${bgImage})` }}>
             {/* Main Card */}
-            <div className="relative w-full max-w-[600px] overflow-hidden rounded-2xl border border-white/10 bg-gray-900/95 p-8 text-center shadow-2xl backdrop-blur-lg sm:p-12 md:p-16 lg:p-20 bg-gray-900">
+            <div className="relative w-full max-w-[600px] overflow-hidden rounded-2xl border border-white/10 bg-[linear-gradient(180deg,#1F1E1F_0%,#121213_100%)] p-8 text-center shadow-2xl backdrop-blur-lg sm:p-12 md:p-16 lg:p-20">
                 {/* Decorative Elements - hidden on mobile (sm) and up */}
-                <div className="absolute top-[-50px] right-[-50px] hidden h-[100px] w-[100px] rounded-full bg-gradient-to-br from-[#667eea] to-[#764ba2] opacity-10 sm:block"></div>
+                <div className="absolute top-[-50px] right-[-50px] hidden h-[100px] w-[100px] rounded-full bg-gradient-to-br from-[#ead266] to-[#a2864b] opacity-10 sm:block"></div>
                 <div className="absolute bottom-[-30px] left-[-30px] hidden h-[60px] w-[60px] rounded-full bg-gradient-to-br from-[#f093fb] to-[#f5576c] opacity-10 sm:block"></div>
 
                 {/* Logo */}
@@ -26,7 +26,7 @@ const Support = () => {
                 </div>
 
                 {/* Welcome Message */}
-                <h1 className="mb-2 bg-gradient-to-br from-[#667eea] to-[#764ba2] bg-clip-text text-3xl font-bold text-transparent sm:mb-3 sm:text-4xl md:text-5xl">
+                <h1 className="mb-2 bg-gradient-to-br from-[#a2864b] to-[#ffb617] bg-clip-text text-3xl font-bold text-transparent sm:mb-3 sm:text-4xl md:text-5xl">
                     Welcome to
                 </h1>
 

@@ -427,7 +427,7 @@ const EducatorLiveSession = ({ title = "Live Session" }) => {
                 Create a New Live Session
               </button>
               {/* Tooltip */}
-              <div className="absolute left-1/2 -translate-x-1/2 mt-2 w-max px-2 py-1 text-sm text-white bg-gray-800 rounded opacity-0 group-hover:opacity-100 transition">
+              <div className="absolute left-1/2 -translate-x-1/2 mt-2 w-max px-2 py-1 text-sm text-white bg-gray-800 dark:bg-gray-200 rounded opacity-0 group-hover:opacity-100 transition">
                 It won't appear in the schedule
               </div>
             </div>
