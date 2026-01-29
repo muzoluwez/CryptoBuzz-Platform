@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { ChevronDown, Play, Lock } from 'lucide-react';
+import { ChevronDown, Play, Lock, Circle, CircleCheck } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router';
 import { useSelector } from 'react-redux';
 import { Card, CardContent } from '../../../components/ui/card';
@@ -17,8 +17,6 @@ import { selectCurrentToken, selectIsAuthenticated } from '../../../store/authSl
 import { toast } from 'sonner';
 import { selectSelectedLanguage } from '../../../store/languageSlice';
 import { useGetCourseProgressQuery, useMarkLectureCompleteMutation, useUndoLectureCompleteMutation } from '../../../store/client/clientCourseProgressApiSlice';
-
-
 
 // Helper function to convert video URLs to embeddable formats
 const getEmbedUrl = (url) => {
@@ -73,6 +71,74 @@ const getEmbedUrl = (url) => {
   if (url.includes("dyntube.com/")) return url;
 
   return url;
+};
+
+// Helper: detect if video URL is an uploaded file (not external)
+const isUploadedVideo = (url) => {
+  if (!url || typeof url !== "string") return false;
+  const lower = url.toLowerCase();
+  return !(
+    lower.includes("youtube.com") ||
+    lower.includes("youtu.be") ||
+    lower.includes("vimeo.com") ||
+    lower.includes("loom.com") ||
+    lower.includes("loom.share") ||
+    lower.includes("stream.mux.com") ||
+    lower.includes("player.mux.com")
+  );
+};
+
+// Helper: get thumbnail URL for YouTube, Vimeo, Loom, Mux
+const getVideoThumbnail = (url) => {
+  if (!url) return "";
+  const lower = url.toLowerCase();
+
+  if (isUploadedVideo(url)) return "";
+
+  // YouTube
+  if (lower.includes("youtube.com/watch?v=")) {
+    try {
+      const id = url.split("v=")[1].split("&")[0];
+      return `https://img.youtube.com/vi/${id}/hqdefault.jpg`;
+    } catch (e) { }
+  }
+  if (lower.includes("youtu.be/")) {
+    try {
+      const id = url.split("youtu.be/")[1].split("?")[0];
+      return `https://img.youtube.com/vi/${id}/hqdefault.jpg`;
+    } catch (e) { }
+  }
+
+  // Vimeo
+  if (lower.includes("vimeo.com/")) {
+    try {
+      const id = url.split("vimeo.com/")[1].split("?")[0].split("/")[0];
+      return `https://vumbnail.com/${id}.jpg`;
+    } catch (e) { }
+  }
+
+  // Loom
+  if (lower.includes("loom.com/")) {
+    try {
+      const parts = url.split("loom.com/")[1];
+      const id = parts.split("/")[1] || parts.split("/")[0];
+      return `https://cdn.loom.com/sessions/thumbnails/${id}-00001.jpg`;
+    } catch (e) { }
+  }
+
+  // Mux
+  if (lower.includes("stream.mux.com/") || lower.includes("player.mux.com/")) {
+    try {
+      const id = url
+        .split("mux.com/")[1]
+        .split("?")[0]
+        .split(".")[0]
+        .split("/")[0];
+      return `https://image.mux.com/${id}/thumbnail.jpg`;
+    } catch (e) { }
+  }
+
+  return "";
 };
 
 function CourseUI({
@@ -158,8 +224,22 @@ function CourseUI({
     skip: !isAuthenticated || !currentCourseId,
   });
 
-  const completedLectureIds =
-    progressData?.completedLectures || [];
+  const completedLectureIds = progressData?.completedLectures || [];
+
+  // Overall course progress for sidebar
+  const allLessonIds = [
+    ...(introLessons || []).map((l) => l?._id || l?.id).filter(Boolean),
+    ...Object.values(sections || {})
+      .flatMap((lectures) => (lectures || []).map((l) => l?._id || l?.id))
+      .filter(Boolean),
+  ];
+  const totalLessons = allLessonIds.length;
+  const completedCount = totalLessons
+    ? allLessonIds.filter((id) => completedLectureIds.includes(id)).length
+    : 0;
+  const progressPercent = totalLessons
+    ? Math.round((completedCount / totalLessons) * 100)
+    : 0;
 
   // Handle purchase - Check authentication first, then fetch plans
   const handlePurchase = async () => {
@@ -407,13 +487,24 @@ function CourseUI({
                 <div className="relative">
                   {isVideoPlaying && selectedVideo && hasAccess ? (
                     <div className="aspect-video w-full border border-gray-200 rounded-lg overflow-hidden shadow-lg bg-black ">
-                      <iframe
-                        src={getEmbedUrl(selectedVideo?.url)}
-                        className="w-full h-full rounded-lg"
-                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                        allowFullScreen
-                        title="Video Player"
-                      />
+                      {isUploadedVideo(selectedVideo?.url) ? (
+                        // Use video element for uploaded MP4 files
+                        <video
+                          src={selectedVideo?.url}
+                          controls
+                          className="w-full h-full rounded-lg"
+                          style={{ objectFit: 'contain' }}
+                        />
+                      ) : (
+                        // Use iframe for external videos (YouTube, Vimeo, Loom)
+                        <iframe
+                          src={getEmbedUrl(selectedVideo?.url)}
+                          className="w-full h-full rounded-lg"
+                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                          allowFullScreen
+                          title="Video Player"
+                        />
+                      )}
                     </div>
                   ) : (
                     <div className="relative bg-gradient-to-br from-yellow-600 via-yellow-700 to-gray-800 rounded-lg overflow-hidden aspect-video shadow-lg">
@@ -530,6 +621,29 @@ function CourseUI({
                 </div>
               ) : (
                 <>
+                  {/* Course progress */}
+                  {totalLessons > 0 && (
+                    <div className="mb-4">
+                      <p className="text-xl font-semibold text-gray-800 dark:text-gray-100 mb-4">
+                        {currentCourse?.[0]?.courseTitle || "Intro Series"}
+                      </p>
+                      <div className="flex items-center justify-between mb-2">
+                        <p className="text-sm font-semibold text-gray-800 dark:text-gray-100">
+                          Course Progress
+                        </p>
+                        <p className="text-xs text-gray-500 dark:text-gray-400">
+                          {completedCount}/{totalLessons} • {progressPercent}%
+                        </p>
+                      </div>
+                      <div className="w-full bg-gray-200 dark:bg-gray-800 rounded-full h-2 overflow-hidden">
+                        <div
+                          className="h-2 bg-yellow-500 rounded-full transition-all duration-300"
+                          style={{ width: `${progressPercent}%` }}
+                        />
+                      </div>
+                    </div>
+                  )}
+
                   {/* First Section (Intro Series) */}
                   {currentCourse?.length > 0 && currentCourse?.[0]?.title && (
                     <div className="mb-2">
@@ -553,13 +667,16 @@ function CourseUI({
                       </button>
 
                       {open === (currentCourse?.[0]?.title || "Intro Series") && (
-                        <div className="space-y-2">
+                        <div className="space-y-2 mt-2">
                           {introLessons?.map((lesson) => {
                             const lessonId = lesson?._id || lesson?.id;
                             const isCompleted = completedLectureIds.includes(lessonId);
                             const isSelected = activeLectureId === lessonId || selectedVideo?.id === lessonId;
                             const videoUrl = lesson?.videoUrl || lesson?.content;
                             const isLocked = showLock && !hasAccess;
+                            // For uploaded videos, use thumbnailUrl from lecture data; for external videos, use getVideoThumbnail
+                            const thumbnailUrl = lesson?.thumbnailUrl || getVideoThumbnail(videoUrl);
+                            const durationLabel = lesson?.duration || "0:00";
 
                             return (
                               <button
@@ -574,9 +691,9 @@ function CourseUI({
                                   }
                                 }}
                                 disabled={isLocked}
-                                className={`w-full flex items-center gap-3 p-3 rounded-lg transition-colors mt-2 relative
+                                className={`w-full flex items-center gap-3 p-3 rounded-lg transition-colors relative
                                   ${isCompleted && !isSelected
-                                    ? "bg-green-100 border border-green-500"
+                                    ? "bg-gray-100"
                                     : isSelected
                                       ? "bg-yellow-400 hover:bg-yellow-500"
                                       : "bg-gray-100 hover:bg-gray-200 dark:bg-[#201a09] dark:hover:bg-[#201a09]"
@@ -588,10 +705,74 @@ function CourseUI({
                                     <Lock className="w-4 h-4 text-gray-500" />
                                   </div>
                                 )}
-                                <div className="w-8 h-8 rounded-full flex items-center justify-center bg-gray-800 dark:bg-gray-600">
-                                  <Play className="w-4 h-4 text-white fill-white" />
+
+                                {/* Completion checkbox */}
+                                {hasAccess && (
+                                  <div
+                                    onClick={async (e) => {
+                                      e.stopPropagation();
+
+                                      const payload = {
+                                        courseId: currentCourseId,
+                                        lectureId: lessonId,
+                                      };
+
+                                      try {
+                                        if (isCompleted) {
+                                          await undoLectureComplete(payload).unwrap();
+                                          toast.success("Lecture marked as incomplete");
+                                        } else {
+                                          await markLectureComplete(payload).unwrap();
+                                          toast.success("Lecture marked as complete");
+                                        }
+                                      } catch {
+                                        toast.error("Failed to update progress");
+                                      }
+                                    }}
+                                    className="cursor-pointer flex items-center"
+                                  >
+                                    {isCompleted ? (
+                                      <CircleCheck className="w-5 h-5 text-green-600" />
+                                    ) : (
+                                      <Circle className='w-5 h-5 text-gray-500'
+                                      />
+                                    )}
+                                  </div>
+                                )}
+
+
+                                {/* Thumbnail */}
+                                <div className="w-14 h-10 rounded-md overflow-hidden bg-black/10 flex items-center justify-center relative">
+                                  {thumbnailUrl ? (
+                                    <img
+                                      src={thumbnailUrl}
+                                      alt={lesson?.title || "Lesson thumbnail"}
+                                      className="w-full h-full object-cover"
+                                      onError={(e) => {
+                                        if (e?.target) e.target.style.display = "none";
+                                      }}
+                                    />
+                                  ) : (
+                                    <>
+                                      <video
+                                        src={lesson?.videoUrl}
+                                        className="w-full h-full object-cover"
+                                        muted
+                                        preload="metadata"
+                                        onLoadedMetadata={(e) => {
+                                          // Set video thumbnail
+                                          const video = e.target;
+                                          video.currentTime = 1; // Seek to 1 second for thumbnail
+                                        }}
+                                      />
+                                    </>
+                                  )}
+                                  <span className="absolute bottom-0 right-0 m-0.5 px-1 py-[1px] rounded bg-black/70 text-[10px] text-white">
+                                    {durationLabel}
+                                  </span>
                                 </div>
 
+                                {/* Title */}
                                 <span
                                   className={`text-sm font-medium flex-1 text-left ${isSelected
                                     ? "text-gray-900"
@@ -600,6 +781,8 @@ function CourseUI({
                                 >
                                   {lesson?.title}
                                 </span>
+
+
                               </button>
                             );
                           })}
@@ -631,10 +814,14 @@ function CourseUI({
                       {open === section && (
                         <div className="mt-2 space-y-2">
                           {sections?.[section]?.map((lectureItem, index) => {
-                            const lectureId = lectureItem?._id || index;
-                            const isSelected = activeLectureId === lectureId;
+                            const lectureId = lectureItem?._id || lectureItem?.id || index;
+                            const isSelected = activeLectureId === lectureId || selectedVideo?.id === lectureId;
+                            const isCompleted = completedLectureIds.includes(lectureId);
                             const videoUrl = lectureItem?.videoUrl || lectureItem?.content;
                             const isLocked = showLock && !hasAccess;
+                            // For uploaded videos, use thumbnailUrl from lecture data; for external videos, use getVideoThumbnail
+                            const thumbnailUrl = lectureItem?.thumbnailUrl || getVideoThumbnail(videoUrl);
+                            const durationLabel = lectureItem?.duration || "0:00";
 
                             return (
                               <button
@@ -649,19 +836,87 @@ function CourseUI({
                                   }
                                 }}
                                 disabled={isLocked}
-                                className={`w-full flex items-center gap-3 p-3 rounded-lg transition-colors relative ${isSelected
-                                  ? "bg-yellow-400 hover:bg-yellow-500"
-                                  : "bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700"
-                                  } ${isLocked ? "opacity-60 cursor-not-allowed" : ""}`}
+                                className={`w-full flex items-center gap-3 p-3 rounded-lg transition-colors relative
+                                  ${isCompleted && !isSelected
+                                    ? "border"
+                                    : isSelected
+                                      ? "bg-yellow-400 hover:bg-yellow-500"
+                                      : "bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700"
+                                  }
+                                  ${isLocked ? "opacity-60 cursor-not-allowed" : ""}`}
                               >
                                 {isLocked && (
                                   <div className="absolute right-2 top-2">
                                     <Lock className="w-4 h-4 text-gray-500" />
                                   </div>
                                 )}
-                                <div className="w-8 h-8 rounded-full flex items-center justify-center bg-gray-900">
-                                  <Play className="w-4 h-4 text-white fill-white" />
+                                {/* Completion checkbox */}
+                                {hasAccess && (
+                                  <div
+                                    onClick={async (e) => {
+                                      e.stopPropagation();
+
+                                      const payload = {
+                                        courseId: currentCourseId,
+                                        lectureId: lessonId,
+                                      };
+
+                                      try {
+                                        if (isCompleted) {
+                                          await undoLectureComplete(payload).unwrap();
+                                          toast.success("Lecture marked as incomplete");
+                                        } else {
+                                          await markLectureComplete(payload).unwrap();
+                                          toast.success("Lecture marked as complete");
+                                        }
+                                      } catch {
+                                        toast.error("Failed to update progress");
+                                      }
+                                    }}
+                                    className="cursor-pointer flex items-center"
+                                  >
+                                    {isCompleted ? (
+                                      <CircleCheck className="w-5 h-5 text-green-600" />
+                                    ) : (
+                                      <Circle className='w-5 h-5 text-gray-500'
+                                      />
+                                    )}
+                                  </div>
+                                )}
+                                {/* Thumbnail */}
+                                <div className="w-14 h-10 rounded-md overflow-hidden bg-black/10 flex items-center justify-center relative">
+                                  {thumbnailUrl ? (
+                                    <img
+                                      src={thumbnailUrl}
+                                      alt={lectureItem?.title || `Lesson ${index + 1}`}
+                                      className="w-full h-full object-cover"
+                                      onError={(e) => {
+                                        if (e?.target) e.target.style.display = "none";
+                                      }}
+                                    />
+                                  ) : (
+                                    <>
+                                      <video
+                                        src={lectureItem?.videoUrl}
+                                        className="w-full h-full object-cover"
+                                        muted
+                                        preload="metadata"
+                                        onLoadedMetadata={(e) => {
+                                          // Set video thumbnail
+                                          const video = e.target;
+                                          video.currentTime = 1; // Seek to 1 second for thumbnail
+                                        }}
+                                      />
+                                    </>)}
+
+                                  {durationLabel && (
+                                    <span className="absolute bottom-0 right-0 m-0.5 px-1 py-[1px] rounded bg-black/70 text-[10px] text-white">
+                                      {durationLabel}
+                                    </span>
+                                  )}
                                 </div>
+
+                                {/* Title */}
                                 <span className={`text-sm font-medium flex-1 text-left ${isSelected
                                   ? "text-gray-900"
                                   : "text-gray-700 dark:text-gray-300"
@@ -764,7 +1019,6 @@ function CourseUI({
     </>
   );
 }
-
 
 export default function AcademyPage() {
   useDocumentTitle('Courses');
@@ -1046,6 +1300,8 @@ export default function AcademyPage() {
       active: activeLectureId === lecture?._id,
       videoUrl: lecture?.videoUrl || lecture?.content || '',
       content: lecture?.content || '',
+      duration: lecture?.duration || lecture?.length || null,
+      thumbnailUrl: lecture?.thumbnailUrl || null,
       _id: lecture?._id,
     })) || [];
   };
@@ -1062,6 +1318,8 @@ export default function AcademyPage() {
           title: lecture?.title,
           videoUrl: lecture?.videoUrl || lecture?.content || '',
           content: lecture?.content || '',
+          duration: lecture?.duration || lecture?.length || null,
+          thumbnailUrl: lecture?.thumbnailUrl || null,
           _id: lecture?._id,
         })) || [];
       }
