@@ -3,6 +3,8 @@ import { useGetAcademyCategoryFetchQuery } from '@/store/client/clientAcademyCat
 import { useNavigate } from 'react-router';
 import { Card } from '../../../components/ui/card';
 import { useGetScheduleQuery } from '../../../store/client/clientScheduleApiSlice';
+import { useSelector } from 'react-redux';
+import { selectSelectedLanguage } from '../../../store/languageSlice';
 import useDocumentTitle from '../../../hooks/use-document-title';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Navigation } from 'swiper/modules';
@@ -71,16 +73,24 @@ export default function LivePage() {
   // Calculate week dates for the active week
   const currentWeekDates = getWeekDates(activeWeek);
 
+  // Get selected language from Redux store and derive name
+  const selectedLanguage = useSelector(selectSelectedLanguage);
+  const language = selectedLanguage?.name || 'English';
+
   // Fetch schedules from API - only if category is selected
   // Dates are sent as ISO strings (same format as reference code)
   const { data, isLoading, error } = useGetScheduleQuery(
     {
       categoryId: activeCategoryId,
+      language,
       startDate: currentWeekDates.startDate.toISOString(),
       endDate: currentWeekDates.endDate.toISOString(),
     },
     {
       skip: !activeCategoryId, // Skip query if no category selected
+      refetchOnMountOrArgChange: true,
+      refetchOnFocus: true,
+      refetchOnReconnect: true,
     },
   );
 
