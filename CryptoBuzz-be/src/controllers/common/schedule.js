@@ -450,7 +450,7 @@ export const createRecurringSessions = async (req, res) => {
       await schedule.save();
 
       const session = await RecurrenceSchedule.create({
-        educator: createdUser._id,
+        educator: body.educator || createdUser._id,
         schedule: schedule._id,
         title: body.title,
         description: body.description,
@@ -491,7 +491,7 @@ export const createRecurringSessions = async (req, res) => {
     const createdSessions = await Promise.all(
       sessionDates.map(d =>
         RecurrenceSchedule.create({
-          educator: createdUser._id,
+          educator: body.educator || createdUser._id,
           schedule: populatedSchedule._id,
           title: body.title,
           description: body.description,
@@ -605,7 +605,7 @@ export const updateRecurringSessions = async (req, res) => {
       });
 
       const session = await RecurrenceSchedule.create({
-        educator: updatedUser._id,
+        educator: body.educator || updatedUser._id,
         schedule: schedule._id,
         title: body.title,
         description: body.description,
@@ -650,7 +650,7 @@ export const updateRecurringSessions = async (req, res) => {
     const newSessions = await Promise.all(
       dates.map(dt =>
         RecurrenceSchedule.create({
-          educator: updatedUser._id,
+          educator: body.educator || updatedUser._id,
           schedule: schedule._id,
           title: body.title,
           description: body.description,
