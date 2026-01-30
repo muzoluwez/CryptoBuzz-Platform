@@ -858,7 +858,7 @@ function CourseUI({
 
                                       const payload = {
                                         courseId: currentCourseId,
-                                        lectureId: lessonId,
+                                        lectureId: lectureId,
                                       };
 
                                       try {
