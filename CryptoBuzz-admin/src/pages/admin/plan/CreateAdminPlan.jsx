@@ -17,6 +17,8 @@ import {
 import { useAuthContext } from "../../../auth/useAuthContext";
 import { Alert } from "../../../components/alert/Alert";
 import { toast } from "sonner";
+import { KeenIcon } from "../../../components";
+import { ImageInput } from "@/components/image-input";
 import {
   useCreatePlanMutation,
   useUpdatePlanMutation,
@@ -39,6 +41,7 @@ const CreateAdminPlan = forwardRef(
       description: "",
       price: 0,
       currency: "USD",
+      image: [],
       hotmartProductId: "",
       hotmartCheckoutUrl: "",
       status: "active",
@@ -72,26 +75,36 @@ const CreateAdminPlan = forwardRef(
       revalidateOnMount: true,
       validationSchema: createSchema,
       onSubmit: async (values, { setStatus, setSubmitting }) => {
-        const payloadData = {
-          name: values.name,
-          description: values.description || "",
-          price: parseFloat(values.price),
-          currency: values.currency || "USD",
-          hotmartCheckoutUrl: values.hotmartCheckoutUrl,
-          hotmartProductId: values.hotmartProductId || null,
-          status: values.status || "active",
-        };
+        const formData = new FormData();
+        formData.append("name", values.name);
+        formData.append("description", values.description || "");
+        formData.append("price", parseFloat(values.price));
+        formData.append("currency", values.currency || "USD");
+        formData.append("hotmartCheckoutUrl", values.hotmartCheckoutUrl);
+        formData.append("hotmartProductId", values.hotmartProductId || null);
+        formData.append("status", values.status || "active");
+
+        console.log(values.image, "values.image.");
+        
+        // Add image if present
+        if (values.image && values.image.length > 0) {
+          values.image.forEach((img) => {
+            if (img?.file) {
+              formData.append("image", img.file);
+            }
+          });
+        }
 
         try {
           if (selectedRow?._id) {
             await updatePlan({
-              data: payloadData,
+              data: formData,
               id: selectedRow?._id,
             }).unwrap();
             refetch();
             toast.success("Payment plan updated successfully!");
           } else {
-            await createPlan(payloadData).unwrap();
+            await createPlan(formData).unwrap();
             refetch();
             toast.success("Payment plan created successfully!");
           }
@@ -112,11 +125,16 @@ const CreateAdminPlan = forwardRef(
 
     useEffect(() => {
       if (selectedRow?._id) {
+        const existingImage = selectedRow.image
+          ? [{ file: null, dataURL: selectedRow.image }]
+          : [];
+
         const initData = {
           name: selectedRow?.name || "",
           description: selectedRow?.description || "",
           price: selectedRow?.price || 0,
           currency: selectedRow?.currency || "USD",
+          image: existingImage, // Pre-populate existing image for editing
           hotmartCheckoutUrl: selectedRow?.hotmartCheckoutUrl || "",
           hotmartProductId: selectedRow?.hotmartProductId || "",
           status: selectedRow?.status || "active",
@@ -271,6 +289,53 @@ const CreateAdminPlan = forwardRef(
                       {formik.errors.currency}
                     </span>
                   )}
+                </div>
+              </div>
+
+              <div className="col-span-12">
+                <div className="flex flex-col gap-1">
+                  <label className="form-label text-gray-900 gap-1">
+                    Plan Image
+                  </label>
+                  <p className="text-xs text-gray-500 mb-2">
+                    Upload an image for the payment plan (optional). Recommended size: 800x600 pixels.
+                  </p>
+                  <ImageInput
+                    value={formik.values.image}
+                    onChange={(images) => formik.setFieldValue("image", images)}
+                  >
+                    {({ onImageUpload }) => (
+                      <div className="image-input size-24" onClick={onImageUpload}>
+                        <div
+                          className="btn btn-icon btn-icon-xs btn-light shadow-default absolute z-1 size-5 -top-0.5 -end-0.5 rounded-full"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            formik.setFieldValue("image", []);
+                          }}
+                        >
+                          <KeenIcon icon="cross" />
+                        </div>
+                        <span className="tooltip" id="image_input_tooltip">
+                          Click to upload or remove image
+                        </span>
+                        <div
+                          className="image-input-placeholder cursor-pointer rounded-md border-2 border-success image-input-empty:border-gray-300 flex items-center justify-center"
+                          style={{
+                            backgroundImage: formik.values.image.length > 0 ? `url(${formik.values.image[0].dataURL})` : 'none',
+                            backgroundSize: 'cover',
+                            backgroundPosition: 'center',
+                          }}
+                        >
+                          {formik.values.image.length === 0 && (
+                            <div className="text-center">
+                              <KeenIcon icon="picture" className="text-gray-400 text-2xl mb-1" />
+                              <p className="text-xs text-gray-500">Click to upload image</p>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    )}
+                  </ImageInput>
                 </div>
               </div>
 
