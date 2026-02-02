@@ -464,7 +464,7 @@ export default function SocialPage() {
                           <div className="mt-5 flex justify-center">
                             <button
                               type="button"
-                              className="w-full max-w-[650px] rounded-xl overflow-hidden bg-black/5 dark:bg-white/5"
+                              className="cursor-pointer w-full max-w-[650px] rounded-xl overflow-hidden bg-black/5 dark:bg-white/5"
                               onClick={() => openImage(0)}
                               disabled={!hasAccess}
                             >
@@ -491,7 +491,7 @@ export default function SocialPage() {
                             {showImages.map((src, idx) => (
                               <div
                                 key={`${src}-${idx}`}
-                                className="w-full max-w-[650px] rounded-xl overflow-hidden bg-black/5 dark:bg-white/5"
+                                className="cursor-pointer w-full max-w-[650px] rounded-xl overflow-hidden bg-black/5 dark:bg-white/5"
                                 onClick={() => openImage(idx)}
                                 disabled={!hasAccess}
                               >
