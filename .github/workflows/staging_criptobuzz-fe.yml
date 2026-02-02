@@ -101,6 +101,7 @@ jobs:
           VITE_APP_URL: ${{ secrets.VITE_APP_URL }}
           VITE_ENV: ${{ secrets.VITE_ENV }}
           VITE_SOCKET_URL: ${{ secrets.VITE_SOCKET_URL }}
+          VITE_APP_STREAM_API_KEY: ${{ secrets.VITE_APP_STREAM_API_KEY }}
         run: npm run build
 
       - name: Upload artifact for deployment
