@@ -389,8 +389,8 @@ export default function ViewProfile() {
   }
 
   return (
-    <div className="container my-6">
-      <div className="w-full bg-gradient-to-r from-[#a76100] via-[#a76100] to-[#a76100] p-6 rounded-2xl flex items-center justify-between shadow-lg mb-6">
+    <div className="container my-6 px-0">
+      <div className="w-full bg-gradient-to-r from-[#a76100] via-[#a76100] to-[#a76100] p-6 rounded-2xl flex flex-wrap items-center justify-between shadow-lg mb-6 gap-5">
         {/* LEFT SECTION — Profile */}
         <div className="flex items-center gap-4">
           {educator?.image ? (
@@ -451,7 +451,7 @@ export default function ViewProfile() {
         </div>
 
         {/* RIGHT SECTION — Buttons */}
-        <div className="flex flex-col items-end gap-3">
+        <div className="flex md:flex-col items-end gap-3">
           <div className="flex gap-3">
             {/* Sound Button */}
             {/* <button className="px-4 py-2 bg-[#ffcd0b] text-dark rounded-lg text-sm flex items-center gap-1 shadow-md">

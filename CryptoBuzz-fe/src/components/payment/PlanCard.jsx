@@ -11,7 +11,7 @@ export default function PlanCard({ plan, purchased = false, onClick }) {
     <Card className="p-4 flex flex-col justify-between h-full">
       <div>
         {image ? (
-          <div className="w-full h-40 overflow-hidden rounded-md mb-4 bg-gray-100">
+          <div className="w-full h-[25vh] overflow-hidden rounded-md mb-4 bg-gray-100">
             <img
               src={image}
               alt={plan?.name}
@@ -21,12 +21,12 @@ export default function PlanCard({ plan, purchased = false, onClick }) {
                 e.target.nextSibling.style.display = 'flex';
               }}
             />
-            <div className="w-full h-40 rounded-md mb-4 bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center text-gray-500" style={{ display: 'none' }}>
+            <div className="w-full h-[25vh] rounded-md mb-4 bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center text-gray-500" style={{ display: 'none' }}>
               <span>Image not available</span>
             </div>
           </div>
         ) : (
-          <div className="w-full h-40 rounded-md mb-4 bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center text-gray-500">
+          <div className="w-full h-[25vh] rounded-md mb-4 bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center text-gray-500">
             <span>No image</span>
           </div>
         )}
@@ -35,9 +35,9 @@ export default function PlanCard({ plan, purchased = false, onClick }) {
         <p className="text-sm text-gray-600 mb-3 line-clamp-3">{plan?.description}</p>
       </div>
 
-      <div className="flex items-center justify-between mt-4">
+      <div className="flex items-end justify-between">
         <div>
-          <div className="text-sm text-gray-500">Price</div>
+          <div className="text-sm text-gray-500 mb-1">Price</div>
           <div className="text-xl font-bold">{priceLabel}</div>
         </div>
 
@@ -45,7 +45,7 @@ export default function PlanCard({ plan, purchased = false, onClick }) {
           {purchased ? (
             <span className="text-sm px-2 py-1 bg-green-100 text-green-700 rounded">Purchased</span>
           ) : (
-            <span className="text-sm px-2 py-1 bg-yellow-50 text-yellow-700 rounded">Available</span>
+            <span className="text-xs px-2 py-1 bg-yellow-50 text-yellow-600 rounded">Available</span>
           )}
           <Button onClick={() => onClick(plan)} className={cn('min-w-[110px]')}>View</Button>
         </div>

@@ -388,11 +388,17 @@ export default function SocialPage() {
               key={post?.id || post?._id}
             >
               <Card className="container overflow-hidden rounded-xl shadow-md mb-5 h-full relative max-w-full md:max-w-2xl mx-auto pb-8">
-
+                {/* Full Card Lock Overlay - Semi-transparent overlay over entire card */}
+                {isLocked && (
+                  <div
+                    className="absolute inset-0 z-10 top-16 bg-black/60 backdrop-blur-[4px] rounded-xl cursor-pointer"
+                    onClick={handleLockClick}
+                  />
+                )}
                 {/* Lock Icon - Top Right Corner of entire card (only when locked) */}
                 {isLocked && (
                   <div
-                    className="absolute top-3 right-3 z-30 cursor-pointer"
+                    className="absolute top-20 right-9 z-30 cursor-pointer"
                     onClick={handleLockClick}
                   >
                     <div className="bg-yellow-500 backdrop-blur-sm p-2.5 rounded-full hover:bg-yellow-600/80 transition-all">
@@ -574,14 +580,6 @@ export default function SocialPage() {
                       </div>
                     )}
                 </CardContent>
-
-                {/* Full Card Lock Overlay - Semi-transparent overlay over entire card */}
-                {isLocked && (
-                  <div
-                    className="absolute inset-0 z-10 rounded-xl cursor-pointer"
-                    onClick={handleLockClick}
-                  />
-                )}
               </Card>
             </div>
           );
