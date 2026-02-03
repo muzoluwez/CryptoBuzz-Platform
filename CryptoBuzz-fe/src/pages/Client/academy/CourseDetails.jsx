@@ -450,19 +450,19 @@ function CourseUI({
         <p className="text-sm text-gray-500 flex items-center gap-1">
           <a
             href="/client/home"
-            className="px-2 py-1 rounded-md hover:bg-gray-200 hover:text-primary transition-all duration-200"
+            className="pr-2 py-1 hover:border-b-2 hover:border-amber-400 hover:text-primary dark:text-gray-200 transition-all duration-200"
           >
             Inicio
           </a>
           <span>/</span>
           <a
             href="/client/academy"
-            className="px-2 py-1 rounded-md hover:bg-gray-200 hover:text-primary transition-all duration-200"
+            className="px-2 py-1 hover:border-b-2 hover:border-amber-400 hover:text-primary dark:text-gray-200 transition-all duration-200"
           >
             Academia
           </a>
           <span>/</span>
-          <span className="px-2 py-1 rounded-md bg-gray-100 text-gray-700 font-medium">
+          <span className="px-2 py-1 border-b-2 border-amber-400 hover:border-amber-400 text-gray-700 dark:text-gray-100 font-medium">
             {breadcrumbCourseTitle}
           </span>
         </p>

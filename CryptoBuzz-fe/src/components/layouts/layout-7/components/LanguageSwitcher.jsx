@@ -45,10 +45,10 @@ export default function LanguageSwitcher() {
           size="sm"
           variant="ghost"
           aria-label="Select language"
-          className="pr-2 py-1 rounded-lg flex cursor-pointer items-center gap-2 text-white hover:bg-white/5"
+          className="pr-2 py-1 rounded-lg flex cursor-pointer items-center gap-2 text-white !hover:text-amber-400"
         >
-          <Globe className="w-4 h-4 text-white" />
-          <span className="text-sm inline text-white">{selectedLanguage?.name || 'English'}</span>
+          <Globe className="w-4 h-4 text-white !hover:text-amber-400" />
+          <span className="text-sm inline text-white !hover:text-amber-400">{selectedLanguage?.name || 'English'}</span>
         </button>
       </DropdownMenuTrigger>
 
