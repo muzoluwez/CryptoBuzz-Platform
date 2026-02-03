@@ -50,7 +50,7 @@ export default function MarketplacePlanModal({ open, onOpenChange, plan, onPurch
         </DialogHeader>
 
         {image ? (
-          <div className="w-full h-48 overflow-hidden rounded-md mb-4 bg-gray-100">
+          <div className="w-full h-[30vh] overflow-hidden rounded-md mb-4 bg-gray-100">
             <img
               src={image}
               alt={plan.name}
@@ -60,17 +60,17 @@ export default function MarketplacePlanModal({ open, onOpenChange, plan, onPurch
                 e.target.nextSibling.style.display = 'flex';
               }}
             />
-            <div className="w-full h-48 rounded-md mb-4 bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center text-gray-500" style={{ display: 'none' }}>
+            <div className="w-full h-[30vh] rounded-md mb-4 bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center text-gray-500" style={{ display: 'none' }}>
               <span>Image not available</span>
             </div>
           </div>
         ) : (
-          <div className="w-full h-48 rounded-md mb-4 bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center text-gray-500">
+          <div className="w-full h-[30vh] rounded-md mb-4 bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center text-gray-500">
             <span>No image</span>
           </div>
         )}
 
-        <div className="px-2 pb-4">
+        <div className="px-2">
           <h3 className="text-2xl font-bold mb-2">{plan.name}</h3>
           {plan.description && <p className="text-sm text-gray-600 mb-4">{plan.description}</p>}
 

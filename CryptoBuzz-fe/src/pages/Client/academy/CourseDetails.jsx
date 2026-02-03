@@ -446,9 +446,27 @@ function CourseUI({
   return (
     <>
       <div className="">
-
         <h1 className="text-2xl font-bold">Academia</h1>
-        <p className="text-sm text-gray-500">Inicio / Academia / {breadcrumbCourseTitle}</p>
+        <p className="text-sm text-gray-500 flex items-center gap-1">
+          <a
+            href="/client/home"
+            className="pr-2 py-1 hover:border-b-2 hover:border-amber-400 hover:text-primary dark:text-gray-200 transition-all duration-200"
+          >
+            Inicio
+          </a>
+          <span>/</span>
+          <a
+            href="/client/academy"
+            className="px-2 py-1 hover:border-b-2 hover:border-amber-400 hover:text-primary dark:text-gray-200 transition-all duration-200"
+          >
+            Academia
+          </a>
+          <span>/</span>
+          <span className="px-2 py-1 border-b-2 border-amber-400 hover:border-amber-400 text-gray-700 dark:text-gray-100 font-medium">
+            {breadcrumbCourseTitle}
+          </span>
+        </p>
+
 
         {/* <Card className="mt-5 p-4 rounded-xl shadow-sm">
           <div className="flex gap-3">

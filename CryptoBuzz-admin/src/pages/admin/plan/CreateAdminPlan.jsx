@@ -67,6 +67,8 @@ const CreateAdminPlan = forwardRef(
         ),
       status: Yup.string()
         .oneOf(["active", "inactive"], "Status must be active or inactive"),
+      hotmartProductId: Yup.string()
+        .required("Hotmart product is required"),
     });
 
     const formik = useFormik({
@@ -295,10 +297,10 @@ const CreateAdminPlan = forwardRef(
               <div className="col-span-12">
                 <div className="flex flex-col gap-1">
                   <label className="form-label text-gray-900 gap-1">
-                    Plan Image
+                    Plan Image<span className="text-danger">*</span>
                   </label>
                   <p className="text-xs text-gray-500 mb-2">
-                    Upload an image for the payment plan (optional). Recommended size: 800x600 pixels.
+                    Upload an image for the payment plan. Recommended size: 800x600 pixels.
                   </p>
                   <ImageInput
                     value={formik.values.image}
@@ -342,18 +344,21 @@ const CreateAdminPlan = forwardRef(
               <div className="col-span-12">
                 <div className="flex flex-col gap-1">
                   <label className="form-label text-gray-900 gap-1">
-                    Hotmart Product (Optional)
+                    Hotmart Product<span className="text-danger">*</span>
                   </label>
                   <p className="text-xs text-gray-500 mb-2">
-                    Select a Hotmart product to link with this plan (optional). The checkout URL must be entered manually below.
+                    Select a Hotmart product to link with this plan. The checkout URL must be entered manually below.
                   </p>
                   <Select
                     value={selectedProduct ? String(selectedProduct.id) : ""}
                     onValueChange={handleProductSelect}
                     disabled={isLoadingProducts}
                   >
-                    <SelectTrigger className="form-control input input-md w-full">
-                      <SelectValue placeholder={isLoadingProducts ? "Loading products..." : "Select Hotmart product (optional)"} />
+                    <SelectTrigger className={`form-control input input-md w-full ${formik.errors.hotmartProductId && formik.touched.hotmartProductId
+                        ? "border border-danger"
+                        : ""
+                      }`}>
+                      <SelectValue placeholder={isLoadingProducts ? "Loading products..." : "Select Hotmart product"} />
                     </SelectTrigger>
                     <SelectContent>
                       {hotmartProducts?.data?.items?.length > 0 ? (
@@ -369,6 +374,11 @@ const CreateAdminPlan = forwardRef(
                       )}
                     </SelectContent>
                   </Select>
+                  {formik.touched.hotmartProductId && formik.errors.hotmartProductId && (
+                    <span role="alert" className="text-danger text-xs mt-1">
+                      {formik.errors.hotmartProductId}
+                    </span>
+                  )}
                 </div>
               </div>
 
