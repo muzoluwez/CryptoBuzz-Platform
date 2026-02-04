@@ -304,19 +304,31 @@ export const createCourse = async (req, res) => {
 
     const azureUrl = await uploadImageToAzure(req.file.buffer, req.file.originalname);
 
+    // Author assignment: admins can assign another user (educator/admin) as course author
+    let authorId = reqUser;
+    const isAdmin = req.user.role === "admin" || req.user.role === "super_admin";
+    const bodyAuthorId = cleanedBody.createdBy ? String(cleanedBody.createdBy).trim() : null;
+    if (isAdmin && bodyAuthorId && /^[0-9a-fA-F]{24}$/.test(bodyAuthorId)) {
+      const authorUser = await User.findById(bodyAuthorId).select("_id role").lean();
+      if (authorUser && ["educator", "admin", "super_admin"].includes(authorUser.role)) {
+        authorId = authorUser._id;
+      }
+    }
+    delete cleanedBody.createdBy; // avoid passing through to payload as raw string
+
     const newCoursePayload = {
       ...cleanedBody,
       imageUrl: azureUrl,
-      createdBy: reqUser,
+      createdBy: authorId,
       order: nextOrder,
-      instructor: reqUser
+      instructor: authorId
     };
 
     await courseValidationSchema.validate(newCoursePayload);
 
     const newCourse = await Course.create(newCoursePayload);
 
-    await User.updateOne({ _id: reqUser }, { $inc: { courseCount: 1 } });
+    await User.updateOne({ _id: authorId }, { $inc: { courseCount: 1 } });
 
     const populated = await Course.findById(newCourse._id).populate("category", "name");
 
@@ -441,9 +453,22 @@ export const updateCourse = async (req, res) => {
       cleanedBody.recommendedCourses = [];
     }
 
+    // Author assignment on update: admins can reassign course author (createdBy/instructor)
+    let updateInstructor = req.user._id;
+    const isAdmin = req.user.role === "admin" || req.user.role === "super_admin";
+    const bodyAuthorId = cleanedBody.createdBy ? String(cleanedBody.createdBy).trim() : (cleanedBody.instructor ? String(cleanedBody.instructor).trim() : null);
+    if (isAdmin && bodyAuthorId && /^[0-9a-fA-F]{24}$/.test(bodyAuthorId)) {
+      const authorUser = await User.findById(bodyAuthorId).select("_id role").lean();
+      if (authorUser && ["educator", "admin", "super_admin"].includes(authorUser.role)) {
+        updateInstructor = authorUser._id;
+      }
+    }
+    delete cleanedBody.createdBy;
+
     const updatePayload = {
       ...cleanedBody,
-      instructor: req.user._id
+      instructor: updateInstructor,
+      createdBy: updateInstructor
     };
 
     await courseValidationSchema.validate(updatePayload);

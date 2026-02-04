@@ -9,6 +9,8 @@ import {
 } from "../../../../../../../store/api/admin/adminAcademyCategoryApiSlice";
 import { useGetAdminCoursesTypesQuery } from "../../../../../../../store/api/admin/adminCoursesTypesApiSlice";
 import { useFetchPlansQuery } from "../../../../../../../store/api/admin/adminPlanApiSlice";
+import { useGetEducatorsQuery } from "../../../../../../../store/api/admin/adminEducatorsApiSlice";
+import { useAuthContext } from "../../../../../../../auth/useAuthContext";
 import {
   Select,
   SelectContent,
@@ -17,9 +19,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
-import { languages } from "eslint-plugin-prettier";
 import CustomSelect from "@/components/CustomSelect";
-;
 
 // Schema for course validation
 const createCourseSchema = z.object({
@@ -40,6 +40,7 @@ const createCourseSchema = z.object({
   section: z.string().min(1, "Please select a course type"),
   language: z.string().min(1, "Please select a course language"),
   recommendedCourses: z.array(z.string()).max(4, "Maximum 4 recommended courses allowed").nullable().optional(),
+  createdBy: z.string().optional(), // Author/educator ID (admin can assign when creating for another educator)
 }).refine((data) => {
   if (data.tier === "PRO" && (!data.plans || data.plans.length === 0)) {
     return false;
@@ -77,6 +78,7 @@ const editCourseSchema = z.object({
   section: z.string().min(1, "Please select a course type"),
   language: z.string().min(1, "Please select a course language"),
   recommendedCourses: z.array(z.string()).max(4, "Maximum 4 recommended courses allowed").nullable().optional(),
+  createdBy: z.string().optional(),
 }).refine((data) => {
   if (data.tier === "PRO" && (!data.plans || data.plans.length === 0)) {
     return false;
@@ -88,6 +90,7 @@ const editCourseSchema = z.object({
 });
 
 const CourseForm = ({ onSubmit, initialData, isLoading }) => {
+  const { auth } = useAuthContext();
   const [thumbnailPreview, setThumbnailPreview] = useState(
     initialData?.imageUrl || null
   );
@@ -98,9 +101,16 @@ const CourseForm = ({ onSubmit, initialData, isLoading }) => {
   const { data: languagesList } = useGetLanguageListQuery();
   const { data: courseTypesList } = useGetAdminCoursesTypesQuery();
   const { data: plans } = useFetchPlansQuery();
+  const { data: educatorsResponse, isLoading: isLoadingEducators } = useGetEducatorsQuery(
+    { page: 1, limit: 100 },
+    { skip: !auth?.user }
+  );
+  const educatorsList = educatorsResponse?.data || [];
 
   // Choose schema based on whether we're editing or creating
   const courseSchema = initialData ? editCourseSchema : createCourseSchema;
+
+  const currentUserId = auth?.user?._id || "";
 
   const {
     control,
@@ -124,6 +134,7 @@ const CourseForm = ({ onSubmit, initialData, isLoading }) => {
       tier: "PUBLIC",
       plans: [],
       recommendedCourses: [],
+      createdBy: currentUserId,
     },
   });
 
@@ -155,6 +166,11 @@ const CourseForm = ({ onSubmit, initialData, isLoading }) => {
         setValue("recommendedCourses", recommendedCourseIds);
       } else {
         setValue("recommendedCourses", []);
+      }
+      // Author/educator (admin can assign when editing)
+      const authorId = initialData.createdBy?._id || initialData.createdBy || initialData.instructor?._id || initialData.instructor;
+      if (authorId) {
+        setValue("createdBy", authorId);
       }
     }
   }, [initialData, setValue]);
@@ -226,6 +242,9 @@ const CourseForm = ({ onSubmit, initialData, isLoading }) => {
     formData.append("tier", data.tier);
     formData.append("section", data.section);
     formData.append("language", data.language);
+    if (data.createdBy) {
+      formData.append("createdBy", data.createdBy);
+    }
 
     // For PRO (paid) courses, append selected plans
     if (data.tier === "PRO" && data.plans && Array.isArray(data.plans) && data.plans.length > 0) {
@@ -449,6 +468,53 @@ const CourseForm = ({ onSubmit, initialData, isLoading }) => {
             <p className="text-sm text-red-600">{errors.language.message}</p>
           )}
         </div>
+      </div>
+
+      {/* Author / Educator selector – searchable; admins can assign the course author when creating for another educator */}
+      <div className="space-y-2">
+        <label
+          htmlFor="createdBy"
+          className="block text-sm font-medium text-gray-700"
+        >
+          Course Author / Educator
+        </label>
+        <p className="text-xs text-gray-500 mb-1">
+          Assign who is shown as the course author. Search by name or email to find an educator.
+        </p>
+        <Controller
+          name="createdBy"
+          control={control}
+          render={({ field }) => {
+            const authorOptions = [
+              {
+                label: `Myself (${auth?.user?.first_name || auth?.user?.email || "Current user"})`,
+                value: String(currentUserId),
+              },
+              ...educatorsList
+                .filter((e) => String(e._id) !== String(currentUserId))
+                .map((e) => ({
+                  label: [e.first_name, e.last_name].filter(Boolean).join(" ") || e.email || String(e._id),
+                  value: String(e._id),
+                })),
+            ];
+            return (
+              <CustomSelect
+                options={authorOptions}
+                value={field.value || currentUserId ? String(field.value || currentUserId) : undefined}
+                onChange={(val) => field.onChange(val || currentUserId)}
+                onBlur={field.onBlur}
+                placeholder={isLoadingEducators ? "Loading educators..." : "Search author by name or email..."}
+                disabled={isLoadingEducators}
+                showSearch={true}
+                filterOption={(input, option) =>
+                  (option?.label ?? "").toLowerCase().includes((input || "").toLowerCase())
+                }
+                allowClear={false}
+                style={{ width: "100%" }}
+              />
+            );
+          }}
+        />
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
