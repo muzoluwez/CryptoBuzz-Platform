@@ -1,13 +1,13 @@
 import React, { useEffect, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useSelector } from 'react-redux';
 import { useNavigate, Link } from 'react-router-dom';
-import { setCredentials, selectCurrentUser } from '@/store/authSlice';
+import { selectCurrentUser } from '@/store/authSlice';
 import { Loader2, Eye, EyeOff } from 'lucide-react';
 import { toast } from 'sonner';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
 
-import { useSignupMutation, useLoginMutation } from '@/store/client/clientAuthApiSlice';
+import { useSignupMutation } from '@/store/client/clientAuthApiSlice';
 import useDocumentTitle from '../../hooks/use-document-title';
 
 export default function Signup() {
@@ -16,10 +16,8 @@ export default function Signup() {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const [signup, { isLoading: isSignupLoading }] = useSignupMutation();
-  const [login, { isLoading: isLoginLoading }] = useLoginMutation();
-  const isLoading = isSignupLoading || isLoginLoading;
+  const isLoading = isSignupLoading;
 
-  const dispatch = useDispatch();
   const navigate = useNavigate();
   const user = useSelector(selectCurrentUser);
 
@@ -61,26 +59,14 @@ export default function Signup() {
           email: values.email,
           password: values.password,
           first_name: values.firstName,
-          last_name: values.lastName
+          last_name: values.lastName,
         }).unwrap();
 
-        const loginResponse = await login({
-          email: values.email,
-          password: values.password
-        }).unwrap();
-
-        const { userObj, token } = loginResponse.data;
-
-        if (token) {
-          dispatch(setCredentials({ user: userObj, token }));
-          localStorage.setItem('token', token);
-          localStorage.setItem('user', JSON.stringify(userObj));
-
-          toast.success('Account created successfully!');
-          navigate('/client/home', { replace: true });
-        } else {
-          toast.error('Account created but login failed');
-        }
+        toast.success('Account created. Please check your email to verify your account.');
+        navigate('/check-email', {
+          replace: true,
+          state: { email: values.email },
+        });
       } catch (err) {
         console.error('Signup error:', err);
         toast.error(err?.data?.message || 'Unable to sign up. Please try again.');
