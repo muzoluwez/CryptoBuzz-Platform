@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Verify Your Email - Cripto Buzz</title>
+</head>
+
+<body
+  style="margin:0;padding:0;font-family:'Segoe UI',Roboto,Helvetica,Arial,sans-serif;background-color:#f4f7fa;color:#333;">
+  <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="background-color:#f4f7fa;">
+    <tr>
+      <td align="center" style="padding:40px 10px;">
+        <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%"
+          style="max-width:600px;background-color:#ffffff;border-radius:20px;box-shadow:0 20px 40px rgba(0,0,0,0.1);overflow:hidden;">
+          <tr>
+            <td align="center" style="padding:0;">
+              <img
+                src="<%= bannerImage || 'https://my.criptobuzz.com/media/images/banner_1.jpeg' %>"
+                alt="Cripto Buzz" width="600" height="220" style="
+                  display:block;
+                  width:100%;
+                  max-width:600px;
+                  height:220px;
+                  object-fit:cover;
+                  border:0;
+                " />
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:40px 30px;text-align:center;">
+              <div
+                style="display:inline-block;background:#ffcd0b24;border:1px solid #ffcd0b;border-radius:20px;padding:6px 20px;margin-bottom:20px;">
+                <span style="color:#d6aa00;font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:1px;">
+                  Email Verification
+                </span>
+              </div>
+              <h2 style="color:#000;margin:0 0 15px 0;font-size:28px;font-weight:800;">
+                Verify your email address
+              </h2>
+              <p style="margin:0 0 20px 0;color:#556b8d;font-size:16px;line-height:1.6;">
+                Hi <strong style="color:#d6aa00;">
+                  <%= name %>
+                </strong>,<br />
+                Thanks for creating an account with <strong>Cripto Buzz</strong>. Please confirm that this email address
+                belongs to you.
+              </p>
+              <a href="<%= link %>"
+                style="background:#d6aa00;color:#ffffff;text-decoration:none;padding:14px 36px;border-radius:12px;font-size:16px;display:inline-block;font-weight:700;margin-bottom:24px;">
+                Verify Email →
+              </a>
+              <p style="color:#64748b;font-size:13px;margin:0 0 20px 0;line-height:1.5;">
+                If the button doesn't work, copy and paste this link into your browser:<br />
+                <a href="<%= link %>" style="color:#0F3C60;text-decoration:none;word-break:break-all;">
+                  <%= link %>
+                </a>
+              </p>
+              <p style="color:#94a3b8;font-size:12px;margin:0;">
+                If you didn't create this account, you can safely ignore this email.
+              </p>
+            </td>
+          </tr>
+          <tr>
+            <td style="background-color:#d6aa00;padding:30px;text-align:center;">
+              <p style="color:#ffffff;font-size:14px;margin:0;font-weight:600;">
+                © 2026 Cripto Buzz. All rights reserved.
+              </p>
+              <p style="color:rgba(255,255,255,0.9);font-size:14px;margin:8px 0 0 0;">
+                Cripto Buzz is a learning platform to capitalize on the cryptocurrency market.
+              </p>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+
+</html>

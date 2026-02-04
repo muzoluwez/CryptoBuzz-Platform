@@ -20,7 +20,13 @@ export const clientAuthApiSlice = createApi({
                 body: userData,
             }),
         }),
+        verifyEmail: builder.mutation({
+            query: (token) => ({
+                url: `/users/auth/verify-email?token=${encodeURIComponent(token)}`,
+                method: 'GET',
+            }),
+        }),
     }),
 });
 
-export const { useLoginMutation, useSignupMutation } = clientAuthApiSlice;
+export const { useLoginMutation, useSignupMutation, useVerifyEmailMutation } = clientAuthApiSlice;

@@ -59,6 +59,9 @@ const CreateCourseModal = forwardRef(
         const imageFile = formData.get("imageUrl");
         const isImageAFile = imageFile instanceof File;
 
+        // Author/educator: use selected author when provided (admin creating on behalf of educator)
+        const createdBy = formData.get("createdBy") || auth?.user?._id;
+
         // 1. Build payload for common fields
         const payload = {
           title: formData.get("title"),
@@ -69,7 +72,8 @@ const CreateCourseModal = forwardRef(
           tier: formData.get("tier"),
           language: formData.get("language"),
           section: formData.get("section"),
-          instructor: auth?.user?._id,
+          instructor: createdBy,
+          createdBy: createdBy,
         };
 
         // Handle plans array (new approach - multiple plans)

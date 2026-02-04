@@ -138,7 +138,7 @@ const CreateEducator = forwardRef(
       bio: Yup.string()
         .required("Educator bio is required")
         .min(30, "Bio must be at least 30 characters")
-        .max(120, "Bio cannot exceed 120 characters"),
+        .max(1000, "Bio cannot exceed 1000 characters"),
       description: Yup.string()
         .required("Educator long bio is required")
         .min(10, "Bio must be at least 30 characters")
@@ -698,13 +698,13 @@ const CreateEducator = forwardRef(
                   <label className="form-label text-gray-900 gap-1">
                     Profile Bio<span className="text-danger">*</span>
                   </label>
-                  <input
-                    type="text"
-                    placeholder="Enter profile bio"
+                  <textarea
+                    rows={4}
+                    placeholder="Enter profile bio (max 500 characters)"
                     autoComplete="off"
-                    className={`form-control input input-md w-full ${formik.errors.bio && formik.touched.bio
+                    className={`form-control input input-md w-full px-3 py-2 rounded-md shadow-sm min-h-[100px] resize-y ${formik.errors.bio && formik.touched.bio
                       ? "border border-danger"
-                      : ""
+                      : "border border-gray-300"
                       }`}
                     {...formik.getFieldProps("bio")}
                   />
@@ -713,6 +713,9 @@ const CreateEducator = forwardRef(
                       {formik.errors.bio}
                     </span>
                   )}
+                  <p className="text-xs text-gray-500 mt-1">
+                    {formik.values.bio?.length ?? 0}/1000 characters
+                  </p>
                 </div>
               </div>
 

@@ -391,7 +391,7 @@ export default function SocialPage() {
                 {/* Full Card Lock Overlay - Semi-transparent overlay over entire card */}
                 {isLocked && (
                   <div
-                    className="absolute inset-0 z-10 top-16 bg-black/60 backdrop-blur-[4px] rounded-xl cursor-pointer"
+                    className="absolute inset-0 z-10 top-16 bg-black/60 backdrop-blur-[4px] rounded-b-xl cursor-pointer"
                     onClick={handleLockClick}
                   />
                 )}

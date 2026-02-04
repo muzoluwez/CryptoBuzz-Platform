@@ -1,6 +1,8 @@
 // auth pages
 import Login from '@/pages/Auth/Login';
 import Signup from '@/pages/Auth/Signup';
+import VerifyEmail from '@/pages/Auth/VerifyEmail';
+import CheckEmail from '@/pages/Auth/CheckEmail';
 import AcademyPage from '@/pages/Client/academy/AcademyPage';
 import CryptoPage from '@/pages/Client/crypto/CryptoPage';
 import ViewProfile from '@/pages/Client/educator/ViewProfilePage';
@@ -38,6 +40,24 @@ export function AppRoutingSetup() {
         element={
           <AuthBrandedLayout>
             <Signup />
+          </AuthBrandedLayout>
+        }
+      />
+
+      <Route
+        path="/verify-email"
+        element={
+          <AuthBrandedLayout>
+            <VerifyEmail />
+          </AuthBrandedLayout>
+        }
+      />
+
+      <Route
+        path="/check-email"
+        element={
+          <AuthBrandedLayout>
+            <CheckEmail />
           </AuthBrandedLayout>
         }
       />
