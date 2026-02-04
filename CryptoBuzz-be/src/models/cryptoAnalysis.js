@@ -36,6 +36,26 @@ const cryptoAnalysisSchema = new mongoose.Schema(
         type: String, // Image URLs
       },
     ],
+    videoUrl: {
+      type: String, // Video URL (single video)
+    },
+    mediaType: {
+      type: String,
+      enum: ["image", "video"],
+      default: "image",
+    },
+    accessType: {
+      type: String,
+      enum: ["PUBLIC", "LOGGED_IN", "UID_ONLY", "PRO"],
+      default: "PUBLIC",
+      required: true
+    },
+
+    // Plans array - Crypto Project can belong to multiple plans (same as Courses)
+    plans: [{
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Plan",
+    }],
 
     isDeleted: {
       type: Boolean,

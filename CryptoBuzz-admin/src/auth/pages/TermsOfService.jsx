@@ -7,20 +7,20 @@ const TermsOfService = () => {
         <div className='bg-cover bg-center bg-fixed w-full overflow-auto' style={{ backgroundImage: `url(${bgImage})` }}>
         <div className="flex justify-center items-start min-h-screen  dark:bg-gray-900 p-4 sm:p-6 md:p-8 w-full"
         >
-            <div className="w-full max-w-4xl bg-white dark:bg-gray-800 shadow-md rounded-lg p-6 sm:p-8 md:p-10 my-8">
+            <div className="w-full max-w-4xl bg-white dark:bg-gray-100 shadow-md rounded-lg p-6 sm:p-8 md:p-10 my-8">
                 <div className='flex justify-center mb-5'>
-                    <img src={logo} alt="CryptoBuzz Logo" className='w-40 ' />
+                    <img src={logo} alt="Cripto Buzz Logo" className='w-40 ' />
                 </div>
                 <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white mb-4 text-center">
                     Terms of Service
                 </h1>
-                <p className="text-xs text-gray-500 dark:text-gray-400 mb-8 text-center">
+                <p className="text-xs text-gray-500 dark:text-gray-700 mb-8 text-center">
                     Effective Date: 1st September 2025
                 </p>
 
-                <div className="space-y-6 text-sm text-gray-700 dark:text-gray-300">
+                <div className="space-y-6 text-sm text-gray-700 dark:text-gray-800">
                     <p>
-                        By using CryptoBuzz, you agree to these terms:
+                        By using Cripto Buzz, you agree to these terms:
                     </p>
 
                     <div>
@@ -49,7 +49,7 @@ const TermsOfService = () => {
                             3. Intellectual Property
                         </h2>
                         <ul className="list-disc list-inside space-y-2 pl-4">
-                            <li>CryptoBuzz owns all content and branding.</li>
+                            <li>Cripto Buzz owns all content and branding.</li>
                             <li>Do not copy or distribute materials without permission.</li>
                         </ul>
                     </div>
@@ -88,7 +88,7 @@ const TermsOfService = () => {
                         <h2 className="text-xl sm:text-xl font-semibold text-gray-900 dark:text-white mb-3">
                             Contact Us
                         </h2>
-                        <p>Email: <a href="mailto:support@CryptoBuzz.space" className="text-primary hover:underline">support@CryptoBuzz.space</a></p>
+                        <p>Email: <a href="mailto:support@CriptoBuzz.space" className="text-primary hover:underline">support@CriptoBuzz.space</a></p>
                     </div>
                 </div>
             </div>

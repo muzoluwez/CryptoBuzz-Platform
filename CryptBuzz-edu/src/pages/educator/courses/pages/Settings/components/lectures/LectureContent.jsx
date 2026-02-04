@@ -30,6 +30,13 @@ import {
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import ShowMoreLess from "../../../../../../../components/ui/showmoreless";
+import {
+  detectVideoType,
+  fetchVideoDuration,
+  fetchUploadedVideoDuration,
+  formatDuration,
+  getYouTubeVideoId,
+} from "@/utils/videoDuration";
 
 const LectureContent = ({
   lecture,
@@ -65,6 +72,7 @@ const LectureContent = ({
         : lecture?.section,
     thumbnail: lecture?.thumbnailUrl ? lecture?.thumbnailUrl : null,
     videoUrl: lecture?.videoUrl || null,
+    duration: lecture?.duration || "",
   });
 
   useEffect(() => {
@@ -108,6 +116,7 @@ const LectureContent = ({
         preview: lecture.preview || false,
         section: sectionId || "",
         thumbnail: lecture?.thumbnailUrl || null,
+        duration: lecture?.duration || "",
       });
 
       // setShowPreview(false);
@@ -154,15 +163,28 @@ const LectureContent = ({
     }));
   };
 
-  const handleVideoUrlChange = (e) => {
+  const handleVideoUrlChange = async (e) => {
     const url = e.target.value;
     setFormData((prev) => ({
       ...prev,
       content: url,
+      duration: "", // Reset duration when URL changes
     }));
 
     if (isValidVideoUrl(url)) {
       setShowPreview(true);
+      
+      // Fetch duration for Vimeo and Loom
+      const videoType = detectVideoType(url);
+      if (videoType === "vimeo" || videoType === "loom") {
+        const duration = await fetchVideoDuration(url, videoType);
+        if (duration) {
+          setFormData((prev) => ({
+            ...prev,
+            duration: duration,
+          }));
+        }
+      }
     } else {
       setShowPreview(false);
     }
@@ -180,6 +202,10 @@ const LectureContent = ({
     }
 
     if (url.includes("vimeo.com")) {
+      return true;
+    }
+
+    if (url.includes("loom.com") || url.includes("useloom.com")) {
       return true;
     }
 
@@ -268,13 +294,26 @@ const LectureContent = ({
   return "";
 };
 
-  const handleFileUpload = (e) => {
+  const handleFileUpload = async (e) => {
     const file = e.target.files[0];
     if (file && file.type.startsWith("video/")) {
       setVideoFile(file);
+      
+      // Extract duration from uploaded video file
+      const duration = await fetchUploadedVideoDuration(file);
+      if (duration) {
+        setFormData((prev) => ({
+          ...prev,
+          duration: duration,
+        }));
+      }
     } else {
       setVideoFile(null);
       setShowPreviewVideo(null);
+      setFormData((prev) => ({
+        ...prev,
+        duration: "",
+      }));
     }
   };
 
@@ -285,6 +324,81 @@ const LectureContent = ({
       return () => URL.revokeObjectURL(url);
     }
   }, [videoFile]);
+
+  // Fetch YouTube duration using YouTube IFrame Player API
+  useEffect(() => {
+    if (!formData.content || videoInputType !== "url") return;
+
+    const videoType = detectVideoType(formData.content);
+    if (videoType !== "youtube") return;
+
+    const videoId = getYouTubeVideoId(formData.content);
+    if (!videoId) return;
+
+    // Load YouTube IFrame Player API if not already loaded
+    if (!window.YT) {
+      const tag = document.createElement("script");
+      tag.src = "https://www.youtube.com/iframe_api";
+      const firstScriptTag = document.getElementsByTagName("script")[0];
+      firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+
+      window.onYouTubeIframeAPIReady = () => {
+        createYouTubePlayer(videoId);
+      };
+    } else {
+      createYouTubePlayer(videoId);
+    }
+
+    function createYouTubePlayer(videoId) {
+      // Check if player already exists and destroy it
+      if (window.youtubePlayer) {
+        try {
+          window.youtubePlayer.destroy();
+        } catch (e) {
+          // Ignore errors
+        }
+      }
+
+      // Create a hidden player to get duration
+      window.youtubePlayer = new window.YT.Player("youtube-duration-player", {
+        videoId: videoId,
+        events: {
+          onReady: (event) => {
+            try {
+              const duration = event.target.getDuration();
+              if (duration && duration > 0) {
+                const formattedDuration = formatDuration(duration);
+                setFormData((prev) => {
+                  // Only update if duration is not already set
+                  if (!prev.duration || prev.duration === "0:00") {
+                    return {
+                      ...prev,
+                      duration: formattedDuration,
+                    };
+                  }
+                  return prev;
+                });
+              }
+            } catch (error) {
+              console.error("Error getting YouTube video duration:", error);
+            }
+          },
+        },
+      });
+    }
+
+    return () => {
+      // Cleanup: destroy player when component unmounts or URL changes
+      if (window.youtubePlayer) {
+        try {
+          window.youtubePlayer.destroy();
+          window.youtubePlayer = null;
+        } catch (e) {
+          // Ignore errors
+        }
+      }
+    };
+  }, [formData.content, videoInputType]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -331,6 +445,9 @@ const LectureContent = ({
     dataToSend.append("preview", formData.preview);
     dataToSend.append("section", formData.section);
     dataToSend.append("content", formData.content);
+    if (formData.duration) {
+      dataToSend.append("duration", formData.duration);
+    }
 if (formData.thumbnail?.file) {
   dataToSend.append("thumbnail", formData.thumbnail.file);
 }
@@ -864,6 +981,9 @@ if (videoFile) {
 
   return (
     <div className="space-y-6">
+      {/* Hidden YouTube player for duration fetching */}
+      <div id="youtube-duration-player" style={{ display: "none" }}></div>
+      
       {/* Header */}
       <div className="flex items-center justify-between  p-4 rounded-lg border border-gray-200 shadow-sm">
         <div>

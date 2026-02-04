@@ -86,7 +86,7 @@ const Login = () => {
           <h3 className="text-lg font-semibold text-gray-100 dark:text-gray-900 leading-none mb-2.5">
             Sign in
           </h3>
-          <p className="text-gray-500">Let's Get Started CryptoBuzz</p>
+          <p className="text-gray-500">Let's Get Started Cripto Buzz</p>
         </div>
         {formik.status && <Alert variant="danger">{formik.status}</Alert>}
         {/* <Link
@@ -113,11 +113,11 @@ const Login = () => {
         <div className="flex items-center flex-col gap-3">
           <div className="text-center flex items-center gap-1 justify-center">
             <p className="text-2xs text-gray-300 dark:text-gray-800 mb-0">
-              CryptoBuzz
+              Cripto Buzz
             </p>
             {/* <Link
               to="/terms-of-service"
-              className="text-2xs text-gray-700 underline"
+              className="text-2xs text-gray-500 underline"
             >
               {" "}
               Terms of Service{" "}
@@ -125,7 +125,7 @@ const Login = () => {
             <p className="text-2xs text-gray-300 dark:text-gray-800 mb-0">&</p>
             <Link
               to="/privacy-policy"
-              className="text-2xs text-gray-700 underline"
+              className="text-2xs text-gray-500 underline"
             >
               {" "}
               Privacy Policy{" "}
@@ -135,7 +135,7 @@ const Login = () => {
             <p className="text-2xs text-gray-300 dark:text-gray-800 mb-0">
               Need help?
             </p>
-            <Link to="/support" className="text-2xs text-gray-700 underline">
+            <Link to="/support" className="text-2xs text-gray-500 underline">
               {" "}
               Contact Support.
             </Link>

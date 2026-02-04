@@ -1,32 +1,56 @@
 import { useMemo, useState } from 'react';
 import { useGetSocialsQuery } from '@/store/client/clientSocialApiSlice';
 import { Button } from 'react-aria-components';
-import { Link } from 'react-router';
-import { useAccessControl } from '@/hooks/use-access-control';
+import { Lock } from 'lucide-react';
+import { Link, useNavigate } from 'react-router';
+import { toast } from 'sonner';
+import { checkAccess } from '@/utils/accessControl';
+import { PlanSelectionModal } from '@/components/payment/PlanSelectionModal';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
+import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuLabel, DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { AccessGate } from '@/components/common/AccessGate';
-import ImageCarousel from '@/components/common/ImageCarousel';
-import ImageViewer from '@/components/common/ImageViewer';
 import ShowMoreLess from '@/components/common/ShowMoreLess';
 import { Toolbar, ToolbarHeading } from '@/components/layouts/layout-7/components/toolbar';
 import { Card, CardContent, CardFooter, CardHeader, CardHeading, CardTitle, CardToolbar } from '../../../components/ui/card';
 import useDocumentTitle from '../../../hooks/use-document-title';
+import { useSelector } from 'react-redux';
+import { selectCurrentUser, selectIsAuthenticated } from '@/store/authSlice';
+import { useGetPurchasedPlanIdsQuery } from '@/store/client/clientPaymentApiSlice';
+import { UidRequired } from '@/components/common/access-states/UidRequired';
 
 
 export default function SocialPage() {
   useDocumentTitle('Social');
+  const navigate = useNavigate();
   const [sortValue, setSortValue] = useState('latest');
   const [selectedImage, setSelectedImage] = useState(null);
-  const [selectedImages, setSelectedImages] = useState([]);
+  const [selectedImages, setSelectedImages] = useState([]); // kept for compatibility if needed elsewhere
+  const [showPlanModal, setShowPlanModal] = useState(false);
+  const [selectedContentForPurchase, setSelectedContentForPurchase] = useState(null);
+  const [showUidModal, setShowUidModal] = useState(false);
   const [filters, setFilters] = useState({
     images: false,
     videos: false,
     textPosts: false,
   });
 
-  const { checkAccess } = useAccessControl();
+  // Access control hooks - called at component level
+  const isAuthenticated = useSelector(selectIsAuthenticated);
+  const user = useSelector(selectCurrentUser);
+  const { data: purchasedPlansData } = useGetPurchasedPlanIdsQuery(undefined, {
+    skip: !isAuthenticated,
+  });
+
+  const purchasedPlanIds = useMemo(() => {
+    if (!purchasedPlansData?.data?.planIds) return new Set();
+    return new Set(purchasedPlansData.data.planIds);
+  }, [purchasedPlansData]);
+
+  const userUid = useMemo(() => {
+    if (!user) return null;
+    return user.uid || user.credential?.uid || null;
+  }, [user]);
 
   // Fetch social posts from API
   const { data, isLoading, isError, error } = useGetSocialsQuery({
@@ -79,7 +103,7 @@ export default function SocialPage() {
       const imageUrls = post?.images && Array.isArray(post.images) && post.images.length > 0
         ? post.images.map(img => img?.url || img).filter(Boolean)
         : [];
-      
+
       // Get first image for backward compatibility
       const image = imageUrls?.length > 0 ? imageUrls[0] : null;
 
@@ -105,8 +129,8 @@ export default function SocialPage() {
         (post?.shares?.length || 0);
       const views = totalViews > 0 ? formatViews(totalViews) : '0';
 
-      // Make all posts PUBLIC (free access)
-      const accessType = 'PUBLIC';
+      // Get access type from post (can be PUBLIC, LOGGED_IN, UID_ONLY, PRO)
+      const accessType = post?.tier || post?.accessType || 'PUBLIC';
 
       // Get category for host name
       const category = post?.category || 'Event';
@@ -131,7 +155,9 @@ export default function SocialPage() {
         },
         views: views,
         accessType: accessType,
-        allowedPlans: post?.allowedPlans || [],
+        tier: post?.tier || post?.accessType || 'PUBLIC', // Use tier for unified access control
+        plans: post?.plans || post?.allowedPlans || [], // Support both new (plans) and old (allowedPlans) format
+        allowedPlans: post?.allowedPlans || [], // Keep for backward compatibility
         category: category,
         hashtags: post?.hashtags || [],
         mentions: post?.mentions || [],
@@ -149,13 +175,13 @@ export default function SocialPage() {
   // Loading state
   if (isLoading) {
     return (
-      <div className="container py-6">
+      <>
         <div className="flex justify-between items-center mb-6">
           <header className="">
             <h1 className="text-2xl font-semibold text-black dark:text-white">
               Social
             </h1>
-            <p className="text-xs text-gray-500 mt-1">Latest community posts</p>
+            <p className="text-sm text-muted-foreground mt-1">Latest community posts</p>
           </header>
         </div>
         <div className="flex items-center justify-center min-h-[400px]">
@@ -164,20 +190,20 @@ export default function SocialPage() {
             <p className="text-gray-500">Loading social posts...</p>
           </div>
         </div>
-      </div>
+      </>
     );
   }
 
   // Error state
   if (isError) {
     return (
-      <div className="container py-6">
+      <>
         <div className="flex justify-between items-center mb-6">
           <header className="">
             <h1 className="text-2xl font-semibold text-black dark:text-white">
               Social
             </h1>
-            <p className="text-xs text-gray-500 mt-1">Latest community posts</p>
+            <p className="text-sm text-muted-foreground mt-1">Latest community posts</p>
           </header>
         </div>
         <div className="flex items-center justify-center min-h-[400px]">
@@ -188,20 +214,20 @@ export default function SocialPage() {
             </p>
           </div>
         </div>
-      </div>
+      </>
     );
   }
 
   // Empty state
   if (!posts || posts.length === 0) {
     return (
-      <div className="container py-6">
+      <>
         <div className="flex justify-between items-center mb-6">
           <header className="">
             <h1 className="text-2xl font-semibold text-black dark:text-white">
               Social
             </h1>
-            <p className="text-xs text-gray-500 mt-1">Latest community posts</p>
+            <p className="text-sm text-muted-foreground mt-1">Latest community posts</p>
           </header>
           {/* <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -229,21 +255,20 @@ export default function SocialPage() {
             <p className="text-gray-500">No social posts available</p>
           </div>
         </div>
-      </div>
+      </>
     );
   }
 
   return (
     <>
-      <div className="container py-6">
-        <div className="flex justify-between items-center mb-6">
-          <header className="">
-            <h1 className="text-2xl font-semibold text-black dark:text-white">
-              Social
-            </h1>
-            <p className="text-xs text-gray-500 mt-1">Latest community posts</p>
-          </header>
-          {/* <DropdownMenu>
+      <div className="flex justify-between items-center mb-6">
+        <header className="">
+          <h1 className="text-2xl font-semibold text-black dark:text-white">
+            Social
+          </h1>
+          <p className="text-sm text-muted-foreground mt-1">Latest community posts</p>
+        </header>
+        {/* <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button className="btn !flex gap-2 bg-primary !text-dark cursor-pointer ">
                 Filter <FilterIcon className="w-5" />{' '}
@@ -263,41 +288,125 @@ export default function SocialPage() {
               </DropdownMenuRadioGroup>
             </DropdownMenuContent>
           </DropdownMenu> */}
-        </div>
-        <div>
-          {posts?.map((post) => (
-            <AccessGate
-              key={post?.id || post?._id}
-              accessType={post?.accessType}
-              allowedPlans={post?.allowedPlans || []}
-              fallback={
-                <Card className="max-w-full overflow-hidden rounded-xl shadow-md mb-5 opacity-75">
-                  <CardHeader className="p-4 justify-between blur-[2px]">
-                    {/* Masked Header */}
-                    <div className="flex items-start gap-3">
-                      <Avatar className="h-10 w-10">
-                        <AvatarFallback>?</AvatarFallback>
-                      </Avatar>
-                      <div className="flex-1">
-                        <div className="h-4 w-32 bg-gray-200 rounded animate-pulse mb-2"></div>
-                        <div className="h-3 w-24 bg-gray-100 rounded animate-pulse"></div>
-                      </div>
-                    </div>
-                  </CardHeader>
-                  <CardContent className="p-4 pt-2 flex flex-col items-center justify-center min-h-[200px] gap-3">
-                    <span className="text-lg font-semibold text-gray-500">
-                      {post.accessType === 'LOGIN_REQUIRED'
-                        ? 'Login to view this post'
-                        : 'Upgrade to view this post'}
-                    </span>
-                    <Button className="bg-primary text-white" disabled>
-                      Locked Content
-                    </Button>
-                  </CardContent>
-                </Card>
+      </div>
+      <div>
+        {posts?.map((post) => {
+          // Compute access control using utility function (not hook) inside map
+          const tier = post?.tier || post?.accessType || "PUBLIC";
+          const contentPlans = (post?.plans || post?.allowedPlans || []).map(p => (p?._id || p)?.toString()).filter(Boolean);
+
+          // Check if user has purchased any plan associated with this content
+          const hasPurchase = tier === "PRO" && contentPlans.length > 0 && purchasedPlanIds.size > 0
+            ? contentPlans.some(planId => purchasedPlanIds.has(planId))
+            : false;
+
+          // Use checkAccess utility function (not hook)
+          const { hasAccess, showLock, lockReason, lockMessage } = checkAccess({
+            tier,
+            isAuthenticated,
+            userUid,
+            hasPurchase,
+            isPremium: tier === "PRO",
+          });
+
+          const isLocked = showLock && !hasAccess;
+
+          // Handle lock icon click - Determine which action to take based on access type
+          const handleLockClick = (e) => {
+            // Stop propagation to prevent card interactions
+            e.stopPropagation();
+
+            // 1. Login Required - Navigate to login page
+            if (lockReason === 'LOGIN_REQUIRED' || (tier === 'PRO' && !isAuthenticated)) {
+              navigate('/login', { state: { from: window.location.pathname } });
+              return;
+            }
+
+            // 2. UID Required - Show UID modal
+            if (lockReason === 'UID_REQUIRED') {
+              setShowUidModal(true);
+              return;
+            }
+
+            // 3. Purchase Required (Paid content) - ALWAYS show plan modal
+            if (lockReason === 'PURCHASE_REQUIRED' || tier === 'PRO') {
+              // Debug: Log the post object to see what we're working with
+              console.log('Post object for purchase:', post);
+              console.log('Plans from post:', post?.plans);
+
+              // Get plans from the content item
+              // Plans can come as an array of objects (populated) or array of IDs (not populated)
+              const rawPlans = post?.plans || [];
+              console.log('Raw plans array:', rawPlans);
+
+              // Filter out null/undefined and map to proper format
+              const contentPlans = rawPlans
+                .filter(p => p && (p?._id || p))
+                .map(p => {
+                  // If p is just an ID string, return null (we'd need to fetch it, but for now skip)
+                  if (typeof p === 'string') {
+                    console.warn('Plan is a string ID, not populated:', p);
+                    return null;
+                  }
+                  // If p is an object with _id, it's populated
+                  return {
+                    _id: p?._id || p,
+                    name: p?.name || 'Plan',
+                    description: p?.description || '',
+                    price: p?.price || 0,
+                    hotmartCheckoutUrl: p?.hotmartCheckoutUrl || '',
+                  };
+                })
+                .filter(Boolean); // Remove null entries
+
+              console.log('Processed content plans:', contentPlans);
+
+              if (contentPlans.length === 0) {
+                toast.error('No plans available for this content');
+                console.error('No valid plans found. Raw plans:', rawPlans);
+                return;
               }
+
+              // ALWAYS show modal - even for single plan (user requirement)
+              console.log('✅ Plans detected - opening modal', {
+                plansCount: contentPlans.length,
+                plans: contentPlans
+              });
+              setSelectedContentForPurchase({
+                id: post?._id || post?.id,
+                title: post?.content?.substring(0, 50) || 'Social Post',
+                plans: contentPlans,
+                contentType: 'post',
+              });
+              setShowPlanModal(true);
+            }
+          };
+
+          return (
+            <div
+              className="relative h-full"
+              key={post?.id || post?._id}
             >
-              <Card className="max-w-full overflow-hidden rounded-xl shadow-md mb-5">
+              <Card className="container overflow-hidden rounded-xl shadow-md mb-5 h-full relative max-w-full md:max-w-2xl mx-auto pb-8">
+                {/* Full Card Lock Overlay - Semi-transparent overlay over entire card */}
+                {isLocked && (
+                  <div
+                    className="absolute inset-0 z-10 top-16 bg-black/60 backdrop-blur-[4px] rounded-xl cursor-pointer"
+                    onClick={handleLockClick}
+                  />
+                )}
+                {/* Lock Icon - Top Right Corner of entire card (only when locked) */}
+                {isLocked && (
+                  <div
+                    className="absolute top-20 right-9 z-30 cursor-pointer"
+                    onClick={handleLockClick}
+                  >
+                    <div className="bg-yellow-500 backdrop-blur-sm p-2.5 rounded-full hover:bg-yellow-600/80 transition-all">
+                      <Lock className="w-5 h-5 text-white" />
+                    </div>
+                  </div>
+                )}
+
                 <CardHeader className="p-4 justify-between">
                   <div className="flex items-center gap-3">
                     <Avatar className="h-10 w-10">
@@ -326,64 +435,129 @@ export default function SocialPage() {
                       </div>
                     </div>
                   </div>
-                  {/* <CardToolbar>
-                    <Button
-                      mode="icon"
-                      variant="outline"
-                      size="sm"
-                      className="opacity-80"
-                    >
-                      <Settings />
-                    </Button>
-                  </CardToolbar> */}
                 </CardHeader>
 
-                <CardContent className="p-4 pt-2">
+                <CardContent className={`p-4 pt-2 ${isLocked ? 'opacity-85' : ''}`}>
                   <div className="">
-                    <div className="text-sm text-gray-600 dark:text-gray-300 mt-2">
+                    <div className="text-sm text-gray-600 dark:text-gray-100 mt-2">
                       {post?.content ? (
-                        <ShowMoreLess text={post.content} limit={100} />
+                        isLocked ? (
+                          <p className="line-clamp-3">{`${(post?.content || "").substring(0, 8)}******`}</p>
+                        ) : (
+                          <ShowMoreLess text={post.content} limit={100} />
+                        )
                       ) : (
                         <p className="line-clamp-3">No content available.</p>
                       )}
                     </div>
                   </div>
-                  {/* Images */}
+                  {/* Images (grid view, click to open modal) */}
                   {post?.images &&
                     Array.isArray(post.images) &&
-                    post.images.length > 0 && (
-                      <div className="rounded-xl overflow-hidden h-72 relative mt-5 mb-4">
-                        <ImageCarousel
-                          images={post.images}
-                          alt={post?.content || 'Social post'}
-                          height="h-72"
-                          showViewButton={true}
-                          className="rounded-xl"
-                        />
-                        {/* <Link
-                          to="/client/viewprofile"
-                          className="absolute inset-0 z-10"
-                          onClick={(e) => e?.stopPropagation()}
-                        /> */}
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent pointer-events-none" />
-                        {/* <div className="absolute left-4 bottom-4 text-white z-20">
-                          <div className="text-xs uppercase opacity-80 tracking-wider">
-                            Hosted by
+                    post.images.length > 0 && (() => {
+                      const images = post.images.filter(Boolean);
+                      if (images.length === 0) return null;
+
+                      const openImage = (idx) => {
+                        if (!hasAccess) return;
+                        const safeIdx = Math.max(0, Math.min(idx, images.length - 1));
+                        setSelectedImage(images[safeIdx]);
+                      };
+
+                      // Single image: show as uploaded (contain, max width like PostCard)
+                      if (images.length === 1) {
+                        return (
+                          <div className="mt-5 flex justify-center">
+                            <button
+                              type="button"
+                              className="cursor-pointer w-full max-w-[650px] rounded-xl overflow-hidden bg-black/5 dark:bg-white/5"
+                              onClick={() => openImage(0)}
+                              disabled={!hasAccess}
+                            >
+                              <img
+                                src={images[0]}
+                                alt={post?.content || 'Social post'}
+                                className="w-full h-auto max-h-[600px] object-contain"
+                                onError={(e) => {
+                                  if (e?.target) e.target.style.display = 'none';
+                                }}
+                              />
+                            </button>
                           </div>
-                          <div className="text-lg font-bold text-primary">
-                            {post?.host?.name || post?.category || ''}
+                        );
+                      }
+
+                      // Multi image: grid preview (like reference)
+                      const showImages = images.slice(0, 4);
+                      const remaining = images.length - showImages.length;
+
+                      return (
+                        <div className="mt-5 flex justify-center">
+                          <div className="w-full max-w-[650px] grid grid-cols-2 gap-2">
+                            {showImages.map((src, idx) => (
+                              <div
+                                key={`${src}-${idx}`}
+                                className="cursor-pointer w-full max-w-[650px] rounded-xl overflow-hidden bg-black/5 dark:bg-white/5"
+                                onClick={() => openImage(idx)}
+                                disabled={!hasAccess}
+                              >
+                                <img
+                                  src={src}
+                                  alt={post?.content || 'Social post'}
+                                  className="w-full aspect-square object-contain transition-all duration-300 ease-in-out group-hover:scale-105"
+                                  onError={(e) => {
+                                    if (e?.target) e.target.style.display = 'none';
+                                  }}
+                                />
+
+                                {idx === 3 && remaining > 0 && (
+                                  <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
+                                    <span className="text-white text-xl font-semibold">
+                                      +{remaining}
+                                    </span>
+                                  </div>
+                                )}
+                                {selectedImage && (
+                                  <div
+                                    className="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50 p-4 backdrop-blur-sm"
+                                    onClick={() => setSelectedImage(null)}
+                                  >
+                                    <div
+                                      className="relative"
+                                      onClick={(e) => e?.stopPropagation()}
+                                    >
+                                      <img
+                                        src={selectedImage}
+                                        alt="Social post image"
+                                        className="rounded-2xl max-w-full max-h-[90vh] border border-gray-200 dark:border-[#2C2F36]"
+                                        onError={(e) => {
+                                          if (e?.target) {
+                                            e.target.style.display = 'none';
+                                          }
+                                        }}
+                                      />
+                                      <button
+                                        type="button"
+                                        className="absolute top-3 right-3 bg-white dark:bg-[#1F1F23] text-black dark:text-[#EDEDED] hover:bg-gray-200 dark:hover:bg-[#3B3B42] px-3 py-1 rounded-lg shadow-md transition cursor-pointer"
+                                        onClick={() => setSelectedImage(null)}
+                                        aria-label="Close image"
+                                      >
+                                        ✕
+                                      </button>
+                                    </div>
+                                  </div>
+                                )}
+                              </div>
+                            ))}
                           </div>
-                          <div className="text-sm opacity-90">
-                            {post?.host?.desc || 'Social Post'}
-                          </div>
-                        </div> */}
-                      </div>
-                    )}
+                        </div>
+                      );
+                    })()}
                   {/* Videos */}
                   {post?.videos &&
                     Array.isArray(post.videos) &&
                     post.videos.length > 0 && (
-                      <div className="rounded-xl overflow-hidden space-y-4 mb-4">
+                      <div className={`rounded-xl overflow-hidden space-y-4 mb-4 ${isLocked ? 'blur-md' : ''}`}>
                         {post.videos.map((video, idx) => (
                           <div
                             key={idx}
@@ -406,55 +580,51 @@ export default function SocialPage() {
                       </div>
                     )}
                 </CardContent>
-
-                {/* <CardFooter className="p-4 pt-2 flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <Button
-                      mode="icon"
-                      variant="ghost"
-                      size="sm"
-                      className="text-gray-600 cursor-pointer hover:text-primary"
-                    >
-                      <ThumbsUpIcon />
-                    </Button>
-                    <Button
-                      mode="icon"
-                      variant="ghost"
-                      size="sm"
-                      className="text-gray-600 cursor-pointer hover:text-primary"
-                    >
-                      <MessageCircle />
-                    </Button>
-                    <Button
-                      mode="icon"
-                      variant="ghost"
-                      size="sm"
-                      className="text-gray-600 cursor-pointer hover:text-primary"
-                    >
-                      <Forward />
-                    </Button>
-                  </div>
-                  <div className="text-xs text-gray-700">
-                    {post.views} views
-                  </div>
-                </CardFooter> */}
               </Card>
-            </AccessGate>
-          ))}
-        </div>
+            </div>
+          );
+        })}
       </div>
 
-      {/* Image Viewer Modal */}
-      <ImageViewer
-        image={selectedImage}
-        images={selectedImages?.length > 0 ? selectedImages : []}
-        isOpen={!!selectedImage}
-        onClose={() => {
-          setSelectedImage(null);
-          setSelectedImages([]);
-        }}
-        alt="Social post image"
-      />
+      {/* Plan Selection Modal */}
+      {selectedContentForPurchase && (
+        <PlanSelectionModal
+          open={showPlanModal}
+          onOpenChange={setShowPlanModal}
+          courseId={selectedContentForPurchase.id} // Reusing courseId prop name for compatibility
+          courseTitle={selectedContentForPurchase.title}
+          plans={selectedContentForPurchase.plans}
+          useDirectPlanCheckout={true} // Use plan's checkout URL directly (non-course content)
+          onPurchaseSuccess={() => {
+            setShowPlanModal(false);
+            setSelectedContentForPurchase(null);
+          }}
+          onPurchaseError={() => {
+            setShowPlanModal(false);
+          }}
+        />
+      )}
+
+      {/* UID Required Modal */}
+      <Dialog open={showUidModal} onOpenChange={setShowUidModal}>
+        <DialogContent className="sm:max-w-md">
+          <UidRequired
+            onConnectUid={(e) => {
+              e?.preventDefault();
+              e?.stopPropagation();
+              setShowUidModal(false);
+              // Only navigate to login if user is not authenticated
+              if (!isAuthenticated) {
+                navigate('/login', { state: { from: window.location.pathname } });
+              }
+            }}
+            onClose={() => setShowUidModal(false)}
+          />
+        </DialogContent>
+      </Dialog>
+
+      {/* Simple Image Modal (single image only) */}
+
     </>
   );
 }

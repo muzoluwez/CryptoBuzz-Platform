@@ -19,7 +19,7 @@ const PrivacyPolicy = () => {
 
                     <div className="space-y-6 text-sm text-gray-700 dark:text-gray-300">
                         <p>
-                            CryptoBuzz (“we”, “our”, or “us”) respects your privacy. This Privacy Policy explains how we handle your information when you use our app and related services.
+                            Cripto Buzz (“we”, “our”, or “us”) respects your privacy. This Privacy Policy explains how we handle your information when you use our app and related services.
                         </p>
 
                         <div>
@@ -92,7 +92,7 @@ const PrivacyPolicy = () => {
                             <h2 className="text-xl sm:text-xl font-semibold text-gray-900 dark:text-white mb-3">
                                 7. Contact Us
                             </h2>
-                            <p>Email: <a href="mailto:support@CryptoBuzz.space" className="text-primary hover:underline">support@cryptobuzz.space</a></p>
+                            <p>Email: <a href="mailto:support@CriptoBuzz.space" className="text-primary hover:underline">support@CriptoBuzz.space</a></p>
                         </div>
                     </div>
                 </div>

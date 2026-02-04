@@ -45,7 +45,13 @@ const baseQueryWithReauth = async (args, api, extraOptions) => {
             message: data?.message || result.error?.error || 'Unknown error'
         });
 
-        if (status === 401 || data?.error === "jwt expired" || data?.error === "invalid signature") {
+
+        // Handle "Invalid or expired token" error message
+        if (data?.message === "Invalid or expired token" || 
+            status === 401 || 
+            data?.error === "jwt expired" || 
+            data?.error === "invalid signature" ||
+            data?.error === "Invalid or expired access token") {
             console.warn("⚠️ JWT expired or invalid! Message:", data?.message || result.error?.error);
             
             // Only redirect on actual auth failures, not on missing token for public endpoints
@@ -53,8 +59,8 @@ const baseQueryWithReauth = async (args, api, extraOptions) => {
             localStorage.clear();
             sessionStorage.clear();
 
-            // Redirect user to login page
-            window.location.href = "/auth/login"; // Adjust route as needed
+            // Redirect user to home page
+            window.location.href = "/login"; // Adjust route as needed
         }
     }
 

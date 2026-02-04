@@ -28,7 +28,7 @@ function NavigationMenuList({ className, ...props }) {
     <NavigationMenuPrimitive.List
       data-slot="navigation-menu-list"
       className={cn(
-        'group flex flex-1 list-none items-center justify-center gap-1',
+        'group flex flex-1 list-none items-center justify-center gap-1 !px-0',
         className,
       )}
       {...props}
@@ -47,7 +47,7 @@ function NavigationMenuItem({ className, ...props }) {
 }
 
 const navigationMenuTriggerStyle = cva(
-  'cursor-pointer group inline-flex h-9 w-max items-center justify-center rounded-md bg-background px-4 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground disabled:pointer-events-none disabled:opacity-50 data-[active=true]:bg-accent/50 data-[state=open]:bg-accent/50 data-[active=true]:text-accent-foreground ring-ring/10 dark:ring-ring/20 dark:outline-ring/40 outline-ring/50 transition-[color,box-shadow] focus-visible:ring-4 focus-visible:outline-1',
+  'cursor-pointer no-underline group inline-flex h-9 w-max items-center justify-center rounded-md bg-background px-4 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground disabled:pointer-events-none disabled:opacity-50 data-[active=true]:bg-accent/50 data-[state=open]:bg-accent/50 data-[active=true]:text-accent-foreground ring-ring/10 dark:ring-ring/20 dark:outline-ring/40 outline-ring/50 transition-[color,box-shadow] focus-visible:ring-4 focus-visible:outline-1',
 );
 
 function NavigationMenuTrigger({ className, children, ...props }) {
@@ -104,7 +104,7 @@ function NavigationMenuLink({ className, ...props }) {
     <NavigationMenuPrimitive.Link
       data-slot="navigation-menu-link"
       className={cn(
-        'data-[active=true]:text-shadow-accent-foreground ring-ring/10 dark:ring-ring/20 dark:outline-ring/40 outline-ring/50 flex flex-col gap-1 rounded-md p-2 text-sm transition-[color,box-shadow] focus-visible:ring-4 focus-visible:outline-1',
+        'header_nav data-[active=true]:text-shadow-accent-foreground ring-ring/10 dark:ring-ring/20 dark:outline-ring/40 outline-ring/50 flex flex-col gap-1 rounded-md p-2 text-sm transition-[color,box-shadow] focus-visible:ring-4 focus-visible:outline-1',
         className,
       )}
       {...props}

@@ -7,7 +7,11 @@ const CourseSchema = new mongoose.Schema(
     price: { type: Number, default: 0 },
     published: { type: Boolean, default: false },
     isFeatured: { type: Boolean, default: false },
-    tier: { type: String, default: "FREE" },
+    tier: { 
+      type: String, 
+      enum: ["PUBLIC", "LOGGED_IN", "UID_ONLY", "PRO"],
+      default: "PUBLIC" 
+    },
     order: { type: Number, required: true },
     section: { type: String, required: true },
     language: { type: String, required: true },
@@ -55,6 +59,12 @@ const CourseSchema = new mongoose.Schema(
       type: String,
       default: null,
     },
+
+    // Recommended courses - array of course IDs (max 4)
+    recommendedCourses: [{
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Course",
+    }],
 
     isDeleted: { type: Boolean, default: false },
     deletedAt: { type: Date },

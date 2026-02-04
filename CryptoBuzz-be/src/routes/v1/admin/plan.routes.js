@@ -8,6 +8,7 @@ import {
   getHotmartProductsForPlan,
 } from "../../../controllers/admin/plan.js";
 import Auth from "../../../middlewares/auth.js";
+import { upload } from "../../../middlewares/multer.js";
 
 const router = express.Router();
 
@@ -19,8 +20,8 @@ router.get("/hotmart-products", Auth.AdminAuth, getHotmartProductsForPlan);
 router.get("/", Auth.CommonAuth, getPlans);
 router.get("/:id", Auth.CommonAuth, getPlan);
 // POST, PUT, DELETE: Admin only (plan management)
-router.post("/", Auth.AdminAuth, createPlan);
-router.put("/:id", Auth.AdminAuth, updatePlan);
+router.post("/", Auth.AdminAuth, upload.single("image"), createPlan);
+router.put("/:id", Auth.AdminAuth, upload.single("image"), updatePlan);
 router.delete("/:id", Auth.AdminAuth, deletePlan);
 
 export default router;

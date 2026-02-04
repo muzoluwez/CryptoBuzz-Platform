@@ -99,6 +99,19 @@ const ScheduleSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+
+    // Access control - same tier system as other modules
+    tier: {
+      type: String,
+      enum: ["PUBLIC", "LOGGED_IN", "UID_ONLY", "PRO"],
+      default: "PUBLIC",
+    },
+
+    // Plans array - Schedule/Live Stream can belong to multiple plans (same as Courses)
+    plans: [{
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Plan",
+    }],
   },
   { timestamps: true }
 );

@@ -25,20 +25,20 @@ const HeaderLogo = () => {
   }, [pathname]);
 
   return (
-    <div className="flex items-stretch gap-1.5 lg:gap-10 grow">
+    <div className="flex items-stretch gap-1.5 lg:gap-8 grow">
       <div className="flex items-center gap-2.5">
         <Link to="/client/home">
           <img
             src={toAbsoluteUrl('/media/app/mini-logo-circle-primary-dark.svg')}
-            className="dark:hidden min-h-[34px]"
+            className="min-h-[34px]"
             alt="logo"
           />
 
-          <img
+          {/* <img
             src={toAbsoluteUrl('/media/app/mini-logo-circle-primary-dark.svg')}
             className="hidden dark:inline-block min-h-[34px]"
             alt="logo"
-          />
+          /> */}
         </Link>
       </div>
 
@@ -48,7 +48,7 @@ const HeaderLogo = () => {
         <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
           <SheetTrigger asChild>
             <Button variant="dim" mode="icon">
-              <Menu className='text-white'/>
+              <Menu className='!text-white'/>
             </Button>
           </SheetTrigger>
           <SheetContent

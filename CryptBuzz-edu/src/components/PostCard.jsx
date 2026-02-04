@@ -138,7 +138,7 @@ const PostCard = ({ post, onEdit, isOwnPost = false, refetch }) => {
       <div className="space-y-3">
         {/* Images */}
         {hasImages && (
-          <div>
+          <div className="flex justify-start">
             {post.images.length === 1 ? (
               <>
                 <img
@@ -171,7 +171,7 @@ const PostCard = ({ post, onEdit, isOwnPost = false, refetch }) => {
                 )}
               </>
             ) : (
-              <div className="grid grid-cols-2 gap-2">
+              <div className="grid grid-cols-2 gap-2 w-full">
                 {post.images.slice(0, 4).map((image, index) => (
                   <div key={index} className="relative">
                     <img

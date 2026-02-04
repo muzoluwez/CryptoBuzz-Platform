@@ -5,6 +5,9 @@ import { useCreatePaymentLinkMutation, useGetCoursePlansQuery } from '@/store/cl
 import { PlanSelectionModal } from './PlanSelectionModal';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
+import { useSelector } from 'react-redux';
+import { selectIsAuthenticated } from '@/store/authSlice';
+import { useNavigate } from 'react-router-dom';
 
 /**
  * PurchaseButton Component
@@ -20,7 +23,10 @@ export function PurchaseButton({
   showPrice = true,
   onPurchaseSuccess,
   onPurchaseError,
+  tier = 'PRO', // Default to PRO for paid courses
 }) {
+  const navigate = useNavigate();
+  const isAuthenticated = useSelector(selectIsAuthenticated);
   const [showPlanModal, setShowPlanModal] = useState(false);
   const [createPaymentLink, { isLoading }] = useCreatePaymentLinkMutation();
   
@@ -35,6 +41,13 @@ export function PurchaseButton({
   const handlePurchase = async () => {
     if (!courseId) {
       toast.error('Course ID is required');
+      return;
+    }
+
+    // For PRO courses, check authentication first
+    // If not authenticated, redirect to login
+    if (tier === 'PRO' && !isAuthenticated) {
+      navigate('/login', { state: { from: window.location.pathname } });
       return;
     }
 

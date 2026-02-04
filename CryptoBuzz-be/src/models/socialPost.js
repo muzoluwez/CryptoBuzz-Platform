@@ -78,6 +78,19 @@ const postSchema = new mongoose.Schema(
       enum: ["public", "followers", "private"],
       default: "public",
     },
+
+    // Access control - same tier system as other modules
+    tier: {
+      type: String,
+      enum: ["PUBLIC", "LOGGED_IN", "UID_ONLY", "PRO"],
+      default: "PUBLIC",
+    },
+
+    // Plans array - Social Post can belong to multiple plans (same as Courses)
+    plans: [{
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Plan",
+    }],
   },
   {
     timestamps: true,

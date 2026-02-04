@@ -28,6 +28,7 @@ export const getSocials = asyncHandler(async (req, res) => {
             .skip(skip)
             .limit(limitNum)
             .populate("author", "_id first_name last_name image")
+            .populate("plans", "name price description hotmartCheckoutCode hotmartCheckoutUrl")
             .lean(),
         Post.countDocuments(query)
     ]);

@@ -6,20 +6,20 @@ const PrivacyPolicy = () => {
     return (
         <div className='bg-cover bg-center bg-fixed w-full overflow-auto' style={{ backgroundImage: `url(${bgImage})` }}>
             <div className="flex justify-center items-start w-full min-h-screen p-4 sm:p-6 md:p-8">
-                <div className="w-full max-w-4xl bg-white dark:bg-gray-800 shadow-md rounded-lg p-6 sm:p-8 md:p-10 my-8">
+                <div className="w-full max-w-4xl bg-white dark:bg-gray-100 shadow-md rounded-lg p-6 sm:p-8 md:p-10 my-8">
                     <div className='flex justify-center mb-5'>
                         <img src={logo} alt="" className='w-40 ' />
                     </div>
                     <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white mb-4 text-center">
                         Privacy Policy
                     </h1>
-                    <p className="text-xs text-gray-500 dark:text-gray-400 mb-8 text-center">
+                    <p className="text-xs text-gray-500 dark:text-gray-700 mb-8 text-center">
                         Effective Date: 1st September 2025
                     </p>
 
-                    <div className="space-y-6 text-sm text-gray-700 dark:text-gray-300">
+                    <div className="space-y-6 text-sm text-gray-700 dark:text-gray-800">
                         <p>
-                            CryptoBuzz (“we”, “our”, or “us”) respects your privacy. This Privacy Policy explains how we handle your information when you use our app and related services.
+                            Cripto Buzz (“we”, “our”, or “us”) respects your privacy. This Privacy Policy explains how we handle your information when you use our app and related services.
                         </p>
 
                         <div>
@@ -92,7 +92,7 @@ const PrivacyPolicy = () => {
                             <h2 className="text-xl sm:text-xl font-semibold text-gray-900 dark:text-white mb-3">
                                 7. Contact Us
                             </h2>
-                            <p>Email: <a href="mailto:support@cryptobuzz.space" className="text-primary hover:underline">support@cryptobuzz.space</a></p>
+                            <p>Email: <a href="mailto:support@CriptoBuzz.space" className="text-primary hover:underline">support@criptobuzz.space</a></p>
                         </div>
                     </div>
                 </div>

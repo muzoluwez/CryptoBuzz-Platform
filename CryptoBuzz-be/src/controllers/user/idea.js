@@ -65,6 +65,7 @@ export const getIdeas = asyncHandler(async (req, res) => {
             .limit(limitNum)
             .populate("category", "_id name")
             .populate("educatorId", "_id first_name last_name image")
+            .populate("plans", "name price description hotmartCheckoutCode hotmartCheckoutUrl")
             .select("-__v -isDeleted -deletedAt")
             .lean(),
         Idea.countDocuments(query)
@@ -84,6 +85,7 @@ export const getIdeas = asyncHandler(async (req, res) => {
         pips: idea.pips,
         exits: idea.exits,
         accessType: idea.accessType,
+        plans: idea.plans || [], // Include populated plans
         createdAt: idea.createdAt,
         category: idea.category,
         educator: idea.educatorId

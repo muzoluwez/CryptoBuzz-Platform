@@ -9,6 +9,8 @@ import categoryRoutes from "./category.routes.js"
 import educatorRoutes from "./educator.routes.js"
 import ratingRoutes from "./rating.routes.js"
 import courseRoutes from "./course.routes.js"
+import languageRoutes from "./language.routes.js"
+import { getAllCoursesForMarketplace } from "../../../controllers/user/course.js";
 
 const router = express.Router();
 
@@ -23,5 +25,8 @@ router.use("/category", categoryRoutes);
 router.use("/educator", educatorRoutes);
 router.use("/rating", ratingRoutes);
 router.use("/course", courseRoutes);
+router.use("/language", languageRoutes);
+// Direct route for marketplace courses (matches frontend expectation)
+router.get("/courses", getAllCoursesForMarketplace);
 
 export default router;

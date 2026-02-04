@@ -21,6 +21,12 @@ const PlanSchema = new mongoose.Schema(
       default: "USD",
     },
 
+    // Image
+    image: {
+      type: String,
+      default: "",
+    },
+
     // Hotmart Integration
     hotmartProductId: {
       type: String,

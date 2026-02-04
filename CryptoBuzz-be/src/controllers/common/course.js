@@ -23,7 +23,7 @@ const courseValidationSchema = yup.object().shape({
   price: yup.number().min(0).optional(),
   published: yup.boolean().default(false),
   isFeatured: yup.boolean().default(false),
-  tier: yup.string().oneOf(["FREE", "PREMIUM"]).default("FREE"),
+  tier: yup.string().oneOf(["PUBLIC", "LOGGED_IN", "UID_ONLY", "PRO"]).default("PUBLIC"),
   order: yup.number().integer().min(0).optional(),
   category: yup
     .string()
@@ -61,6 +61,17 @@ const courseValidationSchema = yup.object().shape({
     .optional(),
   // Legacy field - keep for backward compatibility
   hotmartProductId: yup.string().nullable().optional(),
+  // Recommended courses - array of course IDs (max 4)
+  recommendedCourses: yup
+    .array()
+    .of(
+      yup
+        .string()
+        .matches(/^[0-9a-fA-F]{24}$/, "Each recommended course must be a valid ObjectId")
+    )
+    .max(4, "Maximum 4 recommended courses allowed")
+    .nullable()
+    .optional(),
 });
 
 const courseReorderSchema = yup.object().shape({
@@ -148,6 +159,7 @@ export const getOneCourse = async (req, res) => {
       .populate("instructor", "name email")
       .populate("plan", "name price currency hotmartCheckoutUrl status")
       .populate("plans", "name price currency hotmartCheckoutUrl status description")
+      .populate("recommendedCourses", "_id title description imageUrl price tier")
       .populate({
         path: "sections",
         populate: {
@@ -255,6 +267,41 @@ export const createCourse = async (req, res) => {
       }
     }
 
+    // Handle recommendedCourses array (max 4 courses)
+    if (cleanedBody.recommendedCourses) {
+      // Parse JSON string if sent as JSON (from FormData)
+      if (typeof cleanedBody.recommendedCourses === "string") {
+        try {
+          const parsed = JSON.parse(cleanedBody.recommendedCourses);
+          if (Array.isArray(parsed)) {
+            cleanedBody.recommendedCourses = parsed;
+          } else {
+            // If not JSON array, try comma-separated
+            cleanedBody.recommendedCourses = cleanedBody.recommendedCourses
+              .split(",")
+              .map(c => c.trim())
+              .filter(c => c && c !== "null" && c !== "undefined");
+          }
+        } catch (e) {
+          // Not JSON, try comma-separated string
+          cleanedBody.recommendedCourses = cleanedBody.recommendedCourses
+            .split(",")
+            .map(c => c.trim())
+            .filter(c => c && c !== "null" && c !== "undefined");
+        }
+      }
+      // Ensure it's an array and filter out invalid values, limit to 4
+      if (Array.isArray(cleanedBody.recommendedCourses)) {
+        cleanedBody.recommendedCourses = cleanedBody.recommendedCourses
+          .filter(c => c && c !== "null" && c !== "undefined" && /^[0-9a-fA-F]{24}$/.test(c))
+          .slice(0, 4); // Limit to max 4 courses
+        // Keep empty array (don't delete) to allow setting empty recommended courses
+      }
+    } else if (cleanedBody.recommendedCourses === null || cleanedBody.recommendedCourses === "" || cleanedBody.recommendedCourses === undefined) {
+      // Explicitly set to empty array if null, empty string, or undefined
+      cleanedBody.recommendedCourses = [];
+    }
+
     const azureUrl = await uploadImageToAzure(req.file.buffer, req.file.originalname);
 
     const newCoursePayload = {
@@ -357,6 +404,41 @@ export const updateCourse = async (req, res) => {
         delete cleanedBody.plans;
         delete cleanedBody.plan;
       }
+    }
+
+    // Handle recommendedCourses array (max 4 courses)
+    if (cleanedBody.recommendedCourses) {
+      // Parse JSON string if sent as JSON (from FormData)
+      if (typeof cleanedBody.recommendedCourses === "string") {
+        try {
+          const parsed = JSON.parse(cleanedBody.recommendedCourses);
+          if (Array.isArray(parsed)) {
+            cleanedBody.recommendedCourses = parsed;
+          } else {
+            // If not JSON array, try comma-separated
+            cleanedBody.recommendedCourses = cleanedBody.recommendedCourses
+              .split(",")
+              .map(c => c.trim())
+              .filter(c => c && c !== "null" && c !== "undefined");
+          }
+        } catch (e) {
+          // Not JSON, try comma-separated string
+          cleanedBody.recommendedCourses = cleanedBody.recommendedCourses
+            .split(",")
+            .map(c => c.trim())
+            .filter(c => c && c !== "null" && c !== "undefined");
+        }
+      }
+      // Ensure it's an array and filter out invalid values, limit to 4
+      if (Array.isArray(cleanedBody.recommendedCourses)) {
+        cleanedBody.recommendedCourses = cleanedBody.recommendedCourses
+          .filter(c => c && c !== "null" && c !== "undefined" && /^[0-9a-fA-F]{24}$/.test(c))
+          .slice(0, 4); // Limit to max 4 courses
+        // Keep empty array (don't delete) to allow clearing recommended courses
+      }
+    } else if (cleanedBody.recommendedCourses === null || cleanedBody.recommendedCourses === "" || cleanedBody.recommendedCourses === undefined) {
+      // Explicitly set to empty array if null, empty string, or undefined
+      cleanedBody.recommendedCourses = [];
     }
 
     const updatePayload = {

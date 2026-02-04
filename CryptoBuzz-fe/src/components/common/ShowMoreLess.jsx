@@ -23,7 +23,7 @@ const ShowMoreLess = ({
     : plainText.substring(0, limit);
 
   return (
-    <div className={className ? className : "text-sm text-gray-700 leading-relaxed"}>
+    <div className={className ? className : "text-sm text-gray-700 dark:text-gray-200 leading-relaxed"}>
       {isHtml ? (
         <span dangerouslySetInnerHTML={{ __html: displayed }} />
       ) : (

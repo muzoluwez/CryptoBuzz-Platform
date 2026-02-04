@@ -11,27 +11,27 @@ const Support = () => {
             className="font-manrope flex min-h-screen flex-col items-center justify-center bg-cover bg-center bg-fixed p-4 w-full"
             style={{ backgroundImage: `url(${bgImage})` }}>
             {/* Main Card */}
-            <div className="relative w-full max-w-[600px] overflow-hidden rounded-2xl border border-white/10 bg-gray-900/95 p-8 text-center shadow-2xl backdrop-blur-lg sm:p-12 md:p-16 lg:p-20 bg-gray-900">
+            <div className="relative w-full max-w-[600px] overflow-hidden rounded-2xl border border-white/10 bg-[linear-gradient(180deg,#1F1E1F_0%,#121213_100%)] p-8 text-center shadow-2xl backdrop-blur-lg sm:p-12 md:p-16 lg:p-20">
                 {/* Decorative Elements - hidden on mobile (sm) and up */}
-                <div className="absolute top-[-50px] right-[-50px] hidden h-[100px] w-[100px] rounded-full bg-gradient-to-br from-[#667eea] to-[#764ba2] opacity-10 sm:block"></div>
+                <div className="absolute top-[-50px] right-[-50px] hidden h-[100px] w-[100px] rounded-full bg-gradient-to-br from-[#ead266] to-[#a2864b] opacity-10 sm:block"></div>
                 <div className="absolute bottom-[-30px] left-[-30px] hidden h-[60px] w-[60px] rounded-full bg-gradient-to-br from-[#f093fb] to-[#f5576c] opacity-10 sm:block"></div>
 
                 {/* Logo */}
                 <div className="mb-6 sm:mb-8">
                     <img
                         src={logo}
-                        alt="CryptoBuzz Logo"
+                        alt="Cripto Buzz Logo"
                         className="mx-auto h-auto max-h-[50px] w-auto max-w-[120px] object-contain brightness-110 sm:max-h-[60px] sm:max-w-[150px] md:max-h-[80px] md:max-w-[200px]"
                     />
                 </div>
 
                 {/* Welcome Message */}
-                <h1 className="mb-2 bg-gradient-to-br from-[#667eea] to-[#764ba2] bg-clip-text text-3xl font-bold text-transparent sm:mb-3 sm:text-4xl md:text-5xl">
+                <h1 className="mb-2 bg-gradient-to-br from-[#a2864b] to-[#ffb617] bg-clip-text text-3xl font-bold text-transparent sm:mb-3 sm:text-4xl md:text-5xl">
                     Welcome to
                 </h1>
 
                 <h2 className="mb-6 text-2xl font-semibold tracking-tight text-slate-200 sm:mb-8 sm:text-3xl md:mb-10 md:text-4xl">
-                    CryptoBuzz Support
+                    Cripto Buzz Support
                 </h2>
 
                 <p className="mb-8 text-base leading-relaxed text-slate-300 sm:mb-10 sm:text-lg md:mb-12">
@@ -40,7 +40,7 @@ const Support = () => {
 
                 {/* Send Email Button */}
                 <a
-                    href="mailto:Support@CryptoBuzz.space?subject=Support%20Request&body=Hello%20CryptoBuzz%20Support%20Team%2C%0A%0AI%20need%20assistance%20with%3A%0A%0A%5BPlease%20describe%20your%20issue%20here%5D%0A%0AThank%20you%21"
+                    href="mailto:Support@CriptoBuzz.space?subject=Support%20Request&body=Hello%CriptoBuzz%20Support%20Team%2C%0A%0AI%20need%20assistance%20with%3A%0A%0A%5BPlease%20describe%20your%20issue%20here%5D%0A%0AThank%20you%21"
                     className="inline-flex w-full max-w-72 cursor-pointer items-center justify-center gap-2 rounded-xl border border-slate-600/50 bg-slate-700/90 px-8 py-4 text-base font-medium text-slate-200 no-underline backdrop-blur-lg transition-all duration-200 ease-in-out hover:border-slate-500/70 hover:bg-slate-600/90 active:scale-95"
                 >
                     {/* SVG Icon embedded directly */}

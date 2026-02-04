@@ -222,7 +222,7 @@ const AdminPurchase = ({ title = "Course Purchases" }) => {
   };
 
   return (
-    <div className='container-fluid p-0 mt-5'>
+    <div className='container-fluid mt-5'>
       <Toolbar>
         <ToolbarHeading>
           <ToolbarPageTitle text="Course Purchases" />
@@ -232,16 +232,16 @@ const AdminPurchase = ({ title = "Course Purchases" }) => {
         </ToolbarHeading>
         <ToolbarActions>
           <div className="grid grid-cols-3 gap-4 mb-4">
-            <div className="bg-white dark:bg-gray-800 p-4 rounded-lg border">
-              <div className="text-sm text-gray-500">Total Purchases</div>
+            <div className="bg-white dark:bg-gray-200 p-4 rounded-lg border">
+              <div className="text-sm text-gray-500 dark:text-gray-800 mb-2">Total Purchases</div>
               <div className="text-2xl font-bold">{stats.total || 0}</div>
             </div>
-            <div className="bg-white dark:bg-gray-800 p-4 rounded-lg border">
-              <div className="text-sm text-gray-500">Approved</div>
+            <div className="bg-white dark:bg-gray-200 p-4 rounded-lg border">
+              <div className="text-sm text-gray-500 dark:text-gray-800 mb-2">Approved</div>
               <div className="text-2xl font-bold text-green-600">{stats.approved || 0}</div>
             </div>
-            <div className="bg-white dark:bg-gray-800 p-4 rounded-lg border">
-              <div className="text-sm text-gray-500">Total Revenue</div>
+            <div className="bg-white dark:bg-gray-200 p-4 rounded-lg border">
+              <div className="text-sm text-gray-500 dark:text-gray-800 mb-2">Total Revenue</div>
               <div className="text-2xl font-bold text-primary">${(stats.totalRevenue || 0).toFixed(2)}</div>
             </div>
           </div>

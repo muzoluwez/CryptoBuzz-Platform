@@ -47,16 +47,16 @@ import {
 } from 'lucide-react';
 
 export const MENU_MEGA_MOBILE = [
-{
-    title: "Home",
+  {
+    title: "Inicio",
     path: "/",
   },
   {
-    title: "Courses",
+    title: "Academia",
     path: "/client/academy",
   },
   {
-    title: "Live",
+    title: "Sesión Vivo",
     children: [
       {
         title: "Live sessions",
@@ -69,20 +69,24 @@ export const MENU_MEGA_MOBILE = [
     ],
   },
   {
-    title: 'Insights',
-    path: '/client/insight',
-  },
-  {
-    title: 'Crypto',
-    path: '/client/crypto',
-  },
-  {
-    title: 'Ideas',
+    title: 'Ideas de Trading',
     path: '/client/idea',
   },
   {
-    title: 'social',
+    title: 'Portafolio',
+    path: '/client/insight',
+  },
+  {
+    title: 'Proyectos Cripto',
+    path: '/client/crypto',
+  },
+  {
+    title: 'Social Buzz',
     path: '/client/social',
+  },
+  {
+    title: 'Tienda',
+    path: '/client/marketplace',
   },
 ];
 

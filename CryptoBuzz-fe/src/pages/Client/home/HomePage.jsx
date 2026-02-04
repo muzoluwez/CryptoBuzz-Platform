@@ -8,6 +8,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardHeading
 import { LoginRequired } from '@/components/common/access-states/LoginRequired';
 import { useAuthContext } from '@/context/AuthContext';
 import useDocumentTitle from '../../../hooks/use-document-title';
+import hero_banner from "/media/images/crypto_banner.jpeg";
 
 
 const DummyImage = ({ src, alt = "", className = "" }) => (
@@ -144,34 +145,52 @@ export default function HomePage() {
       {/* <Toolbar>
         <ToolbarHeading title="Home" />
       </Toolbar> */}
-      <div className="container my-6">
+      <div className="my-6">
         <main className="">
           {/* Page Header */}
           <header className="mb-6">
-            <h1 className="text-2xl font-bold">Cripto Buzz Home</h1>
-            <p className="text-sm text-gray-500">Home</p>
+            <h1 className="text-2xl font-bold">Cripto Buzz Inicio</h1>
+            <p className="text-sm text-gray-500">Inicio</p>
           </header>
 
           {/* HERO */}
-          <section className="card mb-6 bg-white !rounded-2xl">
+          {/* <section className="card mb-6 bg-white !rounded-2xl">
             <div className="relative h-52 md:h-60 lg:h-72">
               <DummyImage
-                src="https://images.unsplash.com/photo-1542744173-8e7e53415bb0?q=80&w=1600&auto=format&fit=crop"
+                src={hero_banner}
                 alt="hero"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent"></div>
 
-              <div className="absolute left-6 bottom-6 text-white mb-4">
+              <div className="absolute px-4 bottom-6 text-white mb-4">
                 <h2 className="text-2xl md:text-3xl font-semibold drop-shadow-md">
                   Cripto Buzz
                 </h2>
-                <p className="text-sm md:text-base drop-shadow-sm">
-                  CryptoBuzz is a platform for learning about cryptocurrencies
-                  and trading strategies.
+                <p className="text-sm md:text-base drop-shadow-sm line-clamp-2">
+                  es una plataforma de aprendizaje sobre criptomonedas y estrategias de inversión
                 </p>
               </div>
             </div>
-          </section>
+          </section> */}
+
+          <Card className="relative bg-black mb-6 text-white p-0 overflow-hidden h-[30vh]">
+            <CardContent className="p-0">
+              <div className='relative h-full'>
+                <DummyImage
+                  src={hero_banner}
+                  alt="hero"
+                  className="w-full h-full object-cover"
+                />
+                <div className="absolute left-3 bottom-8 px-4 text-white z-10">
+                  <h2 className="text-2xl md:text-3xl font-semibold drop-shadow-md">
+                    Cripto Buzz
+                  </h2>
+                  <p className="text-sm md:text-base drop-shadow-sm line-clamp-2">
+                    es una plataforma de aprendizaje sobre criptomonedas y estrategias de inversión
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
 
           {/* TWO COLUMN FEATURES */}
           <section className="grid grid-cols-1 lg:grid-cols-4 gap-6 mb-6">
@@ -179,50 +198,58 @@ export default function HomePage() {
               {/* Top-left stacked cards */}
               <div className="grid grid-cols-1 md:grid-cols-1 gap-6">
                 <div className="flex flex-col gap-5">
-                  <Card className="relative text-white bg-[url('../../../../public/media/images/FreeMembershipTraining.png')] bg-cover h-64 overflow-hidden">
-                    <CardContent className="flex flex-col justify-center h-full z-10 max-w-[75%]">
-                      <div>
-                        <CardHeading className="text-2xl font-black">
-                          Academy
-                        </CardHeading>
-                        <p className="mt-2 text-lg">
-                          Comprehensive trading education from basics to
-                          advanced strategies
-                        </p>
-                      </div>
-                      <div className="mt-4">
-                        <Link
-                          to="/client/academy"
-                          className="btn bg-black text-white cursor-pointer "
-                        >
-                          Start Learning
-                        </Link>
+                  <Card className="relative bg-black text-white p-0 overflow-hidden h-[30vh]">
+                    <CardContent className="p-0">
+                      <div className='relative h-full'>
+                        <img
+                          src="/media/images/banner_1.jpeg"
+                          alt="live sessions"
+                          className="w-full h-full object-cover"
+                        />
+                        <div className="absolute top-1/2 -translate-y-1/2 px-4 text-white z-10">
+                          <CardHeading className="text-2xl font-black">
+                            Academia
+                          </CardHeading>
+                          <p className="mt-2 text-lg line-clamp-3">
+                            Aprendizaje desde lo más básico hasta lo más avanzado para que inicies a capitalizar el mercado.
+                          </p>
+                          <div className="mt-4">
+                            <Link
+                              to="/client/academy"
+                              className="btn bg-white text-black cursor-pointer">
+                              Inicia tu aprendizaje!
+                            </Link>
+                          </div>
+                        </div>
                       </div>
                     </CardContent>
-                    <div className="absolute inset-0 bg-gradient-green z-0"></div>
                   </Card>
-                  <Card className="relative text-white bg-[url('../../../../public/media/images/PremiumAcademy.png')] bg-cover h-64 overflow-hidden">
-                    <CardContent className="flex flex-col justify-center h-full z-10 max-w-[75%]">
-                      <div>
-                        <CardHeading className="text-2xl font-black">
-                          Premium Membership
-                        </CardHeading>
-                        <p className="mt-2 text-lg">
-                          CryptoBuzz Premium Membership is a platform for
-                          learning about cryptocurrencies and trading
-                          strategies.
-                        </p>
-                      </div>
-                      <div className="mt-4">
-                        <Link
-                          to="/client/home"
-                          className="btn bg-white text-black cursor-pointer "
-                        >
-                          Start Membership
-                        </Link>
+                  <Card className="relative bg-black text-white p-0 overflow-hidden h-[30vh]">
+                    <CardContent className="p-0">
+                      <div className='relative h-full'>
+                        <img
+                          src="/media/images/banner_2.jpeg"
+                          alt="live sessions"
+                          className="w-full h-full object-cover"
+                        />
+                        <div className="absolute top-1/2 -translate-y-1/2 px-4 text-white z-10">
+                          <CardHeading className="text-2xl font-black">
+                            Membresía VIP
+                          </CardHeading>
+                          <p className="mt-2 text-lg line-clamp-3">
+                            Cripto Buzz VIP te dará los análisis clave que te permitirán tomar atajos en el mercado cripto.
+                          </p>
+                          <div className="mt-4">
+                            <Link
+                              to="/client/marketplace"
+                              className="btn bg-white text-black cursor-pointer "
+                            >
+                              Obtener VIP
+                            </Link>
+                          </div>
+                        </div>
                       </div>
                     </CardContent>
-                    <div className="absolute inset-0 bg-gradient-blue z-0"></div>
                   </Card>
                 </div>
               </div>
@@ -230,7 +257,7 @@ export default function HomePage() {
 
             {/* Right big highlighted card */}
             <div className="lg:col-span-2 space-y-6">
-              <Card className="relative text-white bg-[url('../../../../public/media/images/live-user--bg.png')] bg-cover overflow-hidden h-full">
+              <Card className="relative text-white bg-[url('/media/images/live_user_bg.png')] bg-cover overflow-hidden h-full">
                 {/* Live Badge - Only show when there are live streams */}
                 {liveStreams.length > 0 && !isLiveStreamsLoading && (
                   <div className="absolute top-4 left-4 z-30 bg-red-600 text-white text-xs font-semibold px-3 py-1.5 rounded-full flex items-center gap-2 shadow-lg">
@@ -241,13 +268,13 @@ export default function HomePage() {
                 <CardContent className="flex flex-col items-center justify-between w-full z-10 h-full py-10">
                   <div className="text-center">
                     <CardHeading className="text-3xl font-black mb-5 leading-10">
-                      Who is live on <br /> Cripto Buzz
+                      Descubre quién esta vivo en <br /> Cripto Buzz
                     </CardHeading>
                     <p className="mt-2 text-lg opacity-95 leading-6">
                       {isLiveStreamsLoading
                         ? 'Loading live streams...'
                         : liveStreams.length === 0
-                          ? 'No educators are currently live. Check back soon!'
+                          ? 'No hay educatores en vivo en estos momentos. Revisa nuestro calendario para que no te pierdas la proxima sesión!'
                           : 'Join our live trading sessions and learn from experts'}
                     </p>
                   </div>
@@ -309,11 +336,10 @@ export default function HomePage() {
                                   e.stopPropagation();
                                   setCurrentLiveIndex(index);
                                 }}
-                                className={`w-2.5 h-2.5 rounded-full transition-all ${
-                                  index === currentLiveIndex
-                                    ? 'bg-white w-6'
-                                    : 'bg-white/50 hover:bg-white/70'
-                                }`}
+                                className={`w-2.5 h-2.5 rounded-full transition-all ${index === currentLiveIndex
+                                  ? 'bg-white w-6'
+                                  : 'bg-white/50 hover:bg-white/70'
+                                  }`}
                                 aria-label={`Go to slide ${index + 1}`}
                               />
                             ))}
@@ -331,10 +357,10 @@ export default function HomePage() {
                           className="flex flex-col items-center cursor-pointer hover:opacity-90 transition-opacity"
                           onClick={(e) => {
                             // Only prevent navigation if clicking on slider navigation buttons, dots, or counter
-                            const isSliderButton = e.target.closest('button[aria-label*="educator"]') || 
-                                                   e.target.closest('button[aria-label*="slide"]');
+                            const isSliderButton = e.target.closest('button[aria-label*="educator"]') ||
+                              e.target.closest('button[aria-label*="slide"]');
                             const isCounter = e.target.closest('[class*="absolute"][class*="top-2"][class*="right-2"]');
-                            
+
                             if (isSliderButton || isCounter) {
                               e.preventDefault();
                               e.stopPropagation();
@@ -391,7 +417,7 @@ export default function HomePage() {
                     <div className="flex flex-col items-center mt-7">
                       <div className="h-34 w-34 radius-live-user overflow-hidden mb-3">
                         <img
-                          src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&w=800&auto=format&fit=crop"
+                          src="/media/images/live_user.jpeg"
                           alt="No live stream"
                           className="w-full h-full object-cover opacity-70"
                         />
@@ -408,21 +434,21 @@ export default function HomePage() {
             </div>
           </section>
 
-          <section className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
-            <Card className="relative bg-black text-white h-[438px] p-0 overflow-hidden">
+          <section className="grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
+            <Card className="relative bg-black text-white p-0 overflow-hidden">
               <CardContent className="p-0">
                 <div className="relative h-full">
                   <img
-                    src="https://images.unsplash.com/photo-1519389950473-47ba0277781c?q=80&w=800&auto=format&fit=crop"
+                    src="/media/images/home_images/1.jpeg"
                     alt="live sessions"
                     className="w-full h-full object-cover"
                   />
-                  <div className="absolute left-4 bottom-4 text-white z-10">
+                  <div className="absolute left-4 bottom-6 text-white z-10">
                     <h4 className=" text-2xl font-bold">
-                      Cripto Buzz Live Sessions
+                      Cripto Buzz Sesiones en Vivo
                     </h4>
-                    <p className="text-md mt-1 mb-5">
-                      Join live trading sessions and webinars
+                    <p className="text-md mt-1 mb-5 line-clamp-2">
+                      Únete a nuestras clases en vivo
                     </p>
                     <Link
                       to="/client/live"
@@ -433,24 +459,22 @@ export default function HomePage() {
                   </div>
                 </div>
               </CardContent>
-              <div className="absolute bg-gradient-black  inset-0 bg-gradient-green z-0"></div>
             </Card>
 
-            <Card className="relative bg-black text-white h-[438px] p-0 overflow-hidden">
+            <Card className="relative bg-black text-white p-0 overflow-hidden">
               <CardContent className="p-0">
                 <div className="relative h-full">
                   <img
-                    src="https://images.unsplash.com/photo-1559526324-593bc073d938?q=80&w=800&auto=format&fit=crop"
+                    src="/media/images/home_images/2.jpeg"
                     alt="trading ideas"
                     className="w-full h-full object-cover"
                   />
-                  <div className="absolute left-4 bottom-4 text-white z-10">
+                  <div className="absolute left-4 bottom-6 text-white z-10">
                     <h4 className=" text-2xl font-bold">
-                      Cripto Buzz Trading Ideas
+                      Ideas de Trading
                     </h4>
-                    <p className="text-md mt-1 mb-5">
-                      Get the latest trading ideas to help you make better
-                      decisions
+                    <p className="text-md mt-1 mb-5 line-clamp-2">
+                      Obtén acceso a nuestras entradas en tiempo real!
                     </p>
                     <Link
                       to="/client/idea"
@@ -461,23 +485,22 @@ export default function HomePage() {
                   </div>
                 </div>
               </CardContent>
-              <div className="absolute bg-gradient-black  inset-0 bg-gradient-green z-0"></div>
             </Card>
 
-            <Card className="relative bg-black text-white h-[438px] p-0 overflow-hidden">
+            <Card className="relative bg-black text-white p-0 overflow-hidden">
               <CardContent className="p-0">
                 <div className="relative h-full">
                   <img
-                    src="https://images.unsplash.com/photo-1519389950473-47ba0277781c?q=80&w=800&auto=format&fit=crop"
+                    src="/media/images/home_images/3.jpeg"
                     alt="social feed"
                     className="w-full h-full object-cover"
                   />
-                  <div className="absolute left-4 bottom-4 text-white z-10">
+                  <div className="absolute left-4 bottom-6 text-white z-10">
                     <h4 className=" text-2xl font-bold">
                       Cripto Buzz Social Feed
                     </h4>
-                    <p className="text-md mt-1 mb-5">
-                      Follow the latest news and updates from the crypto world
+                    <p className="text-md mt-1 mb-5 line-clamp-2">
+                      Sigue las actualizaciones más recientes del mercado, sobre nuestra plataforma y contenido.
                     </p>
                     <Link
                       to="/client/social"
@@ -488,20 +511,19 @@ export default function HomePage() {
                   </div>
                 </div>
               </CardContent>
-              <div className="absolute bg-gradient-black  inset-0 bg-gradient-green z-0"></div>
             </Card>
           </section>
 
           {/* FEED + SIDEBAR */}
           <section className="grid grid-cols-3 lg:grid-cols-3 gap-6">
             {/* Activity feed (large left) */}
-            <div className="col-span-12 lg:col-span-2 rounded-2xl">
-              <div className="card rounded-2xl p-6 h-full">
+            <div className="col-span-12 rounded-2xl">
+              <div className="card border !rounded-xl p-6 h-full">
                 {/* Header */}
                 <div className="flex flex-wrap items-center justify-between mb-6 gap-3">
                   <h3 className="text-lg font-bold dark:text-white flex items-center gap-2">
                     <Activity className="w-5 h-5 text-yellow-400" />
-                    Live Activity Feed
+                    Actividad del Feed
                   </h3>
 
                   <div className="flex gap-1 p-1 rounded-lg">
@@ -567,7 +589,7 @@ export default function HomePage() {
                     posts.map((post) => (
                       <div
                         key={post._id}
-                        className="flex items-center gap-3 p-3 bg-gray-100 dark:bg-gray-900 rounded-xl hover:bg-gray-100 transition cursor-pointer"
+                        className="flex items-center gap-3 p-3 bg-gray-100 dark:bg-[#201a09] rounded-xl hover:bg-gray-100 transition cursor-pointer"
                         onClick={() =>
                           navigate(`/client/social?socialType=${socialType}`)
                         }
@@ -585,11 +607,11 @@ export default function HomePage() {
 
                         <div className="flex-1">
                           <div className="flex items-center justify-between ">
-                            <p className="dark:text-white font-medium text-[11px]">
+                            <p className="dark:text-white font-medium text-[14px]">
                               {post.author?.first_name || 'IQNOIC'}{' '}
                               {post.author?.last_name || 'EDUCATOR'}
                             </p>
-                            <p className="text-xs text-gray-600 dark:text-gray-400 font-medium text-[11px]">
+                            <p className="text-xs text-gray-600 dark:text-gray-400 font-medium text-[14px]">
                               {timeAgo(post.createdAt || new Date())}
                             </p>
                           </div>
@@ -625,94 +647,93 @@ export default function HomePage() {
             </div>
 
             {/* Right Sidebar */}
-            <div className="col-span-12 lg:col-span-1">
-              <aside className="space-y-6 mb-5">
-                <Card className="p-4">
-                  <CardHeader className="!p-0 min-h-0 !pb-3 mb-3">
-                    <CardTitle>Connect With Us</CardTitle>
-                  </CardHeader>
-                  <CardContent className="!p-0">
-                    <div className="rounded-md p-3 bg-blue-100 text-black flex items-center gap-3">
-                      <div className="h-10 w-10 rounded-md bg-blue-700 text-white flex items-center justify-center">
-                        C
-                      </div>
-                      <div>
-                        <p className="text-sm font-medium">
-                          Follow Cripto Buzz
-                        </p>
-                        <p className="text-xs text-gray-500">@criptobuzz</p>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-
-                <Card className="p-4 ">
-                  <CardHeader className="!p-0 min-h-0 !pb-3 mb-3">
-                    <CardTitle>Download our Apps</CardTitle>
-                  </CardHeader>
-                  <CardContent className="!p-0">
-                    <div className="flex flex-col gap-3">
-                      <div className="flex items-center gap-3 bg-[#fbf6e6] rounded-md p-3">
-                        <div className="h-10 w-10 rounded-md bg-black text-white flex items-center justify-center">
+            {/* <div className="col-span-12 lg:col-span-1">
+                <aside className="space-y-6 mb-5">
+                  <Card className="p-4">
+                    <CardHeader className="!p-0 min-h-0 !pb-3 mb-3">
+                      <CardTitle>Connect With Us</CardTitle>
+                    </CardHeader>
+                    <CardContent className="!p-0">
+                      <div className="rounded-md p-3 bg-blue-100 text-black flex items-center gap-3">
+                        <div className="h-10 w-10 rounded-md bg-blue-700 text-white flex items-center justify-center">
                           C
                         </div>
                         <div>
-                          <p className="text-sm font-medium dark:text-gray-900">
-                            Cripto Buzz App
+                          <p className="text-sm font-medium">
+                            Follow Cripto Buzz
                           </p>
-                          <p className="text-xs text-gray-500">Users</p>
+                          <p className="text-xs text-gray-500">@criptobuzz</p>
                         </div>
                       </div>
+                    </CardContent>
+                  </Card>
 
-                      <div className="flex gap-2">
-                        <img
-                          src="https://upload.wikimedia.org/wikipedia/commons/7/78/Google_Play_Store_badge_EN.svg"
-                          alt="play"
-                          className="h-8"
-                        />
-                        <img
-                          src="https://developer.apple.com/assets/elements/badges/download-on-the-app-store.svg"
-                          alt="appstore"
-                          className="h-8"
-                        />
+                  <Card className="p-4 ">
+                    <CardHeader className="!p-0 min-h-0 !pb-3 mb-3">
+                      <CardTitle>Download our Apps</CardTitle>
+                    </CardHeader>
+                    <CardContent className="!p-0">
+                      <div className="flex flex-col gap-3">
+                        <div className="flex items-center gap-3 bg-[#fbf6e6] rounded-md p-3">
+                          <div className="h-10 w-10 rounded-md bg-black text-white flex items-center justify-center">
+                            C
+                          </div>
+                          <div>
+                            <p className="text-sm font-medium dark:text-gray-900">
+                              Cripto Buzz App
+                            </p>
+                            <p className="text-xs text-gray-500">Users</p>
+                          </div>
+                        </div>
+
+                        <div className="flex gap-2">
+                          <img
+                            src="https://upload.wikimedia.org/wikipedia/commons/7/78/Google_Play_Store_badge_EN.svg"
+                            alt="play"
+                            className="h-8"
+                          />
+                          <img
+                            src="https://developer.apple.com/assets/elements/badges/download-on-the-app-store.svg"
+                            alt="appstore"
+                            className="h-8"
+                          />
+                        </div>
                       </div>
-                    </div>
-                  </CardContent>
-                </Card>
+                    </CardContent>
+                  </Card>
 
-                <Card className="p-4">
-                  <CardHeader className="!p-0 min-h-0 !pb-3 mb-3">
-                    <CardTitle>Ideas and Analysis</CardTitle>
-                  </CardHeader>
-                  <CardContent className="!p-0">
-                    <div className="space-y-3">
-                      <Link
-                        to="/client/idea"
-                        className="rounded-md p-3 bg-yellow-400 text-black flex items-center gap-3"
-                      >
-                        <div className="h-10 w-10 rounded-md bg-black text-white flex items-center justify-center">
-                          C
-                        </div>
-                        <p>Cripto Ideas</p>
-                      </Link>
-                      <Link
-                        to="/client/insight"
-                        className="rounded-md p-3 bg-yellow-400 text-black flex items-center gap-3"
-                      >
-                        <div className="h-10 w-10 rounded-md bg-black text-white flex items-center justify-center">
-                          C
-                        </div>
-                        <p>Cripto Insight</p>
-                      </Link>
-                    </div>
-                  </CardContent>
-                </Card>
-              </aside>
-            </div>
+                  <Card className="p-4">
+                    <CardHeader className="!p-0 min-h-0 !pb-3 mb-3">
+                      <CardTitle>Ideas and Analysis</CardTitle>
+                    </CardHeader>
+                    <CardContent className="!p-0">
+                      <div className="space-y-3">
+                        <Link
+                          to="/client/idea"
+                          className="rounded-md p-3 bg-yellow-400 text-black flex items-center gap-3"
+                        >
+                          <div className="h-10 w-10 rounded-md bg-black text-white flex items-center justify-center">
+                            C
+                          </div>
+                          <p>Cripto Ideas</p>
+                        </Link>
+                        <Link
+                          to="/client/insight"
+                          className="rounded-md p-3 bg-yellow-400 text-black flex items-center gap-3"
+                        >
+                          <div className="h-10 w-10 rounded-md bg-black text-white flex items-center justify-center">
+                            C
+                          </div>
+                          <p>Cripto Insight</p>
+                        </Link>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </aside>
+              </div> */}
           </section>
         </main>
       </div>
-
       {/* Login Required Modal/Dialog */}
       {showLoginRequired && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">

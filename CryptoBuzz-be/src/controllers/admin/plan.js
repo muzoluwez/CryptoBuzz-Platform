@@ -1,6 +1,7 @@
 import Plan from "../../models/plan.js";
 import { getHotmartProducts } from "../../utils/hotmartService.js";
 import { ApiResponse } from "../../utils/ApiResponse.js";
+import { uploadImageToAzure, deleteImageFromAzure } from "../../utils/azureUploader.js";
 import * as yup from "yup";
 
 // Helper function to extract checkout code from URL
@@ -29,6 +30,7 @@ const planValidationSchema = yup.object().shape({
   description: yup.string().nullable(),
   price: yup.number().min(0).required("Price is required"),
   currency: yup.string().default("USD"),
+  image: yup.string().nullable(),
   hotmartProductId: yup.string().nullable(),
   hotmartCheckoutUrl: yup
     .string()
@@ -117,6 +119,12 @@ export const createPlan = async (req, res) => {
       createdBy: userId,
     };
 
+    // Handle image upload
+    if (req.file) {
+      const azureUrl = await uploadImageToAzure(req.file.buffer, req.file.originalname);
+      planData.image = azureUrl;
+    }
+
     // Extract checkout code from URL if URL is provided
     if (planData.hotmartCheckoutUrl) {
       const extractedCode = extractCheckoutCodeFromUrl(planData.hotmartCheckoutUrl);
@@ -184,6 +192,17 @@ export const updatePlan = async (req, res) => {
     const existingPlan = await Plan.findById(id);
     if (!existingPlan) {
       return res.status(404).json({ message: "Plan not found" });
+    }
+
+    // Handle image upload
+    if (req.file) {
+      // Delete old image from Azure if it exists
+      if (existingPlan.image) {
+        await deleteImageFromAzure(existingPlan.image);
+      }
+      // Upload new image to Azure
+      const azureUrl = await uploadImageToAzure(req.file.buffer, req.file.originalname);
+      updateData.image = azureUrl;
     }
 
     // Extract checkout code from URL if URL is provided

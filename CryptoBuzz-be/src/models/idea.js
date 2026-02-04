@@ -65,12 +65,18 @@ const IdeaSchema = new mongoose.Schema(
     ],
     accessType: {
       type: String,
-      enum: ["PUBLIC", "LOGGED_IN", "UID_ONLY", "PLAN_BASED"],
+      enum: ["PUBLIC", "LOGGED_IN", "UID_ONLY", "PRO"],
       default: "PUBLIC",
       required: true
     },
 
-    // Only for PLAN_BASED access
+    // Plans array - Trade Idea can belong to multiple plans (same as Courses)
+    plans: [{
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Plan",
+    }],
+    
+    // Legacy allowedPlans field - kept for backward compatibility during migration
     allowedPlans: {
       type: [String],
       enum: ["MAX", "PRO"],

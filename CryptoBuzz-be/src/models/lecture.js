@@ -18,18 +18,20 @@ const LectureSchema = new mongoose.Schema(
 
     videoUrl: { type: String },
 
+    duration: { type: String },
+
     section: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Section",
       required: true,
     },
 
-    completions: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "LectureCompletion",
-      },
-    ],
+    // completions: [
+    //   {
+    //     type: mongoose.Schema.Types.ObjectId,
+    //     ref: "LectureCompletion",
+    //   },
+    // ],
   },
   { timestamps: true }
 );

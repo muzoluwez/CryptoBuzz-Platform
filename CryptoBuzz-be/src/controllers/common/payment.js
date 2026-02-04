@@ -626,13 +626,23 @@ const handlePurchaseApproved = async (data) => {
     let courses = [];
     
     if (plan) {
-      // New approach: Find all courses using this plan (from plans array or single plan field)
+      // IMPORTANT: Plan purchases grant GLOBAL access across all modules
+      // This webhook creates CoursePurchase records for Courses, but plan-based access
+      // works globally - users get access to ALL content (Courses, Trade Ideas, Trade Analysis,
+      // Crypto Projects, Social Feed, Live Streams) associated with the purchased plan.
+      
+      // Find all courses using this plan (from plans array or single plan field)
+      // Note: We create CoursePurchase records for courses, but access checking for other
+      // content types will also check these plan purchases via the global access control utility.
       courses = await Course.find({
         $or: [
           { plans: plan._id }, // Course has this plan in plans array
           { plan: plan._id }   // Course has this plan as single plan (legacy)
         ]
       });
+      
+      // TODO: In the future, we could also create purchase records for other content types here
+      // For now, global access is handled by checking CoursePurchase.plan when accessing any content type
     } else {
       // Legacy approach: Find course by direct hotmartProductId
       const legacyCourse = await Course.findOne({ hotmartProductId });
@@ -842,17 +852,87 @@ export const getUserPurchases = async (req, res) => {
 };
 
 /**
+ * Get user's purchased plan IDs (for global access checking)
+ * This endpoint is used by frontend to check plan-based access across all content types
+ */
+export const getUserPurchasedPlanIds = async (req, res) => {
+  try {
+    const userId = req.user?._id;
+
+    if (!userId) {
+      // If no user, return empty array (no purchased plans)
+      return res.status(200).json(
+        ApiResponse(200, { planIds: [] }, "No purchased plans for unauthenticated user")
+      );
+    }
+
+    // Get all approved purchases with plans
+    const purchases = await CoursePurchase.find({
+      user: userId,
+      status: "approved",
+      accessGranted: true,
+      plan: { $exists: true, $ne: null },
+    }).select("plan");
+
+    // Extract unique plan IDs
+    const planIds = [...new Set(
+      purchases
+        .map((p) => (p.plan?._id || p.plan)?.toString())
+        .filter(Boolean)
+    )];
+
+    return res.status(200).json(
+      ApiResponse(200, { planIds }, "Purchased plan IDs fetched successfully")
+    );
+  } catch (error) {
+    return res.status(500).json({
+      message: error.message,
+    });
+  }
+};
+
+/**
  * Batch check access for multiple courses (efficient approach)
  * Accepts array of course IDs and returns access status for each
  * Updated to use Plan for price information
  */
 export const batchCheckCourseAccess = async (req, res) => {
   try {
-    const userId = req.user._id;
+    // User may or may not be authenticated for this endpoint
+    const userId = req.user?._id || null;
     const { courseIds } = req.body;
 
     if (!Array.isArray(courseIds) || courseIds.length === 0) {
       return res.status(400).json({ message: "courseIds array is required" });
+    }
+
+    // If no user, we can still check PUBLIC courses
+    if (!userId) {
+      const courses = await Course.find({ _id: { $in: courseIds } }).populate("plan").populate("plans");
+      const accessMap = {};
+      for (const course of courses) {
+        const courseId = course._id.toString();
+        // Only PUBLIC courses are accessible without login
+        if (course.tier === "PUBLIC") {
+          accessMap[courseId] = {
+            hasAccess: true,
+            isPremium: false,
+            reason: "public_course",
+            coursePrice: course.price || 0,
+            courseTier: course.tier
+          };
+        } else {
+          // All other tiers require authentication
+          accessMap[courseId] = {
+            hasAccess: false,
+            isPremium: course.tier === "PRO",
+            reason: "login_required",
+            coursePrice: course.price || 0,
+            courseTier: course.tier
+          };
+        }
+      }
+      return res.status(200).json(ApiResponse(200, accessMap, "Batch access check completed"));
     }
 
     // Fetch all courses and user purchases in parallel
@@ -900,6 +980,11 @@ export const batchCheckCourseAccess = async (req, res) => {
       }
     });
 
+    // Fetch user details to check UID
+    const UserCredential = (await import("../../models/userCredential.js")).default;
+    const userCredential = await UserCredential.findById(userId).select("uid");
+    const userUid = userCredential?.uid || null;
+
     // Build access map for each course
     const accessMap = {};
     
@@ -925,37 +1010,39 @@ export const batchCheckCourseAccess = async (req, res) => {
         coursePrice = course.plan.price;
       }
       
-      // Determine if premium:
-      // A course is FREE if tier is explicitly "FREE" (regardless of plans or price)
-      // A course is PREMIUM if:
-      // 1. tier is "PREMIUM", OR
-      // 2. tier is not "FREE" AND (has plans OR price > 0)
-      const isFreeByTier = course.tier === "FREE";
-      const isPremium = isFreeByTier ? false : (course.tier === "PREMIUM" || hasAnyPlan || coursePrice > 0);
+      // Handle new tier-based access logic
+      let hasAccess = false;
+      let reason = null;
+      let isPremium = false;
       
-      if (!isPremium || isFreeByTier) {
-        // Free course - everyone has access
-        // Course is free if tier is "FREE" OR (no plans, tier is not PREMIUM, and price <= 0)
-        accessMap[courseId] = {
-          hasAccess: true,
-          isPremium: false,
-          reason: "free_course",
-          coursePrice: coursePrice,
-          courseTier: course.tier
-        };
-      } else {
-        // Premium course - check access via:
-        // 1. Direct purchase of this course
-        // 2. Plan-based access (user purchased ANY course using the same plan)
-        let hasAccess = purchasedCourseIds.has(courseId);
+      if (course.tier === "PUBLIC") {
+        // PUBLIC: Everyone has access (no auth required)
+        hasAccess = true;
+        reason = "public_course";
+        isPremium = false;
+      } else if (course.tier === "LOGGED_IN") {
+        // LOGGED_IN: User must be authenticated
+        hasAccess = !!userId; // We already know userId exists at this point
+        reason = hasAccess ? "logged_in_access" : "login_required";
+        isPremium = false;
+      } else if (course.tier === "UID_ONLY") {
+        // UID_ONLY: User must have a valid UID
+        hasAccess = !!userUid;
+        reason = hasAccess ? "uid_access" : "uid_required";
+        isPremium = false;
+      } else if (course.tier === "PRO") {
+        // PRO: Paid course - check purchase/plan access
+        isPremium = true;
+        // Check if user has approved purchase for this specific course
+        hasAccess = purchasedCourseIds.has(courseId);
         let purchase = allUserPurchases.find(p => {
           const pCourseId = p.course?._id?.toString() || p.course?.toString();
           return pCourseId === courseId;
         });
         
         // If no direct purchase, check plan-based access
-        // Check both single plan and plans array
         if (!hasAccess) {
+          // Check both single plan and plans array
           const coursePlanIds = new Set();
           
           // Add single plan (legacy)
@@ -1007,9 +1094,11 @@ export const batchCheckCourseAccess = async (req, res) => {
           }
         }
         
+        reason = hasAccess ? "purchased" : "purchase_required";
         accessMap[courseId] = {
           hasAccess,
-          isPremium: true,
+          isPremium: isPremium,
+          reason: reason,
           purchase: purchase || null,
           coursePrice: coursePrice,
           courseTier: course.tier,
@@ -1035,12 +1124,21 @@ export const batchCheckCourseAccess = async (req, res) => {
  */
 export const checkCourseAccess = async (req, res) => {
   try {
-    const userId = req.user._id;
+    // User may or may not be authenticated for this endpoint
+    const userId = req.user?._id || null;
     const { courseId } = req.params;
 
     const course = await Course.findById(courseId).populate("plan").populate("plans");
     if (!course) {
       return res.status(404).json({ message: "Course not found" });
+    }
+
+    // Fetch user details to check UID if user is authenticated
+    let userUid = null;
+    if (userId) {
+      const UserCredential = (await import("../../models/userCredential.js")).default;
+      const userCredential = await UserCredential.findById(userId).select("uid");
+      userUid = userCredential?.uid || null;
     }
 
     // Check if course has any plans (new plans array or legacy single plan)
@@ -1049,7 +1147,7 @@ export const checkCourseAccess = async (req, res) => {
     const hasAnyPlan = hasPlansArray || hasSinglePlan;
     
     // Get price from plans: check plans array first, then single plan, then course price
-    let coursePrice = course.price ?? 0;
+    let coursePrice = course.price || 0;
     if (hasPlansArray && course.plans.length > 0) {
       // If multiple plans, use the first plan's price (or minimum price)
       const planPrices = course.plans
@@ -1062,75 +1160,100 @@ export const checkCourseAccess = async (req, res) => {
       coursePrice = course.plan.price;
     }
 
-    // Determine if premium:
-    // A course is FREE if tier is explicitly "FREE" (regardless of plans or price)
-    // A course is PREMIUM if:
-    // 1. tier is "PREMIUM", OR
-    // 2. tier is not "FREE" AND (has plans OR price > 0)
-    const isFreeByTier = course.tier === "FREE";
-    const isPremium = isFreeByTier ? false : (course.tier === "PREMIUM" || hasAnyPlan || coursePrice > 0);
+    // Handle new tier-based access logic
+    let hasAccess = false;
+    let reason = null;
+    let isPremium = false;
+    let purchase = null;
+    let accessVia = null;
 
-    // Free courses are accessible to everyone
-    // Course is free if tier is "FREE" OR (no plans, tier is not PREMIUM, and price <= 0)
-    if (!isPremium || isFreeByTier) {
-      return res.status(200).json(
-        ApiResponse(200, { 
-          hasAccess: true, 
-          reason: "free_course",
-          isPremium: false,
-          coursePrice: coursePrice,
-          courseTier: course.tier
-        }, "Access granted")
-      );
-    }
-
-    // Check if user has approved purchase for this specific course
-    let purchase = await CoursePurchase.findOne({
-      user: userId,
-      course: courseId,
-      status: "approved",
-      accessGranted: true,
-    }).populate("course", "plan");
-
-    let hasAccess = !!purchase;
-    let accessVia = hasAccess ? "direct_purchase" : null;
-
-    // If no direct purchase, check plan-based access
-    // User has access if they purchased ANY plan that includes this course
-    if (!hasAccess) {
-      // Collect all plan IDs for this course
-      const coursePlanIds = [];
-      if (course.plan) {
-        const planId = typeof course.plan === 'object' ? (course.plan._id || course.plan).toString() : course.plan.toString();
-        coursePlanIds.push(planId);
-      }
-      if (course.plans && Array.isArray(course.plans)) {
-        course.plans.forEach(p => {
-          if (p && p._id) {
-            const planId = (p._id || p).toString();
-            coursePlanIds.push(planId);
-          }
-        });
-      }
+    if (course.tier === "PUBLIC") {
+      // PUBLIC: Everyone has access (no auth required)
+      hasAccess = true;
+      reason = "public_course";
+      isPremium = false;
+    } else if (course.tier === "LOGGED_IN") {
+      // LOGGED_IN: User must be authenticated
+      hasAccess = !!userId;
+      reason = hasAccess ? "logged_in_access" : "login_required";
+      isPremium = false;
+    } else if (course.tier === "UID_ONLY") {
+      // UID_ONLY: User must have a valid UID
+      hasAccess = !!userUid;
+      reason = hasAccess ? "uid_access" : "uid_required";
+      isPremium = false;
+    } else if (course.tier === "PRO") {
+      // PRO: Paid course - check purchase/plan access
+      isPremium = true;
       
-      // Check if user has purchased any of these plans
-      if (coursePlanIds.length > 0) {
-        const planBasedPurchase = await CoursePurchase.findOne({
-          user: userId,
-          status: "approved",
-          accessGranted: true,
-          plan: { $in: coursePlanIds }
-        }).populate("plan");
+      // If no user, deny access
+      if (!userId) {
+        return res.status(200).json(
+          ApiResponse(200, { 
+            hasAccess: false, 
+            reason: "login_required",
+            isPremium: true,
+            coursePrice: coursePrice,
+            courseTier: course.tier
+          }, "Login required for paid course")
+        );
+      }
 
-        if (planBasedPurchase) {
-          hasAccess = true;
-          purchase = planBasedPurchase;
-          accessVia = "plan_access";
+      // Check if user has approved purchase for this specific course
+      purchase = await CoursePurchase.findOne({
+        user: userId,
+        course: courseId,
+        status: "approved",
+        accessGranted: true,
+      }).populate("course", "plan");
+
+      hasAccess = !!purchase;
+      accessVia = hasAccess ? "direct_purchase" : null;
+
+      // If no direct purchase, check plan-based access
+      // User has access if they purchased ANY plan that includes this course
+      if (!hasAccess) {
+        // Collect all plan IDs for this course
+        const coursePlanIds = [];
+        if (course.plan) {
+          const planId = typeof course.plan === 'object' ? (course.plan._id || course.plan).toString() : course.plan.toString();
+          coursePlanIds.push(planId);
+        }
+        if (course.plans && Array.isArray(course.plans)) {
+          course.plans.forEach(p => {
+            if (p && p._id) {
+              const planId = (p._id || p).toString();
+              coursePlanIds.push(planId);
+            }
+          });
+        }
+        
+        // Check if user has purchased any of these plans
+        if (coursePlanIds.length > 0) {
+          const planBasedPurchase = await CoursePurchase.findOne({
+            user: userId,
+            status: "approved",
+            accessGranted: true,
+            plan: { $in: coursePlanIds }
+          }).populate("plan");
+
+          if (planBasedPurchase) {
+            hasAccess = true;
+            purchase = planBasedPurchase;
+            accessVia = "plan_access";
+          }
         }
       }
+      
+      reason = hasAccess ? "purchased" : "purchase_required";
+    } else {
+      // Unknown tier - default to denying access
+      hasAccess = false;
+      reason = "unknown_tier";
+      isPremium = false;
     }
 
-    // Return additional info to help frontend determine if course is premium
+    // Return additional info to help frontend determine access
     return res.status(200).json(
       ApiResponse(200, { 
         hasAccess, 
@@ -1138,7 +1261,8 @@ export const checkCourseAccess = async (req, res) => {
         isPremium: isPremium,
         courseTier: course.tier,
         coursePrice: coursePrice,
-        accessVia: accessVia
+        accessVia: accessVia,
+        reason: reason
       }, "Access check completed")
     );
   } catch (error) {

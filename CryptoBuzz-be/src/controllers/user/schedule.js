@@ -1,4 +1,5 @@
 import { RecurrenceSchedule } from "../../models/recurrenceSchedule.js";
+import Schedule from "../../models/schedule.js";
 import LiveStream from "../../models/liveStream.js";
 import { asyncHandler } from "../../utils/asyncHandler.js";
 import { ApiError } from "../../utils/ApiError.js";
@@ -49,10 +50,23 @@ export const getSchedules = asyncHandler(async (req, res) => {
   const schedules = await RecurrenceSchedule.find(query)
     .sort({ datetime: 1, createdAt: -1 })
     .populate("category", "_id name")
-    .populate("educator", "_id first_name last_name image email role status")
+    .populate({
+      path: "schedule",
+      select: "educator",
+      populate: {
+        path: "educator",
+        select: "_id first_name last_name image email role status"
+      }
+    })
     .lean();
 
-  return res.status(200).json(ApiResponse(200, schedules, "Schedules fetched successfully"));
+  // Map schedules to include educator from parent Schedule document
+  const mappedSchedules = schedules.map((schedule) => ({
+    ...schedule,
+    educator: schedule.schedule?.educator || null
+  }));
+
+  return res.status(200).json(ApiResponse(200, mappedSchedules, "Schedules fetched successfully"));
 });
 
 export const getToken = asyncHandler(async (req, res) => {
@@ -97,7 +111,15 @@ export const getActiveLiveStreamByEducator = asyncHandler(async (req, res) => {
     status: { $in: ["active", "pending"] } // Can be active or pending but isLive must be true
   })
     .populate("educator", "_id first_name last_name image email bannerImage description")
-    .populate("schedule", "_id title description image tags")
+    .populate({
+      path: "schedule",
+      select: "_id title description image tags tier accessType",
+      populate: {
+        path: "plans",
+        select: "name price description hotmartCheckoutCode hotmartCheckoutUrl"
+      }
+    })
+    .populate("plans", "name price description hotmartCheckoutCode hotmartCheckoutUrl")
     .lean();
 
   if (!activeLiveStream) {
@@ -127,7 +149,15 @@ export const getAllActiveLiveStreams = asyncHandler(async (req, res) => {
       isDeleted: false,
     })
       .populate("educator", "_id first_name last_name image email bannerImage description")
-      .populate("schedule", "_id title description image tags")
+      .populate({
+        path: "schedule",
+        select: "_id title description image tags tier accessType",
+        populate: {
+          path: "plans",
+          select: "name price description hotmartCheckoutCode hotmartCheckoutUrl"
+        }
+      })
+      .populate("plans", "name price description hotmartCheckoutCode hotmartCheckoutUrl")
       .sort({ createdAt: -1 })
       .lean();
 

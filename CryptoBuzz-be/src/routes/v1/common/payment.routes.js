@@ -3,6 +3,7 @@ import {
   createPaymentLink,
   handleHotmartWebhook,
   getUserPurchases,
+  getUserPurchasedPlanIds,
   checkCourseAccess,
   batchCheckCourseAccess,
   getCoursePlans,
@@ -18,11 +19,14 @@ router.post("/webhook/hotmart", handleHotmartWebhook);
 // Get user's purchases (authenticated - all users)
 router.get("/purchases", Auth.UserAuth, getUserPurchases);
 
-// Batch check course access for multiple courses (efficient - single API call)
-router.post("/access/batch", Auth.UserAuth, batchCheckCourseAccess);
+// Get user's purchased plan IDs (optional auth - for global access checking)
+router.get("/purchased-plans", Auth.OptionalUserAuth, getUserPurchasedPlanIds);
 
-// Check course access for single course (authenticated - all users)
-router.get("/access/course/:courseId", Auth.UserAuth, checkCourseAccess);
+// Batch check course access for multiple courses (optional auth - works without login)
+router.post("/access/batch", Auth.OptionalUserAuth, batchCheckCourseAccess);
+
+// Check course access for single course (optional auth - works without login)
+router.get("/access/course/:courseId", Auth.OptionalUserAuth, checkCourseAccess);
 
 // Get available plans for a course (authenticated - all users)
 router.get("/course/:courseId/plans", Auth.UserAuth, getCoursePlans);

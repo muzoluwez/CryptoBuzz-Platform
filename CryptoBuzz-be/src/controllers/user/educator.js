@@ -154,16 +154,7 @@ export const getEducatorDetails = asyncHandler(async (req, res) => {
   };
 
   // Run all DB queries in parallel for better performance
-  const [liveIdeas, courses, insights, ideas, recordings, liveFeed, analysisUpdates] = await Promise.all([
-    // Live Ideas (using Idea model with status 'active')
-    Idea.find({
-      educatorId: new mongoose.Types.ObjectId(educatorId),
-      status: "active"
-    })
-      .sort({ createdAt: -1 })
-      .populate("educatorId", "first_name last_name image _id")
-      .populate("category", "name _id")
-      .lean(),
+  const [courses, insights, ideas, recordings, liveFeed, analysisUpdates] = await Promise.all([
 
     // Courses - filter by allowed categories
     Course.find({
@@ -175,6 +166,7 @@ export const getEducatorDetails = asyncHandler(async (req, res) => {
       .populate("instructor", "first_name last_name email image role")
       .populate("sections")
       .populate("category", "name _id")
+      .populate("plans", "name price description hotmartCheckoutCode hotmartCheckoutUrl")
       .lean(),
 
     // Insights (Trade Analysis) - filter by allowed categories
@@ -186,6 +178,7 @@ export const getEducatorDetails = asyncHandler(async (req, res) => {
       .sort({ createdAt: -1 })
       .populate("createdBy", "first_name last_name image _id")
       .populate("category", "name _id")
+      .populate("plans", "name price description hotmartCheckoutCode hotmartCheckoutUrl")
       .lean(),
 
     // Ideas
@@ -196,6 +189,18 @@ export const getEducatorDetails = asyncHandler(async (req, res) => {
       .sort({ createdAt: -1 })
       .populate("educatorId", "first_name last_name image _id")
       .populate("category", "name _id")
+      .populate("plans", "name price description hotmartCheckoutCode hotmartCheckoutUrl")
+      .lean(),
+
+    // Live Ideas (using Idea model with status 'active')
+    Idea.find({
+      educatorId: new mongoose.Types.ObjectId(educatorId),
+      status: "active"
+    })
+      .sort({ createdAt: -1 })
+      .populate("educatorId", "first_name last_name image _id")
+      .populate("category", "name _id")
+      .populate("plans", "name price description hotmartCheckoutCode hotmartCheckoutUrl")
       .lean(),
 
     // Recordings
@@ -213,6 +218,7 @@ export const getEducatorDetails = asyncHandler(async (req, res) => {
       .sort({ createdAt: -1 })
       .limit(10)
       .populate("author", "first_name last_name image bio role")
+      .populate("plans", "name price description hotmartCheckoutCode hotmartCheckoutUrl")
       .lean(),
 
     // Analysis Updates (Posts with category "Analysis Updates")
@@ -223,6 +229,7 @@ export const getEducatorDetails = asyncHandler(async (req, res) => {
       .sort({ createdAt: -1 })
       .limit(10)
       .populate("author", "first_name last_name image bio role")
+      .populate("plans", "name price description hotmartCheckoutCode hotmartCheckoutUrl")
       .lean()
   ]);
 
@@ -250,7 +257,6 @@ export const getEducatorDetails = asyncHandler(async (req, res) => {
       200,
       {
         educator: educatorResponse,
-        liveIdeas,
         courses,
         insights,
         ideas,

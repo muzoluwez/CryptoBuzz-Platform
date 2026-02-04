@@ -8,9 +8,12 @@ import {
 import { format } from "date-fns";
 import ShowMoreLess from "../../../components/ui/showmoreless";
 import AdminIqCryptoSlider from "./EducatorIqCryptoSlider";
+import CustomVideoPlayer from "../../../components/CustomVideoPlayer.jsX";
 
 const ViewEducatorIqCrypto = forwardRef(
   ({ isViewOpen, handleCloseView, selectedIdea, setIsLightBoxOpen }, ref) => {
+
+    console.log(selectedIdea, 'selectedIdea');
     return (
       <Dialog
         asChild
@@ -32,11 +35,11 @@ const ViewEducatorIqCrypto = forwardRef(
                   </div>
                 </div>
                 <div className="">
-                  <AdminIqCryptoSlider
-                    sliderImages={selectedIdea?.image}
-                    setIsLightBoxOpen={setIsLightBoxOpen}
-                    selectedIdea={selectedIdea}
-                  />
+                    {selectedIdea?.mediaType === "video" && selectedIdea?.videoUrl ? <CustomVideoPlayer videoUrl={selectedIdea?.videoUrl} /> : <AdminIqCryptoSlider
+                      sliderImages={selectedIdea?.photos}
+                      setIsLightBoxOpen={setIsLightBoxOpen}
+                      selectedIdea={selectedIdea}
+                    />}
                 </div>
                 <div className="grid gap-5 p-5">
                   <div className="grid grid-cols-12 gap-4">

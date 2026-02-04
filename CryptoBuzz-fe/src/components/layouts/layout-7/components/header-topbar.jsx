@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { UserDropdownMenu } from '../../layout-1/shared/topbar/user-dropdown-menu';
 import { useAuthContext } from '@/context/AuthContext';
 import { toAbsoluteUrl } from '@/lib/helpers';
+import LanguageSwitcher from './LanguageSwitcher';
 
 const HeaderTopbar = () => {
   const { user, isAuthenticated, token } = useAuthContext();
@@ -39,6 +40,9 @@ const HeaderTopbar = () => {
 
   return (
     <div className="flex items-center flex-wrap gap-2 lg:gap-3.5">
+      <div className="flex items-center">
+        <LanguageSwitcher />
+      </div>
       {isUserLoggedIn && (
         <div className="flex items-center gap-2.5 lg:gap-3.5">
           <Button size="lg" asChild className="bg-transparent p-0">

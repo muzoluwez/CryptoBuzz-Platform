@@ -146,7 +146,7 @@ const DateRangePicker = ({
     dropdown: {
       position: "absolute",
       top: "calc(100% + 6px)",
-      left: "-50px",
+      left: "5px",
       zIndex: 9999,
       width: "fit-content",
       minWidth: "260px",

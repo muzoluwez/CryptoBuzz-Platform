@@ -35,7 +35,7 @@ export function MegaMenu() {
 
   return (
     <NavigationMenu>
-      <NavigationMenuList className="gap-7.5">
+      <NavigationMenuList className="gap-5 xl:gap-7.5">
         {/* Home Item */}
         <NavigationMenuItem>
           <NavigationMenuLink asChild>
@@ -44,7 +44,7 @@ export function MegaMenu() {
               className={cn(linkClass)}
               data-active={isActive('/client/home') || undefined}
             >
-              Home
+              Inicio
             </Link>
           </NavigationMenuLink>
         </NavigationMenuItem>
@@ -56,7 +56,7 @@ export function MegaMenu() {
               className={cn(linkClass)}
               data-active={isActive('/client/academy') || undefined}
             >
-              Courses
+              Academia
             </Link>
           </NavigationMenuLink>
         </NavigationMenuItem>
@@ -72,32 +72,9 @@ export function MegaMenu() {
                   : undefined
               }
             >
-              Live
+              Sesión Vivo
             </Link>
 
-          </NavigationMenuLink>
-        </NavigationMenuItem>
-
-        <NavigationMenuItem>
-          <NavigationMenuLink asChild>
-            <Link
-              to="/client/insight"
-              className={cn(linkClass)}
-              data-active={isActive('/client/insight') || undefined}
-            >
-              Insight
-            </Link>
-          </NavigationMenuLink>
-        </NavigationMenuItem>
-        <NavigationMenuItem>
-          <NavigationMenuLink asChild>
-            <Link
-              to="/client/crypto"
-              className={cn(linkClass)}
-              data-active={isActive('/client/crypto') || undefined}
-            >
-              Crypto Projects
-            </Link>
           </NavigationMenuLink>
         </NavigationMenuItem>
 
@@ -108,10 +85,35 @@ export function MegaMenu() {
               className={cn(linkClass)}
               data-active={isActive('/client/idea') || undefined}
             >
-              Idea
+              Ideas de Trading
             </Link>
           </NavigationMenuLink>
         </NavigationMenuItem>
+
+        <NavigationMenuItem>
+          <NavigationMenuLink asChild>
+            <Link
+              to="/client/insight"
+              className={cn(linkClass)}
+              data-active={isActive('/client/insight') || undefined}
+            >
+              Portafolio
+            </Link>
+          </NavigationMenuLink>
+        </NavigationMenuItem>
+        <NavigationMenuItem>
+          <NavigationMenuLink asChild>
+            <Link
+              to="/client/crypto"
+              className={cn(linkClass)}
+              data-active={isActive('/client/crypto') || undefined}
+            >
+              Proyectos Cripto
+            </Link>
+          </NavigationMenuLink>
+        </NavigationMenuItem>
+
+        
 
         {/* <NavigationMenuItem>
           <NavigationMenuLink asChild>
@@ -144,7 +146,19 @@ export function MegaMenu() {
               className={cn(linkClass)}
               data-active={isActive('/client/social') || undefined}
             >
-              Social
+              Social Buzz
+            </Link>
+          </NavigationMenuLink>
+        </NavigationMenuItem>
+
+        <NavigationMenuItem>
+          <NavigationMenuLink asChild>
+            <Link
+              to="/client/marketplace"
+              className={cn(linkClass)}
+              data-active={isActive('/client/marketplace') || undefined}
+            >
+              Tienda
             </Link>
           </NavigationMenuLink>
         </NavigationMenuItem>

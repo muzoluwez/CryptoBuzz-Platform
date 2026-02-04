@@ -253,6 +253,7 @@ const educatorPostSlice = createSlice({
         // Map backend response to frontend structure
         const postsToAdd = action.payload.data.map((post) => ({
           id: post?._id,
+          _id: post?._id, // Keep _id for compatibility
           content: post?.content,
           author: {
             id: post?.author?._id,
@@ -284,6 +285,11 @@ const educatorPostSlice = createSlice({
           likeCount: post?.likeCount || 0,
           commentCount: post?.commentCount || 0,
           shareCount: post?.shareCount || 0,
+          // Access control fields
+          accessType: post?.accessType || post?.tier || "PUBLIC",
+          access_type: post?.accessType || post?.tier || "PUBLIC", // For backward compatibility
+          tier: post?.tier || post?.accessType || "PUBLIC",
+          plans: post?.plans || [],
         }));
         if (action.payload.append) {
           state.posts = [...state.posts, ...postsToAdd];
@@ -352,6 +358,11 @@ const educatorPostSlice = createSlice({
           likeCount: postData.likeCount || 0,
           commentCount: postData.commentCount || 0,
           shareCount: postData.shareCount || 0,
+          // Access control fields
+          accessType: postData.accessType || postData.tier || "PUBLIC",
+          access_type: postData.accessType || postData.tier || "PUBLIC", // For backward compatibility
+          tier: postData.tier || postData.accessType || "PUBLIC",
+          plans: postData.plans || [],
         };
 
         state.posts.unshift(newPost);
@@ -372,6 +383,7 @@ const educatorPostSlice = createSlice({
         const postData = action.payload.data || action.payload.post || action.payload;
         const updatedPost = {
           id: postData._id || postData.id,
+          _id: postData._id || postData.id, // Keep _id for compatibility
           content: postData.content,
           author: {
             id: postData.author._id || postData.author.id,
@@ -403,6 +415,11 @@ const educatorPostSlice = createSlice({
           likeCount: postData.likeCount || 0,
           commentCount: postData.commentCount || 0,
           shareCount: postData.shareCount || 0,
+          // Access control fields
+          accessType: postData.accessType || postData.tier || "PUBLIC",
+          access_type: postData.accessType || postData.tier || "PUBLIC", // For backward compatibility
+          tier: postData.tier || postData.accessType || "PUBLIC",
+          plans: postData.plans || [],
         };
         const index = state.posts.findIndex(
           (post) => post.id === updatedPost.id

@@ -66,6 +66,18 @@ export const createEducatorPost = async (postData) => {
         formData.append('category', postData.category);
     }
 
+    // Add accessType
+    if (postData.accessType) {
+        formData.append('accessType', postData.accessType);
+    }
+
+    // Add plans array (for PRO tier)
+    if (postData.plans && Array.isArray(postData.plans) && postData.plans.length > 0) {
+        postData.plans.forEach((planId) => {
+            formData.append('plans[]', planId);
+        });
+    }
+
     // Add images array
     if (postData.images && postData.images.length > 0) {
         postData.images.forEach((image, index) => {
@@ -109,6 +121,18 @@ export const updateEducatorPost = async (id, postData) => {
     // Add category (matches backend field)
     if (postData.category) {
         formData.append('category', postData.category);
+    }
+
+    // Add accessType
+    if (postData.accessType) {
+        formData.append('accessType', postData.accessType);
+    }
+
+    // Add plans array (for PRO tier)
+    if (postData.plans && Array.isArray(postData.plans) && postData.plans.length > 0) {
+        postData.plans.forEach((planId) => {
+            formData.append('plans[]', planId);
+        });
     }
 
     // Add images array

@@ -4,7 +4,7 @@ const swagger = swaggerAutogen();
 
 const doc = {
   info: {
-    title: "Crypto Buzz platform API",
+    title: "Cripto Buzz platform API",
     description: "It's backend for an online Trading analysis .",
   },
   host: "localhost:8000",
