@@ -12,7 +12,14 @@ const apiKey = import.meta.env.VITE_APP_STREAM_API_KEY;
 const AdminLiveSessionView = () => {
   const { state: sessionData } = useLocation();
   const { callId } = useParams();
-  const { rtmp_URl: rtmp_url, token: rtmp_stream_key } = sessionData || {};
+  const {
+    rtmp_URl: rtmp_url,
+    token: rtmp_stream_key,
+    schedule: { streamType: scheduleStreamType } = {},
+    streamType: liveStreamStreamType,
+  } = sessionData || {};
+
+  const streamType = scheduleStreamType || liveStreamStreamType || "obs";
 
   const { auth } = useAuthContext();
   const userId = auth?.user?._id;
@@ -102,6 +109,7 @@ const AdminLiveSessionView = () => {
             token={rtmp_stream_key}
             rtmp_stream_key={rtmp_stream_key}
             rtmp_url={rtmp_url}
+            streamType={streamType}
           />
         )}
       </StreamWrapper>

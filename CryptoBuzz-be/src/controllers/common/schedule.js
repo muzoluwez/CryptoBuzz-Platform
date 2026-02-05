@@ -98,6 +98,7 @@ export const listSchedule = async (req, res) => {
       isRecurent: item.isRecurent || false,
       recurrenceRuleId: item.recurrenceRuleId || "",
       tier: item.tier || "PUBLIC",
+      streamType: item.streamType || "obs",
       plans: item.plans || []
     }));
 
@@ -153,6 +154,7 @@ export const createSchedule = async (req, res) => {
       educator:  createdUser._id,
       create_by: createdUser,
       tier: body.tier || "PUBLIC",
+      streamType: body.streamType === "webrtc" ? "webrtc" : "obs",
       // Only add plans if PRO tier and valid plans exist
       plans: (body.tier === "PRO" && validPlans.length > 0) ? validPlans : []
     };
@@ -418,6 +420,7 @@ export const createRecurringSessions = async (req, res) => {
       create_by: createdUser,
       isRecurent: frequency !== "NONE",
       tier: body.tier || "PUBLIC",
+      streamType: body.streamType === "webrtc" ? "webrtc" : "obs",
       // Only add plans if PRO tier and valid plans exist
       plans: (body.tier === "PRO" && validPlans.length > 0) ? validPlans : []
     };
@@ -570,6 +573,7 @@ export const updateRecurringSessions = async (req, res) => {
     schedule.tags = Array.isArray(body.tags) ? body.tags : body.tags?.split(",").map(t => t.trim());
     schedule.isRecurent = frequency !== "NONE";
     schedule.tier = body.tier || schedule.tier || "PUBLIC";
+    schedule.streamType = body.streamType === "webrtc" ? "webrtc" : (body.streamType === "obs" ? "obs" : schedule.streamType || "obs");
     // Update plans: only set if PRO tier, otherwise clear
     if (body.tier === "PRO" && validPlans.length > 0) {
       schedule.plans = validPlans;

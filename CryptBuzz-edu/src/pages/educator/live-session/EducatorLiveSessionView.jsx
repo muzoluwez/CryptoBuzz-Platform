@@ -16,9 +16,12 @@ const EducatorLiveSessionView = () => {
     rtmp_URl: rtmp_url,
     token: rtmp_stream_key,
     _id: _id,
-    schedule: { isRecurent } = {},
+    schedule: { isRecurent, streamType: scheduleStreamType } = {},
+    streamType: liveStreamStreamType,
     checkLastRecurrence: checkLastRecurrence,
   } = sessionData || {};
+
+  const streamType = scheduleStreamType || liveStreamStreamType || "obs";
 
   const { auth } = useAuthContext();
   const userId = auth?.user?._id;
@@ -110,6 +113,7 @@ const EducatorLiveSessionView = () => {
           id={_id}
           checkLastRecurrence={checkLastRecurrence}
           isRecurent={isRecurent}
+          streamType={streamType}
         />
       </StreamWrapper>
     </EventProvider>

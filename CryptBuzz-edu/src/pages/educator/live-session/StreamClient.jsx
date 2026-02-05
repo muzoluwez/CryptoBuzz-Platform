@@ -31,6 +31,7 @@ const StreamClient = ({
   id,
   checkLastRecurrence,
   isRecurent,
+  streamType = "obs",
 }) => {
   const call = useCall();
 
@@ -100,6 +101,7 @@ const StreamClient = ({
                           id={id}
                           checkLastRecurrence={checkLastRecurrence}
                           isRecurent={isRecurent}
+                          streamType={streamType}
                         />
                       </StreamCall>
                     </StreamVideo>
@@ -158,51 +160,55 @@ const StreamClient = ({
                     </DefaultTooltip>
                   </div>
                 </div>
-                <div className="grid grid-cols-12 gap-5 items-center">
-                  <label className="col-span-3 text-sm text-gray-900 font-semibold line-clamp-2">
-                    RTMP URL
-                  </label>
-                  <div className="col-span-9">
-                    <DefaultTooltip
-                      title="Copied to clipboard!"
-                      open={isTooltipOpen?.rtmp_url}
-                      placement="bottom"
-                      className="max-w-48"
-                    >
-                      <p
-                        onClick={() => handleCopy(rtmp_url, "rtmp_url")}
-                        className="cursor-pointer rounded-lg border-2 flex items-center justify-between gap-4 text-xs text-gray-700 font-semibold break-all p-3"
+              {streamType !== "webrtc" && (
+                <>
+                  <div className="grid grid-cols-12 gap-5 items-center">
+                    <label className="col-span-3 text-sm text-gray-900 font-semibold line-clamp-2">
+                      RTMP URL
+                    </label>
+                    <div className="col-span-9">
+                      <DefaultTooltip
+                        title="Copied to clipboard!"
+                        open={isTooltipOpen?.rtmp_url}
+                        placement="bottom"
+                        className="max-w-48"
                       >
-                        {maskAndTruncateText(rtmp_url, 100)}
-                        <Copy size={16} className="shrink-0" />
-                      </p>
-                    </DefaultTooltip>
+                        <p
+                          onClick={() => handleCopy(rtmp_url, "rtmp_url")}
+                          className="cursor-pointer rounded-lg border-2 flex items-center justify-between gap-4 text-xs text-gray-700 font-semibold break-all p-3"
+                        >
+                          {maskAndTruncateText(rtmp_url, 100)}
+                          <Copy size={16} className="shrink-0" />
+                        </p>
+                      </DefaultTooltip>
+                    </div>
                   </div>
-                </div>
 
-                <div className="grid grid-cols-12 gap-5 items-center">
-                  <label className="col-span-3 text-sm text-gray-900 font-semibold line-clamp-2">
-                    RTMP Stream Key
-                  </label>
-                  <div className="col-span-9">
-                    <DefaultTooltip
-                      title="Copied to clipboard!"
-                      open={isTooltipOpen?.rtmp_stream_key}
-                      placement="bottom"
-                      className="max-w-48"
-                    >
-                      <p
-                        onClick={() =>
-                          handleCopy(rtmp_stream_key, "rtmp_stream_key")
-                        }
-                        className="cursor-pointer rounded-lg border-2 flex items-center justify-between gap-4 text-xs text-gray-700 font-semibold break-all p-3"
+                  <div className="grid grid-cols-12 gap-5 items-center">
+                    <label className="col-span-3 text-sm text-gray-900 font-semibold line-clamp-2">
+                      RTMP Stream Key
+                    </label>
+                    <div className="col-span-9">
+                      <DefaultTooltip
+                        title="Copied to clipboard!"
+                        open={isTooltipOpen?.rtmp_stream_key}
+                        placement="bottom"
+                        className="max-w-48"
                       >
-                        {maskAndTruncateText(rtmp_stream_key, 140)}
-                        <Copy size={16} className="shrink-0" />
-                      </p>
-                    </DefaultTooltip>
+                        <p
+                          onClick={() =>
+                            handleCopy(rtmp_stream_key, "rtmp_stream_key")
+                          }
+                          className="cursor-pointer rounded-lg border-2 flex items-center justify-between gap-4 text-xs text-gray-700 font-semibold break-all p-3"
+                        >
+                          {maskAndTruncateText(rtmp_stream_key, 140)}
+                          <Copy size={16} className="shrink-0" />
+                        </p>
+                      </DefaultTooltip>
+                    </div>
                   </div>
-                </div>
+                </>
+              )}
               </div>
             </div>
           </div>

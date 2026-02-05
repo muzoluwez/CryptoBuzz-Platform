@@ -66,6 +66,13 @@ const LiveStreamSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "Plan",
     }],
+
+    // How the educator streams: obs (RTMP) or webrtc (browser)
+    streamType: {
+      type: String,
+      enum: ["obs", "webrtc"],
+      default: "obs",
+    },
   },
   { timestamps: true }
 );

@@ -65,6 +65,7 @@ const CreateAdminRecurrenceScheduleModel = forwardRef(
       plans: [],
 
       educator: "",
+      streamType: "obs",
       recurrenceRule: {
         frequency: "NONE",
         interval: 1,
@@ -81,11 +82,11 @@ const CreateAdminRecurrenceScheduleModel = forwardRef(
     const createSchema = Yup.object().shape({
       title: Yup.string().required("Title is required"),
       description: Yup.string().required("Description is required"),
-      datetime: isEditMode 
+      datetime: isEditMode
         ? Yup.date().required("Start date is required") // Allow past dates when editing
         : Yup.date()
-            .required("Start date is required")
-            .min(new Date(), "Start date must be in the future"),
+          .required("Start date is required")
+          .min(new Date(), "Start date must be in the future"),
       category: Yup.string().required("Category is required"),
       language: Yup.string().required("Language is required"),
       tags: Yup.array().min(1, "At least one tag is required"),
@@ -95,6 +96,9 @@ const CreateAdminRecurrenceScheduleModel = forwardRef(
         then: (schema) => schema.min(1, "At least one plan is required for PRO tier"),
         otherwise: (schema) => schema,
       }),
+      streamType: Yup.string()
+        .oneOf(["obs", "webrtc"], "Invalid stream type")
+        .required("Stream Type is required"),
       recurrenceRule: Yup.object().shape({
         frequency: Yup.string().required(),
         interval: Yup.number()
@@ -131,7 +135,7 @@ const CreateAdminRecurrenceScheduleModel = forwardRef(
         try {
           // Clear any previous status
           setStatus(null);
-          
+
           const { recurrenceRule } = values;
 
           let frequency = recurrenceRule.frequency;
@@ -173,6 +177,8 @@ const CreateAdminRecurrenceScheduleModel = forwardRef(
               formData.append("plans[]", planId);
             });
           }
+
+          formData.append("streamType", values.streamType || "obs");
 
           values.tags.forEach((tag) => {
             formData.append("tags[]", tag);
@@ -248,6 +254,7 @@ const CreateAdminRecurrenceScheduleModel = forwardRef(
           educator: selectedRow?.educator?._id,
           tier: selectedRow?.tier || selectedRow?.accessType || "PUBLIC", // Support both tier and accessType for compatibility
           plans: selectedRow?.plans?.map(p => (p?._id || p)?.toString()) || [],
+          streamType: selectedRow?.schedule?.streamType || selectedRow?.streamType || "obs",
           recurrenceRule: {
             frequency: selectedRow?.recurrenceRuleId?.frequency || "NONE",
             interval: selectedRow?.recurrenceRuleId?.interval || 1,
@@ -259,7 +266,7 @@ const CreateAdminRecurrenceScheduleModel = forwardRef(
             ),
             // Determine endType: prefer backend endType, or infer from data
             // If occurrences exists, use OCCURRENCES; if endDateTime exists, use DATE
-            endType: selectedRow?.recurrenceRuleId?.endType 
+            endType: selectedRow?.recurrenceRuleId?.endType
               || (selectedRow?.recurrenceRuleId?.occurrences ? "OCCURRENCES" : (selectedRow?.recurrenceRuleId?.endDateTime ? "DATE" : "OCCURRENCES"))
               || "OCCURRENCES", // Default fallback
             occurrences: selectedRow?.recurrenceRuleId?.occurrences || 10,
@@ -597,6 +604,72 @@ const CreateAdminRecurrenceScheduleModel = forwardRef(
                   </p>
                 </div>
               )}
+              <div className="col-span-12">
+                <div className="flex flex-col gap-1">
+                  <label className="form-label text-gray-900 gap-1">
+                    Stream Type <span className="text-danger">*</span>
+                  </label>
+                  <div className="flex gap-6">
+                    <div className="grid grid-cols-12 gap-4 w-full">
+                      <div className="col-span-12 sm:col-span-6">
+                        <div className="card h-full">
+                          <div className="card-body px-3">
+                            <label className="flex flex-col gap-1 cursor-pointer">
+                              <div className="flex items-center gap-2 cursor-pointer">
+                                <input
+                                  type="radio"
+                                  name="streamType"
+                                  value="obs"
+                                  checked={formik.values.streamType === "obs"}
+                                  onChange={(e) =>
+                                    formik.setFieldValue("streamType", e.target.value)
+                                  }
+                                  // className="form-radio"
+                                  className="radio radio-primary"
+                                />
+                                <span className="text-sm">OBS / RTMP</span>
+                              </div>
+                              <p className="text-xs mt-2">
+                                Use OBS or streaming software to push RTMP stream.
+                              </p>
+                            </label>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="col-span-12 sm:col-span-6">
+                        <div className="card h-full">
+                          <div className="card-body px-3">
+                            <label className="flex flex-col gap-1 cursor-pointer">
+                              <div className="flex items-center gap-2 cursor-pointer">
+                                <input
+                                  type="radio"
+                                  name="streamType"
+                                  value="webrtc"
+                                  checked={formik.values.streamType === "webrtc"}
+                                  onChange={(e) =>
+                                    formik.setFieldValue("streamType", e.target.value)
+                                  }
+                                  // className="form-radio"
+                                  className="radio radio-primary"
+                                />
+                                <span className="text-sm">WebRTC (Browser)</span>
+                              </div>
+                              <p className="text-xs mt-2">
+                                Stream directly from your browser using WebRTC.
+                              </p>
+                            </label>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  {formik.touched.streamType && formik.errors.streamType && (
+                    <span role="alert" className="text-danger text-xs mt-1 block">
+                      {formik.errors.streamType}
+                    </span>
+                  )}
+                </div>
+              </div>
               <div className="col-span-12">
                 <div className="col-span-6">
                   <div className="flex flex-col gap-1">

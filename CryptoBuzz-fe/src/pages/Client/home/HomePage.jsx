@@ -408,7 +408,7 @@ export default function HomePage() {
                             );
                           }
                         }}
-                        className="btn bg-white text-black mt-2 hover:bg-gray-100 transition-colors"
+                        className="btn cursor-pointer bg-white text-black mt-2 hover:bg-gray-100 transition-colors"
                       >
                         Watch Now
                       </button>

@@ -47,6 +47,7 @@ const CreateLiveStream = forwardRef(
       category: "",
       language: "",
       accessType: "PUBLIC",
+      streamType: "obs",
     };
 
     const createSchema = Yup.object().shape({
@@ -56,9 +57,11 @@ const CreateLiveStream = forwardRef(
       tags: Yup.array()
         .min(1, "At least one tag is required")
         .of(Yup.string().required("Tag cannot be empty")),
-
       language: Yup.string().required("Language is required"),
       accessType: Yup.string().required("Access type is required"),
+      streamType: Yup.string()
+        .oneOf(["obs", "webrtc"], "Invalid stream type")
+        .required("Stream Type is required"),
     });
 
 
@@ -71,17 +74,18 @@ const CreateLiveStream = forwardRef(
       onSubmit: async (values) => {
         try {
 
-          const payload = {
-            title: values.title,
-            description: values.description,
-            category: values.category, // category _id
-            tags: values.tags,
-            language: values.language,
-            accessType: values.accessType || "PUBLIC",
-          };
+          const formData = new FormData();
+          formData.append("title", values.title);
+          formData.append("description", values.description);
+          formData.append("category", values.category);
+          formData.append("language", values.language);
+          formData.append("accessType", values.accessType || "PUBLIC");
+          formData.append("streamType", values.streamType || "obs");
+          values.tags.forEach((tag) => {
+            formData.append("tags[]", tag);
+          });
 
-
-          const res = await createLiveStream(payload).unwrap();
+          const res = await createLiveStream(formData).unwrap();
           if (res) {
             toast.success("Live stream created successfully");
             refetch();
@@ -158,6 +162,73 @@ const CreateLiveStream = forwardRef(
                   {formik.touched.description && formik.errors.description && (
                     <span role="alert" className="text-danger text-xs mt-1">
                       {formik.errors.description}
+                    </span>
+                  )}
+                </div>
+              </div>
+
+              <div className="col-span-12">
+                <div className="flex flex-col gap-1">
+                  <label className="form-label text-gray-900 gap-1">
+                    Stream Type <span className="text-danger">*</span>
+                  </label>
+                  <div className="flex gap-6">
+                    <div className="grid grid-cols-12 gap-4 w-full">
+                      <div className="col-span-12 sm:col-span-6">
+                        <div className="card h-full">
+                          <div className="card-body px-3">
+                            <label className="flex flex-col gap-1 cursor-pointer">
+                              <div className="flex items-center gap-2 cursor-pointer">
+                                <input
+                                  type="radio"
+                                  name="streamType"
+                                  value="obs"
+                                  checked={formik.values.streamType === "obs"}
+                                  onChange={(e) =>
+                                    formik.setFieldValue("streamType", e.target.value)
+                                  }
+                                  // className="form-radio"
+                                  className="radio radio-primary"
+                                />
+                                <span className="text-sm">OBS / RTMP</span>
+                              </div>
+                              <p className="text-xs mt-2">
+                                Use OBS or streaming software to push RTMP stream.
+                              </p>
+                            </label>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="col-span-12 sm:col-span-6">
+                        <div className="card h-full">
+                          <div className="card-body px-3">
+                            <label className="flex flex-col gap-1 cursor-pointer">
+                              <div className="flex items-center gap-2 cursor-pointer">
+                                <input
+                                  type="radio"
+                                  name="streamType"
+                                  value="webrtc"
+                                  checked={formik.values.streamType === "webrtc"}
+                                  onChange={(e) =>
+                                    formik.setFieldValue("streamType", e.target.value)
+                                  }
+                                  // className="form-radio"
+                                  className="radio radio-primary"
+                                />
+                                <span className="text-sm">WebRTC (Browser)</span>
+                              </div>
+                              <p className="text-xs mt-2">
+                                Stream directly from your browser using WebRTC.
+                              </p>
+                            </label>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  {formik.touched.streamType && formik.errors.streamType && (
+                    <span role="alert" className="text-danger text-xs mt-1 block">
+                      {formik.errors.streamType}
                     </span>
                   )}
                 </div>
