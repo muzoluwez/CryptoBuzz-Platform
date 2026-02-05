@@ -218,7 +218,8 @@ export const createLive = async (schedule, createdUser) => {
       educator: schedule.educator,
       callId,
       token,
-      rtmp_URl
+      rtmp_URl,
+      streamType: schedule.streamType || "obs"
     });
 
     schedule.generateToken = true;

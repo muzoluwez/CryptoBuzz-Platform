@@ -99,6 +99,7 @@ export const createLiveStreamForSchedule = async (schedule) => {
       callId,
       token,
       rtmp_URl,
+      streamType: schedule.streamType || "obs",
     });
     // }
 
@@ -211,6 +212,7 @@ export const updateLiveStreamForSchedule = async (schedule) => {
       existingSchedule.callId = schedule.callId ? schedule.callId : callId;
       existingSchedule.token = token;
       existingSchedule.rtmp_URl = rtmp_URl;
+      existingSchedule.streamType = schedule.streamType || existingSchedule.streamType || "obs";
 
       await existingSchedule.save();
     }

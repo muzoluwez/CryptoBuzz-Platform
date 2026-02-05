@@ -112,6 +112,13 @@ const ScheduleSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "Plan",
     }],
+
+    // Stream type: OBS/RTMP vs WebRTC
+    streamType: {
+      type: String,
+      enum: ["obs", "webrtc"],
+      default: "obs",
+    },
   },
   { timestamps: true }
 );

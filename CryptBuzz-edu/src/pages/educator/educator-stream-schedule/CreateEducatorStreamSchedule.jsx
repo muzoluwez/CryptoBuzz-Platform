@@ -50,7 +50,7 @@ const CreateEducatorStreamSchedule = forwardRef(
       category: "",
       // files: null,
       userId: "",
-      streamType: "",
+      streamType: "obs",
       language: "",
       tier: "PUBLIC", // Using 'tier' to match Schedule model (instead of accessType)
       plans: [],
@@ -65,7 +65,9 @@ const CreateEducatorStreamSchedule = forwardRef(
         .min(new Date(), "Start date & time can't be in the past"),
       description: Yup.string().required("Description is required"),
       category: Yup.string().required("Category is required"),
-      //   streamType: Yup.string().required("Stream Type is required"),
+      streamType: Yup.string()
+        .oneOf(["obs", "webrtc"], "Invalid stream type")
+        .required("Stream Type is required"),
       tags: Yup.array()
         .min(1, "At least one tag is required")
         .of(Yup.string().required("Tag cannot be empty")),
@@ -111,7 +113,7 @@ const CreateEducatorStreamSchedule = forwardRef(
         const formData = new FormData();
         // formData.append('callId', callId);
         formData.append("title", values.title);
-        // formData.append("streamType", values.streamType);
+        formData.append("streamType", values.streamType);
         formData.append("category", values.category);
         formData.append("description", values.description);
         formData.append("datetime", values.datetime);
@@ -193,6 +195,7 @@ const CreateEducatorStreamSchedule = forwardRef(
           userId: selectedRow?.userId,
           language: selectedRow?.language,
           tier: selectedRow?.tier || selectedRow?.accessType || "PUBLIC", // Support both tier and accessType for compatibility
+          streamType: selectedRow?.streamType || "obs",
           plans: selectedRow?.plans?.map(p => (p?._id || p)?.toString()) || [],
           // files: selectedRow?.image
         };
@@ -246,75 +249,6 @@ const CreateEducatorStreamSchedule = forwardRef(
                   )}
                 </div>
               </div>
-              {/* 
-              <div className="col-span-12">
-                <div className="flex flex-col gap-1">
-                  <label className="form-label text-gray-900 gap-1">
-                    Stream Type <span className="text-danger">*</span>
-                  </label>
-                  <div className="flex gap-6">
-                    <div className="col-span-12 grid grid-cols-12 gap-4">
-                      <div className="col-span-12 sm:col-span-6">
-                        <div className="card h-full">
-                          <div className="card-body px-3">
-                            <label className="flex items-center gap-2">
-                              <input
-                                type="radio"
-                                name="streamType"
-                                value="obs"
-                                checked={formik.values.streamType === "obs"}
-                                onChange={(e) =>
-                                  formik.setFieldValue(
-                                    "streamType",
-                                    e.target.value
-                                  )
-                                }
-                                className="form-radio"
-                              />
-                              <span>OBS Type</span>
-                            </label>
-                            <p className="text-sm mt-2">
-                              Use OBS or streaming software to push RTMP stream.
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="col-span-12 sm:col-span-6">
-                        <div className="card h-full">
-                          <div className="card-body px-3">
-                            <label className="flex items-center gap-2">
-                              <input
-                                type="radio"
-                                name="streamType"
-                                value="webrtc"
-                                checked={formik.values.streamType === "webrtc"}
-                                onChange={(e) =>
-                                  formik.setFieldValue(
-                                    "streamType",
-                                    e.target.value
-                                  )
-                                }
-                                className="form-radio"
-                              />
-                              <span>WebRTC Type</span>
-                            </label>
-                            <p className="text-sm mt-2">
-                              Stream directly from your browser using WebRTC.
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                  {formik.touched.streamType && formik.errors.streamType && (
-                    <span role="alert" className="text-danger text-xs mt-1">
-                      {formik.errors.streamType}
-                    </span>
-                  )}
-                </div>
-              </div> */}
-
               <div className="col-span-12">
                 <div className="flex flex-col gap-1">
                   <label className="form-label text-gray-900 gap-1">
@@ -584,7 +518,72 @@ const CreateEducatorStreamSchedule = forwardRef(
                   </span>
                 )}
               </div>
-
+              <div className="col-span-12">
+                <div className="flex flex-col gap-1">
+                  <label className="form-label text-gray-900 gap-1">
+                    Stream Type <span className="text-danger">*</span>
+                  </label>
+                  <div className="flex gap-6">
+                    <div className="grid grid-cols-12 gap-4 w-full">
+                      <div className="col-span-12 sm:col-span-6">
+                        <div className="card h-full">
+                          <div className="card-body px-3">
+                            <label className="flex flex-col gap-1 cursor-pointer">
+                              <div className="flex items-center gap-2 cursor-pointer">
+                                <input
+                                  type="radio"
+                                  name="streamType"
+                                  value="obs"
+                                  checked={formik.values.streamType === "obs"}
+                                  onChange={(e) =>
+                                    formik.setFieldValue("streamType", e.target.value)
+                                  }
+                                  // className="form-radio"
+                                  className="radio radio-primary"
+                                />
+                                <span className="text-sm">OBS / RTMP</span>
+                              </div>
+                              <p className="text-xs mt-2">
+                                Use OBS or streaming software to push RTMP stream.
+                              </p>
+                            </label>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="col-span-12 sm:col-span-6">
+                        <div className="card h-full">
+                          <div className="card-body px-3">
+                            <label className="flex flex-col gap-1 cursor-pointer">
+                              <div className="flex items-center gap-2 cursor-pointer">
+                                <input
+                                  type="radio"
+                                  name="streamType"
+                                  value="webrtc"
+                                  checked={formik.values.streamType === "webrtc"}
+                                  onChange={(e) =>
+                                    formik.setFieldValue("streamType", e.target.value)
+                                  }
+                                  // className="form-radio"
+                                  className="radio radio-primary"
+                                />
+                                <span className="text-sm">WebRTC (Browser)</span>
+                              </div>
+                              <p className="text-xs mt-2">
+                                Stream directly from your browser using WebRTC.
+                              </p>
+                            </label>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  {formik.touched.streamType && formik.errors.streamType && (
+                    <span role="alert" className="text-danger text-xs mt-1 block">
+                      {formik.errors.streamType}
+                    </span>
+                  )}
+                </div>
+              </div>
               {formik.values.tier === "PRO" && (
                 <div className="col-span-12">
                   <label className="form-label text-gray-900">

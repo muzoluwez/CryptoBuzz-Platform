@@ -1,10 +1,17 @@
 import {
   LivestreamPlayer,
-  ParticipantView,
+  CallControls,
   useCall,
   useCallStateHooks,
 } from "@stream-io/video-react-sdk";
-import { Copy, PhoneOff, Podcast, Radio, Route, RouteOff } from "lucide-react";
+import {
+  Copy,
+  PhoneOff,
+  Podcast,
+  Radio,
+  Route,
+  RouteOff,
+} from "lucide-react";
 import React, { useEffect, useState } from "react";
 import { DefaultTooltip } from "@/components";
 import { toast } from "sonner";
@@ -30,6 +37,7 @@ const LiveSessionPlayer = ({
   checkLastRecurrence,
   isRecurent,
   id,
+  streamType = "obs",
 }) => {
   const [isCallEnd, setIsCallEnd] = useState(null);
   const [isCallStarted, setIsCallStarted] = useState(null);
@@ -37,7 +45,10 @@ const LiveSessionPlayer = ({
   const [streamRecordings, setStreamRecordings] = useState([]);
   const call = useCall();
   const navigate = useNavigate();
-  const { useIsCallRecordingInProgress } = useCallStateHooks();
+  const {
+    useIsCallRecordingInProgress,
+  } = useCallStateHooks();
+
   const isRecording = useIsCallRecordingInProgress();
   const [endCall, { isLoading: isEnding }] = useEndCallMutation();
   const [updateLiveStatus, { isLoading: isUpdating }] =
@@ -232,7 +243,7 @@ const LiveSessionPlayer = ({
         layoutProps={{
           showLiveBadge: true,
           showSpeakerName: true,
-          showParticipantCount: true,
+          showParticipantCount: false,
           showDuration: true,
           enableFullScreen: true,
         }}
@@ -262,7 +273,7 @@ const LiveSessionPlayer = ({
         </div>
       ) : (
         <>
-          {!isCallStarted && (
+          {!isCallStarted && streamType !== "webrtc" && (
             <div className="flex flex-col justify-center items-center gap-7">
               <Podcast size={44} className="text-primary" />
               <p className="text-gray-300 dark:text-gray-700 mb-0">
@@ -306,6 +317,23 @@ const LiveSessionPlayer = ({
               </div>
             </div>
           )}
+
+          {/* WebRTC call controls from Stream (camera/mic/screen share etc.) */}
+          {streamType === "webrtc" && (
+            <div className="flex justify-center mt-6">
+              <CallControls
+                onLeave={async () => {
+                  try {
+                    await handleEndCall(callId);
+                  } catch (error) {
+                    // handleEndCall already logs & toasts; this is just a safety net
+                    console.error("Error while ending call from CallControls", error);
+                  }
+                }}
+              />
+            </div>
+          )}
+
           <div className="flex justify-center gap-3 mt-10">
             {/* <RecordingControls call={call} /> */}
             {/* <button
